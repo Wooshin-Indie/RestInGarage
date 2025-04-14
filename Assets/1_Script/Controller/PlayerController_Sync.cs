@@ -1,5 +1,4 @@
 using Unity.Netcode;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -85,29 +84,29 @@ namespace Garage.Controller
 
 		public void SetAnimParam(int id, bool param)
 		{
-			animator.SetBool(id, param);
+			animator.SetBool(animIDs[id], param);
 			if (IsHost)
 			{
-				ChangeAnimatorParamClientRPC(animSpeedID, param);
+				ChangeAnimatorParamClientRPC(id, param);
 			}
 			else
 			{
-				ChangeAnimatorParamServerRPC(animSpeedID, param);
+				ChangeAnimatorParamServerRPC(id, param);
+			}
+		}
+		public void SetAnimParam(int id, float param)
+		{
+			animator.SetFloat(animIDs[id], param);
+			if (IsHost)
+			{
+				ChangeAnimatorParamClientRPC(id, param);
+			}
+			else
+			{
+				ChangeAnimatorParamServerRPC(id, param);
 			}
 		}
 
-		public void SetAnimParam(int id, float param)
-		{
-			animator.SetFloat(id, param);
-			if (IsHost)
-			{
-				ChangeAnimatorParamClientRPC(animSpeedID, param);
-			}
-			else
-			{
-				ChangeAnimatorParamServerRPC(animSpeedID, param);
-			}
-		}
 		[ServerRpc(RequireOwnership = false)]
 		public void ChangeAnimatorParamServerRPC(int id, bool param)
 		{
@@ -123,13 +122,13 @@ namespace Garage.Controller
 		public void ChangeAnimatorParamClientRPC(int id, bool param)
 		{
 			if (IsOwner) return;
-			animator.SetBool(id, param);
+			animator.SetBool(animIDs[id], param);
 		}
 		[ClientRpc]
 		public void ChangeAnimatorParamClientRPC(int id, float param)
 		{
 			if (IsOwner) return;
-			animator.SetFloat(id, param);
+			animator.SetFloat(animIDs[id], param);
 		}
 		#endregion
 	}

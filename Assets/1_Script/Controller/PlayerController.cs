@@ -1,5 +1,6 @@
 using Garage.Utils;
 using IUtil;
+using NUnit.Framework;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -20,10 +21,11 @@ namespace Garage.Controller
 		[SerializeField] private float runSpeed;
 		[SerializeField] private float carrySpeed;
 
-		[SerializeField] private Transform cameraTranform;
+		[SerializeField] private Transform cameraTransform;
 
-		private int animSpeedID;
-		private int animCarryID;
+		[System.Serializable]
+		enum AnimationType { Carry, Speed }
+		private int[] animIDs = new int[2];
 
 		private void Awake()
 		{
@@ -33,8 +35,17 @@ namespace Garage.Controller
 
 			rigid.maxLinearVelocity = runSpeed;
 
-			animCarryID = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
-			animSpeedID = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
+			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
+			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
+		}
+
+
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+
+			// TODO - Anim : basic anim
+			cameraTransform.gameObject.SetActive(IsOwner);
 		}
 
 		private bool isCarrying = false;
@@ -50,7 +61,7 @@ namespace Garage.Controller
 			if (Input.GetKeyDown(KeyCode.F))
 			{
 				isCarrying = !isCarrying;
-				SetAnimParam(animCarryID, isCarrying);
+				SetAnimParam((int)AnimationType.Carry, isCarrying);
 			}
 
 			bool isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -66,7 +77,7 @@ namespace Garage.Controller
 				rigid.MoveRotation(Quaternion.LookRotation(moveDir));
 
 			float speedParam = moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed);
-			SetAnimParam(animSpeedID, speedParam);	
+			SetAnimParam((int)AnimationType.Speed, speedParam);	
 
 			OnUpdateSynchronization();
 		}
