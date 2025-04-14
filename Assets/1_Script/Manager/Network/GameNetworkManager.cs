@@ -5,6 +5,7 @@ using Steamworks.Data;
 using Netcode.Transports.Facepunch;
 using System.Threading.Tasks;
 using UnityEngine.InputSystem.LowLevel;
+using Garage.Utils;
 
 namespace Garage.Manager
 {
@@ -146,8 +147,10 @@ namespace Garage.Manager
 			NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
 			transport.targetSteamId = steamId;
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+
 			if (NetworkManager.Singleton.StartClient())
 			{
+				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
 				Debug.Log("Client has started");
 			}
 		}

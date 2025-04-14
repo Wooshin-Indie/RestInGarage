@@ -1,3 +1,4 @@
+using Garage.Controller;
 using Garage.Structs;
 using Garage.Utils;
 using System.Collections.Generic;
@@ -96,7 +97,22 @@ namespace Garage.Manager
 		{
 			if (!playerInfo.ContainsKey(clientId))
 			{
-				PlayerInfo pi = new PlayerInfo(steamName, steamId);
+				bool[] isExist = new bool[4] { false, false, false, false };
+				foreach(var info in playerInfo)
+				{
+					isExist[info.Value.playerId] = true;
+				}
+				int idx = -1;
+				for(int i=0;i <isExist.Length;i++)
+				{
+					if (!isExist[i])
+					{
+						idx = i; break;
+					}
+				}
+				NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
+
+				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);
 				UIManager.Lobby.OnAddPlayerToDictionary(pi);
 			}

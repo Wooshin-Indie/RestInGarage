@@ -18,7 +18,7 @@ namespace Garage.Controller
 			{
 				UpdatePlayerPositionServerRPC(rigid.position);
 				UpdatePlayerRotateServerRPC(rigid.rotation);
-				UpdatePlayerVelocityClientRPC(rigid.linearVelocity);
+				UpdatePlayerVelocityServerRPC(rigid.linearVelocity);
 			}
 		}
 

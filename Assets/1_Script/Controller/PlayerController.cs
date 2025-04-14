@@ -45,6 +45,17 @@ namespace Garage.Controller
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 		}
 
+		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+		private void OnPlayerIDChanged(int prev, int playerId)
+		{
+			var materials = meshRenderer.sharedMaterials.ToList();
+
+			materials.Clear();
+			materials.Add(playerMaterial[playerId]);
+
+			meshRenderer.materials = materials.ToArray();
+		}
 
 		public override void OnNetworkSpawn()
 		{
@@ -53,12 +64,7 @@ namespace Garage.Controller
 			// TODO - Anim : basic anim
 			cameraTransform.gameObject.SetActive(IsOwner);
 
-			var materials = meshRenderer.sharedMaterials.ToList();
-
-			materials.Clear();
-			materials.Add(playerMaterial[(int)OwnerClientId]);
-
-			meshRenderer.materials = materials.ToArray();
+			PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
 		private bool isCarrying = false;

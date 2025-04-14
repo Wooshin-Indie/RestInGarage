@@ -1083,8 +1083,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 9d22253fc47352749a80fe79f559394b, type: 2}
   - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
   - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
-  outlineFillMaterial: {fileID: 2100000, guid: 5b3ac64e319c81f4bbf83a83d6edba3d, type: 2}
-  outlineMaskMaterial: {fileID: 2100000, guid: 54ca59c4788a37c4b845552b0685462c, type: 2}
 --- !u!1 &5685545249949587409
 GameObject:
   m_ObjectHideFlags: 0
@@ -1491,8 +1489,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2df8465bb26b9448a590f8504625561, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraBoomLength: 20
-  fixedRotation: {x: 45, y: 0, z: 0}
+  cameraBoomLength: 15
+  fixedRotation: {x: 60, y: 0, z: 0}
 --- !u!1 &7662283568113658878
 GameObject:
   m_ObjectHideFlags: 0
