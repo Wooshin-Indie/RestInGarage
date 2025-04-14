@@ -13,15 +13,30 @@ namespace Garage.Controller
 			{
 				UpdatePlayerPositionClientRPC(rigid.position);
 				UpdatePlayerRotateClientRPC(rigid.rotation);
+				UpdatePlayerVelocityClientRPC(rigid.linearVelocity);
 			}
 			else
 			{
 				UpdatePlayerPositionServerRPC(rigid.position);
 				UpdatePlayerRotateServerRPC(rigid.rotation);
+				UpdatePlayerVelocityClientRPC(rigid.linearVelocity);
 			}
 		}
 
 		#region Transform RPC
+
+
+		[ServerRpc(RequireOwnership = false)]
+		public void UpdatePlayerVelocityServerRPC(Vector3 velocity)
+		{
+			UpdatePlayerVelocityClientRPC(velocity);
+		}
+		[ClientRpc]
+		public void UpdatePlayerVelocityClientRPC(Vector3 velocity)
+		{
+			if(IsOwner) return;
+			rigid.linearVelocity = velocity;
+		}
 
 		[ServerRpc(RequireOwnership = false)]
 		public void UpdatePlayerPositionServerRPC(Vector3 playerPosition)
