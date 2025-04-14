@@ -20,6 +20,8 @@ namespace Garage.Controller
 		[SerializeField] private float runSpeed;
 		[SerializeField] private float carrySpeed;
 
+		[SerializeField] private Transform cameraTranform;
+
 		private int animSpeedID;
 		private int animCarryID;
 
@@ -48,7 +50,7 @@ namespace Garage.Controller
 			if (Input.GetKeyDown(KeyCode.F))
 			{
 				isCarrying = !isCarrying;
-				animator.SetBool(animCarryID, isCarrying);
+				SetAnimParam(animCarryID, isCarrying);
 			}
 
 			bool isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -63,7 +65,8 @@ namespace Garage.Controller
 			if (moveDir.sqrMagnitude > .1f)
 				rigid.MoveRotation(Quaternion.LookRotation(moveDir));
 
-			animator.SetFloat(animSpeedID, moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed));
+			float speedParam = moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed);
+			SetAnimParam(animSpeedID, speedParam);	
 
 			OnUpdateSynchronization();
 		}
