@@ -1,3 +1,4 @@
+using UnityEngine;
 
 namespace Garage.Utils
 {
@@ -12,5 +13,12 @@ namespace Garage.Utils
         public static readonly int MAX_PLAYERS = 4;
         public static readonly string NAME_SERVER = "_SERVER";
 
+        public static readonly Color[] COLOR_PLAYER =
+        {
+            Color.red,
+            Color.yellow,
+            Color.green,
+            Color.blue
+        };
 	}
 }

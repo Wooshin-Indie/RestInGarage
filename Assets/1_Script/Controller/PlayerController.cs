@@ -1,6 +1,7 @@
 using Garage.Utils;
 using IUtil;
-using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -16,12 +17,17 @@ namespace Garage.Controller
 		private Rigidbody rigid;
 		private CapsuleCollider capsule;
 
+		[TabGroup("Main", "Movements")]
 		[FoldoutGroup("Player Speeds")]
 		[SerializeField] private float walkSpeed;
 		[SerializeField] private float runSpeed;
 		[SerializeField] private float carrySpeed;
 
 		[SerializeField] private Transform cameraTransform;
+
+		[TabGroup("Main", "Rendering")]
+		[SerializeField] private SkinnedMeshRenderer meshRenderer;
+		[SerializeField] private List<Material> playerMaterial = new();
 
 		[System.Serializable]
 		enum AnimationType { Carry, Speed }
@@ -46,6 +52,13 @@ namespace Garage.Controller
 
 			// TODO - Anim : basic anim
 			cameraTransform.gameObject.SetActive(IsOwner);
+
+			var materials = meshRenderer.sharedMaterials.ToList();
+
+			materials.Clear();
+			materials.Add(playerMaterial[(int)OwnerClientId]);
+
+			meshRenderer.materials = materials.ToArray();
 		}
 
 		private bool isCarrying = false;

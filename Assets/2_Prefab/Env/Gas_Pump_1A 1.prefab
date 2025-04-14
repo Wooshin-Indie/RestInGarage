@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6555066521114694299}
   - component: {fileID: 555420322962458393}
   - component: {fileID: 6009889138292291241}
-  - component: {fileID: 8432481870749252899}
   m_Layer: 0
   m_Name: Gas_Pump_1A 1
   m_TagString: Untagged
@@ -109,20 +108,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.7, y: 2.5950184, z: 1}
   m_Center: {x: 0, y: 1.2975094, z: 0}
---- !u!114 &8432481870749252899
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2755727172473404394}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
-  outlineMaskMaterial: {fileID: 2100000, guid: 54ca59c4788a37c4b845552b0685462c, type: 2}
-  outlineFillMaterial: {fileID: 2100000, guid: 5b3ac64e319c81f4bbf83a83d6edba3d, type: 2}

@@ -277,8 +277,6 @@ SkinnedMeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 43080622186391047aff385f2a362d86, type: 2}
-  - {fileID: 2100000, guid: 54ca59c4788a37c4b845552b0685462c, type: 2}
-  - {fileID: 2100000, guid: 5b3ac64e319c81f4bbf83a83d6edba3d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1078,6 +1076,15 @@ MonoBehaviour:
   walkSpeed: 4
   runSpeed: 8
   carrySpeed: 2
+  cameraTransform: {fileID: 8608552576033507524}
+  meshRenderer: {fileID: 5760093498017814160}
+  playerMaterial:
+  - {fileID: 2100000, guid: 43080622186391047aff385f2a362d86, type: 2}
+  - {fileID: 2100000, guid: 9d22253fc47352749a80fe79f559394b, type: 2}
+  - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
+  - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
+  outlineFillMaterial: {fileID: 2100000, guid: 5b3ac64e319c81f4bbf83a83d6edba3d, type: 2}
+  outlineMaskMaterial: {fileID: 2100000, guid: 54ca59c4788a37c4b845552b0685462c, type: 2}
 --- !u!1 &5685545249949587409
 GameObject:
   m_ObjectHideFlags: 0
