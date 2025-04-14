@@ -1,0 +1,42 @@
+	Documentation.
+
+	qweasfjbv.
+
+	Thank you for using our product.
+	We hope our tools make your development process more convenient.
+
+	If you have a better idea/optimization method or find any bugs, please contact me via Email.
+	My Email address is : yeoinho75@gmail.com
+
+	This asset includes:
+		
+		- A set of custom attributes that enhance the Unity Inspector by improving organization and visibility serialized fields.
+
+	What is this tool for :
+
+        - This tool enhances the Unity Inspector by providing conditional visibility and organization options for serialized fields. 
+        - It improves workflow efficiency by displaying only relevant information and keeping the inspector clean and structured.
+
+	How To Use:
+		
+		- Add the corresponding attribute above the target field (or method) in your script.
+        - More details in InspectorUtils/Script/CustomAttribute/CustomAttributes.cs
+        - or example MonoBehaviour scripts in InspectorUtils/Script/_Demo/
+
+	How To Modify:
+
+    - If you want to modify
+		- Attribute's name, parameter,
+            - Find InspectorUtils/Script/CustomAttribute/CustomAttributes.cs
+            - Modify the name of the class derived from `PropertyAttribute` 
+            -   or edit its constructor to change the parameters.
+
+        - How the GroupAttributes works,
+            - Find InspectorUtils/Script/CustomAttribute/MonoBehaviourEditor.cs
+            - `OnInspectorGUI` is the function that draws the GUI elements in the Inspector Window.
+            - Design    -> `DrawTabHeader`, `DrawFoldoutGroup`
+            - Optimize  -> `CollectProperties`, `DrawProperties`
+
+        - How the Other attributes works,
+            - Find InspectorUtils/Script/CustomAttribute/PropertyDrawer
+            - `OnGUI` is the function that draws that GUI elements in the Inspector Window.

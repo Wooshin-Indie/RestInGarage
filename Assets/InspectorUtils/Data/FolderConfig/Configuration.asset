@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79acb6f2be2336a45b036b0766e41ec0, type: 3}
+  m_Name: Configuration
+  m_EditorClassIdentifier: 
+  Elements:
+  - Path: Assets/1_Script
+    ColorType: 1
+    IconType: 0
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/0_Scenes
+    ColorType: 0
+    IconType: -1
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/2_Prefab
+    ColorType: 2
+    IconType: 3
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/3_Material
+    ColorType: 3
+    IconType: 1
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/4_Texture
+    ColorType: 4
+    IconType: 5
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/5_Models
+    ColorType: 5
+    IconType: -1
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/6_Animations
+    ColorType: 6
+    IconType: 6
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/7_Shader
+    ColorType: 7
+    IconType: 2
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
