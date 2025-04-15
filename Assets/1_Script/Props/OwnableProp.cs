@@ -1,4 +1,5 @@
-﻿using Unity.Netcode;
+﻿using Garage.Controller;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
@@ -7,7 +8,26 @@ namespace Garage.Props
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 
+		protected PlayerController controller;
+
 		[SerializeField] protected float height;
+
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+			ownerClientId.OnValueChanged += OnClientIDChanged;
+		}
+
+		private void OnClientIDChanged(ulong prev, ulong clientId)
+		{
+			if (clientId == ulong.MaxValue)
+			{
+				controller = null;
+				return;
+			}
+
+			controller = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>();
+		}
 
 		/// <summary>
 		/// 외부에서 Interact 할 때 호출하는 함수

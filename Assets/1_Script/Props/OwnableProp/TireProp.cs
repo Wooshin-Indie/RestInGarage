@@ -1,6 +1,9 @@
 ﻿using Garage.Controller;
+using Garage.Utils;
+using Steamworks;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 
 namespace Garage.Props
 {
@@ -10,12 +13,17 @@ namespace Garage.Props
 		private Transform targetTrasnsform = null;
 
 		Rigidbody rigid;
+
+		private void Awake()
+		{
+			rigid = GetComponent<Rigidbody>();
+		}
+
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			targetTrasnsform = NetworkManager.Singleton.LocalClient.PlayerObject
 				.GetComponent<PlayerController>().GetSocket(Utils.PropType.Tire, this);
 
-			rigid = GetComponent<Rigidbody>();
 			transform.GetComponent<Rigidbody>().useGravity = false;
 			transform.GetComponent<Collider>().isTrigger = true;
 			SyncStateServerRPC(true);
@@ -52,15 +60,23 @@ namespace Garage.Props
 
 		private void Update()
 		{
-			if (!IsOwner) return;
-			if (targetTrasnsform == null) return;
+			if (!IsOwner)
+			{
 
-			transform.position = targetTrasnsform.position;
-			transform.rotation = targetTrasnsform.rotation;
+				return;
+			}
+			else
+			{
+				UpdatePlayerPositionServerRPC(transform.position);
+				UpdatePlayerRotateServerRPC(transform.rotation);
+				UpdatePlayerVelocityServerRPC(Vector3.zero);
+			}
 
-			UpdatePlayerPositionServerRPC(transform.position);
-			UpdatePlayerRotateServerRPC(transform.rotation);
-			UpdatePlayerVelocityServerRPC(Vector3.zero);
+			if (controller != null)
+			{
+				transform.position = controller.GetSocket(PropType.Tire, this).position;
+				transform.rotation = controller.GetSocket(PropType.Tire, this).rotation;
+			}
 		}
 
 
@@ -89,7 +105,7 @@ namespace Garage.Props
 		private void UpdatePlayerPositionClientRPC(Vector3 playerPosition)
 		{
 			if (IsOwner) return;
-			transform.position = (playerPosition);
+			rigid.MovePosition(playerPosition);
 		}
 
 		[ServerRpc(RequireOwnership = false)]
@@ -102,7 +118,7 @@ namespace Garage.Props
 		private void UpdatePlayerRotateClientRPC(Quaternion playerQuat)
 		{
 			if (IsOwner) return;
-			transform.rotation = (playerQuat);
+			rigid.MoveRotation(playerQuat);
 		}
 		#endregion
 

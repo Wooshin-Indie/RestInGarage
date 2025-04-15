@@ -147,12 +147,6 @@ namespace Garage.Controller
 		private OwnableProp currentOwningProp = null;
 		public Transform GetSocket(PropType type, OwnableProp prop) 
 		{
-            if (currentOwningProp != null)
-            {
-				Debug.LogWarning("Controller already has Prop");
-				return null;
-            }
-
 			currentOwningProp = prop;
 			return sockets[(int)type];
 		}
