@@ -1,8 +1,11 @@
+using Garage.Props;
 using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -23,14 +26,16 @@ namespace Garage.Controller
 		[SerializeField] private float runSpeed;
 		[SerializeField] private float carrySpeed;
 
+		[SerializeField] private float interactRayLength;
+
 		[SerializeField] private Transform cameraTransform;
 
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
-		[System.Serializable]
-		enum AnimationType { Carry, Speed }
+		[SerializeField] private List<Transform> sockets = new();
+
 		private int[] animIDs = new int[2];
 
 		private void Awake()
@@ -73,13 +78,24 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
+			if (!isAbleToMove) return;
+
+			DrawRay();
 			float h = Input.GetAxisRaw("Horizontal");
 			float v = Input.GetAxisRaw("Vertical");
 			moveDir = new Vector3(h, 0f, v).normalized;
 
 			if (Input.GetKeyDown(KeyCode.F))
 			{
-				isCarrying = !isCarrying;
+				if (currentOwningProp != null)
+				{
+					isCarrying = false;
+				}
+				else if (isDetectInteractable)
+				{
+					recentlyDetectedProp.TryInteract();
+					isCarrying = true;
+				}
 				SetAnimParam((int)AnimationType.Carry, isCarrying);
 			}
 
@@ -104,7 +120,54 @@ namespace Garage.Controller
 		private void FixedUpdate()
 		{
 			if (!IsOwner) return;
+		}
 
+		private bool isDetectInteractable = false;
+		private OwnableProp recentlyDetectedProp = null;
+		private void DrawRay()
+		{
+			RaycastHit hit;
+			int targetLayer = Constants.LAYER_INTERACTABLE;
+
+			// HACK - Raycast로 못찾는게 많을듯. overlap으로 변경 필요
+			if (UnityEngine.Physics.Raycast(transform.position + new Vector3(0f, .1f, 0f), transform.forward, out hit, interactRayLength, targetLayer))
+			{
+				isDetectInteractable = true;
+				recentlyDetectedProp = hit.transform.GetComponent<OwnableProp>();
+			}
+			else
+			{
+				isDetectInteractable = false;
+				recentlyDetectedProp = null;
+			}
+
+			Debug.DrawRay(transform.position, transform.forward * interactRayLength, Color.red);
+		}
+
+		private OwnableProp currentOwningProp = null;
+		public Transform GetSocket(PropType type, OwnableProp prop) 
+		{
+            if (currentOwningProp != null)
+            {
+				Debug.LogWarning("Controller already has Prop");
+				return null;
+            }
+
+			currentOwningProp = prop;
+			return sockets[(int)type];
+		}
+
+		private bool isAbleToMove = true;
+		public void OnStartPlace()
+		{
+			isAbleToMove = false;
+			rigid.linearVelocity = Vector3.zero;
+		}
+		public void OnEndPlace()
+		{
+			currentOwningProp.EndInteraction(transform);
+			currentOwningProp = null;
+			isAbleToMove = true;
 		}
 	}
 }

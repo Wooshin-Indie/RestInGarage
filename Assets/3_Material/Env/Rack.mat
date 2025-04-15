@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Storage_Metal_Green
-  m_Shader: {fileID: 4800000, guid: 08533a6b336857d4d8511fcefd81751a, type: 3}
+  m_Name: Rack
+  m_Shader: {fileID: 4800000, guid: 89bc66873974d114aa2d51023507e925, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -95,6 +95,7 @@ Material:
     - _Metallic: 0.388
     - _Mode: 0
     - _OcclusionStrength: 1
+    - _OutlineWidth: 0.02
     - _Parallax: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -105,5 +106,6 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
