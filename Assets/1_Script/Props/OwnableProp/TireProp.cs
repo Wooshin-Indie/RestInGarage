@@ -8,11 +8,14 @@ namespace Garage.Props
 	{
 		[SerializeField]
 		private Transform targetTrasnsform = null;
+
+		Rigidbody rigid;
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			targetTrasnsform = NetworkManager.Singleton.LocalClient.PlayerObject
 				.GetComponent<PlayerController>().GetSocket(Utils.PropType.Tire, this);
 
+			rigid = GetComponent<Rigidbody>();
 			transform.GetComponent<Rigidbody>().useGravity = false;
 			transform.GetComponent<Collider>().isTrigger = true;
 			SyncStateServerRPC(true);
@@ -54,6 +57,54 @@ namespace Garage.Props
 
 			transform.position = targetTrasnsform.position;
 			transform.rotation = targetTrasnsform.rotation;
+
+			UpdatePlayerPositionServerRPC(transform.position);
+			UpdatePlayerRotateServerRPC(transform.rotation);
+			UpdatePlayerVelocityServerRPC(Vector3.zero);
 		}
+
+
+		#region Transform RPC
+
+
+		[ServerRpc(RequireOwnership = false)]
+		public void UpdatePlayerVelocityServerRPC(Vector3 velocity)
+		{
+			UpdatePlayerVelocityClientRPC(velocity);
+		}
+		[ClientRpc]
+		public void UpdatePlayerVelocityClientRPC(Vector3 velocity)
+		{
+			if (IsOwner) return;
+			rigid.linearVelocity = velocity;
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		public void UpdatePlayerPositionServerRPC(Vector3 playerPosition)
+		{
+			UpdatePlayerPositionClientRPC(playerPosition);
+		}
+
+		[ClientRpc]
+		private void UpdatePlayerPositionClientRPC(Vector3 playerPosition)
+		{
+			if (IsOwner) return;
+			transform.position = (playerPosition);
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void UpdatePlayerRotateServerRPC(Quaternion playerQuat)
+		{
+			UpdatePlayerRotateClientRPC(playerQuat);
+		}
+
+		[ClientRpc]
+		private void UpdatePlayerRotateClientRPC(Quaternion playerQuat)
+		{
+			if (IsOwner) return;
+			transform.rotation = (playerQuat);
+		}
+		#endregion
+
 	}
 }
