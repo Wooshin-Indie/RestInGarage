@@ -56,24 +56,24 @@ namespace Garage.Manager
 
 		public void GameStarted()
 		{
-			Managers.Scene.ChangeScene(Utils.SceneEnum.Game);
+			Managers.Scene.ChangeSceneServer(Utils.SceneEnum.Game);
 		}
 
 		public void GameEnded()
 		{
-			Managers.Scene.ChangeScene(Utils.SceneEnum.Lobby);
+			Managers.Scene.ChangeSceneServer(Utils.SceneEnum.Lobby);
 		}
 
 		public void HostCreated()
 		{
-			Managers.Scene.ChangeScene(SceneEnum.Lobby);
+			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 			isHost = true;
 			isConnected = true;
 		}
 
 		public void ConnectedAsClient()
 		{
-			Managers.Scene.UnloadCurrentScene();
+			Managers.Scene.UnloadCurrentSceneServer();
 
 			isHost = false;
 			isConnected = true;
@@ -88,7 +88,7 @@ namespace Garage.Manager
 				Destroy(card);
 			}
 
-			Managers.Scene.ChangeScene(SceneEnum.Main);
+			Managers.Scene.ChangeSceneServer(SceneEnum.Main);
 			isHost = false;
 			isConnected = false;
 		}
@@ -110,8 +110,11 @@ namespace Garage.Manager
 						idx = i; break;
 					}
 				}
-				NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
 
+				if (isHost)
+				{
+					NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
+				}
 				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);
 				UIManager.Lobby.OnAddPlayerToDictionary(pi);

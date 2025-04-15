@@ -1,5 +1,6 @@
 using Garage.Structs;
 using Garage.Utils;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,26 +12,41 @@ namespace Garage.Manager
 
 		public void Init()
 		{
-			LoadScene(SceneEnum.Main);
+			SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
 		}
-		public void ChangeScene(SceneEnum sceneEnum)
+		public void ChangeSceneServer(SceneEnum sceneEnum)
 		{
 			Debug.Log("CHANGE SCENE");
-			UnloadCurrentScene();
-			LoadScene(sceneEnum);
+			UnloadCurrentSceneServer();
+			LoadSceneServer(sceneEnum);
 			UIManager.Instance.OnSceneChanged(sceneEnum);
 		}
 
-		private async void LoadScene(SceneEnum sceneEnum)
+		public void LoadSceneServer(SceneEnum sceneEnum)
 		{
 			CurrentScene?.Clear();
-			await SceneManager.LoadSceneAsync(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
+			if (sceneEnum == SceneEnum.Main)
+			{
+				SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
+			}
+			else
+			{
+				Debug.Log("SCENE LOAD :" + sceneEnum.ToString());
+				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
+			}
 		}
 
-		public async void UnloadCurrentScene()
+		public void UnloadCurrentSceneServer()
 		{
 			if (CurrentScene.SceneEnum == SceneEnum.None) return;
-			await SceneManager.UnloadSceneAsync(CurrentScene.SceneEnum.ToString() + "Scene");
+
+			if(CurrentScene.SceneEnum == SceneEnum.Main)
+			{
+				SceneManager.UnloadSceneAsync("MainScene");
+			}
+			else{
+				NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+			}
 		}
 
 		
