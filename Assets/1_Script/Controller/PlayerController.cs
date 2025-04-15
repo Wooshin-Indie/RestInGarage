@@ -145,9 +145,13 @@ namespace Garage.Controller
 		}
 
 		private OwnableProp currentOwningProp = null;
-		public Transform GetSocket(PropType type, OwnableProp prop) 
+
+		public void StartInteraction(OwnableProp prop)
 		{
 			currentOwningProp = prop;
+		}
+		public Transform GetSocket(PropType type) 
+		{
 			return sockets[(int)type];
 		}
 

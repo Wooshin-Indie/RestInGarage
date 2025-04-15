@@ -1,17 +1,12 @@
 ﻿using Garage.Controller;
 using Garage.Utils;
-using Steamworks;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
 
 namespace Garage.Props
 {
 	public class TireProp : OwnableProp
 	{
-		[SerializeField]
-		private Transform targetTrasnsform = null;
-
 		Rigidbody rigid;
 
 		private void Awake()
@@ -21,8 +16,7 @@ namespace Garage.Props
 
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
-			targetTrasnsform = NetworkManager.Singleton.LocalClient.PlayerObject
-				.GetComponent<PlayerController>().GetSocket(Utils.PropType.Tire, this);
+			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
 
 			transform.GetComponent<Rigidbody>().useGravity = false;
 			transform.GetComponent<Collider>().isTrigger = true;
@@ -52,17 +46,21 @@ namespace Garage.Props
 			transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
-			targetTrasnsform = null;
-
 
 			base.OnEndInteraction(controller);
 		}
 
 		private void Update()
 		{
+			if (controller != null)
+			{
+				transform.position = controller.GetSocket(PropType.Tire).position;
+				transform.rotation = controller.GetSocket(PropType.Tire).rotation;
+				return;
+			}
+
 			if (!IsOwner)
 			{
-
 				return;
 			}
 			else
@@ -70,12 +68,6 @@ namespace Garage.Props
 				UpdatePlayerPositionServerRPC(transform.position);
 				UpdatePlayerRotateServerRPC(transform.rotation);
 				UpdatePlayerVelocityServerRPC(Vector3.zero);
-			}
-
-			if (controller != null)
-			{
-				transform.position = controller.GetSocket(PropType.Tire, this).position;
-				transform.rotation = controller.GetSocket(PropType.Tire, this).rotation;
 			}
 		}
 

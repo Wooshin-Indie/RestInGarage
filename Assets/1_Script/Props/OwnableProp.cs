@@ -8,6 +8,7 @@ namespace Garage.Props
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 
+		[SerializeField]
 		protected PlayerController controller;
 
 		[SerializeField] protected float height;
@@ -71,7 +72,6 @@ namespace Garage.Props
 		private void RemoveOwnershipServerRpc()
 		{
 			ownerClientId.Value = ulong.MaxValue;
-			GetComponent<NetworkObject>().ChangeOwnership(0);
 		}
 
 		[ClientRpc]
@@ -88,7 +88,7 @@ namespace Garage.Props
 
 		protected virtual void OnEndInteraction(Transform transform)
 		{
-			//RemoveOwnershipServerRpc();
+			RemoveOwnershipServerRpc();
 		}
 	}
 }
