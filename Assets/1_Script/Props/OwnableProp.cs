@@ -47,6 +47,12 @@ namespace Garage.Props
 
 			}
 		}
+		[ServerRpc(RequireOwnership = false)]
+		private void RemoveOwnershipServerRpc()
+		{
+			ownerClientId.Value = ulong.MaxValue;
+			GetComponent<NetworkObject>().ChangeOwnership(0);
+		}
 
 		[ClientRpc]
 		private void GrantInteractionClientRPC(ulong clientId)
@@ -62,7 +68,7 @@ namespace Garage.Props
 
 		protected virtual void OnEndInteraction(Transform transform)
 		{
-
+			RemoveOwnershipServerRpc();
 		}
 	}
 }

@@ -160,11 +160,15 @@ namespace Garage.Controller
 		private bool isAbleToMove = true;
 		public void OnStartPlace()
 		{
+			if (!IsOwner) return;
+
 			isAbleToMove = false;
 			rigid.linearVelocity = Vector3.zero;
 		}
 		public void OnEndPlace()
 		{
+			if (!IsOwner) return;
+
 			currentOwningProp.EndInteraction(transform);
 			currentOwningProp = null;
 			isAbleToMove = true;

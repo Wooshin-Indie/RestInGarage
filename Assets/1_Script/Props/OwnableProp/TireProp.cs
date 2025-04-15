@@ -13,20 +13,23 @@ namespace Garage.Props
 			targetTrasnsform = NetworkManager.Singleton.LocalClient.PlayerObject
 				.GetComponent<PlayerController>().GetSocket(Utils.PropType.Tire, this);
 
+			transform.GetComponent<Rigidbody>().useGravity = false;
 			transform.GetComponent<Collider>().isTrigger = true;
 		}
 
 		protected override void OnEndInteraction(Transform controller)
 		{
-			base.OnEndInteraction(controller);
 
-			
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
 			transform.rotation = Quaternion.LookRotation(controller.forward);
 			GetComponent<Rigidbody>().linearVelocity = (controller.forward * 10f);
 
+			transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			targetTrasnsform = null;
+
+
+			base.OnEndInteraction(controller);
 		}
 
 		private void Update()
