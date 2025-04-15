@@ -15,6 +15,20 @@ namespace Garage.Props
 
 			transform.GetComponent<Rigidbody>().useGravity = false;
 			transform.GetComponent<Collider>().isTrigger = true;
+			SyncStateServerRPC(true);
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void SyncStateServerRPC(bool isStart)
+		{
+			SyncStateClientRPC(isStart);
+		}
+
+		[ClientRpc]
+		private void SyncStateClientRPC(bool isStart)
+		{
+			transform.GetComponent<Rigidbody>().useGravity = !isStart;
+			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
 		protected override void OnEndInteraction(Transform controller)
@@ -26,6 +40,7 @@ namespace Garage.Props
 
 			transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
+			SyncStateServerRPC(false);
 			targetTrasnsform = null;
 
 

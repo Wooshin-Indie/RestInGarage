@@ -68,7 +68,7 @@ namespace Garage.Props
 
 		protected virtual void OnEndInteraction(Transform transform)
 		{
-			RemoveOwnershipServerRpc();
+			//RemoveOwnershipServerRpc();
 		}
 	}
 }
