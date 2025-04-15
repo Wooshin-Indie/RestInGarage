@@ -1,6 +1,7 @@
 ﻿using Garage.Controller;
 using Garage.Utils;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Props
@@ -19,7 +20,8 @@ namespace Garage.Props
 			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
 
 			transform.GetComponent<Rigidbody>().useGravity = false;
-			transform.GetComponent<Collider>().isTrigger = true;
+            rigid.isKinematic = true;
+            transform.GetComponent<Collider>().isTrigger = true;
 			SyncStateServerRPC(true);
 		}
 
@@ -32,13 +34,14 @@ namespace Garage.Props
 		[ClientRpc]
 		private void SyncStateClientRPC(bool isStart)
 		{
-			transform.GetComponent<Rigidbody>().useGravity = !isStart;
+			rigid.useGravity = !isStart;
+			rigid.isKinematic = isStart;
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
 		protected override void OnEndInteraction(Transform controller)
 		{
-
+			rigid.isKinematic = false;
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
 			transform.rotation = Quaternion.LookRotation(controller.forward);
 			GetComponent<Rigidbody>().linearVelocity = (controller.forward * 10f);
@@ -54,8 +57,8 @@ namespace Garage.Props
 		{
 			if (controller != null)
 			{
-				transform.position = controller.GetSocket(PropType.Tire).position;
-				transform.rotation = controller.GetSocket(PropType.Tire).rotation;
+				rigid.MovePosition(controller.GetSocket(PropType.Tire).position);
+				rigid.MoveRotation(controller.GetSocket(PropType.Tire).rotation);
 				return;
 			}
 
@@ -65,9 +68,9 @@ namespace Garage.Props
 			}
 			else
 			{
-				UpdatePlayerPositionServerRPC(transform.position);
-				UpdatePlayerRotateServerRPC(transform.rotation);
-				UpdatePlayerVelocityServerRPC(Vector3.zero);
+				UpdatePlayerPositionServerRPC(transform.position, NetworkManager.Singleton.LocalClientId);
+				UpdatePlayerRotateServerRPC(transform.rotation, NetworkManager.Singleton.LocalClientId);
+				UpdatePlayerVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
 			}
 		}
 
@@ -76,40 +79,41 @@ namespace Garage.Props
 
 
 		[ServerRpc(RequireOwnership = false)]
-		public void UpdatePlayerVelocityServerRPC(Vector3 velocity)
+		public void UpdatePlayerVelocityServerRPC(Vector3 velocity, ulong clientId)
 		{
-			UpdatePlayerVelocityClientRPC(velocity);
+			UpdatePlayerVelocityClientRPC(velocity ,clientId);
 		}
 		[ClientRpc]
-		public void UpdatePlayerVelocityClientRPC(Vector3 velocity)
+		public void UpdatePlayerVelocityClientRPC(Vector3 velocity, ulong clientId)
 		{
-			if (IsOwner) return;
+			if (clientId == NetworkManager.Singleton.LocalClientId) return;
 			rigid.linearVelocity = velocity;
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		public void UpdatePlayerPositionServerRPC(Vector3 playerPosition)
+		public void UpdatePlayerPositionServerRPC(Vector3 playerPosition, ulong clientId)
 		{
-			UpdatePlayerPositionClientRPC(playerPosition);
+			UpdatePlayerPositionClientRPC(playerPosition, clientId);
 		}
 
 		[ClientRpc]
-		private void UpdatePlayerPositionClientRPC(Vector3 playerPosition)
+		private void UpdatePlayerPositionClientRPC(Vector3 playerPosition, ulong clientId)
 		{
-			if (IsOwner) return;
+			if (clientId == NetworkManager.Singleton.LocalClientId) return;
+			Debug.Log("MOVEPOS : " + playerPosition);
 			rigid.MovePosition(playerPosition);
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		private void UpdatePlayerRotateServerRPC(Quaternion playerQuat)
+		private void UpdatePlayerRotateServerRPC(Quaternion playerQuat, ulong clientId)
 		{
-			UpdatePlayerRotateClientRPC(playerQuat);
+			UpdatePlayerRotateClientRPC(playerQuat, clientId);
 		}
 
 		[ClientRpc]
-		private void UpdatePlayerRotateClientRPC(Quaternion playerQuat)
+		private void UpdatePlayerRotateClientRPC(Quaternion playerQuat, ulong clientId)
 		{
-			if (IsOwner) return;
+			if (clientId == NetworkManager.Singleton.LocalClientId) return;
 			rigid.MoveRotation(playerQuat);
 		}
 		#endregion

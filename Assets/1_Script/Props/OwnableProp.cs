@@ -43,7 +43,6 @@ namespace Garage.Props
 		/// </summary>
 		public void EndInteraction(Transform transform)
 		{
-			RequestRemoveOwnershipServerRPC();
 			OnEndInteraction(transform);
 		}
 
