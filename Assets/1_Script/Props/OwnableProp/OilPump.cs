@@ -7,7 +7,9 @@ namespace Garage.Props
 {
 	public class OilPump : OwnableProp
 	{
-		[SerializeField] private Transform oilgunSocket;
+		[SerializeField] private Vector3 initPos;
+		[SerializeField] private Vector3 initRot;
+
 		[SerializeField] private Transform oilgun;
 
 		private Rigidbody gunRigid;
@@ -33,7 +35,11 @@ namespace Garage.Props
 			{
 				gunRigid.MovePosition(controller.GetSocket(PropType.Oilgun).position);
 				gunRigid.MoveRotation(controller.GetSocket(PropType.Oilgun).rotation);
-				return;
+			}
+			else
+			{
+				oilgun.localPosition = (initPos);
+				oilgun.localRotation = (Quaternion.Euler(initRot));
 			}
 		}
 	}

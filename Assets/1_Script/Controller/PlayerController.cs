@@ -73,14 +73,11 @@ namespace Garage.Controller
 			PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
-		private bool isCarrying = false;
 		private Vector3 moveDir = Vector3.zero;
 		private void Update()
 		{
 			if (!IsOwner) return;
 			OnUpdateSynchronization();
-
-			if (!isAbleToMove) return;
 
 			DrawRay();
 			float h = Input.GetAxisRaw("Horizontal");
@@ -89,10 +86,17 @@ namespace Garage.Controller
 
 			if (Input.GetKeyDown(KeyCode.F))
 			{
-				if (isCarrying)
+				if(currentOwningProp != null)
 				{
-					isCarrying = false;
-					SetAnimParam((int)AnimationType.Carry, isCarrying);
+					if (currentOwningProp.IsCarry)
+					{
+						SetAnimParam((int)AnimationType.Carry, false);
+					}
+					else
+					{
+						currentOwningProp.EndInteraction(transform);
+						currentOwningProp = null;
+					}
 				}
 				else if (isDetectInteractable)
 				{
@@ -103,19 +107,25 @@ namespace Garage.Controller
 			if (Input.GetKeyDown(KeyCode.Space))
 			{
 				SetAnimParam((int)AnimationType.Oil, true);
+				isAbleToMove = false;
 			}
 			else if (Input.GetKeyUp(KeyCode.Space))
 			{
 				SetAnimParam((int)AnimationType.Oil, false);
+				isAbleToMove = true;
 			}
 
 			bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
 			float speed = walkSpeed;
+			bool isCarrying = (currentOwningProp != null && currentOwningProp.IsCarry);
+
 			if (isRunning) speed = runSpeed;
 			if (isCarrying) speed = carrySpeed;
 
 			moveDir *= speed;
+
+			if (!isAbleToMove) return;
 
 			rigid.linearVelocity = moveDir;
 			if (moveDir.sqrMagnitude > .1f)
@@ -160,8 +170,7 @@ namespace Garage.Controller
 			currentOwningProp = prop;
 			if (prop.IsCarry)
 			{
-				isCarrying = true;
-				SetAnimParam((int)AnimationType.Carry, isCarrying);
+				SetAnimParam((int)AnimationType.Carry, true);
 			}
 		}
 		public Transform GetSocket(PropType type) 
