@@ -3,9 +3,7 @@ using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.WebSockets;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -20,23 +18,34 @@ namespace Garage.Controller
 		private Rigidbody rigid;
 		private CapsuleCollider capsule;
 
+		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
 		[TabGroup("Main", "Movements")]
+		[SerializeField] private List<Transform> sockets = new();
+		[SerializeField] private Transform cameraTransform;
+
 		[FoldoutGroup("Player Speeds")]
 		[SerializeField] private float walkSpeed;
 		[SerializeField] private float runSpeed;
 		[SerializeField] private float carrySpeed;
 
+		[FoldoutGroup("Ray Settings")]
 		[SerializeField] private float interactRayLength;
-
-		[SerializeField] private Transform cameraTransform;
 
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
-		[SerializeField] private List<Transform> sockets = new();
 
 		private int[] animIDs = new int[3];
+
+		private Vector3 moveDir = Vector3.zero;
+		private bool isAbleToMove = true;
+
+
+		private bool isDetectInteractable = false;
+		private OwnableProp recentlyDetectedProp = null;
+		private OwnableProp currentOwningProp = null;
 
 		private void Awake()
 		{
@@ -50,30 +59,14 @@ namespace Garage.Controller
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 		}
-
-		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
-		private void OnPlayerIDChanged(int prev, int playerId)
-		{
-			var materials = meshRenderer.sharedMaterials.ToList();
-
-			materials.Clear();
-			materials.Add(playerMaterial[playerId]);
-
-			meshRenderer.materials = materials.ToArray();
-		}
-
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
 
-			// TODO - Anim : basic anim
 			cameraTransform.gameObject.SetActive(IsOwner);
-
 			PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
-		private Vector3 moveDir = Vector3.zero;
 		private void Update()
 		{
 			if (!IsOwner) return;
@@ -100,7 +93,7 @@ namespace Garage.Controller
 				}
 				else if (isDetectInteractable)
 				{
-					recentlyDetectedProp.TryInteract();
+					recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
 				}
 			}
 
@@ -115,6 +108,12 @@ namespace Garage.Controller
 				isAbleToMove = true;
 			}
 
+			if (!isAbleToMove)
+			{
+				rigid.linearVelocity = Vector3.zero;
+				return;
+			}
+
 			bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
 			float speed = walkSpeed;
@@ -125,7 +124,6 @@ namespace Garage.Controller
 
 			moveDir *= speed;
 
-			if (!isAbleToMove) return;
 
 			rigid.linearVelocity = moveDir;
 			if (moveDir.sqrMagnitude > .1f)
@@ -133,22 +131,15 @@ namespace Garage.Controller
 
 			float speedParam = moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed);
 			SetAnimParam((int)AnimationType.Speed, speedParam);	
-
 		}
 
-		private void FixedUpdate()
-		{
-			if (!IsOwner) return;
-		}
 
-		private bool isDetectInteractable = false;
-		private OwnableProp recentlyDetectedProp = null;
 		private void DrawRay()
 		{
 			RaycastHit hit;
 			int targetLayer = Constants.LAYER_INTERACTABLE;
 
-			// HACK - Raycast�� ��ã�°� ������. overlap���� ���� �ʿ�
+			// HACK - Raycast로 못찾는게 많을듯. overlap으로 변경 필요
 			if (UnityEngine.Physics.Raycast(transform.position + new Vector3(0f, .1f, 0f), transform.forward, out hit, interactRayLength, targetLayer))
 			{
 				isDetectInteractable = true;
@@ -160,11 +151,25 @@ namespace Garage.Controller
 				recentlyDetectedProp = null;
 			}
 
-			Debug.DrawRay(transform.position, transform.forward * interactRayLength, Color.red);
+			Debug.DrawRay(transform.position + new Vector3(0f, .1f, 0f), transform.forward * interactRayLength, Color.red);
 		}
 
-		private OwnableProp currentOwningProp = null;
+		/// <summary>
+		/// 개별 PlayerID를 부여해서 Spawn시 머터리얼을 변경합니다.
+		/// </summary>
+		private void OnPlayerIDChanged(int prev, int playerId)
+		{
+			var materials = meshRenderer.sharedMaterials.ToList();
 
+			materials.Clear();
+			materials.Add(playerMaterial[playerId]);
+
+			meshRenderer.materials = materials.ToArray();
+		}
+
+		/// <summary>
+		/// TryInteract 후에 상호작용 가능한 경우에만 Prop쪽에서 호출됩니다.
+		/// </summary>
 		public void StartInteraction(OwnableProp prop)
 		{
 			currentOwningProp = prop;
@@ -173,20 +178,21 @@ namespace Garage.Controller
 				SetAnimParam((int)AnimationType.Carry, true);
 			}
 		}
+
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
 
-		private bool isAbleToMove = true;
-		public void OnStartPlace()
+		#region Animation Events
+		private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
 			isAbleToMove = false;
 			rigid.linearVelocity = Vector3.zero;
 		}
-		public void OnEndPlace()
+		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
 
@@ -194,5 +200,6 @@ namespace Garage.Controller
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
+		#endregion
 	}
 }

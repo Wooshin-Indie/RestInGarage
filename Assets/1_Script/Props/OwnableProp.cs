@@ -1,4 +1,4 @@
-﻿using Garage.Controller;
+using Garage.Controller;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -33,9 +33,9 @@ namespace Garage.Props
 		/// <summary>
 		/// 외부에서 Interact 할 때 호출하는 함수
 		/// </summary>
-		public void TryInteract()
+		public void TryInteract(ulong clientId)
 		{
-			RequestOwnershipServerRpc(NetworkManager.Singleton.LocalClientId);
+			RequestOwnershipServerRpc(clientId);
 		}
 
 		/// <summary>
@@ -82,7 +82,7 @@ namespace Garage.Props
 
 		protected virtual void StartInteraction(ulong newOwnerClientId)
 		{
-
+			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
 		}
 
 		protected virtual void OnEndInteraction(Transform transform)

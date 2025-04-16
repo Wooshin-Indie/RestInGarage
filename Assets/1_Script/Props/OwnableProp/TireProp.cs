@@ -1,4 +1,3 @@
-﻿using Garage.Controller;
 using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,8 +10,7 @@ namespace Garage.Props
 		[SerializeField] protected float height;
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
-			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
-
+			base.StartInteraction(newOwnerClientId);
 			transform.GetComponent<Rigidbody>().useGravity = false;
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;

@@ -7,6 +7,7 @@ namespace Garage.Utils
         public static readonly string TAG_CHAT = "Chat";
         public static readonly string TAG_PCARD = "PlayerCard";
 
+        public static readonly int LAYER_PLAYER = 1 << 10;
         public static readonly int LAYER_INTERACTABLE = 1 << 10;
 
         public static readonly string ANIM_PARAM_SPEED = "Speed";
