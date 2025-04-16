@@ -1,20 +1,14 @@
 ﻿using Garage.Controller;
 using Garage.Utils;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Props
 {
 	public class TireProp : OwnableProp
 	{
-		Rigidbody rigid;
 
-		private void Awake()
-		{
-			rigid = GetComponent<Rigidbody>();
-		}
-
+		[SerializeField] protected float height;
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
@@ -23,20 +17,6 @@ namespace Garage.Props
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;
 			SyncStateServerRPC(true);
-		}
-
-		[ServerRpc(RequireOwnership = false)]
-		private void SyncStateServerRPC(bool isStart)
-		{
-			SyncStateClientRPC(isStart);
-		}
-
-		[ClientRpc]
-		private void SyncStateClientRPC(bool isStart)
-		{
-			rigid.useGravity = !isStart;
-			rigid.isKinematic = isStart;
-			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
 		protected override void OnEndInteraction(Transform controller)
@@ -74,49 +54,18 @@ namespace Garage.Props
 			}
 		}
 
-
-		#region Transform RPC
-
-
 		[ServerRpc(RequireOwnership = false)]
-		public void UpdatePlayerVelocityServerRPC(Vector3 velocity, ulong clientId)
+		private void SyncStateServerRPC(bool isStart)
 		{
-			UpdatePlayerVelocityClientRPC(velocity ,clientId);
-		}
-		[ClientRpc]
-		public void UpdatePlayerVelocityClientRPC(Vector3 velocity, ulong clientId)
-		{
-			if (clientId == NetworkManager.Singleton.LocalClientId) return;
-			rigid.linearVelocity = velocity;
-		}
-
-		[ServerRpc(RequireOwnership = false)]
-		public void UpdatePlayerPositionServerRPC(Vector3 playerPosition, ulong clientId)
-		{
-			UpdatePlayerPositionClientRPC(playerPosition, clientId);
+			SyncStateClientRPC(isStart);
 		}
 
 		[ClientRpc]
-		private void UpdatePlayerPositionClientRPC(Vector3 playerPosition, ulong clientId)
+		private void SyncStateClientRPC(bool isStart)
 		{
-			if (clientId == NetworkManager.Singleton.LocalClientId) return;
-			Debug.Log("MOVEPOS : " + playerPosition);
-			rigid.MovePosition(playerPosition);
+			rigid.useGravity = !isStart;
+			rigid.isKinematic = isStart;
+			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
-
-		[ServerRpc(RequireOwnership = false)]
-		private void UpdatePlayerRotateServerRPC(Quaternion playerQuat, ulong clientId)
-		{
-			UpdatePlayerRotateClientRPC(playerQuat, clientId);
-		}
-
-		[ClientRpc]
-		private void UpdatePlayerRotateClientRPC(Quaternion playerQuat, ulong clientId)
-		{
-			if (clientId == NetworkManager.Singleton.LocalClientId) return;
-			rigid.MoveRotation(playerQuat);
-		}
-		#endregion
-
 	}
 }

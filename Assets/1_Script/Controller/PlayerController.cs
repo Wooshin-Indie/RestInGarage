@@ -36,7 +36,7 @@ namespace Garage.Controller
 
 		[SerializeField] private List<Transform> sockets = new();
 
-		private int[] animIDs = new int[2];
+		private int[] animIDs = new int[3];
 
 		private void Awake()
 		{
@@ -48,6 +48,7 @@ namespace Garage.Controller
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
+			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 		}
 
 		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -77,6 +78,7 @@ namespace Garage.Controller
 		private void Update()
 		{
 			if (!IsOwner) return;
+			OnUpdateSynchronization();
 
 			if (!isAbleToMove) return;
 
@@ -87,16 +89,24 @@ namespace Garage.Controller
 
 			if (Input.GetKeyDown(KeyCode.F))
 			{
-				if (currentOwningProp != null)
+				if (isCarrying)
 				{
 					isCarrying = false;
+					SetAnimParam((int)AnimationType.Carry, isCarrying);
 				}
 				else if (isDetectInteractable)
 				{
 					recentlyDetectedProp.TryInteract();
-					isCarrying = true;
 				}
-				SetAnimParam((int)AnimationType.Carry, isCarrying);
+			}
+
+			if (Input.GetKeyDown(KeyCode.Space))
+			{
+				SetAnimParam((int)AnimationType.Oil, true);
+			}
+			else if (Input.GetKeyUp(KeyCode.Space))
+			{
+				SetAnimParam((int)AnimationType.Oil, false);
 			}
 
 			bool isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -114,7 +124,6 @@ namespace Garage.Controller
 			float speedParam = moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed);
 			SetAnimParam((int)AnimationType.Speed, speedParam);	
 
-			OnUpdateSynchronization();
 		}
 
 		private void FixedUpdate()
@@ -149,6 +158,11 @@ namespace Garage.Controller
 		public void StartInteraction(OwnableProp prop)
 		{
 			currentOwningProp = prop;
+			if (prop.IsCarry)
+			{
+				isCarrying = true;
+				SetAnimParam((int)AnimationType.Carry, isCarrying);
+			}
 		}
 		public Transform GetSocket(PropType type) 
 		{

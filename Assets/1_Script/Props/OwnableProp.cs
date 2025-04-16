@@ -7,11 +7,11 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
-
-		[SerializeField]
 		protected PlayerController controller;
 
-		[SerializeField] protected float height;
+		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
+		private bool isCarry;
+		public bool IsCarry => isCarry;
 
 		public override void OnNetworkSpawn()
 		{
