@@ -1,10 +1,11 @@
-using Garage.Utils;
+using Garage.Interfaces;
+using Garage.Manager;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
-	public class TireRack : OwnableProp
+	public class TireRack : OwnableProp, IPlaceable
 	{
 		[SerializeField] private GameObject tirePrefab;
 
@@ -12,8 +13,12 @@ namespace Garage.Props
 		{
 			base.StartInteraction(newOwnerClientId);
 
-			SpawnTireServerRpc(newOwnerClientId);
-			OnEndInteraction(null);
+
+			if (GameManagerEx.Instance.IsDay)
+			{
+				SpawnTireServerRpc(newOwnerClientId);
+				OnEndInteraction(null);
+			}
 		}
 
 		[ServerRpc(RequireOwnership = false)]
@@ -33,6 +38,11 @@ namespace Garage.Props
 		private void Update()
 		{
 
+		}
+
+		public Vector2Int GetSize()
+		{
+			return new Vector2Int(2, 4);
 		}
 	}
 }

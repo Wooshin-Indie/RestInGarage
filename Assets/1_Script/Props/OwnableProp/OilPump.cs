@@ -1,10 +1,12 @@
+using Garage.Interfaces;
+using Garage.Manager;
 using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
-	public class OilPump : OwnableProp
+	public class OilPump : OwnableProp, IPlaceable
 	{
 		[SerializeField] private Vector3 initPos;
 		[SerializeField] private Vector3 initRot;
@@ -33,18 +35,26 @@ namespace Garage.Props
 
 		private void Update()
 		{
-			if (controller != null)
+			if (GameManagerEx.Instance.IsDay)
 			{
-				gunRigid.MovePosition(controller.GetSocket(PropType.Oilgun).position);
-				gunRigid.MoveRotation(controller.GetSocket(PropType.Oilgun).rotation);
+				if (controller != null)
+				{
+					gunRigid.MovePosition(controller.GetSocket(PropType.Oilgun).position);
+					gunRigid.MoveRotation(controller.GetSocket(PropType.Oilgun).rotation);
+				}
+				else
+				{
+					oilgun.localPosition = (initPos);
+					oilgun.localRotation = (Quaternion.Euler(initRot));
+				}
+
+				CheckObstacle();
 			}
 			else
 			{
 				oilgun.localPosition = (initPos);
 				oilgun.localRotation = (Quaternion.Euler(initRot));
 			}
-
-			CheckObstacle();
 		}
 
 		private void CheckObstacle()
@@ -61,12 +71,17 @@ namespace Garage.Props
 
 				if (hitObj == gameObject) continue;
 				if (hitObj == oilgun.gameObject) continue;
-				if (hitObj.CompareTag("Player") && hitObj.GetComponent<NetworkObject>().IsLocalPlayer) continue;
+				if (hitObj.CompareTag(Constants.TAG_PLAYER) && hitObj.GetComponent<NetworkObject>().IsLocalPlayer) continue;
 
 				Debug.Log("막힘!");
 				return;
 			}
 
+		}
+
+		Vector2Int IPlaceable.GetSize()
+		{
+			return new Vector2Int(2, 2);
 		}
 	}
 }

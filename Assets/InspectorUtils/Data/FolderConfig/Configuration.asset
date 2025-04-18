@@ -45,3 +45,7 @@ MonoBehaviour:
     ColorType: 7
     IconType: 2
     CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/8_Audio
+    ColorType: 9
+    IconType: 7
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}

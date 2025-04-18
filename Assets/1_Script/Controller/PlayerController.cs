@@ -1,3 +1,5 @@
+using Garage.Interfaces;
+using Garage.Manager;
 using Garage.Props;
 using Garage.Utils;
 using IUtil;
@@ -79,22 +81,46 @@ namespace Garage.Controller
 
 			if (Input.GetKeyDown(KeyCode.F))
 			{
-				if(currentOwningProp != null)
+				if (GameManagerEx.Instance.IsDay)
 				{
-					if (currentOwningProp.IsCarry)
+					if (currentOwningProp != null)
 					{
-						SetAnimParam((int)AnimationType.Carry, false);
+						if (currentOwningProp.IsCarry)
+						{
+							SetAnimParam((int)AnimationType.Carry, false);
+						}
+						else
+						{
+							currentOwningProp.EndInteraction(transform);
+							currentOwningProp = null;
+						}
 					}
-					else
+					else if (isDetectInteractable)
 					{
+						recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
+					}
+				}
+				else
+				{
+					if (currentOwningProp != null)
+					{
+						GameManagerEx.Instance.GetComponent<BuildingManager>().PlaceIfPossible(currentOwningProp);
 						currentOwningProp.EndInteraction(transform);
 						currentOwningProp = null;
 					}
+					else if (isDetectInteractable)
+					{
+						if (recentlyDetectedProp.GetComponent<IPlaceable>() != null)
+						{
+							recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
+						}
+					}
 				}
-				else if (isDetectInteractable)
-				{
-					recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
-				}
+			}
+
+			if (!GameManagerEx.Instance.IsDay && currentOwningProp != null && currentOwningProp.GetComponent<IPlaceable>() != null)
+			{
+				GameManagerEx.Instance.GetComponent<BuildingManager>().UpdatePreviewArea(currentOwningProp, transform);
 			}
 
 			if (Input.GetKeyDown(KeyCode.Space))
@@ -182,6 +208,18 @@ namespace Garage.Controller
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
+		}
+
+		[ClientRpc]
+		public void EndInteractionClientRPC()
+		{
+			if (!IsOwner) return;
+			if(currentOwningProp != null)
+			{
+				currentOwningProp.EndInteraction(transform);
+				currentOwningProp = null;
+			}
+			// TODO - Anim 초기화
 		}
 
 		#region Animation Events

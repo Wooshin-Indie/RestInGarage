@@ -1,8 +1,10 @@
 using Garage.Controller;
 using Garage.Structs;
 using Garage.Utils;
+using IUtil;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -37,10 +39,26 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
+
+		public bool IsDay = true;
+
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
 
 		public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
 
+		/// <summary>
+		/// 서버에서만 호출되는 게임 흐름 제어 함수입니다.
+		/// </summary>
+		[Button]
+		public void ChangeDayAndNight()
+		{
+			foreach (var po in NetworkManager.Singleton.ConnectedClientsList)
+			{
+				po.PlayerObject.GetComponent<PlayerController>().EndInteractionClientRPC();
+			}
+			GetComponent<BuildingManager>().OnStageInit();
+			IsDay = !IsDay;
+		}
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)
 		{
