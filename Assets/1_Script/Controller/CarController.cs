@@ -1,3 +1,4 @@
+using Garage.Utils;
 using IUtil;
 using UnityEngine;
 
@@ -36,7 +37,8 @@ namespace Garage.Controller
 		{
 			if (isBroken)
 			{
-				if (transform.position.z > 0)
+				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
+					(direction == VehicleDirection.Down && transform.position.z < 0))
 				{
 					StopVehicle();
 					return;
@@ -80,11 +82,19 @@ namespace Garage.Controller
 			if (Mathf.Abs(xOffset) > laneSnapThreshold)
 			{
 				float steerAmount = Mathf.Clamp(xOffset * steeringStrength, -maxSteerAngle, maxSteerAngle);
-				targetRot = Quaternion.Euler(0f, steerAmount, 0f);
+
+				if (direction == VehicleDirection.Up)
+				{
+					targetRot = Quaternion.Euler(0f, steerAmount, 0f);
+				}
+				else
+				{
+					targetRot = Quaternion.Euler(0f, 180f - steerAmount, 0f);
+				}
 			}
 			else
 			{
-				targetRot = Quaternion.Euler(0f, 0f, 0f);
+				targetRot = Quaternion.Euler(0f, direction == VehicleDirection.Up ? 0f : 180f, 0f);
 
 				pos.x = targetLaneX;
 				rigid.position = pos;
@@ -131,6 +141,13 @@ namespace Garage.Controller
 			hitDistance = Mathf.Infinity;
 			return false;
 		}
+
+		private VehicleDirection direction = VehicleDirection.None;
+		public void SetLane(float laneX, VehicleDirection dir)
+		{
+			targetLaneX = laneX;
+			direction = dir;
+		}
 		private void OnDrawGizmosSelected()
 		{
 			Vector3 boxCenter = transform.position + Vector3.up * (boxHeight * 0.5f) + transform.forward * (boxLength * 0.5f);
@@ -140,11 +157,6 @@ namespace Garage.Controller
 			Gizmos.color = Color.red;
 			Gizmos.matrix = Matrix4x4.TRS(boxCenter, orientation, Vector3.one);
 			Gizmos.DrawWireCube(Vector3.zero, halfExtents * 2);
-		}
-
-		public void SetLane(int idx)
-		{
-			targetLaneX = idx * 10f;
 		}
 	}
 }

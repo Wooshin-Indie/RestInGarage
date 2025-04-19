@@ -594,6 +594,7 @@ MonoBehaviour:
   initRot: {x: -37.267, y: -94.248, z: 2.575}
   rope: {fileID: 3681204652177645260}
   oilgun: {fileID: 978388452849320846}
+  previewPrefab: {fileID: 0}
 --- !u!4 &8084718555022998890 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}

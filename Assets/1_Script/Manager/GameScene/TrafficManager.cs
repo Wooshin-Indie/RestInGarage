@@ -1,5 +1,8 @@
 using Garage.Controller;
 using IUtil;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -7,14 +10,24 @@ namespace Garage.Manager
 	public class TrafficManager : MonoBehaviour
 	{
 		public GameObject carPrefab;
-		public Transform[] spawnPoints;
+		public GameObject spawnPointPrefab;
+		public List<VehicleSpawnPoint> spawnPoints = new();
+		public float laneLength;
 
 		/// <summary>
 		/// mapId, stageId 에 따라 spawnPoints를 설정합니다.
 		/// </summary>
-		public void OnStageStart(int mapId, int stageId)
+		[Button]
+		public void OnStageStart(/*int mapId, int stageId*/)
 		{
+			spawnPoints.Clear();
 
+			VehicleSpawnPoint sp = Instantiate(spawnPointPrefab, new Vector3(-10, 0, laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
+			sp.SetSpawnPoint(Utils.VehicleDirection.Down);
+			spawnPoints.Add(sp);
+			VehicleSpawnPoint sp1 = Instantiate(spawnPointPrefab, new Vector3(0, 0, -laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
+			sp1.SetSpawnPoint(Utils.VehicleDirection.Up);
+			spawnPoints.Add(sp1);
 		}
 
 		/// <summary>
@@ -25,14 +38,18 @@ namespace Garage.Manager
 
 		}
 
-		private static int laneIdx = 0;
 		[Button]
 		public void SpawnCar()
 		{
-			Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
-			GameObject carObj = Instantiate(carPrefab, spawnPoint.position, spawnPoint.rotation);
-			carObj.GetComponent<CarController>().SetLane(laneIdx % 2);
-			laneIdx++;
+			List<VehicleSpawnPoint> availableSpawnPoints = spawnPoints.Where(p => p.IsAbleToSpawn()).ToList();
+
+			if (availableSpawnPoints.Count > 0)
+			{
+				VehicleSpawnPoint spawnPoint = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
+				GameObject carObj = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
+				carObj.GetComponent<CarController>().SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
+			}
+			else return;
 		}
 	}
 }

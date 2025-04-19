@@ -14,6 +14,8 @@ namespace Garage.Props
 		[SerializeField] private Transform rope;
 		[SerializeField] private Transform oilgun;
 
+		[SerializeField] private GameObject previewPrefab;
+
 		private Rigidbody gunRigid;
 		private RaycastHit[] hits;
 
@@ -82,6 +84,11 @@ namespace Garage.Props
 		Vector2Int IPlaceable.GetSize()
 		{
 			return new Vector2Int(2, 2);
+		}
+
+		public GameObject GetPreviewPrefab()
+		{
+			return previewPrefab;
 		}
 	}
 }

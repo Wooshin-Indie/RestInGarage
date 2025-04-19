@@ -18,4 +18,10 @@ namespace Garage.Utils
         Oilgun,
     }
 
+    public enum VehicleDirection
+    {
+        None,
+        Up,
+        Down
+    }
 }

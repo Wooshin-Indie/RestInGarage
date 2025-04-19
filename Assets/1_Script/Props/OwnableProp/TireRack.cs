@@ -9,6 +9,7 @@ namespace Garage.Props
 	{
 		[SerializeField] private GameObject tirePrefab;
 
+		[SerializeField] private GameObject previewPrefab;
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			base.StartInteraction(newOwnerClientId);
@@ -43,6 +44,11 @@ namespace Garage.Props
 		public Vector2Int GetSize()
 		{
 			return new Vector2Int(2, 4);
+		}
+
+		public GameObject GetPreviewPrefab()
+		{
+			return previewPrefab;
 		}
 	}
 }

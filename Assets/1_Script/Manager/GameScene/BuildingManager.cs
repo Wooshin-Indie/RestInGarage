@@ -1,43 +1,54 @@
 using Garage.Interfaces;
 using Garage.Props;
+using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 namespace Garage.Manager
 {
 	public class BuildingManager : MonoBehaviour
 	{
-		[SerializeField] private GameObject dottedLinePrefab;
-		[SerializeField] private Material defaultMaterial;
-		[SerializeField] private Material occupiedMaterial;
-		[SerializeField] private Material disabledMaterial;
+		[Header("Build")]
+		[SerializeField] private Vector2Int gridOrigin;
+		[SerializeField] private Vector2Int gridSize;
+		[SerializeField] private GameObject gridPrefab;
+		[SerializeField] private Material gridDefaultMaterial;
+		[SerializeField] private Material gridOccupiedMaterial;
+		[SerializeField] private Material gridDisabledMaterial;
+
+		[Header("Preview")]
+		[SerializeField] private Material previewEnableMaterial;
+		[SerializeField] private Material previewDisableMaterial;
 
 		/** 게임 시작 시 Init **/
 		private GridTile[,] gridTiles;
-		private Vector2Int gridSize = new Vector2Int(5, 11);
-		private Vector2Int gridOrigin = new Vector2Int(-20, 0);
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
-		private DottedLineRenderer dottedLine;
 
 		// TODO - 게임 시작시 직접 스폰하도록
 		// + 초기 건물들도 여기서 스폰
 		[Button]
 		public void OnGameStart()
 		{
-			gridTiles = FindObjectsByType<GridTile>(sortMode: FindObjectsSortMode.None)
-				.ToDictionaryByPosition(gridSize, gridOrigin);
+			GameObject parent = new GameObject { name = "Grids" };
+			parent.transform.position = new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f);
+			gridTiles = new GridTile[gridSize.x, gridSize.y];
 
-			dottedLine = Instantiate(dottedLinePrefab).GetComponent<DottedLineRenderer>();
-			dottedLine.gameObject.SetActive(false);
 
+			for (int i = 0; i < gridSize.x; i++) {
+				for (int j = 0; j < gridSize.y; j++)
+				{
+					gridTiles[i, j] = Instantiate(gridPrefab, parent.transform.position + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f), parent.transform).GetComponent<GridTile>();
+				}
+			}
 			SetActiveGrids(false);
 		}
 
 		public void OnStageInit()
 		{
-			dottedLine.gameObject.SetActive(false);
+
 		}
 
 		private void ClearGrids()
@@ -46,7 +57,7 @@ namespace Garage.Manager
 			{
 				for (int j = 0; j < gridTiles.GetLength(1); j++)
 				{
-					gridTiles[i, j].SetMaterial(gridTiles[i, j].prop != null ? occupiedMaterial : defaultMaterial);
+					gridTiles[i, j].SetMaterial(gridTiles[i, j].prop != null ? gridOccupiedMaterial : gridDefaultMaterial);
 				}
 			}
 		}
@@ -54,6 +65,8 @@ namespace Garage.Manager
 		public void PlaceIfPossible(OwnableProp prop)
 		{
 			SetActiveGrids(false);
+			if (tmpPreview != null) Destroy(tmpPreview);
+
 			if (!IsAbleToPlace(prop))
 			{
 				ClearGrids();
@@ -68,7 +81,7 @@ namespace Garage.Manager
 					if (gridTiles[i, j].prop == prop)
 					{
 						gridTiles[i, j].SetProp(null);
-						gridTiles[i, j].SetMaterial(defaultMaterial);
+						gridTiles[i, j].SetMaterial(gridDefaultMaterial);
 					}
 				}
 			}
@@ -78,12 +91,11 @@ namespace Garage.Manager
 				tile.SetProp(prop);
 
 			prop.transform.position = GetAveragePosition();
+			prop.transform.rotation = Quaternion.Euler(0f, wheelRotate * 90f, 0f);
 		}
 
 		private bool IsAbleToPlace(OwnableProp prop)
 		{
-			dottedLine.gameObject.SetActive(false);
-
 			if (prop.GetComponent<IPlaceable>() == null) return false;
 			Vector2Int tmpV = prop.GetComponent<IPlaceable>().GetSize();
 
@@ -120,29 +132,64 @@ namespace Garage.Manager
 			return averageWorldPos;
 		}
 
+		GameObject tmpPreview = null; 
+		private Material lastAppliedMaterial = null;
+
+		private int wheelRotate = 0;
+
+		private void OnWheelRotate()
+		{
+			float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+
+			if (scrollInput > 0f)
+			{
+				wheelRotate = (wheelRotate + 1) % 4;
+			}
+			else if (scrollInput < 0f)
+			{
+				wheelRotate = (wheelRotate - 1 + 4) % 4;
+			}
+		}
+
 		public void UpdatePreviewArea(OwnableProp prop, Transform playerTransform)
 		{
 			if (!gridTiles[0, 0].gameObject.activeSelf)
 			{
 				SetActiveGrids(true);
+				tmpPreview = Instantiate(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
+				wheelRotate = 0;
+			}
+			OnWheelRotate();
+			if (tmpPreview != null)
+			{
+				tmpPreview.transform.rotation = Quaternion.Euler(0f, wheelRotate * 90f, 0f);
 			}
 
 			IPlaceable placeable = prop.GetComponent<IPlaceable>();
 			foreach (var tile in previouslyHighlighted)
 			{ 
-				tile.SetMaterial(tile.prop != null ? occupiedMaterial : defaultMaterial);
+				tile.SetMaterial(tile.prop != null ? gridOccupiedMaterial : gridDefaultMaterial);
 			}
 			previouslyHighlighted.Clear();
 
 			Vector2Int placeSize = placeable.GetSize();
+			switch (wheelRotate)
+			{
+				case 1:
+				case 3:
+					placeSize = new Vector2Int(placeSize.y, placeSize.x);
+					break;
+			}
+
 			Vector3 forward = playerTransform.forward;
 
 			Vector2Int centerOffset = new Vector2Int((placeSize.x - 1) / 2, (placeSize.y - 1) / 2);
-			Vector2Int startGridPos = WorldToGrid(GetMouseWorldPosOnY0());
+			Vector3 onY0 = GetMouseWorldPosOnY0();
+			//Vector2Int startGridPos = WorldToGrid(onY0);
 
-			/*	Player 앞 대신 마우스 입력으로 변경	
+			//	Player 앞 대신 마우스 입력으로 변경	
 			 Vector2Int startGridPos = WorldToGrid(playerTransform.position + forward * 2f) - centerOffset;
-			*/
+			//
 
 			for (int x = 0; x < placeSize.x; x++)
 			{
@@ -154,7 +201,7 @@ namespace Garage.Manager
 					if (IsInBounds(index))
 					{
 						GridTile tile = gridTiles[index.x, index.y];
-						tile.SetMaterial(tile.IsPlaceable(prop) ? occupiedMaterial : disabledMaterial);
+						tile.SetMaterial(tile.IsPlaceable(prop) ? gridOccupiedMaterial : gridDisabledMaterial);
 						previouslyHighlighted.Add(tile);
 					}
 				}
@@ -162,12 +209,23 @@ namespace Garage.Manager
 
 			if (IsAbleToPlace(prop))
 			{
-				dottedLine.gameObject.SetActive(true);
-				dottedLine.DrawDottedLine(prop.transform.position, GetAveragePosition());
+				tmpPreview.transform.position = GetAveragePosition();
+
+				if (lastAppliedMaterial != previewEnableMaterial)
+				{
+					ChangePreviewMaterial(tmpPreview.gameObject, previewEnableMaterial);
+					lastAppliedMaterial = previewEnableMaterial;
+				}
 			}
 			else
 			{
-				dottedLine.gameObject.SetActive(false);
+				tmpPreview.transform.position = onY0;
+
+				if (lastAppliedMaterial != previewDisableMaterial)
+				{
+					ChangePreviewMaterial(tmpPreview.gameObject, previewDisableMaterial);
+					lastAppliedMaterial = previewDisableMaterial;
+				}
 			}
 		}
 
@@ -198,6 +256,16 @@ namespace Garage.Manager
 			Vector3 hit = near + dir * t;
 
 			return hit;
+		}
+
+		private void ChangePreviewMaterial(GameObject go, Material material)
+		{
+			Renderer[] renderers = go.GetComponentsInChildren<Renderer>(includeInactive: true);
+
+			foreach (Renderer renderer in renderers)
+			{
+				renderer.sharedMaterial = material;
+			}
 		}
 
 	}
