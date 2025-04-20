@@ -139,16 +139,11 @@ namespace Garage.Manager
 
 		private void OnWheelRotate()
 		{
-			float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-
-			if (scrollInput > 0f)
+			if (Input.GetKeyDown(KeyCode.R))
 			{
 				wheelRotate = (wheelRotate + 1) % 4;
 			}
-			else if (scrollInput < 0f)
-			{
-				wheelRotate = (wheelRotate - 1 + 4) % 4;
-			}
+
 		}
 
 		public void UpdatePreviewArea(OwnableProp prop, Transform playerTransform)
@@ -181,15 +176,12 @@ namespace Garage.Manager
 					break;
 			}
 
-			Vector3 forward = playerTransform.forward;
 
 			Vector2Int centerOffset = new Vector2Int((placeSize.x - 1) / 2, (placeSize.y - 1) / 2);
-			Vector3 onY0 = GetMouseWorldPosOnY0();
-			//Vector2Int startGridPos = WorldToGrid(onY0);
 
-			//	Player 앞 대신 마우스 입력으로 변경	
-			 Vector2Int startGridPos = WorldToGrid(playerTransform.position + forward * 2f) - centerOffset;
-			//
+			Vector3 forward = playerTransform.forward;
+			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
+			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset);
 
 			for (int x = 0; x < placeSize.x; x++)
 			{
@@ -219,7 +211,7 @@ namespace Garage.Manager
 			}
 			else
 			{
-				tmpPreview.transform.position = onY0;
+				tmpPreview.transform.position = new Vector3(startGridPos.x, 0, startGridPos.y);
 
 				if (lastAppliedMaterial != previewDisableMaterial)
 				{
