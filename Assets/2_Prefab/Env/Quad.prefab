@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4811960571169583832}
   - component: {fileID: 557999226081745571}
   - component: {fileID: 691243564063428803}
+  - component: {fileID: 6540694840120375414}
   - component: {fileID: 380170871382441965}
   m_Layer: 0
   m_Name: Quad
@@ -110,6 +111,31 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &6540694840120375414
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596295414241702324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 420649190
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &380170871382441965
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,4 +148,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b8da531e38bbea4eae7eea5f6e9866e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prop: {fileID: 0}
+  ShowTopMostFoldoutHeaderGroup: 1
+  rend: {fileID: 0}

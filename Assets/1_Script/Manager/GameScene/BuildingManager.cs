@@ -3,12 +3,12 @@ using Garage.Props;
 using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
-using System.Drawing;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Manager
 {
-	public class BuildingManager : MonoBehaviour
+	public class BuildingManager : NetworkBehaviour
 	{
 		[Header("Build")]
 		[SerializeField] private Vector2Int gridOrigin;
@@ -32,15 +32,14 @@ namespace Garage.Manager
 		[Button]
 		public void OnGameStart()
 		{
-			GameObject parent = new GameObject { name = "Grids" };
-			parent.transform.position = new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f);
-			gridTiles = new GridTile[gridSize.x, gridSize.y];
 
+			gridTiles = new GridTile[gridSize.x, gridSize.y];
 
 			for (int i = 0; i < gridSize.x; i++) {
 				for (int j = 0; j < gridSize.y; j++)
 				{
-					gridTiles[i, j] = Instantiate(gridPrefab, parent.transform.position + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f), parent.transform).GetComponent<GridTile>();
+					gridTiles[i, j] = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+					gridTiles[i, j].GetComponent<NetworkObject>().Spawn();
 				}
 			}
 			SetActiveGrids(false);
@@ -61,39 +60,85 @@ namespace Garage.Manager
 				}
 			}
 		}
-
-		public void PlaceIfPossible(OwnableProp prop)
+		public void TryPlaceBuilding(OwnableProp prop)
 		{
-			SetActiveGrids(false);
-			if (tmpPreview != null) Destroy(tmpPreview);
-
-			if (!IsAbleToPlace(prop))
+			if (tmpPreview != null)
 			{
-				ClearGrids();
+				Destroy(tmpPreview);
+			}
+			SetActiveGrids(false);
+			if (!IsAbleToPlace(prop)) return;
+
+			// 설치 가능하다고 판단되면 서버에게 요청
+			var tilePositions = new List<Vector2Int>();
+			foreach (var tile in previouslyHighlighted)
+			{
+				Vector2Int index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin;
+				tilePositions.Add(index);
+			}
+
+			TryPlaceServerRpc(prop.NetworkObjectId, tilePositions.ToArray());
+		}
+		[ServerRpc]
+		private void TryPlaceServerRpc(ulong propNetId, Vector2Int[] tileIndices)
+		{
+			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
+			OwnableProp prop = obj.GetComponent<OwnableProp>();
+
+			bool success = true;
+
+			foreach (var index in tileIndices)
+			{
+				if (!IsInBounds(index)) { success = false; break; }
+				if (!gridTiles[index.x, index.y].IsPlaceable(prop)) { success = false; break; }
+			}
+
+			if (!success)
+			{
+				TryPlaceResultClientRpc(false, propNetId, Vector3.zero, 0);
 				return;
 			}
 
-			// 전에 뒀던 곳 지우기
-			for (int i = 0; i < gridTiles.GetLength(0); i++)
+			foreach (var index in tileIndices)
 			{
-				for (int j = 0; j < gridTiles.GetLength(1); j++)
-				{
-					if (gridTiles[i, j].prop == prop)
-					{
-						gridTiles[i, j].SetProp(null);
-						gridTiles[i, j].SetMaterial(gridDefaultMaterial);
-					}
-				}
+				gridTiles[index.x, index.y].SetProp(prop);
+				gridTiles[index.x, index.y].SetMaterial(gridOccupiedMaterial);
 			}
 
-			// 새로 둘 곳 check하기
-			foreach (var tile in previouslyHighlighted)
-				tile.SetProp(prop);
+			Vector3 position = GetCenterWorldPosition(tileIndices);
+			int rotation = wheelRotate;
 
-			prop.transform.position = GetAveragePosition();
-			prop.transform.rotation = Quaternion.Euler(0f, wheelRotate * 90f, 0f);
+			prop.transform.position = position;
+			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+
+			TryPlaceResultClientRpc(true, propNetId, position, rotation);
 		}
+		[ClientRpc]
+		private void TryPlaceResultClientRpc(bool success, ulong propNetId, Vector3 pos, int rotation)
+		{
+			if (IsHost) return;
 
+			if (!success)
+			{
+				Debug.Log("설치 실패");
+				return;
+			}
+
+			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
+			var prop = obj.GetComponent<OwnableProp>();
+
+			prop.transform.position = pos;
+			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+		}
+		private Vector3 GetCenterWorldPosition(Vector2Int[] indices)
+		{
+			Vector3 avg = Vector3.zero;
+			foreach (var idx in indices)
+			{
+				avg += gridTiles[idx.x, idx.y].transform.position;
+			}
+			return avg / indices.Length;
+		}
 		private bool IsAbleToPlace(OwnableProp prop)
 		{
 			if (prop.GetComponent<IPlaceable>() == null) return false;
@@ -137,7 +182,7 @@ namespace Garage.Manager
 
 		private int wheelRotate = 0;
 
-		private void OnWheelRotate()
+		private void OnRotate()
 		{
 			if (Input.GetKeyDown(KeyCode.R))
 			{
@@ -148,13 +193,15 @@ namespace Garage.Manager
 
 		public void UpdatePreviewArea(OwnableProp prop, Transform playerTransform)
 		{
+
 			if (!gridTiles[0, 0].gameObject.activeSelf)
 			{
 				SetActiveGrids(true);
 				tmpPreview = Instantiate(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
 				wheelRotate = 0;
 			}
-			OnWheelRotate();
+
+			OnRotate();
 			if (tmpPreview != null)
 			{
 				tmpPreview.transform.rotation = Quaternion.Euler(0f, wheelRotate * 90f, 0f);

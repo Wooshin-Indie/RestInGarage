@@ -1,12 +1,15 @@
 using Garage.Props;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage
 {
-	public class GridTile : MonoBehaviour
+	public class GridTile : NetworkBehaviour
 	{
-		private Renderer rend;
-		public OwnableProp prop = null;
+		public Renderer rend;
+		public NetworkVariable<NetworkObjectReference> PropNetRef = new();
+
+		public OwnableProp prop => PropNetRef.Value.TryGet(out var obj) ? obj.GetComponent<OwnableProp>() : null;
 
 
 		void Awake()
@@ -18,15 +21,17 @@ namespace Garage
 		{
 			rend.material = mat;
 		}
-
-		public bool IsPlaceable(OwnableProp prop)
+		public bool IsPlaceable(OwnableProp target)
 		{
-			if (this.prop == null) return true;
-			return this.prop == prop;
+			return prop == null || prop == target;
 		}
 
-		public void SetProp(OwnableProp prop) {
-			this.prop = prop;
+		public void SetProp(OwnableProp p)
+		{
+			if (IsServer)
+			{
+				PropNetRef.Value = p != null ? p.NetworkObject : default;
+			}
 		}
 	}
 }
