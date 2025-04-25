@@ -48,6 +48,10 @@ namespace Garage.Manager
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
 
+		public void RegisterTile(GridTile tile)
+		{
+			gridTiles[tile.GridPosition.Value.y, tile.GridPosition.Value.z] = tile;
+		}
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
@@ -64,7 +68,6 @@ namespace Garage.Manager
 					gridTiles[tiles[i].GridPosition.Value.y, tiles[i].GridPosition.Value.z] = tiles[i];
 				}
 			}
-			SetActiveGrids(false);
 		}
 
 		// TODO - 호스트가 게임 시작시 직접 스폰하도록

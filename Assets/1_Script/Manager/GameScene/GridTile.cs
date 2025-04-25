@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Garage.Props;
 using Unity.Netcode;
 using UnityEngine;
@@ -17,7 +18,16 @@ namespace Garage
 		{
 			rend = GetComponent<Renderer>();
 		}
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+			gameObject.SetActive(false);
 
+			if (IsClient && !IsHost)
+			{
+				BuildingManager.Instance.RegisterTile(this);
+			}
+		}
 		public void SetGridPosition(int idx, int row, int col)
 		{
 			GridPosition.Value.Set(idx, row, col);
