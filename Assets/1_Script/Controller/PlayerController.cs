@@ -75,11 +75,10 @@ namespace Garage.Controller
 			OnUpdateSynchronization();
 
 			DrawRay();
-			float h = Input.GetAxisRaw("Horizontal");
-			float v = Input.GetAxisRaw("Vertical");
-			moveDir = new Vector3(h, 0f, v).normalized;
+			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
+			moveDir = new Vector3(move.x, 0f, move.y).normalized;
 
-			if (Input.GetKeyDown(KeyCode.F))
+			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
 				if (GameManagerEx.Instance.IsDay)
 				{
@@ -123,6 +122,7 @@ namespace Garage.Controller
 				GameManagerEx.Instance.GetComponent<BuildingManager>().UpdatePreviewArea(currentOwningProp, transform);
 			}
 
+			// HACK - 이것도 다 interact 키로 할수있도록 변경해야됨
 			if (Input.GetKeyDown(KeyCode.Space))
 			{
 				SetAnimParam((int)AnimationType.Oil, true);
@@ -140,7 +140,7 @@ namespace Garage.Controller
 				return;
 			}
 
-			bool isRunning = Input.GetKey(KeyCode.LeftShift);
+			bool isRunning = Managers.Input.Control.Player.Run.IsPressed();
 
 			float speed = walkSpeed;
 			bool isCarrying = (currentOwningProp != null && currentOwningProp.IsCarry);

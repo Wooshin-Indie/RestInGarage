@@ -27,7 +27,7 @@ namespace Garage.Manager
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
 
-		// TODO - 게임 시작시 직접 스폰하도록
+		// TODO - 호스트가 게임 시작시 직접 스폰하도록
 		// + 초기 건물들도 여기서 스폰
 		[Button]
 		public void OnGameStart()
