@@ -1,6 +1,5 @@
 using Garage.Interfaces;
 using Garage.Props;
-using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -10,6 +9,28 @@ namespace Garage.Manager
 {
 	public class BuildingManager : NetworkBehaviour
 	{
+		#region Singleton
+		private static BuildingManager instance;
+		public static BuildingManager Instance { get => instance; }
+
+		void Awake()
+		{
+			Init();
+		}
+
+		private void Init()
+		{
+			if (null == instance)
+			{
+				instance = this;
+				DontDestroyOnLoad(this.gameObject);
+			}
+			else
+			{
+				Destroy(this.gameObject);
+			}
+		}
+		#endregion
 		[Header("Build")]
 		[SerializeField] private Vector2Int gridOrigin;
 		[SerializeField] private Vector2Int gridSize;
@@ -27,12 +48,29 @@ namespace Garage.Manager
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
 
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+			if (IsHost)
+			{
+				OnGameStart();
+			}
+			else
+			{
+				gridTiles = new GridTile[gridSize.x, gridSize.y];
+				GridTile[] tiles = FindObjectsByType<GridTile>(FindObjectsSortMode.None);
+				for(int i=0; i<tiles.Length; i++)
+				{
+					gridTiles[tiles[i].GridPosition.Value.y, tiles[i].GridPosition.Value.z] = tiles[i];
+				}
+			}
+			SetActiveGrids(false);
+		}
+
 		// TODO - 호스트가 게임 시작시 직접 스폰하도록
 		// + 초기 건물들도 여기서 스폰
-		[Button]
 		public void OnGameStart()
 		{
-
 			gridTiles = new GridTile[gridSize.x, gridSize.y];
 
 			for (int i = 0; i < gridSize.x; i++) {
@@ -40,9 +78,9 @@ namespace Garage.Manager
 				{
 					gridTiles[i, j] = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
 					gridTiles[i, j].GetComponent<NetworkObject>().Spawn();
+					gridTiles[i, j].SetGridPosition(0, i, j);
 				}
 			}
-			SetActiveGrids(false);
 		}
 
 		public void OnStageInit()
