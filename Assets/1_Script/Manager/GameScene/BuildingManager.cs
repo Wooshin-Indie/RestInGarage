@@ -1,7 +1,6 @@
 using Garage.Interfaces;
 using Garage.Props;
 using IUtil;
-using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -46,7 +45,6 @@ namespace Garage.Manager
 		private GridTile[,] gridTiles;
 		public GridTile[,] GridTiles => gridTiles;
 
-		private BuildingNetworkManager buildNetManager = null;
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
 
 		// TODO - 호스트가 게임 시작시 직접 스폰하도록
@@ -59,9 +57,6 @@ namespace Garage.Manager
 			for (int i = 0; i < gridSize.x; i++) {
 				for (int j = 0; j < gridSize.y; j++)
 				{
-					//gridTiles[i, j] = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
-					//gridTiles[i, j].SetGridPosition(0, i, j);
-					//gridTiles[i, j].GetComponent<NetworkObject>().Spawn();
 					GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
 					tile.SetGridPosition(0, i, j);
 					tile.GetComponent<NetworkObject>().Spawn();
@@ -70,7 +65,6 @@ namespace Garage.Manager
 
 			GameObject go = Instantiate(networkManagerPrefab);
 			go.GetComponent<NetworkObject>().Spawn();
-			buildNetManager = go.GetComponent<BuildingNetworkManager>();
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -102,7 +96,7 @@ namespace Garage.Manager
 				tilePositions.Add(index);
 			}
 
-			buildNetManager.TryPlaceServerRpc(prop.NetworkObjectId, wheelRotate, tilePositions.ToArray());
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(prop.NetworkObjectId, wheelRotate, tilePositions.ToArray());
 		}
 
 		public Vector3 GetCenterWorldPosition(Vector2Int[] indices)

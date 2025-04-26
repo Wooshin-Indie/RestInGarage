@@ -6,7 +6,30 @@ namespace Garage.Manager
 {
 	public class BuildingNetworkManager : NetworkBehaviour
 	{
-		[ServerRpc]
+		#region Singleton
+		private static BuildingNetworkManager instance;
+		public static BuildingNetworkManager Instance { get => instance; }
+
+		void Awake()
+		{
+			Init();
+		}
+
+		private void Init()
+		{
+			if (null == instance)
+			{
+				instance = this;
+				DontDestroyOnLoad(this.gameObject);
+			}
+			else
+			{
+				Destroy(this.gameObject);
+			}
+		}
+		#endregion
+
+		[ServerRpc(RequireOwnership = false)]
 		public void TryPlaceServerRpc(ulong propNetId, int wheelRotate, Vector2Int[] tileIndices)
 		{
 			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
