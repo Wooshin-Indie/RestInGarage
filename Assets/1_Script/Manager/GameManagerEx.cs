@@ -38,8 +38,6 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
-		public GameObject buildingManager;
-
 		public bool IsDay = true;
 
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
@@ -57,7 +55,6 @@ namespace Garage.Manager
 				po.PlayerObject.GetComponent<PlayerController>().EndInteractionClientRPC();
 			}
 
-			myBuildingManager.OnStageInit();
 			IsDay = !IsDay;
 		}
 
@@ -72,9 +69,6 @@ namespace Garage.Manager
 
 			UIManager.Lobby.SendMessageToUI(name, text);
 		}
-
-		private BuildingManager myBuildingManager = null;
-		public BuildingManager BuildingManager => myBuildingManager;
 
 		public void GameStarted()
 		{
@@ -91,11 +85,6 @@ namespace Garage.Manager
 			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 			isHost = true;
 			isConnected = true;
-
-
-			GameObject tmpGo = Instantiate(buildingManager);
-			tmpGo.GetComponent<NetworkObject>().Spawn();
-			myBuildingManager = tmpGo.GetComponent<BuildingManager>();
 		}
 
 		public void ConnectedAsClient()

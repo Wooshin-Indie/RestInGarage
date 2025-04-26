@@ -1,13 +1,14 @@
 using Garage.Interfaces;
 using Garage.Props;
 using IUtil;
+using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Manager
 {
-	public class BuildingManager : NetworkBehaviour
+	public class BuildingManager : MonoBehaviour
 	{
 		#region Singleton
 		private static BuildingManager instance;
@@ -32,12 +33,10 @@ namespace Garage.Manager
 		}
 		#endregion
 		[Header("Build")]
+		[SerializeField] private GameObject networkManagerPrefab;
 		[SerializeField] private Vector2Int gridOrigin;
 		[SerializeField] private Vector2Int gridSize;
 		[SerializeField] private GameObject gridPrefab;
-		[SerializeField] private Material gridDefaultMaterial;
-		[SerializeField] private Material gridOccupiedMaterial;
-		[SerializeField] private Material gridDisabledMaterial;
 
 		[Header("Preview")]
 		[SerializeField] private Material previewEnableMaterial;
@@ -45,33 +44,14 @@ namespace Garage.Manager
 
 		/** 게임 시작 시 Init **/
 		private GridTile[,] gridTiles;
+		public GridTile[,] GridTiles => gridTiles;
 
+		private BuildingNetworkManager buildNetManager = null;
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
-
-		public void RegisterTile(GridTile tile)
-		{
-			gridTiles[tile.GridPosition.Value.y, tile.GridPosition.Value.z] = tile;
-		}
-		public override void OnNetworkSpawn()
-		{
-			base.OnNetworkSpawn();
-			if (IsHost)
-			{
-				OnGameStart();
-			}
-			else
-			{
-				gridTiles = new GridTile[gridSize.x, gridSize.y];
-				GridTile[] tiles = FindObjectsByType<GridTile>(FindObjectsSortMode.None);
-				for(int i=0; i<tiles.Length; i++)
-				{
-					gridTiles[tiles[i].GridPosition.Value.y, tiles[i].GridPosition.Value.z] = tiles[i];
-				}
-			}
-		}
 
 		// TODO - 호스트가 게임 시작시 직접 스폰하도록
 		// + 초기 건물들도 여기서 스폰
+		[Button]
 		public void OnGameStart()
 		{
 			gridTiles = new GridTile[gridSize.x, gridSize.y];
@@ -79,11 +59,25 @@ namespace Garage.Manager
 			for (int i = 0; i < gridSize.x; i++) {
 				for (int j = 0; j < gridSize.y; j++)
 				{
-					gridTiles[i, j] = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
-					gridTiles[i, j].GetComponent<NetworkObject>().Spawn();
-					gridTiles[i, j].SetGridPosition(0, i, j);
+					//gridTiles[i, j] = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+					//gridTiles[i, j].SetGridPosition(0, i, j);
+					//gridTiles[i, j].GetComponent<NetworkObject>().Spawn();
+					GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+					tile.SetGridPosition(0, i, j);
+					tile.GetComponent<NetworkObject>().Spawn();
 				}
 			}
+
+			GameObject go = Instantiate(networkManagerPrefab);
+			go.GetComponent<NetworkObject>().Spawn();
+			buildNetManager = go.GetComponent<BuildingNetworkManager>();
+		}
+
+		public void RegisterTile(GridTile tile)
+		{
+			Vector2Int index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin;
+
+			gridTiles[index.x, index.y] = tile;
 		}
 
 		public void OnStageInit()
@@ -91,16 +85,6 @@ namespace Garage.Manager
 
 		}
 
-		private void ClearGrids()
-		{
-			for (int i = 0; i < gridTiles.GetLength(0); i++)
-			{
-				for (int j = 0; j < gridTiles.GetLength(1); j++)
-				{
-					gridTiles[i, j].SetMaterial(gridTiles[i, j].prop != null ? gridOccupiedMaterial : gridDefaultMaterial);
-				}
-			}
-		}
 		public void TryPlaceBuilding(OwnableProp prop)
 		{
 			if (tmpPreview != null)
@@ -118,60 +102,10 @@ namespace Garage.Manager
 				tilePositions.Add(index);
 			}
 
-			TryPlaceServerRpc(prop.NetworkObjectId, tilePositions.ToArray());
+			buildNetManager.TryPlaceServerRpc(prop.NetworkObjectId, wheelRotate, tilePositions.ToArray());
 		}
-		[ServerRpc]
-		private void TryPlaceServerRpc(ulong propNetId, Vector2Int[] tileIndices)
-		{
-			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
-			OwnableProp prop = obj.GetComponent<OwnableProp>();
 
-			bool success = true;
-
-			foreach (var index in tileIndices)
-			{
-				if (!IsInBounds(index)) { success = false; break; }
-				if (!gridTiles[index.x, index.y].IsPlaceable(prop)) { success = false; break; }
-			}
-
-			if (!success)
-			{
-				TryPlaceResultClientRpc(false, propNetId, Vector3.zero, 0);
-				return;
-			}
-
-			foreach (var index in tileIndices)
-			{
-				gridTiles[index.x, index.y].SetProp(prop);
-				gridTiles[index.x, index.y].SetMaterial(gridOccupiedMaterial);
-			}
-
-			Vector3 position = GetCenterWorldPosition(tileIndices);
-			int rotation = wheelRotate;
-
-			prop.transform.position = position;
-			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
-
-			TryPlaceResultClientRpc(true, propNetId, position, rotation);
-		}
-		[ClientRpc]
-		private void TryPlaceResultClientRpc(bool success, ulong propNetId, Vector3 pos, int rotation)
-		{
-			if (IsHost) return;
-
-			if (!success)
-			{
-				Debug.Log("설치 실패");
-				return;
-			}
-
-			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
-			var prop = obj.GetComponent<OwnableProp>();
-
-			prop.transform.position = pos;
-			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
-		}
-		private Vector3 GetCenterWorldPosition(Vector2Int[] indices)
+		public Vector3 GetCenterWorldPosition(Vector2Int[] indices)
 		{
 			Vector3 avg = Vector3.zero;
 			foreach (var idx in indices)
@@ -229,7 +163,6 @@ namespace Garage.Manager
 			{
 				wheelRotate = (wheelRotate + 1) % 4;
 			}
-
 		}
 
 		public void UpdatePreviewArea(OwnableProp prop, Transform playerTransform)
@@ -249,10 +182,6 @@ namespace Garage.Manager
 			}
 
 			IPlaceable placeable = prop.GetComponent<IPlaceable>();
-			foreach (var tile in previouslyHighlighted)
-			{ 
-				tile.SetMaterial(tile.prop != null ? gridOccupiedMaterial : gridDefaultMaterial);
-			}
 			previouslyHighlighted.Clear();
 
 			Vector2Int placeSize = placeable.GetSize();
@@ -281,7 +210,6 @@ namespace Garage.Manager
 					if (IsInBounds(index))
 					{
 						GridTile tile = gridTiles[index.x, index.y];
-						tile.SetMaterial(tile.IsPlaceable(prop) ? gridOccupiedMaterial : gridDisabledMaterial);
 						previouslyHighlighted.Add(tile);
 					}
 				}
@@ -317,7 +245,7 @@ namespace Garage.Manager
 			);
 		}
 
-		private bool IsInBounds(Vector2Int pos)
+		public bool IsInBounds(Vector2Int pos)
 		{
 			return pos.x >= 0 && pos.y >= 0 && pos.x < gridSize.x && pos.y < gridSize.y;
 		}

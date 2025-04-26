@@ -14,20 +14,19 @@ namespace Garage
 
 		public NetworkVariable<Vector3Int> GridPosition = new();
 
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+
+			BuildingManager.Instance.RegisterTile(this);
+			gameObject.SetActive(false);
+		}
+
 		void Awake()
 		{
 			rend = GetComponent<Renderer>();
 		}
-		public override void OnNetworkSpawn()
-		{
-			base.OnNetworkSpawn();
-			gameObject.SetActive(false);
 
-			if (IsClient && !IsHost)
-			{
-				BuildingManager.Instance.RegisterTile(this);
-			}
-		}
 		public void SetGridPosition(int idx, int row, int col)
 		{
 			GridPosition.Value.Set(idx, row, col);
