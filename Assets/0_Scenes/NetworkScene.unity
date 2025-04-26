@@ -234,6 +234,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  pingInterval: 2
+  timeoutThreshold: 5
   isInGame: 0
 --- !u!1 &105903978
 GameObject:
@@ -548,7 +550,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkManagerPrefab: {fileID: 5363453095286704382, guid: c07acf53a02a09a4da74c08de701cc77, type: 3}
-  gridOrigin: {x: -20, y: 0}
+  gridOrigin:
+  - {x: -20, y: -5}
+  - {x: -30, y: -5}
+  - {x: 0, y: -5}
   gridSize: {x: 5, y: 20}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}

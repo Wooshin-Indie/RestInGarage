@@ -61,7 +61,7 @@ namespace Garage.Manager
 				isDisconnected = true;
 				Debug.LogWarning("[HeartbeatChecker] : Host Disconnected");
 
-				NetworkManager.Singleton.Shutdown();
+				// NetworkManager.Singleton.Shutdown();
 			}
 		}
 

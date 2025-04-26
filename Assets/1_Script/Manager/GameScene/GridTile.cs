@@ -11,7 +11,6 @@ namespace Garage
 		public NetworkVariable<NetworkObjectReference> PropNetRef = new();
 
 		public OwnableProp prop => PropNetRef.Value.TryGet(out var obj) ? obj.GetComponent<OwnableProp>() : null;
-
 		public NetworkVariable<Vector3Int> GridPosition = new();
 
 		public override void OnNetworkSpawn()
@@ -29,7 +28,7 @@ namespace Garage
 
 		public void SetGridPosition(int idx, int row, int col)
 		{
-			GridPosition.Value.Set(idx, row, col);
+			GridPosition.Value = new Vector3Int(idx, row, col);
 		}
 		public void SetMaterial(Material mat)
 		{

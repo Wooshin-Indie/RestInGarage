@@ -1,4 +1,5 @@
 using Garage.Props;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace Garage.Manager
 		#endregion
 
 		[ServerRpc(RequireOwnership = false)]
-		public void TryPlaceServerRpc(ulong propNetId, int wheelRotate, Vector2Int[] tileIndices)
+		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices)
 		{
 			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			OwnableProp prop = obj.GetComponent<OwnableProp>();
@@ -40,7 +41,7 @@ namespace Garage.Manager
 			foreach (var index in tileIndices)
 			{
 				if (!BuildingManager.Instance.IsInBounds(index)) { success = false; break; }
-				if (!BuildingManager.Instance.GridTiles[index.x, index.y].IsPlaceable(prop)) { success = false; break; }
+				if (!BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].IsPlaceable(prop)) { success = false; break; }
 			}
 
 			if (!success)
@@ -49,12 +50,23 @@ namespace Garage.Manager
 				return;
 			}
 
+			for (int t = 0; t < BuildingManager.Instance.GridTiles.Count; t++)
+			{
+				for (int i = 0; i < BuildingManager.Instance.GridTiles[t].GetLength(0); i++)
+				{
+					for (int j = 0; j < BuildingManager.Instance.GridTiles[t].GetLength(1); j++)
+					{
+						if (BuildingManager.Instance.GridTiles[t][i, j].PropNetRef.Value.NetworkObjectId == propNetId)
+							BuildingManager.Instance.GridTiles[t][i, j].SetProp(null);
+					}
+				}
+			}
 			foreach (var index in tileIndices)
 			{
-				BuildingManager.Instance.GridTiles[index.x, index.y].SetProp(prop);
+				BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
 			}
 
-			Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(tileIndices);
+			Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
 			int rotation = wheelRotate;
 
 			prop.transform.position = position;
@@ -62,6 +74,7 @@ namespace Garage.Manager
 
 			TryPlaceResultClientRpc(true, propNetId, position, rotation);
 		}
+
 		[ClientRpc]
 		private void TryPlaceResultClientRpc(bool success, ulong propNetId, Vector3 pos, int rotation)
 		{

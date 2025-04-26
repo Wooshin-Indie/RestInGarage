@@ -2,6 +2,7 @@ using Garage.Interfaces;
 using Garage.Props;
 using IUtil;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ namespace Garage.Manager
 		#endregion
 		[Header("Build")]
 		[SerializeField] private GameObject networkManagerPrefab;
-		[SerializeField] private Vector2Int gridOrigin;
+		[SerializeField] private List<Vector2Int> gridOrigin;
 		[SerializeField] private Vector2Int gridSize;
 		[SerializeField] private GameObject gridPrefab;
 
@@ -42,36 +43,61 @@ namespace Garage.Manager
 		[SerializeField] private Material previewDisableMaterial;
 
 		/** 게임 시작 시 Init **/
-		private GridTile[,] gridTiles;
-		public GridTile[,] GridTiles => gridTiles;
+		private List<GridTile[,]> gridTiles;
+		public List<GridTile[,]> GridTiles => gridTiles;
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
+
+
+		GameObject tmpPreview = null;
+		private Material lastAppliedMaterial = null;
+		private int wheelRotate = 0;
 
 		// TODO - 호스트가 게임 시작시 직접 스폰하도록
 		// + 초기 건물들도 여기서 스폰
 		[Button]
 		public void OnGameStart()
 		{
-			gridTiles = new GridTile[gridSize.x, gridSize.y];
+			gridTiles = new();
 
-			for (int i = 0; i < gridSize.x; i++) {
-				for (int j = 0; j < gridSize.y; j++)
+			for (int t = 0; t < gridOrigin.Count; t++)
+			{
+				gridTiles.Add(new GridTile[gridSize.x, gridSize.y]);
+				for (int i = 0; i < gridSize.x; i++)
 				{
-					GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin.x - .5f, .01f, gridOrigin.y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
-					tile.SetGridPosition(0, i, j);
-					tile.GetComponent<NetworkObject>().Spawn();
+					for (int j = 0; j < gridSize.y; j++)
+					{
+						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+						tile.SetGridPosition(t, i, j);
+						tile.GetComponent<NetworkObject>().Spawn();
+					}
 				}
 			}
-
 			GameObject go = Instantiate(networkManagerPrefab);
 			go.GetComponent<NetworkObject>().Spawn();
 		}
 
 		public void RegisterTile(GridTile tile)
 		{
-			Vector2Int index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin;
+			Vector2Int index = Vector2Int.zero;
+			bool isInBound = false;
+			for (int t = 0; t < gridOrigin.Count; t++)
+			{
+				index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin[t];
+				if (IsInBounds(index))
+				{
+					gridTiles[t][index.x, index.y] = tile;
+					isInBound = true;
+					break;
+				}
+			}
 
-			gridTiles[index.x, index.y] = tile;
+			if (!isInBound)
+			{
+				Debug.Log("[BuildingManager] : Nothing Matched");
+				return;
+			}
+
 		}
 
 		public void OnStageInit()
@@ -86,51 +112,59 @@ namespace Garage.Manager
 				Destroy(tmpPreview);
 			}
 			SetActiveGrids(false);
-			if (!IsAbleToPlace(prop)) return;
+			int gridIdx = IsAbleToPlace(prop);
+			if (gridIdx == -1) return;
 
 			// 설치 가능하다고 판단되면 서버에게 요청
 			var tilePositions = new List<Vector2Int>();
 			foreach (var tile in previouslyHighlighted)
 			{
-				Vector2Int index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin;
+				Vector2Int index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin[gridIdx];
 				tilePositions.Add(index);
 			}
 
-			BuildingNetworkManager.Instance.TryPlaceServerRpc(prop.NetworkObjectId, wheelRotate, tilePositions.ToArray());
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(prop.NetworkObjectId, gridIdx, wheelRotate, tilePositions.ToArray());
 		}
 
-		public Vector3 GetCenterWorldPosition(Vector2Int[] indices)
+		public Vector3 GetCenterWorldPosition(int index, Vector2Int[] indices)
 		{
 			Vector3 avg = Vector3.zero;
 			foreach (var idx in indices)
 			{
-				avg += gridTiles[idx.x, idx.y].transform.position;
+				avg += gridTiles[index][idx.x, idx.y].transform.position;
 			}
 			return avg / indices.Length;
 		}
-		private bool IsAbleToPlace(OwnableProp prop)
+		
+		private int IsAbleToPlace(OwnableProp prop)
 		{
-			if (prop.GetComponent<IPlaceable>() == null) return false;
+			if (prop.GetComponent<IPlaceable>() == null) return -1;
 			Vector2Int tmpV = prop.GetComponent<IPlaceable>().GetSize();
 
 			if (previouslyHighlighted.Count != (tmpV.x * tmpV.y))
-				return false;
+				return -1;
 
 			// 전부 설치가능한 Grid인지 확인
 			foreach (var tile in previouslyHighlighted)
+			{
 				if (!tile.IsPlaceable(prop))
-					return false;
+					return -1;
+			}
 
-			return true;
+			// Tile의 GridIdx 반환
+			return previouslyHighlighted.First().GridPosition.Value.x;
 		}
 
 		private void SetActiveGrids(bool isActive)
 		{
-			for (int i = 0; i < gridTiles.GetLength(0); i++)
+			for (int t = 0; t < gridTiles.Count; t++)
 			{
-				for (int j = 0; j < gridTiles.GetLength(1); j++)
+				for (int i = 0; i < gridTiles[t].GetLength(0); i++)
 				{
-					gridTiles[i, j].gameObject.SetActive(isActive);
+					for (int j = 0; j < gridTiles[t].GetLength(1); j++)
+					{
+						gridTiles[t][i, j].gameObject.SetActive(isActive);
+					}
 				}
 			}
 		}
@@ -146,11 +180,6 @@ namespace Garage.Manager
 			return averageWorldPos;
 		}
 
-		GameObject tmpPreview = null; 
-		private Material lastAppliedMaterial = null;
-
-		private int wheelRotate = 0;
-
 		private void OnRotate()
 		{
 			if (Input.GetKeyDown(KeyCode.R))
@@ -161,8 +190,7 @@ namespace Garage.Manager
 
 		public void UpdatePreviewArea(OwnableProp prop, Transform playerTransform)
 		{
-
-			if (!gridTiles[0, 0].gameObject.activeSelf)
+			if (!gridTiles[0][0, 0].gameObject.activeSelf)
 			{
 				SetActiveGrids(true);
 				tmpPreview = Instantiate(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
@@ -189,27 +217,29 @@ namespace Garage.Manager
 
 
 			Vector2Int centerOffset = new Vector2Int((placeSize.x - 1) / 2, (placeSize.y - 1) / 2);
-
 			Vector3 forward = playerTransform.forward;
 			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
 			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset);
 
-			for (int x = 0; x < placeSize.x; x++)
+			for (int t = 0; t < gridTiles.Count; t++)
 			{
-				for (int y = 0; y < placeSize.y; y++)
+				for (int x = 0; x < placeSize.x; x++)
 				{
-					Vector2Int tilePos = startGridPos + new Vector2Int(x - centerOffset.x, y - centerOffset.y);
-					Vector2Int index = tilePos - gridOrigin;
-
-					if (IsInBounds(index))
+					for (int y = 0; y < placeSize.y; y++)
 					{
-						GridTile tile = gridTiles[index.x, index.y];
-						previouslyHighlighted.Add(tile);
+						Vector2Int tilePos = startGridPos + new Vector2Int(x - centerOffset.x, y - centerOffset.y);
+						Vector2Int index = tilePos - gridOrigin[t];
+
+						if (IsInBounds(index))
+						{
+							GridTile tile = gridTiles[t][index.x, index.y];
+							previouslyHighlighted.Add(tile);
+						}
 					}
 				}
 			}
 
-			if (IsAbleToPlace(prop))
+			if (IsAbleToPlace(prop) != -1)
 			{
 				tmpPreview.transform.position = GetAveragePosition();
 
