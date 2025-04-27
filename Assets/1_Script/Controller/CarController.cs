@@ -1,13 +1,18 @@
 using Garage.Utils;
+using Garage.Structs;
 using IUtil;
 using UnityEngine;
+using Garage.Manager;
+using System.Collections.Generic;
 
 namespace Garage.Controller
 {
 	public class CarController : MonoBehaviour
 	{
+        [Header("Car Parts Transform")]
+        [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
 
-		[FoldoutGroup("Move Parameters")]
+        [FoldoutGroup("Move Parameters")]
 		[SerializeField] private float moveSpeed = 5f;
 		[SerializeField] private float stopDistance = 15f;
 		[SerializeField] private float tmpDistance = 7f;
@@ -22,15 +27,20 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
-
+        private static int currentId = 0;
+		public int MyId = -1;
 		private float targetLaneX = 0f;
 		private bool isBypassing = false;
 		private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[10];
+		private CarStatus carStatus;
 
-		private void Awake()
+        private void Awake()
 		{
 			rigid = GetComponent<Rigidbody>();
+
+			MyId = currentId++;
+			carStatus = new CarStatus();
 		}
 
 		private void FixedUpdate()
@@ -143,7 +153,8 @@ namespace Garage.Controller
 		}
 
 		private VehicleDirection direction = VehicleDirection.None;
-		public void SetLane(float laneX, VehicleDirection dir)
+		public VehicleDirection Direction { get => direction; }
+        public void SetLane(float laneX, VehicleDirection dir)
 		{
 			targetLaneX = laneX;
 			direction = dir;
@@ -158,5 +169,11 @@ namespace Garage.Controller
 			Gizmos.matrix = Matrix4x4.TRS(boxCenter, orientation, Vector3.one);
 			Gizmos.DrawWireCube(Vector3.zero, halfExtents * 2);
 		}
-	}
+
+		public void InitCarStatus()
+		{
+			UIManager.Game.GenerateCarStatusUIs(this, carStatus);
+        }
+
+    }
 }
