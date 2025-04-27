@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -24,10 +25,10 @@ namespace Garage.Manager
 		public float pingInterval = 2.0f;
 		public float timeoutThreshold = 5.0f;
 
-		private float lastPongTime;
-		private float pingTimer;
-		private float pingSentTime;
-		private bool isDisconnected = false;
+		private float lastPongTime;		// 가장 최근 받은 pong응답 시간
+		private float pingTimer;		// ping 보내기 까지 남은 시간
+		private float pingSentTime;		// 가장 최근 ping 보낸 시간
+		private bool isDisconnected = true;
 
 		public float LastPingMs { get; private set; } = -1;
 
