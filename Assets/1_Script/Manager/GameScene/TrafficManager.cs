@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using Garage.UI.GameScene;
 
 namespace Garage.Manager
 {
@@ -46,8 +47,10 @@ namespace Garage.Manager
 			if (availableSpawnPoints.Count > 0)
 			{
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
-				GameObject carObj = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
-				carObj.GetComponent<CarController>().SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
+                CarController car = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation).
+					GetComponent<CarController>();
+				car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
+				car.InitCarStatus();
 			}
 			else return;
 		}

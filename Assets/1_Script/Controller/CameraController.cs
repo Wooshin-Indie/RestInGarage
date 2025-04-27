@@ -6,7 +6,7 @@ namespace Garage.Controller
 	{
 		[SerializeField] private float cameraBoomLength;
 		[SerializeField] private Vector3 fixedRotation = new Vector3(75f, 0f, 0f);
-		private void LateUpdate()
+		private void Update()
 		{
 			float phi = fixedRotation.y * Mathf.Deg2Rad;
 			float theta = fixedRotation.x * Mathf.Deg2Rad;
