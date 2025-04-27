@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -19,6 +20,79 @@ namespace Garage.Manager
 				DontDestroyOnLoad(gameObject);
 			}
 		}
+
+		#region Heartbeat
+		public float pingInterval = 2.0f;
+		public float timeoutThreshold = 5.0f;
+
+		private float lastPongTime;		// 가장 최근 받은 pong응답 시간
+		private float pingTimer;		// ping 보내기 까지 남은 시간
+		private float pingSentTime;		// 가장 최근 ping 보낸 시간
+		private bool isDisconnected = true;
+
+		public float LastPingMs { get; private set; } = -1;
+
+		private void Start()
+		{
+			if (IsClient && !IsHost)
+			{
+				lastPongTime = Time.time;
+				pingTimer = pingInterval;
+			}
+		}
+
+		private void Update()
+		{
+			if (!IsClient || IsHost) return;
+
+			pingTimer -= Time.deltaTime;
+
+			if (pingTimer <= 0f)
+			{
+				if (NetworkManager.Singleton.IsConnectedClient)
+				{
+					SendPingServerRpc();
+					pingSentTime = Time.time;
+				}
+				pingTimer = pingInterval;
+			}
+
+			if (!isDisconnected && (Time.time - lastPongTime) > timeoutThreshold)
+			{
+				isDisconnected = true;
+				Debug.LogWarning("[HeartbeatChecker] : Host Disconnected");
+
+				// NetworkManager.Singleton.Shutdown();
+			}
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void SendPingServerRpc(ServerRpcParams rpcParams = default)
+		{
+			if (!NetworkManager.Singleton.IsServer)
+				return;
+
+			ReceivePongClientRpc(rpcParams.Receive.SenderClientId);
+		}
+
+		[ClientRpc]
+		private void ReceivePongClientRpc(ulong clientId)
+		{
+			if (clientId != NetworkManager.Singleton.LocalClientId)
+				return;
+
+			lastPongTime = Time.time;
+			if (isDisconnected)
+			{
+				Debug.Log("[HeartbeatChecker] 서버 응답 복구됨!");
+				isDisconnected = false;
+			}
+
+			// 핑 계산 (초 -> 밀리초 변환)
+			LastPingMs = (Time.time - pingSentTime) * 1000.0f;
+			Debug.Log($"[HeartbeatChecker] Ping: {LastPingMs:F0} ms");
+		}
+		#endregion
 
 		[ServerRpc(RequireOwnership = false)]
 		public void IWishToSendAChatServerRPC(string message, ulong fromwho)

@@ -103,7 +103,7 @@ namespace Garage.Controller
 				{
 					if (currentOwningProp != null)
 					{
-						GameManagerEx.Instance.GetComponent<BuildingManager>().PlaceIfPossible(currentOwningProp);
+						BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
 						currentOwningProp.EndInteraction(transform);
 						currentOwningProp = null;
 					}
@@ -119,7 +119,7 @@ namespace Garage.Controller
 
 			if (!GameManagerEx.Instance.IsDay && currentOwningProp != null && currentOwningProp.GetComponent<IPlaceable>() != null)
 			{
-				GameManagerEx.Instance.GetComponent<BuildingManager>().UpdatePreviewArea(currentOwningProp, transform);
+				BuildingManager.Instance.UpdatePreviewArea(currentOwningProp, transform);
 			}
 
 			// HACK - 이것도 다 interact 키로 할수있도록 변경해야됨

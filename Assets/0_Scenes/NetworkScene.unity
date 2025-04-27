@@ -234,6 +234,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  pingInterval: 2
+  timeoutThreshold: 5
   isInGame: 0
 --- !u!1 &105903978
 GameObject:
@@ -662,12 +664,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aca306a7516116458ba592ef4b850b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridOrigin: {x: -20, y: 0}
+  networkManagerPrefab: {fileID: 5363453095286704382, guid: c07acf53a02a09a4da74c08de701cc77, type: 3}
+  gridOrigin:
+  - {x: -20, y: -5}
+  - {x: -30, y: -5}
+  - {x: 0, y: -5}
   gridSize: {x: 5, y: 20}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
-  gridDefaultMaterial: {fileID: 2100000, guid: 1a62dfdbdf25e5049bffdd840da2e074, type: 2}
-  gridOccupiedMaterial: {fileID: 2100000, guid: 7602a4a1875c9a846819dc466d8b661f, type: 2}
-  gridDisabledMaterial: {fileID: 2100000, guid: 9f479c9173d320643aae6f8e50889f7b, type: 2}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}
 --- !u!1 &1696624380

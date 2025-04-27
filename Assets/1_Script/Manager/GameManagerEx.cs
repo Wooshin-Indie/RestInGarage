@@ -4,6 +4,7 @@ using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -38,7 +39,6 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
-
 		public bool IsDay = true;
 
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
@@ -55,7 +55,7 @@ namespace Garage.Manager
 			{
 				po.PlayerObject.GetComponent<PlayerController>().EndInteractionClientRPC();
 			}
-			GetComponent<BuildingManager>().OnStageInit();
+
 			IsDay = !IsDay;
 		}
 
