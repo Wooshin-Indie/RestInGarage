@@ -4,10 +4,11 @@ using IUtil;
 using UnityEngine;
 using Garage.Manager;
 using System.Collections.Generic;
+using Unity.Netcode;
 
 namespace Garage.Controller
 {
-	public class CarController : MonoBehaviour
+	public class CarController : NetworkBehaviour
 	{
         [Header("Car Parts Transform")]
         [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
@@ -27,24 +28,26 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
-        private static int currentId = 0;
-		public int MyId = -1;
+		public ulong MyId;
 		private float targetLaneX = 0f;
 		private bool isBypassing = false;
 		private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[10];
 		private CarStatus carStatus;
+		public CarStatus CarStatus { get => carStatus; }
 
         private void Awake()
 		{
 			rigid = GetComponent<Rigidbody>();
 
-			MyId = currentId++;
+			MyId = GetComponent<NetworkObject>().NetworkObjectId;
 			carStatus = new CarStatus();
 		}
 
 		private void FixedUpdate()
 		{
+			if (!IsHost) return;
+
 			if (isBroken)
 			{
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
@@ -158,7 +161,17 @@ namespace Garage.Controller
 		{
 			targetLaneX = laneX;
 			direction = dir;
-		}
+			SetLaneClientRPC(laneX, dir);
+        }
+
+		[ClientRpc]
+		private void SetLaneClientRPC(float laneX, VehicleDirection dir)
+		{
+			if (IsHost) return;
+            targetLaneX = laneX;
+            direction = dir;
+        }
+
 		private void OnDrawGizmosSelected()
 		{
 			Vector3 boxCenter = transform.position + Vector3.up * (boxHeight * 0.5f) + transform.forward * (boxLength * 0.5f);
@@ -173,7 +186,21 @@ namespace Garage.Controller
 		public void InitCarStatus()
 		{
 			UIManager.Game.GenerateCarStatusUIs(this, carStatus);
+			InitCarStatusClientRPC();
         }
 
+		[ClientRpc]
+		private void InitCarStatusClientRPC()
+		{
+            if (IsHost) return;
+            UIManager.Game.GenerateCarStatusUIs(this, carStatus);
+        }
+
+        [ClientRpc]
+        public void SetIsBrokenClientRPC(int carStatusIsBroken)
+        {
+			if (IsHost) return;
+			carStatus.isBroken = carStatusIsBroken;
+        }
     }
 }

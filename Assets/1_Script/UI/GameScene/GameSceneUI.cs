@@ -19,7 +19,7 @@ namespace Garage.UI.GameScene
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
 
-        private Dictionary<int, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<int, Dictionary<CarParts, CarStatusUI>>();
+        private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> objectId
         // secondKey -> (Enum)CarParts
 
