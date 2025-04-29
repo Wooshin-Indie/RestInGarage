@@ -38,14 +38,6 @@ namespace Garage.Props
 			RequestOwnershipServerRpc(clientId);
 		}
 
-		/// <summary>
-		/// Interact 끝낼 때 호출하는 함수
-		/// </summary>
-		public void EndInteraction(Transform transform)
-		{
-			OnEndInteraction(transform);
-		}
-
 		[ServerRpc(RequireOwnership = false)]
 		private void RequestRemoveOwnershipServerRPC()
 		{
@@ -82,10 +74,10 @@ namespace Garage.Props
 
 		protected virtual void StartInteraction(ulong newOwnerClientId)
 		{
-			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
+			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().OnInteractionGranted(this);
 		}
 
-		protected virtual void OnEndInteraction(Transform transform)
+		public virtual void OnEndInteraction(Transform transform)
 		{
 			RemoveOwnershipServerRpc();
 		}

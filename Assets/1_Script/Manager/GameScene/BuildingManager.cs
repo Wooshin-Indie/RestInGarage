@@ -68,8 +68,8 @@ namespace Garage.Manager
 					for (int j = 0; j < gridSize.y; j++)
 					{
 						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+						tile.GetComponent<NetworkObject>().Spawn(); 
 						tile.SetGridPosition(t, i, j);
-						tile.GetComponent<NetworkObject>().Spawn();
 					}
 				}
 			}

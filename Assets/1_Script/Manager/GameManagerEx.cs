@@ -53,7 +53,7 @@ namespace Garage.Manager
 		{
 			foreach (var po in NetworkManager.Singleton.ConnectedClientsList)
 			{
-				po.PlayerObject.GetComponent<PlayerController>().EndInteractionClientRPC();
+				//po.PlayerObject.GetComponent<PlayerController>();
 			}
 
 			IsDay = !IsDay;

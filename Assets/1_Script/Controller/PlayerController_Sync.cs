@@ -6,6 +6,8 @@ namespace Garage.Controller
 	public partial class PlayerController
 	{
 
+		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
 		private void OnUpdateSynchronization()
 		{
 			if (IsHost)
@@ -108,24 +110,24 @@ namespace Garage.Controller
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		public void ChangeAnimatorParamServerRPC(int id, bool param)
+		private void ChangeAnimatorParamServerRPC(int id, bool param)
 		{
 			ChangeAnimatorParamClientRPC(id, param);
 		}
 		[ServerRpc(RequireOwnership = false)]
-		public void ChangeAnimatorParamServerRPC(int id, float param)
+		private void ChangeAnimatorParamServerRPC(int id, float param)
 		{
 			ChangeAnimatorParamClientRPC(id, param);
 		}
 
 		[ClientRpc]
-		public void ChangeAnimatorParamClientRPC(int id, bool param)
+		private void ChangeAnimatorParamClientRPC(int id, bool param)
 		{
 			if (IsOwner) return;
 			animator.SetBool(animIDs[id], param);
 		}
 		[ClientRpc]
-		public void ChangeAnimatorParamClientRPC(int id, float param)
+		private void ChangeAnimatorParamClientRPC(int id, float param)
 		{
 			if (IsOwner) return;
 			animator.SetFloat(animIDs[id], param);
