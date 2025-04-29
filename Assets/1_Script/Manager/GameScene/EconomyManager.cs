@@ -39,10 +39,10 @@ namespace Garage.Manager
         }
 
         [Button]
-        [ClientRpc]
-        public void TmpInitBalClientRPC()
+        public void TmpInitBalByServer()
         {
-            balance = 0;
+            SetBalance(0f);
+            SetBalanceClientRPC(0f);
             Debug.Log("Init Balance: " + balance);
         }
 
