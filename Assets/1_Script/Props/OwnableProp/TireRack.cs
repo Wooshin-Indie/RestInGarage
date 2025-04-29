@@ -31,7 +31,7 @@ namespace Garage.Props
 			go.GetComponent<TireProp>().TryInteract(newOwnerClientId);
 		}
 
-		protected override void OnEndInteraction(Transform controller)
+		public override void OnEndInteraction(Transform controller)
 		{
 			base.OnEndInteraction(controller);
 		}

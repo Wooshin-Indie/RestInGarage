@@ -7,6 +7,7 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
+
 		protected PlayerController controller;
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
@@ -38,14 +39,6 @@ namespace Garage.Props
 			RequestOwnershipServerRpc(clientId);
 		}
 
-		/// <summary>
-		/// Interact 끝낼 때 호출하는 함수
-		/// </summary>
-		public void EndInteraction(Transform transform)
-		{
-			OnEndInteraction(transform);
-		}
-
 		[ServerRpc(RequireOwnership = false)]
 		private void RequestRemoveOwnershipServerRPC()
 		{
@@ -58,6 +51,7 @@ namespace Garage.Props
 			Debug.Log(ownerClientId.Value + ", " + requestingClientId);
 			if (ownerClientId.Value == ulong.MaxValue)
 			{
+				// TODO - 여기서 돈쓰는 
 				ownerClientId.Value = requestingClientId;
 				GetComponent<NetworkObject>().ChangeOwnership(requestingClientId);
 				GrantInteractionClientRPC(requestingClientId);
@@ -82,10 +76,10 @@ namespace Garage.Props
 
 		protected virtual void StartInteraction(ulong newOwnerClientId)
 		{
-			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().StartInteraction(this);
+			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().OnInteractionGranted(this);
 		}
 
-		protected virtual void OnEndInteraction(Transform transform)
+		public virtual void OnEndInteraction(Transform transform)
 		{
 			RemoveOwnershipServerRpc();
 		}

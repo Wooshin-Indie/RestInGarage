@@ -32,6 +32,16 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices)
 		{
+			// TODO - 위치에 따라서 살지 팔지 
+			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
+			{
+				Debug.Log("BUYED");
+				// TODO - Server RPC니까 직접 돈 확인 및 돈 뺴기 연산 필요
+				// 돈없으면 return해서 실패처리
+				BuildingManager.Instance.PlacedBuildings.Add(propNetId, oProp);
+				BuildingManager.Instance.ItemDictionary.Remove(propNetId);
+			}
+
 			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			OwnableProp prop = obj.GetComponent<OwnableProp>();
 
@@ -39,12 +49,13 @@ namespace Garage.Manager
 
 			foreach (var index in tileIndices)
 			{
-				if (!BuildingManager.Instance.IsInBounds(index)) { success = false; break; }
+				if (!BuildingManager.Instance.IsInBounds(gridIdx, index)) { success = false; break; }
 				if (!BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].IsPlaceable(prop)) { success = false; break; }
 			}
 
 			if (!success)
 			{
+				// 자리 부족으로 인한 실패
 				TryPlaceResultClientRpc(false, propNetId, Vector3.zero, 0);
 				return;
 			}
@@ -60,18 +71,44 @@ namespace Garage.Manager
 					}
 				}
 			}
-			foreach (var index in tileIndices)
+			
+			// 마지막 Index는 파는 곳
+			if(gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
-				BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
+				Debug.Log("Building Sell!");
+
+				OwnableProp tmpProp = null;
+				if (BuildingManager.Instance.PlacedBuildings.TryGetValue(propNetId, out tmpProp))
+				{
+					BuildingManager.Instance.PlacedBuildings.Remove(propNetId);
+
+					tmpProp.GetComponent<NetworkObject>().Despawn();
+					Destroy(tmpProp.gameObject);
+				}
+
+				if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out tmpProp))
+				{
+					BuildingManager.Instance.ItemDictionary.Remove(propNetId);
+
+					tmpProp.GetComponent<NetworkObject>().Despawn();
+					Destroy(tmpProp.gameObject);
+				}
 			}
+			else
+			{
+				foreach (var index in tileIndices)
+				{
+					BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
+				}
 
-			Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
-			int rotation = wheelRotate;
+				Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
+				int rotation = wheelRotate;
 
-			prop.transform.position = position;
-			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+				prop.transform.position = position;
+				prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
 
-			TryPlaceResultClientRpc(true, propNetId, position, rotation);
+				TryPlaceResultClientRpc(true, propNetId, position, rotation);
+			}
 		}
 
 		[ClientRpc]

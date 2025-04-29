@@ -19,8 +19,8 @@ namespace Garage.UI.GameScene
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
 
-        private Dictionary<int, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<int, Dictionary<CarParts, CarStatusUI>>();
-        // fitstKey -> objectId
+        private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
+        // fitstKey -> NetworkObjectId
         // secondKey -> (Enum)CarParts
 
         private void LateUpdate()
@@ -37,8 +37,11 @@ namespace Garage.UI.GameScene
 
         public void GenerateCarStatusUIs(CarController car, CarStatus status)
         {
+            ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
+
             Dictionary<CarParts, CarStatusUI> carStatusUIs = new Dictionary<CarParts, CarStatusUI>();
-            carStatusInfo.Add(car.MyId, carStatusUIs);
+            carStatusInfo.Add(carID, carStatusUIs);
+
 
             Array values = Enum.GetValues(typeof(CarParts)); // 0 ~ (Last CarParts Value)
             foreach (CarParts v in values)
@@ -46,16 +49,21 @@ namespace Garage.UI.GameScene
                 if ( ( status.isBroken & (1 << (int)v )) != 0 )
                 {
                     CarStatusUI tmpUI = Instantiate(carStatusUIPrefab, transform).GetComponent<CarStatusUI>();
-                    carStatusInfo[car.MyId].Add(v, tmpUI);
+                    carStatusInfo[carID].Add(v, tmpUI);
                     tmpUI.InitCarStatusUI(car, v);
                 }
             }
         }
 
         public void RemoveCarStatusUI(CarController car, CarParts carPart)
-        {
-            if (carStatusInfo[car.MyId].ContainsKey(carPart))
-                carStatusInfo[car.MyId].Remove(carPart);
+        { 
+            ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
+
+            if (carStatusInfo[carID].ContainsKey(carPart))
+            {
+                Destroy(carStatusInfo[carID][carPart].gameObject);
+                carStatusInfo[carID].Remove(carPart);
+            }
             else Debug.Log($"Key \"{carPart}\" is not in Dictionary");
         }
 

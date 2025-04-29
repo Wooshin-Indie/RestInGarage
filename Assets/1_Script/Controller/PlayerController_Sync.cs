@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -5,6 +6,21 @@ namespace Garage.Controller
 {
 	public partial class PlayerController
 	{
+
+		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+		/// <summary>
+		/// 개별 PlayerID를 부여해서 Spawn시 머터리얼을 변경합니다.
+		/// </summary>
+		private void OnPlayerIDChanged(int prev, int playerId)
+		{
+			var materials = meshRenderer.sharedMaterials.ToList();
+
+			materials.Clear();
+			materials.Add(playerMaterial[playerId]);
+
+			meshRenderer.materials = materials.ToArray();
+		}
 
 		private void OnUpdateSynchronization()
 		{
@@ -108,24 +124,24 @@ namespace Garage.Controller
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		public void ChangeAnimatorParamServerRPC(int id, bool param)
+		private void ChangeAnimatorParamServerRPC(int id, bool param)
 		{
 			ChangeAnimatorParamClientRPC(id, param);
 		}
 		[ServerRpc(RequireOwnership = false)]
-		public void ChangeAnimatorParamServerRPC(int id, float param)
+		private void ChangeAnimatorParamServerRPC(int id, float param)
 		{
 			ChangeAnimatorParamClientRPC(id, param);
 		}
 
 		[ClientRpc]
-		public void ChangeAnimatorParamClientRPC(int id, bool param)
+		private void ChangeAnimatorParamClientRPC(int id, bool param)
 		{
 			if (IsOwner) return;
 			animator.SetBool(animIDs[id], param);
 		}
 		[ClientRpc]
-		public void ChangeAnimatorParamClientRPC(int id, float param)
+		private void ChangeAnimatorParamClientRPC(int id, float param)
 		{
 			if (IsOwner) return;
 			animator.SetFloat(animIDs[id], param);

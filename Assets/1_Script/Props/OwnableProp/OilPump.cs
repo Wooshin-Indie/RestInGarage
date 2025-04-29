@@ -30,7 +30,7 @@ namespace Garage.Props
 			base.StartInteraction(newOwnerClientId);
 		}
 
-		protected override void OnEndInteraction(Transform controller)
+		public override void OnEndInteraction(Transform controller)
 		{
 			base.OnEndInteraction(controller);
 		}

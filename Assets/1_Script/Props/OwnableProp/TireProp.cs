@@ -17,7 +17,7 @@ namespace Garage.Props
 			SyncStateServerRPC(true);
 		}
 
-		protected override void OnEndInteraction(Transform controller)
+		public override void OnEndInteraction(Transform controller)
 		{
 			rigid.isKinematic = false;
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;

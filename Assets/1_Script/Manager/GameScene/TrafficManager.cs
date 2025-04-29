@@ -4,12 +4,36 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Garage.UI.GameScene;
+using Unity.Netcode;
 
 namespace Garage.Manager
 {
-	public class TrafficManager : MonoBehaviour
+	public class TrafficManager : NetworkBehaviour
 	{
-		public GameObject carPrefab;
+        #region Singleton
+        private static TrafficManager instance;
+        public static TrafficManager Instance { get => instance; }
+
+        void Awake()
+        {
+            Init();
+        }
+
+        private void Init()
+        {
+            if (null == instance)
+            {
+                instance = this;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
+        #endregion
+
+        public GameObject carPrefab;
 		public GameObject spawnPointPrefab;
 		public List<VehicleSpawnPoint> spawnPoints = new();
 		public float laneLength;
@@ -18,7 +42,7 @@ namespace Garage.Manager
 		/// mapId, stageId 에 따라 spawnPoints를 설정합니다.
 		/// </summary>
 		[Button]
-		public void OnStageStart(/*int mapId, int stageId*/)
+		public void OnStageStart(/*int mapId, int stageId*/) // 서버에서 호출
 		{
 			spawnPoints.Clear();
 
@@ -39,7 +63,7 @@ namespace Garage.Manager
 		}
 
 		[Button]
-		public void SpawnCar()
+		public void SpawnCar() // 서버에서 호출
 		{
 			List<VehicleSpawnPoint> availableSpawnPoints = spawnPoints.Where(p => p.IsAbleToSpawn()).ToList();
 
@@ -48,10 +72,15 @@ namespace Garage.Manager
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
                 CarController car = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
-				car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
-				car.InitCarStatus();
+                car.GetComponent<NetworkObject>().Spawn();
+
+				car.SyncIsBrokenClientRPC(car.CarStatus.isBroken);
+                car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
+                car.InitCarStatus();
 			}
 			else return;
 		}
+
+		
 	}
 }

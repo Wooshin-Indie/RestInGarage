@@ -1,10 +1,10 @@
+using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -19,8 +19,6 @@ namespace Garage.Controller
 		private Animator animator;
 		private Rigidbody rigid;
 		private CapsuleCollider capsule;
-
-		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
@@ -41,13 +39,28 @@ namespace Garage.Controller
 
 		private int[] animIDs = new int[3];
 
-		private Vector3 moveDir = Vector3.zero;
+		
 		private bool isAbleToMove = true;
-
+		public float WalkSpeed => walkSpeed;
+		public float RunSpeed => runSpeed;
+		public float CarrySpeed => carrySpeed;
 
 		private bool isDetectInteractable = false;
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
+
+		public OwnableProp CurrentOwningProp => currentOwningProp;
+		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
+
+
+		/** Player State Machine **/
+		private PlayerStateMachine stateMachine;
+		public PlayerStateMachine StateMachine { get => stateMachine; }
+
+		public IdleState idleState;
+		public CarryState carryState;
+		public InteractState interactState;
+
 
 		private void Awake()
 		{
@@ -55,12 +68,19 @@ namespace Garage.Controller
 			rigid = GetComponent<Rigidbody>();
 			capsule = GetComponent<CapsuleCollider>();
 
-			rigid.maxLinearVelocity = runSpeed;
+			stateMachine = new PlayerStateMachine();
+			idleState = new IdleState(this, stateMachine);
+			carryState = new CarryState(this, stateMachine);
+			interactState = new InteractState(this, stateMachine);
+			stateMachine.Init(idleState);
+
+            rigid.maxLinearVelocity = runSpeed;
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 		}
+
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
@@ -72,95 +92,106 @@ namespace Garage.Controller
 		private void Update()
 		{
 			if (!IsOwner) return;
+
+			stateMachine.CurState.HandleInput();
+			stateMachine.CurState.LogicUpdate();
+
 			OnUpdateSynchronization();
+		}
 
-			DrawRay();
-			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
-			moveDir = new Vector3(move.x, 0f, move.y).normalized;
+		/// <summary>
+		/// Controller가 Interact를 시작하고 싶을 때 사용합니다.
+		/// </summary>
+		public void TryStartInteract()
+		{
+			if (!isDetectInteractable) return;
 
-			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
+			if (GameManagerEx.Instance.IsDay)
 			{
-				if (GameManagerEx.Instance.IsDay)
+				recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
+			}
+			else
+			{
+				if (recentlyDetectedProp.GetComponent<IPlaceable>() == null) return;
+				recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
+			}
+		}	
+
+		/// <summary>
+		/// Controller가 Interact를 끊고싶을때 사용합니다.
+		/// </summary>
+		public void TryEndInteract()
+		{
+			if (currentOwningProp == null) return;
+
+			if (GameManagerEx.Instance.IsDay)
+			{
+				if (!currentOwningProp.IsCarry)
 				{
-					if (currentOwningProp != null)
-					{
-						if (currentOwningProp.IsCarry)
-						{
-							SetAnimParam((int)AnimationType.Carry, false);
-						}
-						else
-						{
-							currentOwningProp.EndInteraction(transform);
-							currentOwningProp = null;
-						}
-					}
-					else if (isDetectInteractable)
-					{
-						recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
-					}
+					currentOwningProp.OnEndInteraction(transform);
+					currentOwningProp = null;
 				}
 				else
 				{
-					if (currentOwningProp != null)
-					{
-						BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
-						currentOwningProp.EndInteraction(transform);
-						currentOwningProp = null;
-					}
-					else if (isDetectInteractable)
-					{
-						if (recentlyDetectedProp.GetComponent<IPlaceable>() != null)
-						{
-							recentlyDetectedProp.TryInteract(NetworkManager.Singleton.LocalClientId);
-						}
-					}
+					SetAnimParam((int)AnimationType.Carry, false);
 				}
 			}
-
-			if (!GameManagerEx.Instance.IsDay && currentOwningProp != null && currentOwningProp.GetComponent<IPlaceable>() != null)
+			else
 			{
-				BuildingManager.Instance.UpdatePreviewArea(currentOwningProp, transform);
+				BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
+				currentOwningProp.OnEndInteraction(transform);
+				currentOwningProp = null;
 			}
+		}
 
-			// HACK - 이것도 다 interact 키로 할수있도록 변경해야됨
-			if (Input.GetKeyDown(KeyCode.Space))
-			{
-				SetAnimParam((int)AnimationType.Oil, true);
-				isAbleToMove = false;
-			}
-			else if (Input.GetKeyUp(KeyCode.Space))
-			{
-				SetAnimParam((int)AnimationType.Oil, false);
-				isAbleToMove = true;
-			}
+		/// <summary>
+		/// TryInteract 후에 상호작용 가능한 경우에만 Prop쪽에서 호출됩니다.
+		/// </summary>
+		public void OnInteractionGranted(OwnableProp prop)
+		{
+			currentOwningProp = prop;
 
+			if (currentOwningProp.GetComponent<IPlaceable>() == null)
+			{
+				stateMachine.ChangeState(carryState);
+			}
+			else
+			{
+				stateMachine.ChangeState(carryState);
+			}
+		}
+
+		private Vector3 moveDir = Vector3.zero;
+		/// <summary>
+		/// move 방향으로 speed의 속도로 움직입니다.
+		/// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
+		/// </summary>
+		public void MovePosition(Vector2 move, float speed, float maxSpeed)
+		{
 			if (!isAbleToMove)
 			{
-				rigid.linearVelocity = Vector3.zero;
+				rigid.linearVelocity = Vector3.zero; 
+				SetAnimParam((int)AnimationType.Speed, 0);
 				return;
 			}
 
-			bool isRunning = Managers.Input.Control.Player.Run.IsPressed();
+			if(Mathf.Approximately(Mathf.Abs(move.x) + Mathf.Abs(move.y), 0f)) 
+				speed = 0;
 
-			float speed = walkSpeed;
-			bool isCarrying = (currentOwningProp != null && currentOwningProp.IsCarry);
-
-			if (isRunning) speed = runSpeed;
-			if (isCarrying) speed = carrySpeed;
-
+			moveDir = new Vector3(move.x, 0f, move.y).normalized;
 			moveDir *= speed;
-
-
 			rigid.linearVelocity = moveDir;
+
 			if (moveDir.sqrMagnitude > .1f)
 				rigid.MoveRotation(Quaternion.LookRotation(moveDir));
 
-			float speedParam = moveDir.magnitude / (isCarrying ? carrySpeed : runSpeed);
-			SetAnimParam((int)AnimationType.Speed, speedParam);	
+			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
-
-		private void DrawRay()
+		/// <summary>
+		/// Player의 forward 근처의 물체를 탐지합니다.
+		/// </summary>
+		public void DrawRay()
 		{
 			RaycastHit hit;
 			int targetLayer = Constants.LAYER_INTERACTABLE;
@@ -180,46 +211,9 @@ namespace Garage.Controller
 			Debug.DrawRay(transform.position + new Vector3(0f, .1f, 0f), transform.forward * interactRayLength, Color.red);
 		}
 
-		/// <summary>
-		/// 개별 PlayerID를 부여해서 Spawn시 머터리얼을 변경합니다.
-		/// </summary>
-		private void OnPlayerIDChanged(int prev, int playerId)
-		{
-			var materials = meshRenderer.sharedMaterials.ToList();
-
-			materials.Clear();
-			materials.Add(playerMaterial[playerId]);
-
-			meshRenderer.materials = materials.ToArray();
-		}
-
-		/// <summary>
-		/// TryInteract 후에 상호작용 가능한 경우에만 Prop쪽에서 호출됩니다.
-		/// </summary>
-		public void StartInteraction(OwnableProp prop)
-		{
-			currentOwningProp = prop;
-			if (prop.IsCarry)
-			{
-				SetAnimParam((int)AnimationType.Carry, true);
-			}
-		}
-
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
-		}
-
-		[ClientRpc]
-		public void EndInteractionClientRPC()
-		{
-			if (!IsOwner) return;
-			if(currentOwningProp != null)
-			{
-				currentOwningProp.EndInteraction(transform);
-				currentOwningProp = null;
-			}
-			// TODO - Anim 초기화
 		}
 
 		#region Animation Events
@@ -234,7 +228,7 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			currentOwningProp.EndInteraction(transform);
+			currentOwningProp.OnEndInteraction(transform);
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
