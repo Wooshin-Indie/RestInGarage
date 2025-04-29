@@ -32,10 +32,11 @@ namespace Garage.Manager
 			}
 		}
 		#endregion
+
 		[Header("Build")]
 		[SerializeField] private GameObject networkManagerPrefab;
 		[SerializeField] private List<Vector2Int> gridOrigin;
-		[SerializeField] private Vector2Int gridSize;
+		[SerializeField] private List<Vector2Int> gridSize;
 		[SerializeField] private GameObject gridPrefab;
 
 		[Header("Preview")]
@@ -48,6 +49,8 @@ namespace Garage.Manager
 
 		private HashSet<GridTile> previouslyHighlighted = new HashSet<GridTile>();
 
+		public Dictionary<ulong, OwnableProp> PlacedBuildings = new();
+		public Dictionary<ulong, OwnableProp> ItemDictionary = new();
 
 		GameObject tmpPreview = null;
 		private Material lastAppliedMaterial = null;
@@ -62,19 +65,21 @@ namespace Garage.Manager
 
 			for (int t = 0; t < gridOrigin.Count; t++)
 			{
-				gridTiles.Add(new GridTile[gridSize.x, gridSize.y]);
-				for (int i = 0; i < gridSize.x; i++)
+				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
+				for (int i = 0; i < gridSize[t].x; i++)
 				{
-					for (int j = 0; j < gridSize.y; j++)
+					for (int j = 0; j < gridSize[t].y; j++)
 					{
 						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+						tile.GetComponent<NetworkObject>().Spawn(); 
 						tile.SetGridPosition(t, i, j);
-						tile.GetComponent<NetworkObject>().Spawn();
 					}
 				}
 			}
 			GameObject go = Instantiate(networkManagerPrefab);
 			go.GetComponent<NetworkObject>().Spawn();
+
+			PlacedBuildings.Clear();
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -84,7 +89,7 @@ namespace Garage.Manager
 			for (int t = 0; t < gridOrigin.Count; t++)
 			{
 				index = WorldToGrid(tile.transform.position + new Vector3(.5f, 0f, .5f)) - gridOrigin[t];
-				if (IsInBounds(index))
+				if (IsInBounds(t, index))
 				{
 					gridTiles[t][index.x, index.y] = tile;
 					isInBound = true;
@@ -100,9 +105,38 @@ namespace Garage.Manager
 
 		}
 
-		public void OnStageInit()
-		{
+		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
+		[SerializeField] private GameObject tireRack;
+		[SerializeField] private GameObject oilPump;
 
+
+		// 스테이지 시작 시 구매하지 않은 빌딩 삭제
+		public void OnStageStart()
+		{
+			foreach(var entry in ItemDictionary)
+			{
+				entry.Value.GetComponent<NetworkObject>().Despawn();
+				Destroy(entry.Value.gameObject);
+			}
+
+			ItemDictionary.Clear();
+		}
+
+		// 스테이지 종료 시 구매할 빌딩 스폰
+		public void OnStageEnd()
+		{
+			// HACK - 랜덤으로 바꾸기
+			GameObject tmpGo = Instantiate(tireRack, Vector3.zero, Quaternion.identity);
+			tmpGo.GetComponent<NetworkObject>().Spawn();
+
+			GameObject tmpGo2 = Instantiate(oilPump, new Vector3(0f, 0f, 5f), Quaternion.identity);
+			tmpGo2.GetComponent<NetworkObject>().Spawn();
+
+			ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
+				tmpGo.GetComponent<OwnableProp>());
+
+			ItemDictionary.Add(tmpGo2.GetComponent<NetworkObject>().NetworkObjectId,
+				tmpGo2.GetComponent<OwnableProp>());
 		}
 
 		public void TryPlaceBuilding(OwnableProp prop)
@@ -230,7 +264,7 @@ namespace Garage.Manager
 						Vector2Int tilePos = startGridPos + new Vector2Int(x - centerOffset.x, y - centerOffset.y);
 						Vector2Int index = tilePos - gridOrigin[t];
 
-						if (IsInBounds(index))
+						if (IsInBounds(t, index))
 						{
 							GridTile tile = gridTiles[t][index.x, index.y];
 							previouslyHighlighted.Add(tile);
@@ -269,9 +303,9 @@ namespace Garage.Manager
 			);
 		}
 
-		public bool IsInBounds(Vector2Int pos)
+		public bool IsInBounds(int gridIndex, Vector2Int pos)
 		{
-			return pos.x >= 0 && pos.y >= 0 && pos.x < gridSize.x && pos.y < gridSize.y;
+			return pos.x >= 0 && pos.y >= 0 && pos.x < gridSize[gridIndex].x && pos.y < gridSize[gridIndex].y;
 		}
 
 		private Vector3 GetMouseWorldPosOnY0()

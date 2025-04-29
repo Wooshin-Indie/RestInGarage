@@ -53,10 +53,18 @@ namespace Garage.Manager
 		{
 			foreach (var po in NetworkManager.Singleton.ConnectedClientsList)
 			{
-				po.PlayerObject.GetComponent<PlayerController>().EndInteractionClientRPC();
+				//po.PlayerObject.GetComponent<PlayerController>();
 			}
 
 			IsDay = !IsDay;
+			if (IsDay)
+			{
+				BuildingManager.Instance.OnStageStart();
+			}
+			else
+			{
+				BuildingManager.Instance.OnStageEnd();
+			}
 		}
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)

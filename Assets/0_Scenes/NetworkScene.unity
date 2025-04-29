@@ -795,13 +795,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   networkManagerPrefab: {fileID: 5363453095286704382, guid: c07acf53a02a09a4da74c08de701cc77, type: 3}
   gridOrigin:
+  - {x: 0, y: -5}
   - {x: -20, y: -5}
   - {x: -30, y: -5}
-  - {x: 0, y: -5}
-  gridSize: {x: 5, y: 20}
+  gridSize:
+  - {x: 5, y: 20}
+  - {x: 5, y: 20}
+  - {x: 5, y: 5}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}
+  tireRack: {fileID: 3544855763098417, guid: 469c525377c04764d9e99b90d608fe9a, type: 3}
+  oilPump: {fileID: 8084718555022500170, guid: 15eba1e5f050bfd439ff2a7ec4a623c7, type: 3}
 --- !u!1 &1696624380
 GameObject:
   m_ObjectHideFlags: 0
