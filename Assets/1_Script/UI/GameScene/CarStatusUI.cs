@@ -32,7 +32,6 @@ namespace Garage.UI.GameScene.Items
         {
             Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
             transform.position = tmpPos;
-            Debug.Log("ScreenPos: " + tmpPos);
         }
 
         public void InitCarStatusUI(CarController carCtr, CarParts carPart)

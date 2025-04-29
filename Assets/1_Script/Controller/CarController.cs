@@ -28,7 +28,6 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
-		public ulong MyId;
 		private float targetLaneX = 0f;
 		private bool isBypassing = false;
 		private Rigidbody rigid;
@@ -39,8 +38,6 @@ namespace Garage.Controller
         private void Awake()
 		{
 			rigid = GetComponent<Rigidbody>();
-
-			MyId = GetComponent<NetworkObject>().NetworkObjectId;
 			carStatus = new CarStatus();
 		}
 
@@ -159,15 +156,12 @@ namespace Garage.Controller
 		public VehicleDirection Direction { get => direction; }
         public void SetLane(float laneX, VehicleDirection dir)
 		{
-			targetLaneX = laneX;
-			direction = dir;
 			SetLaneClientRPC(laneX, dir);
         }
 
 		[ClientRpc]
 		private void SetLaneClientRPC(float laneX, VehicleDirection dir)
 		{
-			if (IsHost) return;
             targetLaneX = laneX;
             direction = dir;
         }
@@ -185,22 +179,39 @@ namespace Garage.Controller
 
 		public void InitCarStatus()
 		{
-			UIManager.Game.GenerateCarStatusUIs(this, carStatus);
 			InitCarStatusClientRPC();
         }
 
 		[ClientRpc]
 		private void InitCarStatusClientRPC()
 		{
-            if (IsHost) return;
             UIManager.Game.GenerateCarStatusUIs(this, carStatus);
         }
 
         [ClientRpc]
-        public void SetIsBrokenClientRPC(int carStatusIsBroken)
+        public void SyncIsBrokenClientRPC(int carStatusIsBroken)
         {
 			if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
+        }
+
+		public CarParts tmpPart;
+		[Button]
+		public void TmpRepairMethod()
+		{
+			RepairingBrokenPartServerRPC(tmpPart);
+        }
+
+		[ServerRpc(RequireOwnership = false)]
+		public void RepairingBrokenPartServerRPC(CarParts carPart)
+		{
+			RepairingBrokenPartClientRPC(carPart);
+        }
+
+		[ClientRpc]
+		private void RepairingBrokenPartClientRPC(CarParts carPart)
+		{
+            UIManager.Game.RemoveCarStatusUI(this, carPart);
         }
     }
 }

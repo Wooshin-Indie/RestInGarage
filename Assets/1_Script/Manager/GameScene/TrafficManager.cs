@@ -10,7 +10,30 @@ namespace Garage.Manager
 {
 	public class TrafficManager : NetworkBehaviour
 	{
-		public GameObject carPrefab;
+        #region Singleton
+        private static TrafficManager instance;
+        public static TrafficManager Instance { get => instance; }
+
+        void Awake()
+        {
+            Init();
+        }
+
+        private void Init()
+        {
+            if (null == instance)
+            {
+                instance = this;
+                DontDestroyOnLoad(this.gameObject);
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
+        }
+        #endregion
+
+        public GameObject carPrefab;
 		public GameObject spawnPointPrefab;
 		public List<VehicleSpawnPoint> spawnPoints = new();
 		public float laneLength;
@@ -51,7 +74,7 @@ namespace Garage.Manager
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
-				car.SetIsBrokenClientRPC(car.CarStatus.isBroken);
+				car.SyncIsBrokenClientRPC(car.CarStatus.isBroken);
                 car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
                 car.InitCarStatus();
 			}
