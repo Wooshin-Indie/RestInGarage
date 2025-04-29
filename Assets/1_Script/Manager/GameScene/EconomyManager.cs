@@ -43,6 +43,7 @@ namespace Garage.Manager
         public void TmpInitBalClientRPC()
         {
             balance = 0;
+            Debug.Log("Init Balance: " + balance);
         }
 
         [Button]
@@ -62,6 +63,7 @@ namespace Garage.Manager
             if (IsHost) return;
 
             SetBalance(bal);
+            Debug.Log("Client Balance: " + balance);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -69,6 +71,7 @@ namespace Garage.Manager
         {
             balance += pay;
             SetBalanceClientRPC(balance);
+            Debug.Log("Server Balance: " + balance);
         }
 
         [ServerRpc(RequireOwnership = false)]
