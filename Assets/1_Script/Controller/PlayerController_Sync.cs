@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,6 +8,19 @@ namespace Garage.Controller
 	{
 
 		public NetworkVariable<int> PlayerID = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+		/// <summary>
+		/// 개별 PlayerID를 부여해서 Spawn시 머터리얼을 변경합니다.
+		/// </summary>
+		private void OnPlayerIDChanged(int prev, int playerId)
+		{
+			var materials = meshRenderer.sharedMaterials.ToList();
+
+			materials.Clear();
+			materials.Add(playerMaterial[playerId]);
+
+			meshRenderer.materials = materials.ToArray();
+		}
 
 		private void OnUpdateSynchronization()
 		{

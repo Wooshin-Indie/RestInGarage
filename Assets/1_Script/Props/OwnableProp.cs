@@ -7,6 +7,7 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
+
 		protected PlayerController controller;
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
@@ -50,6 +51,7 @@ namespace Garage.Props
 			Debug.Log(ownerClientId.Value + ", " + requestingClientId);
 			if (ownerClientId.Value == ulong.MaxValue)
 			{
+				// TODO - 여기서 돈쓰는 
 				ownerClientId.Value = requestingClientId;
 				GetComponent<NetworkObject>().ChangeOwnership(requestingClientId);
 				GrantInteractionClientRPC(requestingClientId);

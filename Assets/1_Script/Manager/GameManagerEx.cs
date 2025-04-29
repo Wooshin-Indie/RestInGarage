@@ -57,6 +57,14 @@ namespace Garage.Manager
 			}
 
 			IsDay = !IsDay;
+			if (IsDay)
+			{
+				BuildingManager.Instance.OnStageStart();
+			}
+			else
+			{
+				BuildingManager.Instance.OnStageEnd();
+			}
 		}
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)

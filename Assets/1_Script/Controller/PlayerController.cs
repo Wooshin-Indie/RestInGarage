@@ -4,9 +4,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Utils;
 using IUtil;
-using Steamworks;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -82,6 +80,7 @@ namespace Garage.Controller
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 		}
+
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
@@ -98,9 +97,11 @@ namespace Garage.Controller
 			stateMachine.CurState.LogicUpdate();
 
 			OnUpdateSynchronization();
-			
 		}
 
+		/// <summary>
+		/// Controller가 Interact를 시작하고 싶을 때 사용합니다.
+		/// </summary>
 		public void TryStartInteract()
 		{
 			if (!isDetectInteractable) return;
@@ -116,6 +117,9 @@ namespace Garage.Controller
 			}
 		}	
 
+		/// <summary>
+		/// Controller가 Interact를 끊고싶을때 사용합니다.
+		/// </summary>
 		public void TryEndInteract()
 		{
 			if (currentOwningProp == null) return;
@@ -158,6 +162,10 @@ namespace Garage.Controller
 		}
 
 		private Vector3 moveDir = Vector3.zero;
+		/// <summary>
+		/// move 방향으로 speed의 속도로 움직입니다.
+		/// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
+		/// </summary>
 		public void MovePosition(Vector2 move, float speed, float maxSpeed)
 		{
 			if (!isAbleToMove)
@@ -180,6 +188,9 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
+		/// <summary>
+		/// Player의 forward 근처의 물체를 탐지합니다.
+		/// </summary>
 		public void DrawRay()
 		{
 			RaycastHit hit;
@@ -199,20 +210,6 @@ namespace Garage.Controller
 
 			Debug.DrawRay(transform.position + new Vector3(0f, .1f, 0f), transform.forward * interactRayLength, Color.red);
 		}
-
-		/// <summary>
-		/// 개별 PlayerID를 부여해서 Spawn시 머터리얼을 변경합니다.
-		/// </summary>
-		private void OnPlayerIDChanged(int prev, int playerId)
-		{
-			var materials = meshRenderer.sharedMaterials.ToList();
-
-			materials.Clear();
-			materials.Add(playerMaterial[playerId]);
-
-			meshRenderer.materials = materials.ToArray();
-		}
-
 
 		public Transform GetSocket(PropType type) 
 		{

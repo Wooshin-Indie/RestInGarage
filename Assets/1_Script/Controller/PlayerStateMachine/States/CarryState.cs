@@ -1,8 +1,6 @@
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
-using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller.StateMachine
