@@ -39,7 +39,7 @@ namespace Garage.Manager
         }
 
         [Button]
-        public void TmpInitBalByServer()
+        public void TmpInitBal()
         {
             SetBalanceServerRPC(0f);
         }
@@ -48,6 +48,12 @@ namespace Garage.Manager
         public void TmpAddMoney()
         {
             EarnMoneyServerRPC(100f);
+        }
+
+        [Button]
+        public void TmpSubMoney()
+        {
+            UseMoneyServerRPC(100f);
         }
 
         private void SetBalance(float bal)
@@ -76,15 +82,21 @@ namespace Garage.Manager
         public void EarnMoneyServerRPC(float pay)
         {
             balance += pay;
-            SetBalanceClientRPC(balance);
+            SetBalanceClientRPC(balance); // 결과만 ClientRPC로 뿌림
             Debug.Log("Server Balance: " + balance);
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void UseMoneyServerRPC(float fee)
         {
-            balance -= fee;
-            SetBalanceClientRPC(balance);
+            float tmpBal = balance - fee;
+            if (tmpBal < 0f)
+                Debug.LogError("Exception: not enough balance");
+            else
+            {
+                balance -= fee;
+                SetBalanceClientRPC(balance);
+            }
         }
     }
 }
