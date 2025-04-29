@@ -41,9 +41,7 @@ namespace Garage.Manager
         [Button]
         public void TmpInitBalByServer()
         {
-            SetBalance(0f);
-            SetBalanceClientRPC(0f);
-            Debug.Log("Init Balance: " + balance);
+            SetBalanceServerRPC(0f);
         }
 
         [Button]
@@ -55,6 +53,14 @@ namespace Garage.Manager
         private void SetBalance(float bal)
         {
             balance = bal;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void SetBalanceServerRPC(float bal)
+        {
+            SetBalance(bal);
+            Debug.Log("Server Balance: " + balance);
+            SetBalanceClientRPC(bal);
         }
 
         [ClientRpc]
