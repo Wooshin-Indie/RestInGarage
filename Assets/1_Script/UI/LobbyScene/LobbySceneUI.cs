@@ -51,6 +51,9 @@ namespace Garage.UI.LobbyScene
 			notreadyButton.onClick.AddListener(() => {
                 NetworkTransmission.instance.IsTheClientReadyServerRPC(false, GameManagerEx.Instance.MyClientId);
             });
+            startButton.onClick.AddListener(() => {
+                NetworkTransmission.instance.StartGameServerRPC();
+            });
         }
 
 		private void OnDestroy()
