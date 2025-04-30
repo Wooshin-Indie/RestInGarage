@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -27,6 +28,21 @@ namespace Garage.Controller.StateMachine
 		{
 			base.LogicUpdate();
 
+			if (controller.CurrentFixablePart == null)
+			{
+				stateMachine.ChangeState(controller.carryState);
+				return;
+			}
+
+			if (Managers.Input.Control.Player.Interact.IsPressed())
+			{
+				controller.CurrentFixablePart.Interact(controller, controller.CurrentOwningProp);
+			}
+			else
+			{
+				stateMachine.ChangeState(controller.carryState);
+				return;
+			}
 		}
 
 		public override void PhysicsUpdate()

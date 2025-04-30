@@ -163,6 +163,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  ItemData: {fileID: 11400000, guid: a4a98ec7c27857048a382a384785c579, type: 2}
   isCarry: 0
   tirePrefab: {fileID: 1178809210040168974, guid: dcf62d7bb3ffc124e8a81ad3b698f33f, type: 3}
   previewPrefab: {fileID: 3544855763098417, guid: fc263d7b2df9fff42b8531aa6c6d987e, type: 3}

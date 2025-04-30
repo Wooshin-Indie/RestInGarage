@@ -35,9 +35,7 @@ namespace Garage.Manager
 			// TODO - 위치에 따라서 살지 팔지 
 			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
 			{
-				Debug.Log("BUYED");
-				// TODO - Server RPC니까 직접 돈 확인 및 돈 뺴기 연산 필요
-				// 돈없으면 return해서 실패처리
+				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.BuyPrice)) return;
 				BuildingManager.Instance.PlacedBuildings.Add(propNetId, oProp);
 				BuildingManager.Instance.ItemDictionary.Remove(propNetId);
 			}
@@ -75,8 +73,7 @@ namespace Garage.Manager
 			// 마지막 Index는 파는 곳
 			if(gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
-				Debug.Log("Building Sell!");
-
+				EconomyManager.Instance.EarnMoney_HostOnly(oProp.ItemData.SellPrice);
 				OwnableProp tmpProp = null;
 				if (BuildingManager.Instance.PlacedBuildings.TryGetValue(propNetId, out tmpProp))
 				{

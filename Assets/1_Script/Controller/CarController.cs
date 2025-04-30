@@ -5,6 +5,7 @@ using UnityEngine;
 using Garage.Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Garage.Props;
 
 namespace Garage.Controller
 {
@@ -118,8 +119,15 @@ namespace Garage.Controller
 		{
 			rigid.linearVelocity = Vector3.zero;
 		}
-
-
+		
+		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
+		{
+			Debug.Log("Interact Complete : " + part + ", " + prop.name);
+		}
+		public bool IsAbleToInteract(CarParts part, OwnableProp prop)
+		{
+			return true;
+		}
 		private bool IsObstacleAhead(out float hitDistance)
 		{
 			Vector3 boxCenter = transform.position + Vector3.up * (boxHeight * 0.5f) + transform.forward * (boxLength * 0.5f);
@@ -154,6 +162,7 @@ namespace Garage.Controller
 
 		private VehicleDirection direction = VehicleDirection.None;
 		public VehicleDirection Direction { get => direction; }
+
         public void SetLane(float laneX, VehicleDirection dir)
 		{
 			SetLaneClientRPC(laneX, dir);
@@ -193,13 +202,6 @@ namespace Garage.Controller
         {
 			if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
-        }
-
-		public CarParts tmpPart;
-		[Button]
-		public void TmpRepairMethod()
-		{
-			RepairingBrokenPartServerRPC(tmpPart);
         }
 
 		[ServerRpc(RequireOwnership = false)]

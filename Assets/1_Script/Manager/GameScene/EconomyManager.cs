@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using IUtil;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Garage.Manager
 {
@@ -29,41 +30,55 @@ namespace Garage.Manager
         }
         #endregion
 
-        //서버에서만 관리
         public NetworkVariable<int> Balance = new();
 
-        private void SetBalance(int bal)
-        {
-            Balance.Value = bal;
+		public override void OnNetworkSpawn()
+		{
+            base.OnNetworkSpawn();
+
+            Balance.OnValueChanged += UIManager.Game.OnBalancedChanged;
+            UIManager.Game.OnBalancedChanged(0, Balance.Value);
 		}
 
-        [Button]
+        public bool HasEnoughMoney(int money)
+        {
+            return Balance.Value <= money;
+        }
+
+        public bool UseMoney_HostOnly(int pay)
+        {
+            if (!IsHost) return false;
+            if (Balance.Value < pay) return false;
+
+            Balance.Value -= pay;
+            return true;
+        }
+
+        public void EarnMoney_HostOnly(int money)
+		{
+            if (!IsHost) return;
+
+			Balance.Value += money;
+		}
+
+		[Button]
         public void TmpSetBalance()
         {
-            SetBalanceServerRPC(100);
+			EarnMoneyServerRPC(100);
         }
 
         [ServerRpc(RequireOwnership = false)]
         private void SetBalanceServerRPC(int bal)
-        {
-            SetBalance(bal);
-            Debug.Log("Server Balance: " + Balance.Value);
-            SetBalanceClientRPC(bal);
+		{
+			Balance.Value = bal;
+			Debug.Log("Server Balance: " + Balance.Value);
         }
 
-        [ClientRpc]
-        private void SetBalanceClientRPC(int bal)
-        {
-            if (IsHost) return;
-
-            SetBalance(bal);
-        }
 
         [ServerRpc(RequireOwnership = false)]
         public void EarnMoneyServerRPC(int pay)
         {
 			Balance.Value += pay;
-            SetBalanceClientRPC(Balance.Value); // 결과만 ClientRPC로 뿌림
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -71,11 +86,10 @@ namespace Garage.Manager
         {
             float tmpBal = Balance.Value - fee;
             if (tmpBal < 0f)
-                Debug.LogError("Exception: not enough balance");
+                Debug.LogWarning("Exception: not enough balance");
             else
             {
 				Balance.Value -= fee;
-                SetBalanceClientRPC(Balance.Value);
             }
         }
     }

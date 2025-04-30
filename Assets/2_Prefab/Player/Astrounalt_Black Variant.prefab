@@ -1106,20 +1106,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  sockets:
+  - {fileID: 4510192838223473813}
+  - {fileID: 8904382118372160319}
+  cameraTransform: {fileID: 8608552576033507524}
   walkSpeed: 4
   runSpeed: 8
   carrySpeed: 2
-  interactRayLength: 3
-  cameraTransform: {fileID: 8608552576033507524}
+  boxWidth: 1
+  boxHeight: 1.8
   meshRenderer: {fileID: 5760093498017814160}
   playerMaterial:
   - {fileID: 2100000, guid: 43080622186391047aff385f2a362d86, type: 2}
   - {fileID: 2100000, guid: 9d22253fc47352749a80fe79f559394b, type: 2}
   - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
   - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
-  sockets:
-  - {fileID: 4510192838223473813}
-  - {fileID: 8904382118372160319}
   PlayerID:
     m_InternalValue: 0
 --- !u!1 &5685545249949587409

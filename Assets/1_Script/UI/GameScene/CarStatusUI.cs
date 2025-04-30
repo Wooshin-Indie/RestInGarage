@@ -1,13 +1,7 @@
 using Garage.Controller;
-using Garage.Structs;
 using Garage.Utils;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
-using System.Security.Cryptography;
-using UnityEditor;
-using static UnityEngine.ParticleSystem;
-using Unity.VisualScripting;
 
 namespace Garage.UI.GameScene.Items
 {

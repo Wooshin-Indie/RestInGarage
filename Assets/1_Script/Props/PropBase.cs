@@ -1,10 +1,13 @@
-﻿using Unity.Netcode;
+using Garage.Structs;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
 	public class PropBase : NetworkBehaviour
 	{
+		public ItemData ItemData;
+
 		protected Rigidbody rigid;
 
 		public virtual void Awake()

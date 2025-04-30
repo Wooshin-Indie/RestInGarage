@@ -2,6 +2,7 @@ using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
+using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
@@ -30,7 +31,8 @@ namespace Garage.Controller
 		[SerializeField] private float carrySpeed;
 
 		[FoldoutGroup("Ray Settings")]
-		[SerializeField] private float interactRayLength;
+		[SerializeField] private float boxWidth;
+		[SerializeField] private float boxHeight;
 
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
@@ -45,13 +47,15 @@ namespace Garage.Controller
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
 
-		private bool isDetectInteractable = false;
+		private Collider[] interactableHits = null;
+		
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
+		private CarPartBase currentFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
 		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
-
+		public CarPartBase CurrentFixablePart => currentFixablePart;
 
 		/** Player State Machine **/
 		private PlayerStateMachine stateMachine;
@@ -64,6 +68,8 @@ namespace Garage.Controller
 
 		private void Awake()
 		{
+			interactableHits = new Collider[5];
+
 			animator = GetComponent<Animator>();
 			rigid = GetComponent<Rigidbody>();
 			capsule = GetComponent<CapsuleCollider>();
@@ -104,7 +110,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void TryStartInteract()
 		{
-			if (!isDetectInteractable) return;
+			if (recentlyDetectedProp == null) return;
 
 			if (GameManagerEx.Instance.IsDay)
 			{
@@ -141,6 +147,17 @@ namespace Garage.Controller
 				BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
 				currentOwningProp.OnEndInteraction(transform);
 				currentOwningProp = null;
+			}
+		}
+		
+		public void TryStartFix()
+		{
+			if (currentFixablePart == null) return;
+
+			// TODO - 타이어 넣는건 여기서 예외처리 해야될듯
+			if (currentFixablePart.IsAbleToInteract(currentOwningProp))
+			{
+				stateMachine.ChangeState(interactState);
 			}
 		}
 
@@ -191,26 +208,32 @@ namespace Garage.Controller
 		/// <summary>
 		/// Player의 forward 근처의 물체를 탐지합니다.
 		/// </summary>
-		public void DrawRay()
+		public void DetectInteractables()
 		{
-			RaycastHit hit;
+			Vector3 boxSize = new Vector3(boxWidth, boxHeight, boxWidth);
+			Vector3 boxCenter = transform.position + transform.forward * (boxSize.z / 2f + 0.5f) + new Vector3(0f, boxSize.y/2, 0f);
+
 			int targetLayer = Constants.LAYER_INTERACTABLE;
+			int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.5f, interactableHits, transform.rotation, targetLayer);
 
-			// HACK - Raycast로 못찾는게 많을듯. overlap으로 변경 필요
-			if (UnityEngine.Physics.Raycast(transform.position + new Vector3(0f, .1f, 0f), transform.forward, out hit, interactRayLength, targetLayer))
+			recentlyDetectedProp = null;
+			currentFixablePart = null;
+			// TODO - 가장 위치 가까운애 가져와야될듯
+			for (int i = 0; i < hitCount; i++)
 			{
-				isDetectInteractable = true;
-				recentlyDetectedProp = hit.transform.GetComponent<OwnableProp>();
-			}
-			else
-			{
-				isDetectInteractable = false;
-				recentlyDetectedProp = null;
+				if (currentOwningProp != null && interactableHits[i].GetComponent<OwnableProp>() == currentOwningProp) 
+					continue;
+
+				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
+					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
+
+				if (currentFixablePart == null && interactableHits[i].GetComponent<CarPartBase>() != null
+					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
+					currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
 			}
 
-			Debug.DrawRay(transform.position + new Vector3(0f, .1f, 0f), transform.forward * interactRayLength, Color.red);
+			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];

@@ -60,8 +60,15 @@ namespace Garage.Controller.StateMachine
 			// End Interact
 			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
-				controller.TryEndInteract();
-				return;
+				if (controller.CurrentFixablePart != null)
+				{
+					controller.TryStartFix();
+				}
+				else
+				{
+					controller.TryEndInteract();
+					return;
+				}
 			}
 
 		}

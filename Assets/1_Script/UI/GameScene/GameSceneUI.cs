@@ -1,23 +1,24 @@
 using Garage.Controller;
-using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.GameScene.Items;
-using Garage.UI.LobbyScene.Items;
 using Garage.Utils;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
     public class GameSceneUI : MonoBehaviour
     {
+        [Header("HUD")]
+        [SerializeField] private TextMeshProUGUI balanceText;
+
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
+
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> NetworkObjectId
@@ -67,6 +68,9 @@ namespace Garage.UI.GameScene
             else Debug.Log($"Key \"{carPart}\" is not in Dictionary");
         }
 
-
+        public void OnBalancedChanged(int prev, int balance)
+        {
+            balanceText.text = balance.ToString();
+        }
 	}
 }
