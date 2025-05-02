@@ -9,7 +9,8 @@ namespace Garage.Props
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 
 		protected PlayerController controller;
-		protected Vector3 gridPosition= Vector3.zero;
+
+		protected NetworkVariable<Vector3> gridPosition = new();
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
@@ -88,7 +89,7 @@ namespace Garage.Props
 		public void SetGridPosition(Vector3 pos)
 		{
 			transform.position = pos;
-			gridPosition = pos;
+			gridPosition.Value = pos;
 		}
 	}
 }
