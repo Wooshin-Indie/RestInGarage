@@ -46,8 +46,8 @@ namespace Garage.Props
 			}
 			else
 			{
-				UpdatePlayerPositionServerRPC(transform.position, NetworkManager.Singleton.LocalClientId);
-				UpdatePlayerRotateServerRPC(transform.rotation, NetworkManager.Singleton.LocalClientId);
+				UpdatePropPositionServerRPC(transform.position, NetworkManager.Singleton.LocalClientId);
+				UpdatePropRotateServerRPC(transform.rotation, NetworkManager.Singleton.LocalClientId);
 				UpdatePlayerVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
 			}
 		}

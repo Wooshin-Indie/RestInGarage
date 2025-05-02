@@ -150,6 +150,10 @@ namespace Garage.Controller
 			}
 		}
 		
+		/// <summary>
+		/// 수리를 시작할 때 호출
+		/// 
+		/// </summary>
 		public void TryStartFix()
 		{
 			if (currentFixablePart == null) return;

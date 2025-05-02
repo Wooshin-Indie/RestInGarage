@@ -128,9 +128,11 @@ namespace Garage.Manager
 			// HACK - 랜덤으로 바꾸기
 			GameObject tmpGo = Instantiate(tireRack, Vector3.zero, Quaternion.identity);
 			tmpGo.GetComponent<NetworkObject>().Spawn();
+			tmpGo.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 0f));
 
 			GameObject tmpGo2 = Instantiate(oilPump, new Vector3(0f, 0f, 5f), Quaternion.identity);
 			tmpGo2.GetComponent<NetworkObject>().Spawn();
+			tmpGo2.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 5f));
 
 			ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
 				tmpGo.GetComponent<OwnableProp>());
@@ -251,9 +253,11 @@ namespace Garage.Manager
 
 
 			Vector2Int centerOffset = new Vector2Int((placeSize.x - 1) / 2, (placeSize.y - 1) / 2);
+
 			Vector3 forward = playerTransform.forward;
 			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
-			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset);
+			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset
+				  + new Vector3(placeSize.x %2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
 
 			for (int t = 0; t < gridTiles.Count; t++)
 			{
@@ -293,6 +297,29 @@ namespace Garage.Manager
 					lastAppliedMaterial = previewDisableMaterial;
 				}
 			}
+		}
+
+		public Vector3 GetBuildingPosition(ulong networkId)
+		{
+			int count = 0;
+			Vector3 sumPos = Vector3.zero;
+			for (int t = 0; t < gridTiles.Count; t++)
+			{
+				for(int i = 0; i < gridTiles[t].GetLength(0); i++)
+				{
+					for (int j = 0; j < gridTiles[t].GetLength(1); j++)
+					{
+						if (gridTiles[t][i, j].prop != null && gridTiles[t][i,j].prop.GetComponent<NetworkObject>().NetworkObjectId == networkId)
+						{
+							count++;
+							sumPos += gridTiles[t][i, j].transform.position;
+						}
+					}
+				}
+			}
+
+			if (count == 0) return Vector3.zero;
+			return sumPos / count;
 		}
 
 		private Vector2Int WorldToGrid(Vector3 pos)

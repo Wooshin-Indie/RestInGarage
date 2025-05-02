@@ -1,6 +1,7 @@
 using Garage.Props;
 using Unity.Netcode;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace Garage.Manager
 {
@@ -101,7 +102,7 @@ namespace Garage.Manager
 				Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
 				int rotation = wheelRotate;
 
-				prop.transform.position = position;
+				prop.SetGridPosition(position);
 				prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
 
 				TryPlaceResultClientRpc(true, propNetId, position, rotation);
@@ -122,7 +123,7 @@ namespace Garage.Manager
 			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			var prop = obj.GetComponent<OwnableProp>();
 
-			prop.transform.position = pos;
+			prop.SetGridPosition(pos);
 			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
 		}
 	}

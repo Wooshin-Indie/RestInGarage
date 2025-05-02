@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6343241022d168147b6ad1e7a8870acd, type: 3}
-  m_Name: 0_ItemProp
+  m_Name: 0_TireProp
   m_EditorClassIdentifier: 
   itemID: 0
-  itemName: ItemProp
-  price: 0
+  itemName: TireProp
+  buyPrice: 0
+  sellPrice: 0

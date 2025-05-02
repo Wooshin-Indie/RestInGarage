@@ -16,6 +16,7 @@ namespace Garage.Utils
         None = -1,
         Tire,
         Oilgun,
+        Wrench,
     }
 
     public enum VehicleDirection

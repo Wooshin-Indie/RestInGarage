@@ -1,5 +1,6 @@
 using Garage.Utils;
 using System;
+using UnityEngine;
 
 namespace Garage.Structs
 {
@@ -10,6 +11,7 @@ namespace Garage.Structs
         {
             Array values = Enum.GetValues(typeof(CarParts));
             isBroken = 0; // isBroken에 부품들(CarParts) 상태를 비트마스킹
+            hasTire = 0;
             int count = UnityEngine.Random.Range(1, 4); // 고장날 CarPart 개수
 
             while (count > 0)
@@ -21,8 +23,41 @@ namespace Garage.Structs
                     count--;
                 }
             }
+
+            progress = new float[values.Length];
         }
 
         public int isBroken; // CarParts 상태를 LSB부터 비트마스킹
+        private int hasTire;
+        private float[] progress;
+
+        public int HasTire { get => hasTire; set => hasTire = value; }
+        public float[] Progress { get => progress; set => progress = value; }
+
+        public bool IsTireEmpty(CarParts part)
+        {
+            return ((hasTire & (1<<(int)part)) == 0);
+
+		}
+        public bool IsBroken(CarParts part)
+        {
+            return (isBroken & (1 << (int)part)) != 0;
+        }
+        public float GetProgress(CarParts part)
+        {
+            if ((isBroken & (1 << (int)part)) == 0) return float.MaxValue;
+            return progress[(int)part];
+        }
+        public bool AddProgress(CarParts part, float gage)
+		{
+			progress[(int)part] += gage;
+            Debug.Log($"{part} : {progress[(int)part]}");
+			return progress[(int)part] > 1f - .01f;
+        }
+        public void AddTire(CarParts part)
+		{
+			hasTire |= 1 << (int)part;
+		}
+
     }
 }

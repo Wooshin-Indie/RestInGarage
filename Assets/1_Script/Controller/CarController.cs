@@ -33,6 +33,7 @@ namespace Garage.Controller
 		private bool isBypassing = false;
 		private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[10];
+
 		private CarStatus carStatus;
 		public CarStatus CarStatus { get => carStatus; }
 
@@ -122,11 +123,79 @@ namespace Garage.Controller
 		
 		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
 		{
-			Debug.Log("Interact Complete : " + part + ", " + prop.name);
+			switch (part)
+			{
+				case CarParts.FLT:
+				case CarParts.FRT:
+				case CarParts.RLT:
+				case CarParts.RRT:
+					if (carStatus.IsTireEmpty(part) && prop is TireProp)
+					{
+						AddTireServerRPC(part);
+					}
+					else if(!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
+					{
+						ProgressFixGageServerRPC(part, Time.deltaTime * .3f);
+					}
+					break;
+				case CarParts.Oil:
+				case CarParts.Engine:
+					ProgressFixGageServerRPC(part, Time.deltaTime * .3f);
+					break;
+			}
 		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void AddTireServerRPC(CarParts part)
+		{
+			carStatus.AddTire(part);
+			AddTireClientRPC(part);
+		}
+		[ClientRpc]
+		private void AddTireClientRPC(CarParts part)
+		{
+			if (IsHost) return;
+			carStatus.AddTire(part);
+		}
+
+
+
+		[ServerRpc(RequireOwnership = false)]
+		private void ProgressFixGageServerRPC(CarParts part, float gage)
+		{
+			if (carStatus.AddProgress(part, gage))
+			{
+				RepairingBrokenPartClientRPC(part);
+			}
+
+			SyncCarProgressClientRPC(part, carStatus.GetProgress(part));
+		}
+		[ClientRpc]
+		private void SyncCarProgressClientRPC(CarParts part, float progress)
+		{
+			if (IsHost) return;
+
+			carStatus.Progress[(int)part] = progress;
+		}
+
 		public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
-			return true;
+			if (carStatus.GetProgress(part) > 1f - Mathf.Epsilon) return false;
+
+			switch (part)
+			{
+				case CarParts.FLT:
+				case CarParts.FRT:
+				case CarParts.RLT:
+				case CarParts.RRT:
+					return (prop is TireProp || prop is WrenchProp);
+				case CarParts.Oil:
+					return prop is OilPump;
+				case CarParts.Engine:
+					return prop is WrenchProp;
+			}
+
+			return false;
 		}
 		private bool IsObstacleAhead(out float hitDistance)
 		{

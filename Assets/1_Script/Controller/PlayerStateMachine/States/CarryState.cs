@@ -14,6 +14,12 @@ namespace Garage.Controller.StateMachine
 		{
 			base.Enter();
 
+			if(controller.CurrentOwningProp == null)
+			{
+				stateMachine.ChangeState(controller.idleState);
+				return;
+			}
+
 			if (controller.CurrentOwningProp.IsCarry)
 			{
 				controller.SetAnimParam((int)AnimationType.Carry, true);
