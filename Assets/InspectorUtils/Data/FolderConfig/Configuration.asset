@@ -49,3 +49,7 @@ MonoBehaviour:
     ColorType: 9
     IconType: 7
     CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}
+  - Path: Assets/Resources
+    ColorType: 10
+    IconType: -1
+    CustomFolderColor: {r: 1, g: 1, b: 1, a: 1}

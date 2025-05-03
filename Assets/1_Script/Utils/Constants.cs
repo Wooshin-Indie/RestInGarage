@@ -14,6 +14,8 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_SPEED = "Speed";
         public static readonly string ANIM_PARAM_CARRY = "IsCarry";
         public static readonly string ANIM_PARAM_OIL = "IsOil";
+        public static readonly string ANIM_PARAM_PLACE = "IsPlace";
+        public static readonly string ANIM_PARAM_TIREPUT = "IsTirePut";
 
         public static readonly int MAX_PLAYERS = 4;
         public static readonly string NAME_SERVER = "_SERVER";

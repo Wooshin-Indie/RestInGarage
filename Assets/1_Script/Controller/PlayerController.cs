@@ -39,7 +39,7 @@ namespace Garage.Controller
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[3];
+		private int[] animIDs = new int[5];
 
 		
 		private bool isAbleToMove = true;
@@ -85,6 +85,8 @@ namespace Garage.Controller
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
+			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
+			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
 		}
 
 		public override void OnNetworkSpawn()
@@ -140,6 +142,7 @@ namespace Garage.Controller
 				else
 				{
 					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Place);
 				}
 			}
 			else
@@ -158,10 +161,15 @@ namespace Garage.Controller
 		{
 			if (currentFixablePart == null) return;
 
-			// TODO - 타이어 넣는건 여기서 예외처리 해야될듯
 			if (currentFixablePart.IsAbleToInteract(currentOwningProp))
 			{
-				stateMachine.ChangeState(interactState);
+				if(currentOwningProp is TireProp)
+				{
+					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Tire);
+				}
+				else
+					stateMachine.ChangeState(interactState);
 			}
 		}
 
@@ -256,6 +264,16 @@ namespace Garage.Controller
 			if (!IsOwner) return;
 
 			currentOwningProp.OnEndInteraction(transform);
+			currentOwningProp = null;
+			isAbleToMove = true;
+		}
+
+		private void OnPutTire()
+		{
+			if (!IsOwner) return;
+
+			currentFixablePart?.Interact(this, currentOwningProp);
+
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
