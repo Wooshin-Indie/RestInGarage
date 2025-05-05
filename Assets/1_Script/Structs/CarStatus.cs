@@ -34,6 +34,11 @@ namespace Garage.Structs
         public int HasTire { get => hasTire; set => hasTire = value; }
         public float[] Progress { get => progress; set => progress = value; }
 
+        public bool IsProgressFull(CarParts part)
+        {
+            return progress[(int)part] > 1f;
+        }
+
         public bool IsTireEmpty(CarParts part)
         {
             return ((hasTire & (1<<(int)part)) == 0);
@@ -52,7 +57,7 @@ namespace Garage.Structs
 		{
 			progress[(int)part] += gage;
             Debug.Log($"{part} : {progress[(int)part]}");
-			return progress[(int)part] > 1f - .01f;
+			return IsProgressFull(part);
         }
         public void AddTire(CarParts part)
 		{

@@ -135,12 +135,12 @@ namespace Garage.Controller
 					}
 					else if(!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime * .3f);
+						ProgressFixGageServerRPC(part, Time.deltaTime * .3f, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
 				case CarParts.Oil:
 				case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime * .3f);
+					ProgressFixGageServerRPC(part, Time.deltaTime * .3f, NetworkManager.Singleton.LocalClientId);
 					break;
 			}
 		}
@@ -161,26 +161,44 @@ namespace Garage.Controller
 
 
 		[ServerRpc(RequireOwnership = false)]
-		private void ProgressFixGageServerRPC(CarParts part, float gage)
+		private void ProgressFixGageServerRPC(CarParts part, float gage, ulong networkId)
 		{
 			if (carStatus.AddProgress(part, gage))
 			{
 				RepairingBrokenPartClientRPC(part);
 			}
 
-			SyncCarProgressClientRPC(part, carStatus.GetProgress(part));
+			UIManager.Game.OnCarPartFixed(part, carStatus.Progress[(int)part], 1f);
+			if (carStatus.IsProgressFull(part))
+			{
+				var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
+				pc.StateMachine.ChangeState(pc.carryState);
+				Debug.Log("Change State");
+			}
+			SyncCarProgressClientRPC(part, carStatus.GetProgress(part), networkId);
 		}
 		[ClientRpc]
-		private void SyncCarProgressClientRPC(CarParts part, float progress)
+		private void SyncCarProgressClientRPC(CarParts part, float progress, ulong networkId)
 		{
 			if (IsHost) return;
 
 			carStatus.Progress[(int)part] = progress;
+
+			if (networkId == NetworkManager.Singleton.LocalClientId) 
+			{
+				UIManager.Game.OnCarPartFixed(part, carStatus.Progress[(int)part], 1f);
+				if (carStatus.IsProgressFull(part))
+				{
+					var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
+					pc.StateMachine.ChangeState(pc.carryState);
+					Debug.Log("Change State");
+				}
+			}
 		}
 
 		public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
-			if (carStatus.GetProgress(part) > 1f - Mathf.Epsilon) return false;
+			if (carStatus.IsProgressFull(part)) return false;
 
 			switch (part)
 			{

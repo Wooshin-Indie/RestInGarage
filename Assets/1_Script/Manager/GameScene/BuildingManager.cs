@@ -108,6 +108,7 @@ namespace Garage.Manager
 		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
 		[SerializeField] private GameObject tireRack;
 		[SerializeField] private GameObject oilPump;
+		[SerializeField] private GameObject wrench;
 
 
 		// 스테이지 시작 시 구매하지 않은 빌딩 삭제
@@ -134,10 +135,18 @@ namespace Garage.Manager
 			tmpGo2.GetComponent<NetworkObject>().Spawn();
 			tmpGo2.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 5f));
 
+			GameObject tmpGo3 = Instantiate(wrench, new Vector3(0f, 0f, 10f), Quaternion.identity);
+			tmpGo3.GetComponent<NetworkObject>().Spawn();
+			tmpGo3.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 10f));
+
+
 			ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
 				tmpGo.GetComponent<OwnableProp>());
 
 			ItemDictionary.Add(tmpGo2.GetComponent<NetworkObject>().NetworkObjectId,
+				tmpGo2.GetComponent<OwnableProp>());
+
+			ItemDictionary.Add(tmpGo3.GetComponent<NetworkObject>().NetworkObjectId,
 				tmpGo2.GetComponent<OwnableProp>());
 		}
 

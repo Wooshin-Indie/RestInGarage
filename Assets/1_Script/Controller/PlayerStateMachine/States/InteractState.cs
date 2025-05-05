@@ -1,4 +1,5 @@
 using Garage.Manager;
+using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,11 +13,16 @@ namespace Garage.Controller.StateMachine
 		public override void Enter()
 		{
 			base.Enter();
+
 		}
 
 		public override void Exit()
 		{
 			base.Exit();
+
+			controller.SetAnimParam((int)AnimationType.Crouch, false);
+			controller.SetAnimParam((int)AnimationType.Oil, false);
+			controller.SetAnimParam((int)AnimationType.Hammer, false);
 		}
 
 		public override void HandleInput()

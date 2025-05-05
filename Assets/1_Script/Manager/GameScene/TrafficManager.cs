@@ -3,7 +3,6 @@ using IUtil;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Garage.UI.GameScene;
 using Unity.Netcode;
 
 namespace Garage.Manager

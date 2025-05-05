@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
-using UnityEditor.AnimatedValues;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
@@ -16,8 +16,15 @@ namespace Garage.UI.GameScene
         [Header("HUD")]
         [SerializeField] private TextMeshProUGUI balanceText;
 
+
+        [SerializeField] private TextMeshProUGUI carPartName;
+        [SerializeField] private Slider carPartProgress;
+
+
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
+
+
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -72,5 +79,13 @@ namespace Garage.UI.GameScene
         {
             balanceText.text = balance.ToString();
         }
+
+        // HACK - 임시로 만들어둠
+        // 완성되면 꺼지는거나 Tire끼웠을때도 뭐 띄워야됨
+        public void OnCarPartFixed(CarParts carPart, float progress, float maxProgress)
+        {
+            carPartName.text = carPart.ToString();
+            carPartProgress.value = progress / maxProgress;
+		}
 	}
 }

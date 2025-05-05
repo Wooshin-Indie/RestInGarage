@@ -39,7 +39,7 @@ namespace Garage.Controller
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[5];
+		private int[] animIDs = new int[7];
 
 		
 		private bool isAbleToMove = true;
@@ -87,6 +87,8 @@ namespace Garage.Controller
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
+			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
+			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
 		}
 
 		public override void OnNetworkSpawn()
@@ -169,7 +171,24 @@ namespace Garage.Controller
 					SetAnimParam((int)AnimationType.Tire);
 				}
 				else
+				{
+					switch (currentFixablePart.PartType)
+					{
+						case CarParts.FLT:
+						case CarParts.RLT:
+						case CarParts.FRT:
+						case CarParts.RRT:
+							SetAnimParam((int)AnimationType.Crouch, true);
+							break;
+						case CarParts.Oil:
+							SetAnimParam((int)AnimationType.Oil, true);
+							break;
+						case CarParts.Engine:
+							SetAnimParam((int)AnimationType.Hammer, true);
+							break;
+					}
 					stateMachine.ChangeState(interactState);
+				}
 			}
 		}
 
@@ -217,11 +236,14 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
+		private float fixablePartDistance = 100f;
 		/// <summary>
 		/// Player의 forward 근처의 물체를 탐지합니다.
 		/// </summary>
 		public void DetectInteractables()
 		{
+			fixablePartDistance = 1000f;
+
 			Vector3 boxSize = new Vector3(boxWidth, boxHeight, boxWidth);
 			Vector3 boxCenter = transform.position + transform.forward * (boxSize.z / 2f + 0.5f) + new Vector3(0f, boxSize.y/2, 0f);
 
@@ -230,7 +252,7 @@ namespace Garage.Controller
 
 			recentlyDetectedProp = null;
 			currentFixablePart = null;
-			// TODO - 가장 위치 가까운애 가져와야될듯
+
 			for (int i = 0; i < hitCount; i++)
 			{
 				if (currentOwningProp != null && interactableHits[i].GetComponent<OwnableProp>() == currentOwningProp) 
@@ -239,9 +261,15 @@ namespace Garage.Controller
 				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
 					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
 
-				if (currentFixablePart == null && interactableHits[i].GetComponent<CarPartBase>() != null
+				if (interactableHits[i].GetComponent<CarPartBase>() != null
 					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
-					currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
+				{
+					if (transform.position.ManhatanDistance(interactableHits[i].transform.position) < fixablePartDistance)
+					{
+						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
+						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
+					}
+				}
 			}
 
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
@@ -273,10 +301,22 @@ namespace Garage.Controller
 			if (!IsOwner) return;
 
 			currentFixablePart?.Interact(this, currentOwningProp);
-
+			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
+		[ServerRpc(RequireOwnership = false)]
+		private void DespawnPropServerRPC(ulong networkId)
+		{
+			if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkId, out var networkObject))
+			{
+				if (networkObject.IsSpawned)
+				{
+					networkObject.Despawn(true);
+				}
+			}
+		}
+
 		#endregion
 	}
 }
