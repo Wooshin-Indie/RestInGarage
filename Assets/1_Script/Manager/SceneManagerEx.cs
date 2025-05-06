@@ -20,6 +20,8 @@ namespace Garage.Manager
 			UnloadCurrentSceneServer();
 			LoadSceneServer(sceneEnum);
 			UIManager.Instance.OnSceneChanged(sceneEnum);
+			SunManager.Instance.OnSceneChanged(sceneEnum);
+			BuildingManager.Instance.OnSceneChanged(sceneEnum);
 		}
 
 		public void LoadSceneServer(SceneEnum sceneEnum)

@@ -2,6 +2,7 @@ using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
+using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Garage.Controller
 		private Rigidbody rigid;
 		private CapsuleCollider capsule;
 
+		public Rigidbody Rigid => rigid;
+
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
 		[SerializeField] private Transform cameraTransform;
@@ -30,14 +33,15 @@ namespace Garage.Controller
 		[SerializeField] private float carrySpeed;
 
 		[FoldoutGroup("Ray Settings")]
-		[SerializeField] private float interactRayLength;
+		[SerializeField] private float boxWidth;
+		[SerializeField] private float boxHeight;
 
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[3];
+		private int[] animIDs = new int[7];
 
 		
 		private bool isAbleToMove = true;
@@ -45,13 +49,15 @@ namespace Garage.Controller
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
 
-		private bool isDetectInteractable = false;
+		private Collider[] interactableHits = null;
+		
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
+		private CarPartBase currentFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
 		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
-
+		public CarPartBase CurrentFixablePart => currentFixablePart;
 
 		/** Player State Machine **/
 		private PlayerStateMachine stateMachine;
@@ -64,6 +70,8 @@ namespace Garage.Controller
 
 		private void Awake()
 		{
+			interactableHits = new Collider[5];
+
 			animator = GetComponent<Animator>();
 			rigid = GetComponent<Rigidbody>();
 			capsule = GetComponent<CapsuleCollider>();
@@ -79,6 +87,10 @@ namespace Garage.Controller
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
+			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
+			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
+			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
+			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
 		}
 
 		public override void OnNetworkSpawn()
@@ -104,7 +116,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void TryStartInteract()
 		{
-			if (!isDetectInteractable) return;
+			if (recentlyDetectedProp == null) return;
 
 			if (GameManagerEx.Instance.IsDay)
 			{
@@ -134,6 +146,7 @@ namespace Garage.Controller
 				else
 				{
 					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Place);
 				}
 			}
 			else
@@ -141,6 +154,43 @@ namespace Garage.Controller
 				BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
 				currentOwningProp.OnEndInteraction(transform);
 				currentOwningProp = null;
+			}
+		}
+		
+		/// <summary>
+		/// 수리를 시작할 때 호출
+		/// 
+		/// </summary>
+		public void TryStartFix()
+		{
+			if (currentFixablePart == null) return;
+
+			if (currentFixablePart.IsAbleToInteract(currentOwningProp))
+			{
+				if(currentOwningProp is TireProp)
+				{
+					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Tire);
+				}
+				else
+				{
+					switch (currentFixablePart.PartType)
+					{
+						case CarParts.FLT:
+						case CarParts.RLT:
+						case CarParts.FRT:
+						case CarParts.RRT:
+							SetAnimParam((int)AnimationType.Crouch, true);
+							break;
+						case CarParts.Oil:
+							SetAnimParam((int)AnimationType.Oil, true);
+							break;
+						case CarParts.Engine:
+							SetAnimParam((int)AnimationType.Hammer, true);
+							break;
+					}
+					stateMachine.ChangeState(interactState);
+				}
 			}
 		}
 
@@ -188,29 +238,44 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
+		private float fixablePartDistance = 100f;
 		/// <summary>
 		/// Player의 forward 근처의 물체를 탐지합니다.
 		/// </summary>
-		public void DrawRay()
+		public void DetectInteractables()
 		{
-			RaycastHit hit;
+			fixablePartDistance = 1000f;
+
+			Vector3 boxSize = new Vector3(boxWidth, boxHeight, boxWidth);
+			Vector3 boxCenter = transform.position + transform.forward * (boxSize.z / 2f + 0.5f) + new Vector3(0f, boxSize.y/2, 0f);
+
 			int targetLayer = Constants.LAYER_INTERACTABLE;
+			int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.5f, interactableHits, transform.rotation, targetLayer);
 
-			// HACK - Raycast로 못찾는게 많을듯. overlap으로 변경 필요
-			if (UnityEngine.Physics.Raycast(transform.position + new Vector3(0f, .1f, 0f), transform.forward, out hit, interactRayLength, targetLayer))
+			recentlyDetectedProp = null;
+			currentFixablePart = null;
+
+			for (int i = 0; i < hitCount; i++)
 			{
-				isDetectInteractable = true;
-				recentlyDetectedProp = hit.transform.GetComponent<OwnableProp>();
-			}
-			else
-			{
-				isDetectInteractable = false;
-				recentlyDetectedProp = null;
+				if (currentOwningProp != null && interactableHits[i].GetComponent<OwnableProp>() == currentOwningProp) 
+					continue;
+
+				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
+					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
+
+				if (interactableHits[i].GetComponent<CarPartBase>() != null
+					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
+				{
+					if (transform.position.ManhatanDistance(interactableHits[i].transform.position) < fixablePartDistance)
+					{
+						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
+						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
+					}
+				}
 			}
 
-			Debug.DrawRay(transform.position + new Vector3(0f, .1f, 0f), transform.forward * interactRayLength, Color.red);
+			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
@@ -232,6 +297,28 @@ namespace Garage.Controller
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
+
+		private void OnPutTire()
+		{
+			if (!IsOwner) return;
+
+			currentFixablePart?.Interact(this, currentOwningProp);
+			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
+			currentOwningProp = null;
+			isAbleToMove = true;
+		}
+		[ServerRpc(RequireOwnership = false)]
+		private void DespawnPropServerRPC(ulong networkId)
+		{
+			if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkId, out var networkObject))
+			{
+				if (networkObject.IsSpawned)
+				{
+					networkObject.Despawn(true);
+				}
+			}
+		}
+
 		#endregion
 	}
 }

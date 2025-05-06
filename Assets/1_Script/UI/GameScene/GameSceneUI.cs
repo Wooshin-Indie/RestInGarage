@@ -1,10 +1,7 @@
 using Garage.Controller;
-using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.GameScene.Items;
-using Garage.UI.LobbyScene.Items;
 using Garage.Utils;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -16,8 +13,19 @@ namespace Garage.UI.GameScene
 {
     public class GameSceneUI : MonoBehaviour
     {
+        [Header("HUD")]
+        [SerializeField] private TextMeshProUGUI balanceText;
+
+
+        [SerializeField] private TextMeshProUGUI carPartName;
+        [SerializeField] private Slider carPartProgress;
+
+
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
+
+
+
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> NetworkObjectId
@@ -67,6 +75,17 @@ namespace Garage.UI.GameScene
             else Debug.Log($"Key \"{carPart}\" is not in Dictionary");
         }
 
+        public void OnBalancedChanged(int prev, int balance)
+        {
+            balanceText.text = balance.ToString();
+        }
 
+        // HACK - 임시로 만들어둠
+        // 완성되면 꺼지는거나 Tire끼웠을때도 뭐 띄워야됨
+        public void OnCarPartFixed(CarParts carPart, float progress, float maxProgress)
+        {
+            carPartName.text = carPart.ToString();
+            carPartProgress.value = progress / maxProgress;
+		}
 	}
 }

@@ -155,6 +155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  ItemData: {fileID: 11400000, guid: 3f55df8fe5169d84c90338cf4791c0ee, type: 2}
   isCarry: 1
   height: 0.5
 --- !u!64 &7020740912526171379

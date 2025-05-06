@@ -60,11 +60,13 @@ namespace Garage.Manager
 			if (IsDay)
 			{
 				BuildingManager.Instance.OnStageStart();
+				SunManager.Instance.OnChangedToDay();
 			}
 			else
 			{
 				BuildingManager.Instance.OnStageEnd();
-			}
+                SunManager.Instance.OnChangedToNight();
+            }
 		}
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)

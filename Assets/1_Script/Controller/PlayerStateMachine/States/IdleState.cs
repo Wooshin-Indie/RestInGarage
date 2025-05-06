@@ -35,8 +35,18 @@ namespace Garage.Controller.StateMachine
 			// Interact
 			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
-				controller.TryStartInteract();
+				if(controller.RecentlyDetectedProp != null)
+				{
+					controller.TryStartInteract();
+					return;
+				}
+				if (controller.CurrentFixablePart != null)
+				{
+					controller.TryStartFix();
+					return;
+				}
 			}
+
 		}
 
 		public override void PhysicsUpdate()

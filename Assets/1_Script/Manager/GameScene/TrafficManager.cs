@@ -3,7 +3,6 @@ using IUtil;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Garage.UI.GameScene;
 using Unity.Netcode;
 
 namespace Garage.Manager
@@ -49,9 +48,10 @@ namespace Garage.Manager
 			VehicleSpawnPoint sp = Instantiate(spawnPointPrefab, new Vector3(-10, 0, laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
 			sp.SetSpawnPoint(Utils.VehicleDirection.Down);
 			spawnPoints.Add(sp);
-			VehicleSpawnPoint sp1 = Instantiate(spawnPointPrefab, new Vector3(0, 0, -laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
-			sp1.SetSpawnPoint(Utils.VehicleDirection.Up);
-			spawnPoints.Add(sp1);
+
+			//VehicleSpawnPoint sp1 = Instantiate(spawnPointPrefab, new Vector3(0, 0, -laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
+			//sp1.SetSpawnPoint(Utils.VehicleDirection.Up);
+			//spawnPoints.Add(sp1);
 		}
 
 		/// <summary>
