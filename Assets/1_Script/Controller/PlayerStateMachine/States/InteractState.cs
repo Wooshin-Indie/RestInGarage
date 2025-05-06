@@ -34,6 +34,8 @@ namespace Garage.Controller.StateMachine
 		{
 			base.LogicUpdate();
 
+			controller.Rigid.linearVelocity = Vector3.zero;
+
 			if (controller.CurrentFixablePart == null)
 			{
 				stateMachine.ChangeState(controller.carryState);

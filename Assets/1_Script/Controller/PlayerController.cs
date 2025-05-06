@@ -21,6 +21,8 @@ namespace Garage.Controller
 		private Rigidbody rigid;
 		private CapsuleCollider capsule;
 
+		public Rigidbody Rigid => rigid;
+
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
 		[SerializeField] private Transform cameraTransform;

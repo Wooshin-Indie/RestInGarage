@@ -6,6 +6,7 @@ using Garage.Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
+using System;
 
 namespace Garage.Controller
 {
@@ -175,6 +176,7 @@ namespace Garage.Controller
 				pc.StateMachine.ChangeState(pc.carryState);
 				Debug.Log("Change State");
 			}
+
 			SyncCarProgressClientRPC(part, carStatus.GetProgress(part), networkId);
 		}
 		[ClientRpc]
@@ -191,13 +193,13 @@ namespace Garage.Controller
 				{
 					var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
 					pc.StateMachine.ChangeState(pc.carryState);
-					Debug.Log("Change State");
 				}
 			}
 		}
 
 		public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
+			if (!carStatus.IsBroken(part)) return false;
 			if (carStatus.IsProgressFull(part)) return false;
 
 			switch (part)
@@ -301,6 +303,22 @@ namespace Garage.Controller
 		private void RepairingBrokenPartClientRPC(CarParts carPart)
 		{
             UIManager.Game.RemoveCarStatusUI(this, carPart);
+			Array array = Enum.GetValues(typeof(CarParts));
+			bool isComplete = true;
+			if (IsHost)
+			{
+				for (int i = 0; i < array.Length; i++)
+				{
+					if (!carStatus.IsBroken((CarParts)i)) continue;
+					if (!carStatus.IsProgressFull((CarParts)i))
+					{
+						isComplete = false;
+						break;
+					};
+				}
+
+				if (isComplete) isBroken = false;
+			}
         }
     }
 }
