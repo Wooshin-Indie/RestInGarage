@@ -14,6 +14,12 @@ namespace Garage.Controller.StateMachine
 		{
 			base.Enter();
 
+			if(controller.CurrentOwningProp == null)
+			{
+				stateMachine.ChangeState(controller.idleState);
+				return;
+			}
+
 			if (controller.CurrentOwningProp.IsCarry)
 			{
 				controller.SetAnimParam((int)AnimationType.Carry, true);
@@ -60,8 +66,15 @@ namespace Garage.Controller.StateMachine
 			// End Interact
 			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
-				controller.TryEndInteract();
-				return;
+				if (controller.CurrentFixablePart != null)
+				{
+					controller.TryStartFix();
+				}
+				else
+				{
+					controller.TryEndInteract();
+					return;
+				}
 			}
 
 		}

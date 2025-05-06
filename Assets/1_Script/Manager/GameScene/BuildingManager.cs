@@ -116,6 +116,7 @@ namespace Garage.Manager
 		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
 		[SerializeField] private GameObject tireRack;
 		[SerializeField] private GameObject oilPump;
+		[SerializeField] private GameObject wrench;
 		[SerializeField] private GameObject shopCar;
         [SerializeField] private GameObject lamps;
         [SerializeField] private List<Light> lightsList;
@@ -175,33 +176,21 @@ namespace Garage.Manager
 		// 스테이지 종료 시 구매할 빌딩 스폰
 		public void OnStageEnd()
 		{
-			SpawnShopProducts();
+			// HACK - 랜덤으로 바꾸기
+			GameObject tmpGo = Instantiate(tireRack, Vector3.zero, Quaternion.identity);
+			tmpGo.GetComponent<NetworkObject>().Spawn();
+			tmpGo.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 0f));
+
+			GameObject tmpGo2 = Instantiate(oilPump, new Vector3(0f, 0f, 5f), Quaternion.identity);
+			tmpGo2.GetComponent<NetworkObject>().Spawn();
+			tmpGo2.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 5f));
+
+			GameObject tmpGo3 = Instantiate(wrench, new Vector3(0f, 0f, 10f), Quaternion.identity);
+			tmpGo3.GetComponent<NetworkObject>().Spawn();
+			tmpGo3.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 10f));
+
 			SpawnNightDecoProps();
             TurnOnLights();
-        }
-
-		private void SpawnShopProducts() // 판매물품 스폰
-		{
-            Vector3 eulRot = new Vector3(0f, -90f, 0f);
-            Quaternion targetRot = Quaternion.Euler(eulRot);
-            // HACK - 랜덤으로 바꾸기
-            GameObject tmpGo = Instantiate(tireRack, new Vector3(-10f, 0f, 8f), targetRot);
-            tmpGo.GetComponent<NetworkObject>().Spawn();
-
-            GameObject tmpGo2 = Instantiate(oilPump, new Vector3(-9f, 0f, 6f), targetRot);
-            tmpGo2.GetComponent<NetworkObject>().Spawn();
-
-            GameObject tmpGo3 = Instantiate(oilPump, new Vector3(-11f, 0f, 6f), targetRot);
-            tmpGo3.GetComponent<NetworkObject>().Spawn();
-
-            ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
-                tmpGo.GetComponent<OwnableProp>());
-
-            ItemDictionary.Add(tmpGo2.GetComponent<NetworkObject>().NetworkObjectId,
-                tmpGo2.GetComponent<OwnableProp>());
-
-            ItemDictionary.Add(tmpGo3.GetComponent<NetworkObject>().NetworkObjectId,
-                tmpGo3.GetComponent<OwnableProp>());
         }
 
 		private void SpawnNightDecoProps()
@@ -324,9 +313,11 @@ namespace Garage.Manager
 
 
 			Vector2Int centerOffset = new Vector2Int((placeSize.x - 1) / 2, (placeSize.y - 1) / 2);
+
 			Vector3 forward = playerTransform.forward;
 			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
-			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset);
+			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset
+				  + new Vector3(placeSize.x %2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
 
 			for (int t = 0; t < gridTiles.Count; t++)
 			{
@@ -366,6 +357,29 @@ namespace Garage.Manager
 					lastAppliedMaterial = previewDisableMaterial;
 				}
 			}
+		}
+
+		public Vector3 GetBuildingPosition(ulong networkId)
+		{
+			int count = 0;
+			Vector3 sumPos = Vector3.zero;
+			for (int t = 0; t < gridTiles.Count; t++)
+			{
+				for(int i = 0; i < gridTiles[t].GetLength(0); i++)
+				{
+					for (int j = 0; j < gridTiles[t].GetLength(1); j++)
+					{
+						if (gridTiles[t][i, j].prop != null && gridTiles[t][i,j].prop.GetComponent<NetworkObject>().NetworkObjectId == networkId)
+						{
+							count++;
+							sumPos += gridTiles[t][i, j].transform.position;
+						}
+					}
+				}
+			}
+
+			if (count == 0) return Vector3.zero;
+			return sumPos / count;
 		}
 
 		private Vector2Int WorldToGrid(Vector3 pos)

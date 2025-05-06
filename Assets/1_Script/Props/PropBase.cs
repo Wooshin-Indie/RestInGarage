@@ -1,10 +1,13 @@
-﻿using Unity.Netcode;
+using Garage.Structs;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
 	public class PropBase : NetworkBehaviour
 	{
+		public ItemData ItemData;
+
 		protected Rigidbody rigid;
 
 		public virtual void Awake()
@@ -17,36 +20,36 @@ namespace Garage.Props
 		[ServerRpc(RequireOwnership = false)]
 		protected void UpdatePlayerVelocityServerRPC(Vector3 velocity, ulong clientId)
 		{
-			UpdatePlayerVelocityClientRPC(velocity, clientId);
+			UpdatePropVelocityClientRPC(velocity, clientId);
 		}
 		[ClientRpc]
-		protected void UpdatePlayerVelocityClientRPC(Vector3 velocity, ulong clientId)
+		protected void UpdatePropVelocityClientRPC(Vector3 velocity, ulong clientId)
 		{
 			if (clientId == NetworkManager.Singleton.LocalClientId) return;
 			rigid.linearVelocity = velocity;
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		protected void UpdatePlayerPositionServerRPC(Vector3 playerPosition, ulong clientId)
+		protected void UpdatePropPositionServerRPC(Vector3 playerPosition, ulong clientId)
 		{
-			UpdatePlayerPositionClientRPC(playerPosition, clientId);
+			UpdatePropPositionClientRPC(playerPosition, clientId);
 		}
 
 		[ClientRpc]
-		protected void UpdatePlayerPositionClientRPC(Vector3 playerPosition, ulong clientId)
+		protected void UpdatePropPositionClientRPC(Vector3 playerPosition, ulong clientId)
 		{
 			if (clientId == NetworkManager.Singleton.LocalClientId) return;
 			rigid.MovePosition(playerPosition);
 		}
 
 		[ServerRpc(RequireOwnership = false)]
-		protected void UpdatePlayerRotateServerRPC(Quaternion playerQuat, ulong clientId)
+		protected void UpdatePropRotateServerRPC(Quaternion playerQuat, ulong clientId)
 		{
-			UpdatePlayerRotateClientRPC(playerQuat, clientId);
+			UpdatePropRotateClientRPC(playerQuat, clientId);
 		}
 
 		[ClientRpc]
-		protected void UpdatePlayerRotateClientRPC(Quaternion playerQuat, ulong clientId)
+		protected void UpdatePropRotateClientRPC(Quaternion playerQuat, ulong clientId)
 		{
 			if (clientId == NetworkManager.Singleton.LocalClientId) return;
 			rigid.MoveRotation(playerQuat);

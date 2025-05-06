@@ -10,6 +10,8 @@ namespace Garage.Props
 
 		protected PlayerController controller;
 
+		protected NetworkVariable<Vector3> gridPosition = new();
+
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
 		public bool IsCarry => isCarry;
@@ -82,6 +84,12 @@ namespace Garage.Props
 		public virtual void OnEndInteraction(Transform transform)
 		{
 			RemoveOwnershipServerRpc();
+		}
+
+		public void SetGridPosition(Vector3 pos)
+		{
+			transform.position = pos;
+			gridPosition.Value = pos;
 		}
 	}
 }

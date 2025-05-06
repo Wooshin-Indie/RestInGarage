@@ -98,6 +98,18 @@ namespace Garage.Controller
 
 		#region Animator RPC
 
+		public void SetAnimParam(int id)
+		{
+			animator.SetTrigger(animIDs[id]);
+			if (IsHost)
+			{
+				ChangeAnimatorParamClientRPC(id);
+			}
+			else
+			{
+				ChangeAnimatorParamServerRPC(id);
+			}
+		}
 		public void SetAnimParam(int id, bool param)
 		{
 			animator.SetBool(animIDs[id], param);
@@ -124,6 +136,11 @@ namespace Garage.Controller
 		}
 
 		[ServerRpc(RequireOwnership = false)]
+		private void ChangeAnimatorParamServerRPC(int id)
+		{
+			ChangeAnimatorParamClientRPC(id);
+		}
+		[ServerRpc(RequireOwnership = false)]
 		private void ChangeAnimatorParamServerRPC(int id, bool param)
 		{
 			ChangeAnimatorParamClientRPC(id, param);
@@ -134,6 +151,12 @@ namespace Garage.Controller
 			ChangeAnimatorParamClientRPC(id, param);
 		}
 
+		[ClientRpc]
+		private void ChangeAnimatorParamClientRPC(int id)
+		{
+			if (IsOwner) return;
+			animator.SetTrigger(animIDs[id]);
+		}
 		[ClientRpc]
 		private void ChangeAnimatorParamClientRPC(int id, bool param)
 		{

@@ -16,7 +16,7 @@ namespace Garage.Controller.StateMachine
         public virtual void HandleInput() { }       // Manage Input in particular state
         public virtual void LogicUpdate()           // Logic Update  
 		{
-            controller.DrawRay();
+            controller.DetectInteractables();
 		}           
         public virtual void PhysicsUpdate()         // Only Physics Update
 		{

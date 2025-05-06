@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using IUtil;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace Garage.Manager
 {
@@ -29,73 +30,66 @@ namespace Garage.Manager
         }
         #endregion
 
-        //서버에서만 관리
-        private float balance;
-        public float Balance { get => balance; }
+        public NetworkVariable<int> Balance = new();
 
-        private void LoadBalance() // Host에서 저장된 값 로드
+		public override void OnNetworkSpawn()
+		{
+            base.OnNetworkSpawn();
+
+            Balance.OnValueChanged += UIManager.Game.OnBalancedChanged;
+            UIManager.Game.OnBalancedChanged(0, Balance.Value);
+		}
+
+        public bool HasEnoughMoney(int money)
         {
-            
+            return Balance.Value <= money;
         }
 
-        [Button]
-        public void TmpInitBal()
+        public bool UseMoney_HostOnly(int pay)
         {
-            SetBalanceServerRPC(0f);
+            if (!IsHost) return false;
+            if (Balance.Value < pay) return false;
+
+            Balance.Value -= pay;
+            return true;
         }
 
-        [Button]
-        public void TmpAddMoney()
-        {
-            EarnMoneyServerRPC(100f);
-        }
+        public void EarnMoney_HostOnly(int money)
+		{
+            if (!IsHost) return;
 
-        [Button]
-        public void TmpSubMoney()
-        {
-            UseMoneyServerRPC(100f);
-        }
+			Balance.Value += money;
+		}
 
-        private void SetBalance(float bal)
+		[Button]
+        public void TmpSetBalance()
         {
-            balance = bal;
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        private void SetBalanceServerRPC(float bal)
-        {
-            SetBalance(bal);
-            Debug.Log("Server Balance: " + balance);
-            SetBalanceClientRPC(bal);
-        }
-
-        [ClientRpc]
-        private void SetBalanceClientRPC(float bal)
-        {
-            if (IsHost) return;
-
-            SetBalance(bal);
-            Debug.Log("Client Balance: " + balance);
+			EarnMoneyServerRPC(100);
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void EarnMoneyServerRPC(float pay)
+        private void SetBalanceServerRPC(int bal)
+		{
+			Balance.Value = bal;
+			Debug.Log("Server Balance: " + Balance.Value);
+        }
+
+
+        [ServerRpc(RequireOwnership = false)]
+        public void EarnMoneyServerRPC(int pay)
         {
-            balance += pay;
-            SetBalanceClientRPC(balance); // 결과만 ClientRPC로 뿌림
-            Debug.Log("Server Balance: " + balance);
+			Balance.Value += pay;
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void UseMoneyServerRPC(float fee)
+        public void UseMoneyServerRPC(int fee)
         {
-            float tmpBal = balance - fee;
+            float tmpBal = Balance.Value - fee;
             if (tmpBal < 0f)
-                Debug.LogError("Exception: not enough balance");
+                Debug.LogWarning("Exception: not enough balance");
             else
             {
-                balance -= fee;
-                SetBalanceClientRPC(balance);
+				Balance.Value -= fee;
             }
         }
     }
