@@ -15,13 +15,12 @@ namespace Garage.Structs
 		{
 			base.Init();
 			SceneEnum = SceneEnum.Main;
-
-			light.intensity = 0f;
+			/*
 			light.transform.rotation = Quaternion.Euler(startRot);
 
 			Sequence seq = DOTween.Sequence();
 
-			seq.AppendInterval(5f); 
+			seq.AppendInterval(10f); 
 
 			seq.Append(light.DOIntensity(1f, 7f));
 			seq.Join(light.transform.DORotate(endRot, 7f));
@@ -29,6 +28,7 @@ namespace Garage.Structs
 			{
 				// TODO - UIManager에서 UI불러오기
 			});
+			*/
 		}
 
 		public override void Clear()

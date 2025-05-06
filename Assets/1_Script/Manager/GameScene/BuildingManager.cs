@@ -1,6 +1,8 @@
 using Garage.Interfaces;
 using Garage.Props;
+using Garage.Utils;
 using IUtil;
+using Steamworks.Data;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -51,6 +53,7 @@ namespace Garage.Manager
 
 		public Dictionary<ulong, OwnableProp> PlacedBuildings = new();
 		public Dictionary<ulong, OwnableProp> ItemDictionary = new();
+		public Dictionary<ulong, GameObject> DecoPropDictionary = new();
 
 		GameObject tmpPreview = null;
 		private Material lastAppliedMaterial = null;
@@ -82,6 +85,11 @@ namespace Garage.Manager
 			PlacedBuildings.Clear();
 		}
 
+		public void SetGrid(Vector2Int origin, Vector2Int size)
+		{
+
+		}
+
 		public void RegisterTile(GridTile tile)
 		{
 			Vector2Int index = Vector2Int.zero;
@@ -109,10 +117,44 @@ namespace Garage.Manager
 		[SerializeField] private GameObject tireRack;
 		[SerializeField] private GameObject oilPump;
 		[SerializeField] private GameObject wrench;
+		[SerializeField] private GameObject shopCar;
+        [SerializeField] private GameObject lamps;
+        [SerializeField] private List<Light> lightsList;
 
+		public void OnSceneChanged(SceneEnum scene)
+		{
+            switch (scene)
+            {
+                case SceneEnum.None:
+                    lamps.SetActive(false);
+                    break;
+                case SceneEnum.Main:
+					lamps.SetActive(false);
+                    break;
+                case SceneEnum.Lobby:
+                    lamps.SetActive(true);
+					TurnOffLights();
+                    break;
+                case SceneEnum.Game:
+                    lamps.SetActive(true);
+                    break;
+            }
+        }
 
-		// 스테이지 시작 시 구매하지 않은 빌딩 삭제
-		public void OnStageStart()
+        private void TurnOffLights()
+        {
+			foreach (Light light in lightsList)
+				light.enabled = false;
+        }
+
+        private void TurnOnLights()
+        {
+            foreach (Light light in lightsList)
+                light.enabled = true;
+        }
+
+        // 스테이지 시작 시 구매하지 않은 빌딩 삭제
+        public void OnStageStart()
 		{
 			foreach(var entry in ItemDictionary)
 			{
@@ -120,8 +162,16 @@ namespace Garage.Manager
 				Destroy(entry.Value.gameObject);
 			}
 
-			ItemDictionary.Clear();
-		}
+            foreach (var entry in DecoPropDictionary)
+            {
+                entry.Value.GetComponent<NetworkObject>().Despawn();
+                Destroy(entry.Value.gameObject);
+            }
+
+            ItemDictionary.Clear();
+			DecoPropDictionary.Clear();
+            TurnOffLights();
+        }
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
 		public void OnStageEnd()
@@ -139,18 +189,19 @@ namespace Garage.Manager
 			tmpGo3.GetComponent<NetworkObject>().Spawn();
 			tmpGo3.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 10f));
 
+			SpawnNightDecoProps();
+            TurnOnLights();
+        }
 
-			ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
-				tmpGo.GetComponent<OwnableProp>());
+		private void SpawnNightDecoProps()
+		{
+            GameObject tmpShop = Instantiate(shopCar, new Vector3(-3.5f, 0f, 8f), Quaternion.Euler(new Vector3(0f, 135f, 0f)));
+            tmpShop.GetComponent<NetworkObject>().Spawn();
+            DecoPropDictionary.Add(tmpShop.GetComponent<NetworkObject>().NetworkObjectId,
+                tmpShop.gameObject);
+        }
 
-			ItemDictionary.Add(tmpGo2.GetComponent<NetworkObject>().NetworkObjectId,
-				tmpGo2.GetComponent<OwnableProp>());
-
-			ItemDictionary.Add(tmpGo3.GetComponent<NetworkObject>().NetworkObjectId,
-				tmpGo2.GetComponent<OwnableProp>());
-		}
-
-		public void TryPlaceBuilding(OwnableProp prop)
+        public void TryPlaceBuilding(OwnableProp prop)
 		{
 			if (tmpPreview != null)
 			{
