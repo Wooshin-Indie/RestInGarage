@@ -23,7 +23,7 @@ namespace Garage.UI.LobbyScene
         [Header("Chating System")]
 		[SerializeField] private int maxMessages = 20;
 		[SerializeField] private Transform chatPanel;
-        [SerializeField] private TMP_InputField chatInputField;
+        //[SerializeField] private TMP_InputField chatInputField;
         [SerializeField] private GameObject chatPrefab;
 
         [Space(20)]
@@ -61,31 +61,31 @@ namespace Garage.UI.LobbyScene
 		}
 
 
-		private void Update()
-		{
-			if (chatInputField.text != "")
-			{
-				if (Input.GetKeyDown(KeyCode.Return))
-				{
-					if (chatInputField.text == " ")
-					{
-						chatInputField.text = "";
-						chatInputField.DeactivateInputField();
-						return;
-					}
-					NetworkTransmission.instance.IWishToSendAChatServerRPC(chatInputField.text, NetworkManager.Singleton.LocalClientId);
-					chatInputField.text = "";
-				}
-			}
-			else
-			{
-				if (Input.GetKeyDown(KeyCode.Return))
-				{
-					chatInputField.ActivateInputField();
-					chatInputField.text = " ";
-				}
-			}
-		}
+		//private void Update()
+		//{
+		//	if (chatInputField.text != "")
+		//	{
+		//		if (Input.GetKeyDown(KeyCode.Return))
+		//		{
+		//			if (chatInputField.text == " ")
+		//			{
+		//				chatInputField.text = "";
+		//				chatInputField.DeactivateInputField();
+		//				return;
+		//			}
+		//			NetworkTransmission.instance.IWishToSendAChatServerRPC(chatInputField.text, NetworkManager.Singleton.LocalClientId);
+		//			chatInputField.text = "";
+		//		}
+		//	}
+		//	else
+		//	{
+		//		if (Input.GetKeyDown(KeyCode.Return))
+		//		{
+		//			chatInputField.ActivateInputField();
+		//			chatInputField.text = " ";
+		//		}
+		//	}
+		//}
 
 		public void SendMessageToUI(string name, string text)
         {
