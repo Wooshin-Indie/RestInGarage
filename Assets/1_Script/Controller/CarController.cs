@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
 using System;
+using UnityEditor;
 
 namespace Garage.Controller
 {
@@ -22,7 +23,7 @@ namespace Garage.Controller
 		[SerializeField] private float steeringStrength;
 		[SerializeField] private float maxSteerAngle;
 		[SerializeField] private float laneSnapThreshold;
-		[SerializeField] private bool isBroken = true;
+		[SerializeField] private bool isAnyBroken = true; // 하나라도 고장난 부분이 있는지
 
 		[FoldoutGroup("Overlap Parameters")]
 		[SerializeField] private float boxLength = 10f;
@@ -48,7 +49,7 @@ namespace Garage.Controller
 		{
 			if (!IsHost) return;
 
-			if (isBroken)
+			if (isAnyBroken)
 			{
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
 					(direction == VehicleDirection.Down && transform.position.z < 0))
@@ -136,12 +137,12 @@ namespace Garage.Controller
 					}
 					else if(!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime * .3f, NetworkManager.Singleton.LocalClientId);
+						ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
 				case CarParts.Oil:
 				case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime * .3f, NetworkManager.Singleton.LocalClientId);
+					ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					break;
 			}
 		}
@@ -160,47 +161,61 @@ namespace Garage.Controller
 		}
 
 
-
-		[ServerRpc(RequireOwnership = false)]
-		private void ProgressFixGageServerRPC(CarParts part, float gage, ulong networkId)
+		private float fixingTime = 3f; // 고치는데 걸리는 시간
+        [ServerRpc(RequireOwnership = false)]
+		private void ProgressFixGageServerRPC(CarParts part, float deltaTime, ulong networkId)
 		{
-			if (carStatus.AddProgress(part, gage))
-			{
-				RepairingBrokenPartClientRPC(part);
-			}
+            if (carStatus.IsProgressFull(part))
+            {
+                OnProgressFulledClientRPC(part, networkId);
+				Debug.Log(part + "is fulled");
 
-			UIManager.Game.OnCarPartFixed(part, carStatus.Progress[(int)part], 1f);
-			if (carStatus.IsProgressFull(part))
-			{
-				var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
-				pc.StateMachine.ChangeState(pc.carryState);
-				Debug.Log("Change State");
-			}
+				isAnyBroken = carStatus.IsThereAnyBroken();
+                if (!isAnyBroken) // 모든 part 고쳐졌을 때
+					OnAllPartsRepairedClientRPC();
 
-			SyncCarProgressClientRPC(part, carStatus.GetProgress(part), networkId);
+                return;
+            }
+
+			carStatus.AddProgress(part, deltaTime / fixingTime);
+
+			//여기서 UI 게이지 업데이트
+			UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
+
+            ApplyProgressWithUIClientRPC(part, carStatus.GetProgress(part));
 		}
 		[ClientRpc]
-		private void SyncCarProgressClientRPC(CarParts part, float progress, ulong networkId)
+		private void ApplyProgressWithUIClientRPC(CarParts part, float progress)
 		{
 			if (IsHost) return;
 
 			carStatus.Progress[(int)part] = progress;
+            UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
+        }
+        [ClientRpc]
+        private void OnProgressFulledClientRPC(CarParts part, ulong networkId)
+		{
+			carStatus.SetIsBrokenAsFalse(part); // 비트마스킹 끔
 
-			if (networkId == NetworkManager.Singleton.LocalClientId) 
-			{
-				UIManager.Game.OnCarPartFixed(part, carStatus.Progress[(int)part], 1f);
-				if (carStatus.IsProgressFull(part))
-				{
-					var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
-					pc.StateMachine.ChangeState(pc.carryState);
-				}
-			}
-		}
+            if (networkId == NetworkManager.Singleton.LocalClientId)
+            {
+				var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
+				pc.StateMachine.ChangeState(pc.carryState);
+				Debug.Log("Repair Ended and Changed to CarryState");
+            }
+            Debug.Log("Part Repair Totally Ended");
+            UIManager.Game.RemoveCarStatusUI(this, part);
+        }
+        [ClientRpc]
+        private void OnAllPartsRepairedClientRPC()
+        {
 
-		public bool IsAbleToInteract(CarParts part, OwnableProp prop)
+        }
+
+
+        public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
 			if (!carStatus.IsBroken(part)) return false;
-			if (carStatus.IsProgressFull(part)) return false;
 
 			switch (part)
 			{
@@ -291,34 +306,6 @@ namespace Garage.Controller
         {
 			if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
-        }
-
-		[ServerRpc(RequireOwnership = false)]
-		public void RepairingBrokenPartServerRPC(CarParts carPart)
-		{
-			RepairingBrokenPartClientRPC(carPart);
-        }
-
-		[ClientRpc]
-		private void RepairingBrokenPartClientRPC(CarParts carPart)
-		{
-            UIManager.Game.RemoveCarStatusUI(this, carPart);
-			Array array = Enum.GetValues(typeof(CarParts));
-			bool isComplete = true;
-			if (IsHost)
-			{
-				for (int i = 0; i < array.Length; i++)
-				{
-					if (!carStatus.IsBroken((CarParts)i)) continue;
-					if (!carStatus.IsProgressFull((CarParts)i))
-					{
-						isComplete = false;
-						break;
-					};
-				}
-
-				if (isComplete) isBroken = false;
-			}
         }
     }
 }

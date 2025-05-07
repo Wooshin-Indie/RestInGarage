@@ -281244,7 +281244,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2274949829270208904}
-  m_Mesh: {fileID: 854394063}
+  m_Mesh: {fileID: 6648134287359802531, guid: 6a6fd4fbcf5f6fd4e863376f2e1dca4a, type: 3}
 --- !u!1 &2592852488598570736
 GameObject:
   m_ObjectHideFlags: 0
@@ -298362,27 +298362,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.73216134
+      value: 0.8843725
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.6803658
+      value: 0.3591064
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.023648676
+      value: 0.27629814
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.021975689
+      value: -0.112193026
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -274.2
+      value: 44.2
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 3.699997
+      value: 34.7
       objectReference: {fileID: 0}
     - target: {fileID: 3327971326599212357, guid: eefd66184ddbc2e48a118b8bec000e12, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
