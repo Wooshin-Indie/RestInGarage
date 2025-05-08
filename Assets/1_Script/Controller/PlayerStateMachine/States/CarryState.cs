@@ -73,10 +73,15 @@ namespace Garage.Controller.StateMachine
 				else
 				{
 					controller.TryEndInteract();
-					return;
 				}
+				return;
 			}
 
+			if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
+			{
+				controller.TryAction();
+				return;
+			}
 		}
 
 		public override void PhysicsUpdate()

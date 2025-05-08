@@ -1,7 +1,6 @@
 using Garage.Props;
 using Unity.Netcode;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 namespace Garage.Manager
 {
@@ -70,8 +69,9 @@ namespace Garage.Manager
 					}
 				}
 			}
-			
-			// 마지막 Index는 파는 곳
+
+			BuildingManager.Instance.OnBuyItem(propNetId);
+
 			if(gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
 				EconomyManager.Instance.EarnMoney_HostOnly(oProp.ItemData.SellPrice);

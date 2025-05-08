@@ -1,3 +1,5 @@
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 namespace Garage.Utils
@@ -7,6 +9,12 @@ namespace Garage.Utils
 		public static float ManhatanDistance(this Vector3 a, Vector3 b)
 		{
 			return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) + Mathf.Abs(a.z - b.z);
+		}
+
+		public static Tweener DOFontSize(this TextMeshProUGUI tmp, float targetSize, float duration)
+		{
+			float startSize = tmp.fontSize;
+			return DOTween.To(() => tmp.fontSize, x => tmp.fontSize = x, targetSize, duration);
 		}
 	}
 }

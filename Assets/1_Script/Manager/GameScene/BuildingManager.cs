@@ -1,8 +1,6 @@
 using Garage.Interfaces;
 using Garage.Props;
-using Garage.Utils;
 using IUtil;
-using Steamworks.Data;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -117,41 +115,31 @@ namespace Garage.Manager
 		[SerializeField] private GameObject tireRack;
 		[SerializeField] private GameObject oilPump;
 		[SerializeField] private GameObject wrench;
-		[SerializeField] private GameObject shopCar;
-        [SerializeField] private GameObject lamps;
-        [SerializeField] private List<Light> lightsList;
+        [SerializeField] private GameObject lightPrefab;
+		[SerializeField] private List<Vector3> shopPositions = new();
 
-		public void OnSceneChanged(SceneEnum scene)
+		private Dictionary<ulong, Light> lightDictionary = new();
+
+		public void OnBuyItem(ulong networkId)
 		{
-            switch (scene)
-            {
-                case SceneEnum.None:
-                    lamps.SetActive(false);
-                    break;
-                case SceneEnum.Main:
-					lamps.SetActive(false);
-                    break;
-                case SceneEnum.Lobby:
-                    lamps.SetActive(true);
-					TurnOffLights();
-                    break;
-                case SceneEnum.Game:
-                    lamps.SetActive(true);
-                    break;
-            }
-        }
+			if (lightDictionary.TryGetValue(networkId, out Light light))
+			{
+				light.GetComponent<NetworkObject>().Despawn();
+				Destroy(light.gameObject);
+			}
+		}
 
         private void TurnOffLights()
         {
-			foreach (Light light in lightsList)
-				light.enabled = false;
-        }
+			foreach(var light in lightDictionary)
+			{
+				if (light.Value == null) continue;
+				light.Value.GetComponent<NetworkObject>().Despawn();
+				Destroy(light.Value.gameObject);
+			}
 
-        private void TurnOnLights()
-        {
-            foreach (Light light in lightsList)
-                light.enabled = true;
-        }
+			lightDictionary.Clear();
+		}
 
         // 스테이지 시작 시 구매하지 않은 빌딩 삭제
         public void OnStageStart()
@@ -177,28 +165,24 @@ namespace Garage.Manager
 		public void OnStageEnd()
 		{
 			// HACK - 랜덤으로 바꾸기
-			GameObject tmpGo = Instantiate(tireRack, Vector3.zero, Quaternion.identity);
-			tmpGo.GetComponent<NetworkObject>().Spawn();
-			tmpGo.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 0f));
+			for (int i = 0; i < shopPositions.Count; i++)
+			{
+				GameObject tmpGo = Instantiate(oilPump, shopPositions[i], Quaternion.Euler(0f, -90f, 0f));
+				tmpGo.GetComponent<NetworkObject>().Spawn();
+				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
+				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());
 
-			GameObject tmpGo2 = Instantiate(oilPump, new Vector3(0f, 0f, 5f), Quaternion.identity);
-			tmpGo2.GetComponent<NetworkObject>().Spawn();
-			tmpGo2.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 5f));
-
-			GameObject tmpGo3 = Instantiate(wrench, new Vector3(0f, 0f, 10f), Quaternion.identity);
-			tmpGo3.GetComponent<NetworkObject>().Spawn();
-			tmpGo3.GetComponent<OwnableProp>().SetGridPosition(new Vector3(0f, 0f, 10f));
+				lightDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
+					Instantiate(lightPrefab, new Vector3(shopPositions[i].x, 10f, shopPositions[i].z), Quaternion.Euler(90f, 0f, 0f)).GetComponent<Light>());
+				lightDictionary[tmpGo.GetComponent<NetworkObject>().NetworkObjectId].GetComponent<NetworkObject>().Spawn();
+			}
 
 			SpawnNightDecoProps();
-            TurnOnLights();
         }
 
 		private void SpawnNightDecoProps()
 		{
-            GameObject tmpShop = Instantiate(shopCar, new Vector3(-3.5f, 0f, 8f), Quaternion.Euler(new Vector3(0f, 135f, 0f)));
-            tmpShop.GetComponent<NetworkObject>().Spawn();
-            DecoPropDictionary.Add(tmpShop.GetComponent<NetworkObject>().NetworkObjectId,
-                tmpShop.gameObject);
+           
         }
 
         public void TryPlaceBuilding(OwnableProp prop)

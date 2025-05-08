@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Unity.Mathematics;
 using DG.Tweening;
-using Unity.VisualScripting;
 using Garage.Utils;
 
 namespace Garage.Manager

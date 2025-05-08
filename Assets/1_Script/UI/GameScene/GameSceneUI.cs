@@ -14,17 +14,15 @@ namespace Garage.UI.GameScene
     public class GameSceneUI : MonoBehaviour
     {
         [Header("HUD")]
-        [SerializeField] private TextMeshProUGUI balanceText;
+        [SerializeField] private BalanceUI balanceText;
 
 
         [SerializeField] private TextMeshProUGUI carPartName;
         [SerializeField] private Slider carPartProgress;
-
+        [SerializeField] private ShopInfo shopInfo;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
-
-
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -77,7 +75,7 @@ namespace Garage.UI.GameScene
 
         public void OnBalancedChanged(int prev, int balance)
         {
-            balanceText.text = balance.ToString();
+            balanceText.SetBalance(balance);
         }
 
         // HACK - 임시로 만들어둠
@@ -87,5 +85,12 @@ namespace Garage.UI.GameScene
             carPartName.text = carPart.ToString();
             carPartProgress.value = progress / maxProgress;
 		}
+
+        // 화면에 Shop Item 정보를 띄움
+        public void PopupItemInfo(ItemData data)
+        {
+            shopInfo.SetInfo(data);
+            shopInfo.gameObject.SetActive(true);
+        }
 	}
 }

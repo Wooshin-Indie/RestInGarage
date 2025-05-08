@@ -138,16 +138,9 @@ namespace Garage.Controller
 
 			if (GameManagerEx.Instance.IsDay)
 			{
-				if (!currentOwningProp.IsCarry)
-				{
-					currentOwningProp.OnEndInteraction(transform);
-					currentOwningProp = null;
-				}
-				else
-				{
-					SetAnimParam((int)AnimationType.Carry, false);
-					SetAnimParam((int)AnimationType.Place);
-				}
+				currentOwningProp.OnEndInteraction(transform);
+				currentOwningProp = null;
+				SetAnimParam((int)AnimationType.Carry, false);
 			}
 			else
 			{
@@ -156,7 +149,28 @@ namespace Garage.Controller
 				currentOwningProp = null;
 			}
 		}
-		
+
+		/// <summary>
+		/// 들고있는 Prop의 Action을 수행합니다.
+		/// ex. 타이어 -> 굴림, 소화기 -> 분사
+		/// </summary>
+		public void TryAction()
+		{
+			if (currentOwningProp == null) return;
+			if (currentOwningProp.GetComponent<IActionable>() == null) return;
+
+			switch (currentOwningProp)
+			{
+				case TireProp _:
+					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Place);
+					break;
+				case Extinguisher ex:
+					ex.GetComponent<IActionable>().OnPropAction(transform);
+					break;
+			}
+		}
+
 		/// <summary>
 		/// 수리를 시작할 때 호출
 		/// 
@@ -274,6 +288,8 @@ namespace Garage.Controller
 				}
 			}
 
+			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
+
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
 		public Transform GetSocket(PropType type) 
@@ -293,7 +309,10 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			currentOwningProp.OnEndInteraction(transform);
+			if (currentOwningProp.GetComponent<IActionable>() != null)
+			{
+				currentOwningProp.GetComponent<IActionable>().OnPropAction(transform);
+			}
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
