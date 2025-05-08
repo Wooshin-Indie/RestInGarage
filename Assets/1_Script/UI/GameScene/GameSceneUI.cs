@@ -96,13 +96,12 @@ namespace Garage.UI.GameScene
 
             CarController car = partBase.CarController;
             ulong carID = car.NetworkObjectId;
-            if (carStatusInfo.ContainsKey(carID)) return;
+            if (!carStatusInfo.ContainsKey(carID)) return;
 
             CarParts part = partBase.PartType;
-            if (carStatusInfo[carID].ContainsKey(part)) return;
+            if (!carStatusInfo[carID].ContainsKey(part)) return;
 
 
-            // part key 오류남
             carStatusInfo[carID][part].ResizeCarPartUI(enlarge);
             isAnyEnlargedPart = enlarge;
         }
