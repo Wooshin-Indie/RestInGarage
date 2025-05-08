@@ -2,6 +2,7 @@ using Garage.Controller;
 using Garage.Structs;
 using Garage.UI.GameScene.Items;
 using Garage.Utils;
+using Garage.Structs.CarPart;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -19,12 +20,15 @@ namespace Garage.UI.GameScene
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
 
-
-
-
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> NetworkObjectId
         // secondKey -> (Enum)CarParts
+        private bool isAnyEnlargedPart;
+
+        private void Awake()
+        {
+            isAnyEnlargedPart = false;
+        }
 
         private void LateUpdate()
         {
@@ -81,6 +85,26 @@ namespace Garage.UI.GameScene
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
 
             carStatusInfo[carID][part].ApplyFill(progress);
+        }
+
+        // enlarge = true   =>  확대
+        // enlarge = false   =>  축소
+        public void TryToResizeCarPartUI(CarPartBase partBase, bool enlarge)
+        {
+            if (!isAnyEnlargedPart && !enlarge) return; // 이미 다 축소돼있으면 return
+            if (isAnyEnlargedPart && enlarge) return;   // 이미 확대가 되어있으면 return
+
+            CarController car = partBase.CarController;
+            ulong carID = car.NetworkObjectId;
+            if (carStatusInfo.ContainsKey(carID)) return;
+
+            CarParts part = partBase.PartType;
+            if (carStatusInfo[carID].ContainsKey(part)) return;
+
+
+            // part key 오류남
+            carStatusInfo[carID][part].ResizeCarPartUI(enlarge);
+            isAnyEnlargedPart = enlarge;
         }
 	}
 }

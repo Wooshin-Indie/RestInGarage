@@ -12,8 +12,10 @@ namespace Garage.Structs.CarPart
 		protected CarController carController;
 
 		public CarParts PartType => part;
+		public CarController CarController => carController;
 
-		public virtual void Awake()
+
+        public virtual void Awake()
 		{
 			carController = GetComponentInParent<CarController>();
 			if (carController == null)

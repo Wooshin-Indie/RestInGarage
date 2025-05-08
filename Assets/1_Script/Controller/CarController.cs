@@ -209,7 +209,7 @@ namespace Garage.Controller
         [ClientRpc]
         private void OnAllPartsRepairedClientRPC()
         {
-
+			isAnyBroken = false;
         }
 
 

@@ -18,10 +18,14 @@ namespace Garage.UI.GameScene.Items
         private Camera mainCam;
         private CarController car;
         private Transform partPos;
+        private RectTransform uiRect;
+        private Vector2 originSize;
 
         private void Start()
         {
             mainCam = Camera.main;
+            uiRect = GetComponent<RectTransform>();
+            originSize = uiRect.sizeDelta;
 
             // Pivot Y 를 0으로 강제설정 (아래에서부터 채우기 위해)
             if (!Mathf.Approximately(maskToFill.pivot.y, 0f))
@@ -128,6 +132,20 @@ namespace Garage.UI.GameScene.Items
         public void ApplyFill(float progress)
         {
             maskToFill.anchorMax = new Vector2(maskToFill.anchorMax.x, progress);
+        }
+
+        public void ResizeCarPartUI(bool enlarge)
+        {
+            // 크기 확대
+            if (enlarge)
+            {
+                uiRect.sizeDelta = 1.5f * originSize;
+            }
+            // 크기 축소
+            else
+            {
+                uiRect.sizeDelta = originSize;
+            }
         }
     }
 }
