@@ -1,4 +1,5 @@
 using Garage.Props;
+using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -104,7 +105,7 @@ namespace Garage.Manager
 				int rotation = wheelRotate;
 
 				prop.SetGridPosition(position);
-				prop.GetComponent<Rigidbody>().rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+				prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
 
 				TryPlaceResultClientRpc(true, propNetId, position, rotation);
 			}
@@ -124,8 +125,8 @@ namespace Garage.Manager
 			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			var prop = obj.GetComponent<OwnableProp>();
 
-			prop.GetComponent<Rigidbody>().MovePosition(pos);
-			prop.GetComponent<Rigidbody>().MoveRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
+			prop.GetComponent<Rigidbody>().SetPosition(pos);
+			prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
 		}
 	}
 }

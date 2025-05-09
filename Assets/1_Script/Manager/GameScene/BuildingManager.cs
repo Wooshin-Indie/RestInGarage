@@ -122,7 +122,7 @@ namespace Garage.Manager
 
 		public void OnBuyItem(ulong networkId)
 		{
-			if (lightDictionary.TryGetValue(networkId, out Light light))
+			if (lightDictionary.TryGetValue(networkId, out Light light) && light != null)
 			{
 				light.GetComponent<NetworkObject>().Despawn();
 				Destroy(light.gameObject);
