@@ -30,6 +30,12 @@ namespace Garage.Manager
 			{
 				Destroy(this.gameObject);
 			}
+
+			gridTiles = new();
+			for (int t = 0; t < gridOrigin.Count; t++)
+			{
+				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
+			}
 		}
 		#endregion
 

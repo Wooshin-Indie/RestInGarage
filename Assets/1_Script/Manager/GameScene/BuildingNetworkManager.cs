@@ -123,6 +123,7 @@ namespace Garage.Manager
 			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			var prop = obj.GetComponent<OwnableProp>();
 
+			prop.transform.position = pos;
 			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
 		}
 	}

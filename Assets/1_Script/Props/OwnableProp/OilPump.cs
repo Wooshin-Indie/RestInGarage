@@ -54,8 +54,8 @@ namespace Garage.Props
 			}
 			else
 			{
-				oilgun.localPosition = (initPos);
-				oilgun.localRotation = (Quaternion.Euler(initRot));
+				transform.position = gridPosition.Value;
+				transform.rotation = Quaternion.identity;
 			}
 		}
 
