@@ -83,11 +83,6 @@ namespace Garage.Manager
 			PlacedBuildings.Clear();
 		}
 
-		public void SetGrid(Vector2Int origin, Vector2Int size)
-		{
-
-		}
-
 		public void RegisterTile(GridTile tile)
 		{
 			Vector2Int index = Vector2Int.zero;
@@ -112,9 +107,8 @@ namespace Garage.Manager
 		}
 
 		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
-		[SerializeField] private GameObject tireRack;
-		[SerializeField] private GameObject oilPump;
-		[SerializeField] private GameObject wrench;
+
+		[SerializeField] private List<GameObject> prefabList = new();
         [SerializeField] private GameObject lightPrefab;
 		[SerializeField] private List<Vector3> shopPositions = new();
 
@@ -167,7 +161,7 @@ namespace Garage.Manager
 			// HACK - 랜덤으로 바꾸기
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
-				GameObject tmpGo = Instantiate(oilPump, shopPositions[i], Quaternion.Euler(0f, -90f, 0f));
+				GameObject tmpGo = Instantiate(prefabList[i], shopPositions[i], Quaternion.Euler(0f, -90f, 0f));
 				tmpGo.GetComponent<NetworkObject>().Spawn();
 				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
 				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());

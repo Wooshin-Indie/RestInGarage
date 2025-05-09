@@ -134,6 +134,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void TryEndInteract()
 		{
+			TryEndAction();
 			if (currentOwningProp == null) return;
 
 			if (GameManagerEx.Instance.IsDay)
@@ -162,11 +163,30 @@ namespace Garage.Controller
 			switch (currentOwningProp)
 			{
 				case TireProp _:
+					break;
+				case Extinguisher ex:
+					isAbleToMove = false;
+					ex.GetComponent<IActionable>().OnStartPropAction(transform);
+					SetAnimParam((int)AnimationType.Oil, true);
+					break;
+			}
+		}
+
+		public void TryEndAction()
+		{
+			if (currentOwningProp == null) return;
+			if (currentOwningProp.GetComponent<IActionable>() == null) return;
+
+			switch (currentOwningProp)
+			{
+				case TireProp _:
 					SetAnimParam((int)AnimationType.Carry, false);
 					SetAnimParam((int)AnimationType.Place);
 					break;
 				case Extinguisher ex:
-					ex.GetComponent<IActionable>().OnPropAction(transform);
+					isAbleToMove = true;
+					ex.GetComponent<IActionable>().OnStopPropAction(transform);
+					SetAnimParam((int)AnimationType.Oil, false);
 					break;
 			}
 		}
@@ -311,7 +331,7 @@ namespace Garage.Controller
 
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
-				currentOwningProp.GetComponent<IActionable>().OnPropAction(transform);
+				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
 			}
 			currentOwningProp = null;
 			isAbleToMove = true;

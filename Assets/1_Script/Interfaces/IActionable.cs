@@ -5,6 +5,7 @@ namespace Garage.Interfaces
 {
 	public interface IActionable
 	{
-		void OnPropAction(Transform controller);
+		void OnStartPropAction(Transform controller);
+		void OnStopPropAction(Transform controller);
 	}
 }

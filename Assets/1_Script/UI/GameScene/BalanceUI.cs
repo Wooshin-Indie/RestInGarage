@@ -14,24 +14,26 @@ namespace Garage.UI.GameScene
 
 		private TextMeshProUGUI balanceText;
 		private int currentBalance = 0;
+		private int destBalance = 0;
 
 		private void Awake()
 		{
 			balanceText = GetComponent<TextMeshProUGUI>();
 			if (int.TryParse(balanceText.text, out var result))
 			{
-				currentBalance = result;
+				destBalance = result;
 			}
 			else
 			{
-				currentBalance = 0;
+				destBalance = 0;
 				balanceText.text = "0";
 			}
 		}
 
 		public void SetBalance(int balance)
 		{
-			int diff = balance - currentBalance;
+			int diff = balance - destBalance;
+			destBalance = balance;
 			if (diff != 0)
 			{
 				ShowAddBalanceEffect(diff);
@@ -41,7 +43,7 @@ namespace Garage.UI.GameScene
 			{
 				currentBalance = x;
 				balanceText.text = x.ToString();
-			}, balance, tweenDuration).SetEase(Ease.OutCubic);
+			}, destBalance, tweenDuration).SetEase(Ease.OutCubic);
 
 			Sequence fontSizeSeq = DOTween.Sequence();
 			fontSizeSeq.Append(balanceText.DOFontSize(expandedFontSize, tweenDuration * 0.3f).SetEase(Ease.OutSine));

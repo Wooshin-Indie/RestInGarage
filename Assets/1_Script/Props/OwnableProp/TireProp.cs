@@ -68,7 +68,11 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
-		public void OnPropAction(Transform controller)
+		public void OnStartPropAction(Transform controller)
+		{
+		}
+
+		public void OnStopPropAction(Transform controller)
 		{
 			rigid.isKinematic = false;
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;

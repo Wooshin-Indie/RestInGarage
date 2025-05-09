@@ -82,6 +82,11 @@ namespace Garage.Controller.StateMachine
 				controller.TryAction();
 				return;
 			}
+			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
+			{
+				controller.TryEndAction();
+				return;
+			}
 		}
 
 		public override void PhysicsUpdate()

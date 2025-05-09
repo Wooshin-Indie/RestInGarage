@@ -1,6 +1,7 @@
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
+using Unity.Burst;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,6 +13,22 @@ namespace Garage.Props
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] protected float height;
 
+		[SerializeField] private ParticleSystem fireExPS;
+
+		private NetworkVariable<bool> IsAction = new(
+			false,
+			NetworkVariableReadPermission.Everyone,
+			NetworkVariableWritePermission.Owner
+		);
+
+		public override void Awake()
+		{
+			base.Awake();
+			fireExPS.Stop();
+
+			IsAction.OnValueChanged -= OnActionChanged;
+			IsAction.OnValueChanged += OnActionChanged;
+		}
 
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
@@ -32,6 +49,7 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
 
+			IsAction.Value = false;
 			base.OnEndInteraction(controller);
 		}
 
@@ -43,6 +61,12 @@ namespace Garage.Props
 				{
 					rigid.MovePosition(controller.GetSocket(PropType.Extinguisher).position);
 					rigid.MoveRotation(controller.GetSocket(PropType.Extinguisher).rotation);
+
+					if (IsAction.Value)
+					{
+						fireExPS.transform.rotation = controller.transform.rotation;
+					}
+
 					return;
 				}
 
@@ -65,6 +89,7 @@ namespace Garage.Props
 			}
 		}
 
+
 		[ServerRpc(RequireOwnership = false)]
 		private void SyncStateServerRPC(bool isStart)
 		{
@@ -79,10 +104,40 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
-		public void OnPropAction(Transform controller)
+		public void OnStartPropAction(Transform controller)
 		{
-			// controller forward 방향으로 소화기 발사
+			if (!IsOwner)
+			{
+				Debug.LogWarning("You are not prop's owner"); 
+				return;
+			}
+
+			IsAction.Value = true;
 		}
+
+		public void OnStopPropAction(Transform controller)
+		{
+			if (!IsOwner)
+			{
+				Debug.LogWarning("You are not prop's owner");
+				return;
+			}
+			IsAction.Value = false;
+		}
+
+		private void OnActionChanged(bool prev, bool isAction)
+		{
+			if (prev == isAction) return;
+
+            if (isAction)
+            {
+				fireExPS.Play();
+            }
+			else
+			{
+				fireExPS.Stop();
+			}
+        }
 
 		public Vector2Int GetSize()
 		{
