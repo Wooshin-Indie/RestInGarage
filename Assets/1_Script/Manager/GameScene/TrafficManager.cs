@@ -74,9 +74,8 @@ namespace Garage.Manager
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
-				car.SyncIsBrokenClientRPC(car.CarStatus.isBroken);
                 car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
-                car.InitCarStatus();
+                car.InitCarStatusServer();
 			}
 			else return;
 		}

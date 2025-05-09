@@ -271,6 +271,8 @@ namespace Garage.Controller
 					{
 						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
 						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
+
+						//if (currentFixablePart == preFixablePart) continue;
 						preFixablePart = currentFixablePart;
                     }
 				}
@@ -281,14 +283,13 @@ namespace Garage.Controller
             if (isCurFixableExist)
 			{
                 // currentFixablePart 있으므로 확대 시도
-                UIManager.Game.TryToResizeCarPartUI(currentFixablePart, isCurFixableExist);
+                UIManager.Game.TryToResizeCarPartUI(currentFixablePart, true);
             }
             else
 			{
-                UIManager.Game.TryToResizeCarPartUI(preFixablePart, isCurFixableExist);
-            }
                 // currentFixablePart가 null이므로 이전에 저장해놓은 FixablePart 축소 시도
-				// 사라질 때 key index 오류
+                UIManager.Game.TryToResizeCarPartUI(preFixablePart, false);
+            }
 
 
             Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);

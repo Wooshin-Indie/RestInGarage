@@ -96,14 +96,20 @@ namespace Garage.UI.GameScene
 
             CarController car = partBase.CarController;
             ulong carID = car.NetworkObjectId;
-            if (!carStatusInfo.ContainsKey(carID)) return;
+            if (!carStatusInfo.ContainsKey(carID)) return;  // key 참조 에러 방지
 
             CarParts part = partBase.PartType;
-            if (!carStatusInfo[carID].ContainsKey(part)) return;
+            if (!carStatusInfo[carID].ContainsKey(part)) return;    // key 참조 에러 방지
 
 
             carStatusInfo[carID][part].ResizeCarPartUI(enlarge);
             isAnyEnlargedPart = enlarge;
+        }
+
+        public void OnTireInserted(CarController car, CarParts tire)
+        {
+            ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
+            carStatusInfo[carID][tire].ChangeTireImage();
         }
 	}
 }

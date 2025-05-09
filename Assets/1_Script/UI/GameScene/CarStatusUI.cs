@@ -11,6 +11,7 @@ namespace Garage.UI.GameScene.Items
         [SerializeField] private RectTransform maskToFill;
 
         [Header("Car Part Images")]
+        [SerializeField] private Sprite tireEmptyImage;
         [SerializeField] private Sprite tireImage;
         [SerializeField] private Sprite engineImage;
         [SerializeField] private Sprite oilImage;
@@ -66,19 +67,19 @@ namespace Garage.UI.GameScene.Items
             {
                 // 이미지, 사이즈, 좌우반전, 위치 초기화
                 case CarParts.FLT:
-                    iconImage.sprite = tireImage;
+                    iconImage.sprite = tireEmptyImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.FRT:
-                    iconImage.sprite = tireImage;
+                    iconImage.sprite = tireEmptyImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.RLT:
-                    iconImage.sprite = tireImage;
+                    iconImage.sprite = tireEmptyImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.RRT:
-                    iconImage.sprite = tireImage;
+                    iconImage.sprite = tireEmptyImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.Engine:
@@ -149,6 +150,14 @@ namespace Garage.UI.GameScene.Items
             {
                 uiRect.sizeDelta = originSize;
             }
+        }
+
+        public void ChangeTireImage(bool inserted = true)
+        {
+            if(inserted)
+                iconImage.sprite = tireImage;
+            else
+                iconImage.sprite = tireEmptyImage;
         }
     }
 }

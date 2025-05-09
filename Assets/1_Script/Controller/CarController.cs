@@ -8,6 +8,7 @@ using Unity.Netcode;
 using Garage.Props;
 using System;
 using UnityEditor;
+using System.Runtime.ConstrainedExecution;
 
 namespace Garage.Controller
 {
@@ -151,14 +152,16 @@ namespace Garage.Controller
 		private void AddTireServerRPC(CarParts part)
 		{
 			carStatus.AddTire(part);
-			AddTireClientRPC(part);
+			UIManager.Game.OnTireInserted(this, part);
+            AddTireClientRPC(part);
 		}
 		[ClientRpc]
 		private void AddTireClientRPC(CarParts part)
 		{
 			if (IsHost) return;
 			carStatus.AddTire(part);
-		}
+            UIManager.Game.OnTireInserted(this, part);
+        }
 
 
 		private float fixingTime = 3f; // 고치는데 걸리는 시간
@@ -209,6 +212,8 @@ namespace Garage.Controller
         [ClientRpc]
         private void OnAllPartsRepairedClientRPC()
         {
+			if (IsHost) return;
+
 			isAnyBroken = false;
         }
 
@@ -223,8 +228,10 @@ namespace Garage.Controller
 				case CarParts.FRT:
 				case CarParts.RLT:
 				case CarParts.RRT:
-					return (prop is TireProp || prop is WrenchProp);
-				case CarParts.Oil:
+					return (prop is TireProp && carStatus.IsTireEmpty(part))
+						|| (prop is WrenchProp && !carStatus.IsTireEmpty(part));
+
+                case CarParts.Oil:
 					return prop is OilPump;
 				case CarParts.Engine:
 					return prop is WrenchProp;
@@ -289,23 +296,36 @@ namespace Garage.Controller
 			Gizmos.matrix = Matrix4x4.TRS(boxCenter, orientation, Vector3.one);
 			Gizmos.DrawWireCube(Vector3.zero, halfExtents * 2);
 		}
-
-		public void InitCarStatus()
-		{
-			InitCarStatusClientRPC();
+        public void InitCarStatusServer()
+        {
+			InitCarStatusLogic();
+            InitCarStatusClientRPC(carStatus.isBroken);
         }
-
-		[ClientRpc]
-		private void InitCarStatusClientRPC()
+		private void InitCarStatusLogic()
 		{
+			for(int i = 0; i < 4; i++)
+			{
+				if (carStatus.IsBroken((CarParts)i))
+				{
+					ChangeTirePresence((CarParts)i);
+                }
+			}
+			
             UIManager.Game.GenerateCarStatusUIs(this, carStatus);
         }
-
-        [ClientRpc]
-        public void SyncIsBrokenClientRPC(int carStatusIsBroken)
+		[ClientRpc]
+		private void InitCarStatusClientRPC(int carStatusIsBroken)
         {
-			if (IsHost) return;
+            if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
+
+            InitCarStatusLogic();
+        }
+
+		private void ChangeTirePresence(CarParts part)
+		{
+            //PartTransforms[(int)part].GetComponent<MeshRenderer>().materials[0].
+
         }
     }
 }
