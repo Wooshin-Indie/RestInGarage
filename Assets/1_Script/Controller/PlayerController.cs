@@ -134,7 +134,6 @@ namespace Garage.Controller
 		/// </summary>
 		public void TryEndInteract()
 		{
-			TryEndAction();
 			if (currentOwningProp == null) return;
 
 			if (GameManagerEx.Instance.IsDay)

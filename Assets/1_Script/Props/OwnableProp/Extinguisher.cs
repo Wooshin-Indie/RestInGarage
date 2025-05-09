@@ -48,7 +48,10 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
 
-			IsAction.Value = false;
+			if (IsAction.Value)
+			{
+				IsAction.Value = false;
+			}
 			base.OnEndInteraction(controller);
 		}
 
