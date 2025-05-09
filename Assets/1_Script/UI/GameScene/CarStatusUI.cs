@@ -7,19 +7,41 @@ namespace Garage.UI.GameScene.Items
 {
     public class CarStatusUI : MonoBehaviour
     {
-        [SerializeField] Image iconImage;
+        [SerializeField] private Image iconImage;
+        [SerializeField] private RectTransform maskToFill;
+
         [Header("Car Part Images")]
-        [SerializeField] private Sprite TireImage;
-        [SerializeField] private Sprite EngineImage;
-        [SerializeField] private Sprite OilImage;
+        [SerializeField] private Sprite tireEmptyImage;
+        [SerializeField] private Sprite tireImage;
+        [SerializeField] private Sprite engineImage;
+        [SerializeField] private Sprite oilImage;
 
         private Camera mainCam;
         private CarController car;
         private Transform partPos;
+        private RectTransform uiRect;
+        private Vector2 originSize;
 
-        private void Awake()
+        private void Start()
         {
             mainCam = Camera.main;
+            uiRect = GetComponent<RectTransform>();
+            originSize = uiRect.sizeDelta;
+
+            // Pivot Y 를 0으로 강제설정 (아래에서부터 채우기 위해)
+            if (!Mathf.Approximately(maskToFill.pivot.y, 0f))
+            {
+                maskToFill.pivot = new Vector2(maskToFill.pivot.x, 0f);
+            }
+
+            // AnchorMin.y를 0으로 강제설정
+            Vector2 currentAnchorMin = maskToFill.anchorMin;
+            if (!Mathf.Approximately(currentAnchorMin.y, 0f))
+            {
+                maskToFill.anchorMin = new Vector2(currentAnchorMin.x, 0f);
+            }
+
+            ApplyFill(0f); // 처음 mask가 비어있게 설정
         }
 
         public void OnUpdate()
@@ -41,58 +63,54 @@ namespace Garage.UI.GameScene.Items
 
         private void SetUI(CarParts carPart)
         {
-            RectTransform rt = iconImage.rectTransform;
             switch (carPart)
             {
                 // 이미지, 사이즈, 좌우반전, 위치 초기화
                 case CarParts.FLT:
-                    iconImage.sprite = TireImage;
-                    rt.sizeDelta = new Vector2(48, 35);
-                    SetTireUI(carPart);
+                    iconImage.sprite = tireEmptyImage;
+                    SetUIScale(carPart);
                     break;
                 case CarParts.FRT:
-                    iconImage.sprite = TireImage;
-                    rt.sizeDelta = new Vector2(48, 35);
-                    SetTireUI(carPart);
+                    iconImage.sprite = tireEmptyImage;
+                    SetUIScale(carPart);
                     break;
                 case CarParts.RLT:
-                    iconImage.sprite = TireImage;
-                    rt.sizeDelta = new Vector2(48, 35);
-                    SetTireUI(carPart);
+                    iconImage.sprite = tireEmptyImage;
+                    SetUIScale(carPart);
                     break;
                 case CarParts.RRT:
-                    iconImage.sprite = TireImage;
-                    rt.sizeDelta = new Vector2(48, 35);
-                    iconImage.rectTransform.localScale = new Vector3(-1f, 1f, 1f);
-                    SetTireUI(carPart);
+                    iconImage.sprite = tireEmptyImage;
+                    SetUIScale(carPart);
                     break;
                 case CarParts.Engine:
-                    iconImage.sprite = EngineImage;
-                    rt.sizeDelta = new Vector2(35, 35);
+                    iconImage.sprite = engineImage;
                     break;
                 case CarParts.Oil:
-                    iconImage.sprite = OilImage;
-                    rt.sizeDelta = new Vector2(35, 35);
+                    iconImage.sprite = oilImage;
+                    SetUIScale(carPart);
                     break;
             }
 
             partPos = car.PartTransforms[(int)carPart];
         }
         
-        private void SetTireUI(CarParts carPart) // 차량의 방향과 바퀴위치에 따라 이미지반전 및 pivot 수정
-        {// 피봇이 1f 면 원래보다 왼쪽으로 이동, 0f면 오른쪽으로 이동
-            RectTransform rt = iconImage.rectTransform;
-            if(car.Direction == VehicleDirection.Up)
+        private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 이미지반전
+        {
+            uiRect = GetComponent<RectTransform>();
+            if (car.Direction == VehicleDirection.Up)
             {
                 switch (carPart)
                 {
                     case CarParts.FLT: // 왼쪽이면 좌우반전
                     case CarParts.RLT:
-                        rt.localScale = new Vector3(-1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                     case CarParts.FRT:
                     case CarParts.RRT:
-                        rt.localScale = new Vector3(1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                 }
             }
@@ -102,16 +120,44 @@ namespace Garage.UI.GameScene.Items
                 {
                     case CarParts.FLT:
                     case CarParts.RLT:
-                        rt.localScale = new Vector3(1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
-                    case CarParts.FRT: // 오른 쪽이면 좌우반전
+                    case CarParts.FRT:
                     case CarParts.RRT:
-                        rt.localScale = new Vector3(-1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
+        }
 
-            rt.pivot = new Vector2(0f, 0f);
+        public void ApplyFill(float progress)
+        {
+            maskToFill.anchorMax = new Vector2(maskToFill.anchorMax.x, progress);
+        }
+
+        public void ResizeCarPartUI(bool enlarge)
+        {
+            // 크기 확대
+            if (enlarge)
+            {
+                uiRect.sizeDelta = 1.5f * originSize;
+            }
+            // 크기 축소
+            else
+            {
+                uiRect.sizeDelta = originSize;
+            }
+        }
+
+        public void ChangeTireImage(bool inserted = true)
+        {
+            if(inserted)
+                iconImage.sprite = tireImage;
+            else
+                iconImage.sprite = tireEmptyImage;
         }
     }
 }

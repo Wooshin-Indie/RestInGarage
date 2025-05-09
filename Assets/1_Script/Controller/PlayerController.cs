@@ -54,6 +54,7 @@ namespace Garage.Controller
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
 		private CarPartBase currentFixablePart = null;
+		private CarPartBase preFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
 		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
@@ -303,21 +304,36 @@ namespace Garage.Controller
 					{
 						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
 						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
-					}
+
+						//if (currentFixablePart == preFixablePart) continue;
+						preFixablePart = currentFixablePart;
+                    }
 				}
 			}
 
-			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
+			bool isCurFixableExist = currentFixablePart != null;
+            if (isCurFixableExist)
+			{
+                // currentFixablePart 있으므로 확대 시도
+                UIManager.Game.TryToResizeCarPartUI(currentFixablePart, true);
+            }
+            else
+			{
+                // currentFixablePart가 null이므로 이전에 저장해놓은 FixablePart 축소 시도
+                UIManager.Game.TryToResizeCarPartUI(preFixablePart, false);
+            }
 
+
+			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-		public Transform GetSocket(PropType type) 
+        public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
 
-		#region Animation Events
-		private void OnStartPlace()
+        #region Animation Events
+        private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 

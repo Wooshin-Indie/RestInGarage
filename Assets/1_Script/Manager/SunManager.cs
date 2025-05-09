@@ -27,6 +27,9 @@ namespace Garage.Manager
         {
             Init();
             light = GetComponent<Light>();
+            light.transform.position = startPos; // 처음 위치
+            light.transform.localEulerAngles = mainStartRot; // 처음 각도
+            light.transform.DORotate(mainEndRot, 600f);
         }
 
         private void Init()
