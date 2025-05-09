@@ -54,6 +54,7 @@ namespace Garage.Controller
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
 		private CarPartBase currentFixablePart = null;
+		private CarPartBase preFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
 		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
@@ -138,16 +139,9 @@ namespace Garage.Controller
 
 			if (GameManagerEx.Instance.IsDay)
 			{
-				if (!currentOwningProp.IsCarry)
-				{
-					currentOwningProp.OnEndInteraction(transform);
-					currentOwningProp = null;
-				}
-				else
-				{
-					SetAnimParam((int)AnimationType.Carry, false);
-					SetAnimParam((int)AnimationType.Place);
-				}
+				currentOwningProp.OnEndInteraction(transform);
+				currentOwningProp = null;
+				SetAnimParam((int)AnimationType.Carry, false);
 			}
 			else
 			{
@@ -156,7 +150,47 @@ namespace Garage.Controller
 				currentOwningProp = null;
 			}
 		}
-		
+
+		/// <summary>
+		/// 들고있는 Prop의 Action을 수행합니다.
+		/// ex. 타이어 -> 굴림, 소화기 -> 분사
+		/// </summary>
+		public void TryAction()
+		{
+			if (currentOwningProp == null) return;
+			if (currentOwningProp.GetComponent<IActionable>() == null) return;
+
+			switch (currentOwningProp)
+			{
+				case TireProp _:
+					break;
+				case Extinguisher ex:
+					isAbleToMove = false;
+					ex.GetComponent<IActionable>().OnStartPropAction(transform);
+					SetAnimParam((int)AnimationType.Oil, true);
+					break;
+			}
+		}
+
+		public void TryEndAction()
+		{
+			if (currentOwningProp == null) return;
+			if (currentOwningProp.GetComponent<IActionable>() == null) return;
+
+			switch (currentOwningProp)
+			{
+				case TireProp _:
+					SetAnimParam((int)AnimationType.Carry, false);
+					SetAnimParam((int)AnimationType.Place);
+					break;
+				case Extinguisher ex:
+					isAbleToMove = true;
+					ex.GetComponent<IActionable>().OnStopPropAction(transform);
+					SetAnimParam((int)AnimationType.Oil, false);
+					break;
+			}
+		}
+
 		/// <summary>
 		/// 수리를 시작할 때 호출
 		/// 
@@ -270,19 +304,36 @@ namespace Garage.Controller
 					{
 						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
 						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
-					}
+
+						//if (currentFixablePart == preFixablePart) continue;
+						preFixablePart = currentFixablePart;
+                    }
 				}
 			}
 
+			bool isCurFixableExist = currentFixablePart != null;
+            if (isCurFixableExist)
+			{
+                // currentFixablePart 있으므로 확대 시도
+                UIManager.Game.TryToResizeCarPartUI(currentFixablePart, true);
+            }
+            else
+			{
+                // currentFixablePart가 null이므로 이전에 저장해놓은 FixablePart 축소 시도
+                UIManager.Game.TryToResizeCarPartUI(preFixablePart, false);
+            }
+
+
+			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-		public Transform GetSocket(PropType type) 
+        public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
 
-		#region Animation Events
-		private void OnStartPlace()
+        #region Animation Events
+        private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
@@ -293,7 +344,10 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			currentOwningProp.OnEndInteraction(transform);
+			if (currentOwningProp.GetComponent<IActionable>() != null)
+			{
+				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
+			}
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}

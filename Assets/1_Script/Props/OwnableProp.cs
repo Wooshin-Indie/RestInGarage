@@ -50,10 +50,8 @@ namespace Garage.Props
 		[ServerRpc(RequireOwnership = false)]
 		private void RequestOwnershipServerRpc(ulong requestingClientId)
 		{
-			Debug.Log(ownerClientId.Value + ", " + requestingClientId);
 			if (ownerClientId.Value == ulong.MaxValue)
 			{
-				// TODO - 여기서 돈쓰는 
 				ownerClientId.Value = requestingClientId;
 				GetComponent<NetworkObject>().ChangeOwnership(requestingClientId);
 				GrantInteractionClientRPC(requestingClientId);

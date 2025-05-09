@@ -1,10 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Unity.Mathematics;
 using DG.Tweening;
-using Unity.VisualScripting;
 using Garage.Utils;
 
 namespace Garage.Manager
@@ -31,6 +27,9 @@ namespace Garage.Manager
         {
             Init();
             light = GetComponent<Light>();
+            light.transform.position = startPos; // 처음 위치
+            light.transform.localEulerAngles = mainStartRot; // 처음 각도
+            light.transform.DORotate(mainEndRot, 600f);
         }
 
         private void Init()

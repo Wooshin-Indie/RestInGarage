@@ -49,9 +49,9 @@ namespace Garage.Manager
 			sp.SetSpawnPoint(Utils.VehicleDirection.Down);
 			spawnPoints.Add(sp);
 
-			//VehicleSpawnPoint sp1 = Instantiate(spawnPointPrefab, new Vector3(0, 0, -laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
-			//sp1.SetSpawnPoint(Utils.VehicleDirection.Up);
-			//spawnPoints.Add(sp1);
+			VehicleSpawnPoint sp1 = Instantiate(spawnPointPrefab, new Vector3(0, 0, -laneLength), Quaternion.identity).GetComponent<VehicleSpawnPoint>();
+			sp1.SetSpawnPoint(Utils.VehicleDirection.Up);
+			spawnPoints.Add(sp1);
 		}
 
 		/// <summary>
@@ -74,9 +74,8 @@ namespace Garage.Manager
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
-				car.SyncIsBrokenClientRPC(car.CarStatus.isBroken);
                 car.SetLane(spawnPoint.transform.position.x, spawnPoint.transform.position.z > 0 ? Utils.VehicleDirection.Down : Utils.VehicleDirection.Up);
-                car.InitCarStatus();
+                car.InitCarStatusServer();
 			}
 			else return;
 		}
