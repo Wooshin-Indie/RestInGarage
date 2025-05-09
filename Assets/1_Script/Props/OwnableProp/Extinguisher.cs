@@ -85,8 +85,8 @@ namespace Garage.Props
 			}
 			else
 			{
-				transform.position = gridPosition.Value;
-				transform.rotation = Quaternion.identity;
+				rigid.MovePosition(gridPosition.Value);
+				rigid.MoveRotation(Quaternion.identity);
 				rigid.linearVelocity = Vector3.zero;
 			}
 		}
