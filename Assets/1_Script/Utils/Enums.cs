@@ -17,6 +17,7 @@ namespace Garage.Utils
         Tire,
         Oilgun,
         Wrench,
+        Extinguisher
     }
 
     public enum VehicleDirection

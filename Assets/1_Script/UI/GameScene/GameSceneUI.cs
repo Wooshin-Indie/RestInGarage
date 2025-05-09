@@ -15,10 +15,14 @@ namespace Garage.UI.GameScene
     public class GameSceneUI : MonoBehaviour
     {
         [Header("HUD")]
-        [SerializeField] private TextMeshProUGUI balanceText;
+        [SerializeField] private BalanceUI balanceText;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
+
+        [SerializeField] private TextMeshProUGUI carPartName;
+        [SerializeField] private ShopInfo shopInfo;
+
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> NetworkObjectId
@@ -76,7 +80,7 @@ namespace Garage.UI.GameScene
 
         public void OnBalancedChanged(int prev, int balance)
         {
-            balanceText.text = balance.ToString();
+            balanceText.SetBalance(balance);
         }
 
         // 완성되면 꺼지는거나 Tire끼웠을때도 뭐 띄워야됨
@@ -110,6 +114,13 @@ namespace Garage.UI.GameScene
         {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
             carStatusInfo[carID][tire].ChangeTireImage();
+		}
+
+        // 화면에 Shop Item 정보를 띄움
+        public void PopupItemInfo(ItemData data)
+        {
+            shopInfo.SetInfo(data);
+            shopInfo.gameObject.SetActive(true);
         }
 	}
 }

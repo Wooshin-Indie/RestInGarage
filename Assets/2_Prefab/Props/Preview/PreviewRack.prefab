@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6132898960838511418}
   - component: {fileID: 6956996108057045930}
   - component: {fileID: 743401431004540994}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: PreviewRack
   m_TagString: Untagged
   m_Icon: {fileID: 0}

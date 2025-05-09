@@ -1,7 +1,8 @@
 using Garage.Props;
+using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
+using UnityEngine.UIElements;
 
 namespace Garage.Manager
 {
@@ -70,8 +71,9 @@ namespace Garage.Manager
 					}
 				}
 			}
-			
-			// 마지막 Index는 파는 곳
+
+			BuildingManager.Instance.OnBuyItem(propNetId);
+
 			if(gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
 				EconomyManager.Instance.EarnMoney_HostOnly(oProp.ItemData.SellPrice);
@@ -103,7 +105,7 @@ namespace Garage.Manager
 				int rotation = wheelRotate;
 
 				prop.SetGridPosition(position);
-				prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+				prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
 
 				TryPlaceResultClientRpc(true, propNetId, position, rotation);
 			}
@@ -123,7 +125,8 @@ namespace Garage.Manager
 			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			var prop = obj.GetComponent<OwnableProp>();
 
-			prop.transform.rotation = Quaternion.Euler(0f, rotation * 90f, 0f);
+			prop.GetComponent<Rigidbody>().SetPosition(pos);
+			prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
 		}
 	}
 }

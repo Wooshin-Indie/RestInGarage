@@ -123,7 +123,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: ae7a32b34a3b03043afe2e1bebb234df, type: 2}
-  isCarry: 0
+  isCarry: 1
   previewPrefab: {fileID: 8379998864351062203, guid: 8521ff113355b5441957696f63ae537d, type: 3}
 --- !u!1001 &8225151536918808819
 PrefabInstance:
