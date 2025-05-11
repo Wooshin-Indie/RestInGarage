@@ -547,7 +547,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8090333718313200712}
+  m_Father: {fileID: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.55, y: 1}
   m_AnchorMax: {x: 0.95, y: 1}
@@ -798,9 +798,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   balanceText: {fileID: 1089780290}
   carStatusUIPrefab: {fileID: 5610953079502897029, guid: 04ab8def65fa474428575f6bce85258d, type: 3}
-  carPartName: {fileID: 0}
-  shopInfo: {fileID: 5301772727738478027}
-  priceTextPrefab: {fileID: 4694303986074475783, guid: 2f66e0c61729c1546a952ea737eb46b8, type: 3}
+  carPartName: {fileID: 224969177}
+  shopInfo: {fileID: 142566774}
 --- !u!114 &404230441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3667,13 +3666,13 @@ MonoBehaviour:
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}
   prefabList:
   - {fileID: 3544855763098417, guid: 469c525377c04764d9e99b90d608fe9a, type: 3}
-  - {fileID: 8084718555022500170, guid: 15eba1e5f050bfd439ff2a7ec4a623c7, type: 3}
   - {fileID: 1125104945815731866, guid: 120ee973cc3e36d418d7eac8e0134b34, type: 3}
   lightPrefab: {fileID: 1088789332951765597, guid: 19201ba5f45fb5540ba9e68173741c5f, type: 3}
   shopPositions:
   - {x: 0, y: 0, z: 0}
   - {x: -5, y: 0, z: 0}
   - {x: -10, y: 0, z: 0}
+  - {x: -15, y: 0, z: 0}
 --- !u!1 &1419189502
 GameObject:
   m_ObjectHideFlags: 0
@@ -7410,4 +7409,5 @@ SceneRoots:
   - {fileID: 864579740}
   - {fileID: 1029262920}
   - {fileID: 1465153905}
-  - {fileID: 701033069}
+  - {fileID: 224969176}
+  - {fileID: 233692432}
