@@ -33,6 +33,11 @@ namespace Garage.Props
 		public override void OnEndInteraction(Transform controller)
 		{
 			base.OnEndInteraction(controller);
+
+			if (GameManagerEx.Instance.IsDay)
+			{
+				SoundManager.Instance.PlaySfx(SFXType.Tape, .8f, .8f);
+			}
 		}
 
 		private void Update()

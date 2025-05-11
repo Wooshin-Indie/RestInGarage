@@ -55,8 +55,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.034859188, y: 0.031387012, z: 0.10000001}
-  m_Center: {x: -0.0007050056, y: 0.01, z: 0}
+  m_Size: {x: 0.034859188, y: 0.010367644, z: 0.10000002}
+  m_Center: {x: -0.00070500525, y: 0.00876866, z: 0}
 --- !u!114 &8466759521667992767
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +123,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: ae7a32b34a3b03043afe2e1bebb234df, type: 2}
-  isCarry: 1
+  isCarry: 0
   previewPrefab: {fileID: 8379998864351062203, guid: 8521ff113355b5441957696f63ae537d, type: 3}
 --- !u!1001 &8225151536918808819
 PrefabInstance:

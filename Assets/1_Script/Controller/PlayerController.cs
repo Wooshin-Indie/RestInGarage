@@ -54,7 +54,7 @@ namespace Garage.Controller
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
 		private CarPartBase currentFixablePart = null;
-		private CarPartBase preFixablePart = null;
+		private CarPartBase preEnlargedFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
 		public OwnableProp RecentlyDetectedProp => recentlyDetectedProp;
@@ -304,24 +304,21 @@ namespace Garage.Controller
 					{
 						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
 						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
-
-						//if (currentFixablePart == preFixablePart) continue;
-						preFixablePart = currentFixablePart;
                     }
 				}
 			}
 
-			bool isCurFixableExist = currentFixablePart != null;
-            if (isCurFixableExist)
+
+			if (currentFixablePart == null || currentFixablePart != preEnlargedFixablePart)
 			{
-                // currentFixablePart 있으므로 확대 시도
-                UIManager.Game.TryToResizeCarPartUI(currentFixablePart, true);
+                UIManager.Game.TryToReducePreCarPartUI(preEnlargedFixablePart);
             }
-            else
-			{
-                // currentFixablePart가 null이므로 이전에 저장해놓은 FixablePart 축소 시도
-                UIManager.Game.TryToResizeCarPartUI(preFixablePart, false);
+			if (currentFixablePart != null)
+            {
+                UIManager.Game.TryToEnlargeCurCarPartUI(currentFixablePart);
+				preEnlargedFixablePart = currentFixablePart;
             }
+			
 
 
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
@@ -333,7 +330,8 @@ namespace Garage.Controller
 		}
 
         #region Animation Events
-        private void OnStartPlace()
+
+		private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
@@ -356,11 +354,14 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
+			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
+
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
+
 		[ServerRpc(RequireOwnership = false)]
 		private void DespawnPropServerRPC(ulong networkId)
 		{
@@ -370,6 +371,30 @@ namespace Garage.Controller
 				{
 					networkObject.Despawn(true);
 				}
+			}
+		}
+
+		private void OnFootstep()
+		{
+			// TODO - 바닥 텍스쳐에 따라 소리 다르게 하면 좋을듯?
+			// 지금은 자갈 밟는 소리임
+			SoundManager.Instance.PlaySfx(SFXType.Walk, .7f, 1f);
+		}
+		private void OnCrouch()
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Wrench, .5f, 1.1f);
+		}
+
+		private void OnHammer()
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+		}
+
+		private void OnOiling()
+		{
+			if(currentOwningProp is OilPump)
+			{
+				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 			}
 		}
 

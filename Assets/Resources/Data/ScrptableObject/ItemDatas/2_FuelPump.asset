@@ -12,7 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6343241022d168147b6ad1e7a8870acd, type: 3}
   m_Name: 2_FuelPump
   m_EditorClassIdentifier: 
+  isRevealData: 1
   itemID: 2
   itemName: Fuel Pump
   buyPrice: 100
   sellPrice: 10
+  descriptionKey: Fuel pump description key
+  itemFeatures:
+  - FeatureName: Fuel Pump Feat
+    FeatureValue: 15
+    IsPositiveValue: 1
+    IsPositiveFeature: 1
