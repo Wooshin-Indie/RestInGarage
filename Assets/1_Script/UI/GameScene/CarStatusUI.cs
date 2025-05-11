@@ -2,6 +2,7 @@ using Garage.Controller;
 using Garage.Utils;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 namespace Garage.UI.GameScene.Items
 {
@@ -138,18 +139,16 @@ namespace Garage.UI.GameScene.Items
             maskToFill.anchorMax = new Vector2(maskToFill.anchorMax.x, progress);
         }
 
-        public void ResizeCarPartUI(bool enlarge)
+        private float uiExpandDuration = 0.2f;
+        public void EnlargeCarPartUI()
         {
-            // 크기 확대
-            if (enlarge)
-            {
-                uiRect.sizeDelta = 1.5f * originSize;
-            }
-            // 크기 축소
-            else
-            {
-                uiRect.sizeDelta = originSize;
-            }
+            uiRect.DOSizeDelta(1.5f * originSize, uiExpandDuration).SetEase(Ease.OutCubic);
+            //uiRect.sizeDelta = 1.5f * originSize;
+        }
+        public void ReduceCarPartUI()
+        {
+            uiRect.DOSizeDelta(originSize, uiExpandDuration).SetEase(Ease.OutCubic);
+            //uiRect.sizeDelta = originSize;
         }
 
         public void ChangeTireImage(bool inserted = true)

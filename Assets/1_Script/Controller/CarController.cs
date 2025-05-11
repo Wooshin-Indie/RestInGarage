@@ -17,6 +17,9 @@ namespace Garage.Controller
         [Header("Car Parts Transform")]
         [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
 
+		[SerializeField] private ParticleSystem smokePS;
+		[SerializeField] private ParticleSystem allRepairedVFX;
+
         [FoldoutGroup("Move Parameters")]
 		[SerializeField] private float moveSpeed = 5f;
 		[SerializeField] private float stopDistance = 15f;
@@ -44,7 +47,8 @@ namespace Garage.Controller
 		{
 			rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
-		}
+            smokePS.Stop();
+        }
 
 		private void FixedUpdate()
 		{
@@ -148,21 +152,24 @@ namespace Garage.Controller
 			}
 		}
 
-		[ServerRpc(RequireOwnership = false)]
+        private void AddTireLogic(CarParts part)
+        {
+            carStatus.AddTire(part);
+            UIManager.Game.OnTireInserted(this, part);
+            RevealTire(part);
+        }
+        [ServerRpc(RequireOwnership = false)]
 		private void AddTireServerRPC(CarParts part)
 		{
-			carStatus.AddTire(part);
-			UIManager.Game.OnTireInserted(this, part);
+            AddTireLogic(part);
             AddTireClientRPC(part);
 		}
 		[ClientRpc]
 		private void AddTireClientRPC(CarParts part)
 		{
 			if (IsHost) return;
-			carStatus.AddTire(part);
-            UIManager.Game.OnTireInserted(this, part);
+			AddTireLogic(part);
         }
-
 
 		private float fixingTime = 3f; // 고치는데 걸리는 시간
         [ServerRpc(RequireOwnership = false)]
@@ -170,7 +177,7 @@ namespace Garage.Controller
 		{
             if (carStatus.IsProgressFull(part))
             {
-                OnProgressFulledClientRPC(part, networkId);
+                OnPartRepairedClientRPC(part, networkId);
 				Debug.Log(part + "is fulled");
 
 				isAnyBroken = carStatus.IsThereAnyBroken();
@@ -196,7 +203,7 @@ namespace Garage.Controller
             UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
         }
         [ClientRpc]
-        private void OnProgressFulledClientRPC(CarParts part, ulong networkId)
+        private void OnPartRepairedClientRPC(CarParts part, ulong networkId)
 		{
 			carStatus.SetIsBrokenAsFalse(part); // 비트마스킹 끔
 
@@ -208,13 +215,28 @@ namespace Garage.Controller
             }
             Debug.Log("Part Repair Totally Ended");
             UIManager.Game.RemoveCarStatusUI(this, part);
+
+			switch (part)
+			{
+				case CarParts.FLT:
+				case CarParts.FRT:
+                case CarParts.RLT:
+                case CarParts.RRT:
+                    break;
+				case CarParts.Engine:
+                    smokePS.Stop();
+                    break;
+				case CarParts.Oil:
+					break;
+            }
         }
         [ClientRpc]
         private void OnAllPartsRepairedClientRPC()
         {
-			if (IsHost) return;
+			if (!IsHost)
+				isAnyBroken = false;
 
-			isAnyBroken = false;
+            allRepairedVFX.Play();
         }
 
 
@@ -307,10 +329,13 @@ namespace Garage.Controller
 			{
 				if (carStatus.IsBroken((CarParts)i))
 				{
-					ChangeTirePresence((CarParts)i);
+					HideTire((CarParts)i);
                 }
 			}
-			
+
+            if (carStatus.IsBroken(CarParts.Engine))
+                smokePS.Play();
+
             UIManager.Game.GenerateCarStatusUIs(this, carStatus);
         }
 		[ClientRpc]
@@ -322,10 +347,16 @@ namespace Garage.Controller
             InitCarStatusLogic();
         }
 
-		private void ChangeTirePresence(CarParts part)
+		private void HideTire(CarParts part)
 		{
-            //PartTransforms[(int)part].GetComponent<MeshRenderer>().materials[0].
+            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
+			rend.enabled = false;
+        }
 
+		private void RevealTire(CarParts part)
+		{
+            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
+            rend.enabled = true;
         }
     }
 }
