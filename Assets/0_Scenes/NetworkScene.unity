@@ -800,6 +800,7 @@ MonoBehaviour:
   carStatusUIPrefab: {fileID: 5610953079502897029, guid: 04ab8def65fa474428575f6bce85258d, type: 3}
   carPartName: {fileID: 0}
   shopInfo: {fileID: 5301772727738478027}
+  priceTextPrefab: {fileID: 4694303986074475783, guid: 2f66e0c61729c1546a952ea737eb46b8, type: 3}
 --- !u!114 &404230441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3667,7 +3668,7 @@ MonoBehaviour:
   prefabList:
   - {fileID: 3544855763098417, guid: 469c525377c04764d9e99b90d608fe9a, type: 3}
   - {fileID: 8084718555022500170, guid: 15eba1e5f050bfd439ff2a7ec4a623c7, type: 3}
-  - {fileID: 4307560395867504668, guid: bf0ea4a7b2c279047a7d801bff445913, type: 3}
+  - {fileID: 1125104945815731866, guid: 120ee973cc3e36d418d7eac8e0134b34, type: 3}
   lightPrefab: {fileID: 1088789332951765597, guid: 19201ba5f45fb5540ba9e68173741c5f, type: 3}
   shopPositions:
   - {x: 0, y: 0, z: 0}

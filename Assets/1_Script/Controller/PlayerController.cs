@@ -395,7 +395,10 @@ namespace Garage.Controller
 
 		private void OnOiling()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+			if(currentOwningProp is OilPump)
+			{
+				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+			}
 		}
 
 		#endregion

@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 using Garage.Manager;
+using Garage.UI.Item;
 
 namespace Garage.UI.GameScene
 {
@@ -129,6 +129,34 @@ namespace Garage.UI.GameScene
         {
             shopInfo.SetInfo(data);
             shopInfo.gameObject.SetActive(true);
+        }
+
+        [SerializeField] private GameObject priceTextPrefab;
+        private Dictionary<ulong, ItemPriceText> priceTexts = new();
+
+        public void RevealItemPrice(Vector3 pos, ulong netId, int price)
+		{
+            EraseItemPrice(netId);
+
+			priceTexts[netId] = Instantiate(priceTextPrefab, transform).GetComponent<ItemPriceText>();
+			priceTexts[netId].SetItemPrice(pos, price);
+		}
+
+        public void EraseItemPrice(ulong netId)
+		{
+			if (priceTexts.ContainsKey(netId))
+			{
+				if (priceTexts[netId] != null) Destroy(priceTexts[netId].gameObject);
+			}
+		}
+
+        public void EraseAllItemPrice()
+        {
+            foreach(var item in priceTexts.Values)
+            {
+                if(item != null) Destroy(item.gameObject); 
+            }
+            priceTexts.Clear();
         }
 	}
 }

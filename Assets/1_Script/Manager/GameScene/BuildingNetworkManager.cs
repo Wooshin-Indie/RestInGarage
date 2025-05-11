@@ -2,7 +2,6 @@ using Garage.Props;
 using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Garage.Manager
 {
@@ -73,8 +72,9 @@ namespace Garage.Manager
 			}
 
 			BuildingManager.Instance.OnBuyItem(propNetId);
+			OnShopItemBuyedClientRPC(propNetId);
 
-			if(gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
+			if (gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
 				EconomyManager.Instance.EarnMoney_HostOnly(oProp.ItemData.SellPrice);
 				OwnableProp tmpProp = null;
@@ -127,6 +127,29 @@ namespace Garage.Manager
 
 			prop.GetComponent<Rigidbody>().SetPosition(pos);
 			prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
+		}
+
+
+
+		[ClientRpc]
+		public void OnShopItemRevealedClientRPC()
+		{
+			foreach (var item in BuildingManager.Instance.ItemDictionary)
+			{
+				UIManager.Game.RevealItemPrice(item.Value.transform.position - new Vector3(0, 0, 1.5f), item.Key, item.Value.ItemData.BuyPrice);
+			}
+		}
+
+		[ClientRpc]
+		public void OnShopItemBuyedClientRPC(ulong netId)
+		{
+			UIManager.Game.EraseItemPrice(netId);
+		}
+
+		[ClientRpc]
+		public void OnShopItemEraseAllClientRPC()
+		{
+			UIManager.Game.EraseAllItemPrice();
 		}
 	}
 }
