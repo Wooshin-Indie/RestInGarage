@@ -12,7 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6343241022d168147b6ad1e7a8870acd, type: 3}
   m_Name: 4_Extinguisher
   m_EditorClassIdentifier: 
+  isRevealData: 1
   itemID: 4
   itemName: Extinguisher
   buyPrice: 50
   sellPrice: 5
+  descriptionKey: A fire extinguisher is a safety device used to put out small fires,
+    including those on vehicles. It sprays a chemical that cools the flames and helps
+    stop the fire from spreading.
+  itemFeatures:
+  - FeatureName: Extinguish time
+    FeatureValue: 25
+    IsPositiveValue: 0
+    IsPositiveFeature: 1
+  - FeatureName: Player Speed
+    FeatureValue: 20
+    IsPositiveValue: 0
+    IsPositiveFeature: 0

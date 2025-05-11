@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6343241022d168147b6ad1e7a8870acd, type: 3}
   m_Name: 1_TireRack
   m_EditorClassIdentifier: 
+  isRevealData: 1
   itemID: 1
   itemName: Tire Rack
   buyPrice: 250
   sellPrice: 8
+  descriptionKey: Tire rack description key.
+  itemFeatures: []

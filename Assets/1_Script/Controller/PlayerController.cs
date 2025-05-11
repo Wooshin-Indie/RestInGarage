@@ -333,7 +333,8 @@ namespace Garage.Controller
 		}
 
         #region Animation Events
-        private void OnStartPlace()
+
+		private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
@@ -356,11 +357,14 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
+			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
+
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
 			currentOwningProp = null;
 			isAbleToMove = true;
 		}
+
 		[ServerRpc(RequireOwnership = false)]
 		private void DespawnPropServerRPC(ulong networkId)
 		{
@@ -371,6 +375,28 @@ namespace Garage.Controller
 					networkObject.Despawn(true);
 				}
 			}
+		}
+
+		private void OnFootstep()
+		{
+			// TODO - 바닥 텍스쳐에 따라 소리 다르게 하면 좋을듯?
+			// 지금은 자갈 밟는 소리임
+			SoundManager.Instance.PlaySfx(SFXType.Walk, .7f, 1f);
+		}
+		private void OnCrouch()
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Wrench, .7f, 1.1f);
+		}
+
+		private void OnHammer()
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+		}
+
+		private void OnOiling()
+		{
+			Debug.Log("ONOILING");
+			SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 		}
 
 		#endregion
