@@ -9,6 +9,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using Garage.Manager;
 
 namespace Garage.UI.GameScene
 {
@@ -80,6 +81,13 @@ namespace Garage.UI.GameScene
 
         public void OnBalancedChanged(int prev, int balance)
         {
+            if (prev == balance) return;
+
+            if (prev < balance)
+                SoundManager.Instance.PlaySfx(SFXType.EarnMoney, 1f, 1f);
+            else
+				SoundManager.Instance.PlaySfx(SFXType.UseMoney, .8f, .8f);
+
             balanceText.SetBalance(balance);
         }
 

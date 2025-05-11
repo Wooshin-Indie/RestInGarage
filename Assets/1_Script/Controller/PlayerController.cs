@@ -385,7 +385,7 @@ namespace Garage.Controller
 		}
 		private void OnCrouch()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Wrench, .7f, 1.1f);
+			SoundManager.Instance.PlaySfx(SFXType.Wrench, .5f, 1.1f);
 		}
 
 		private void OnHammer()
@@ -395,7 +395,6 @@ namespace Garage.Controller
 
 		private void OnOiling()
 		{
-			Debug.Log("ONOILING");
 			SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 		}
 
