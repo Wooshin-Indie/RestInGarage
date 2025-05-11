@@ -5,10 +5,8 @@ using Garage.Utils;
 using Garage.Structs.CarPart;
 using System;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
 using Garage.Manager;
 using Garage.UI.Item;
@@ -23,7 +21,6 @@ namespace Garage.UI.GameScene
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
 
-        [SerializeField] private TextMeshProUGUI carPartName;
         [SerializeField] private ShopInfo shopInfo;
 
 
