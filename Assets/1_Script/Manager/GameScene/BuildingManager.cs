@@ -159,7 +159,8 @@ namespace Garage.Manager
             ItemDictionary.Clear();
 			DecoPropDictionary.Clear();
             TurnOffLights();
-        }
+			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
+		}
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
 		public void OnStageEnd()
@@ -178,7 +179,9 @@ namespace Garage.Manager
 			}
 
 			SpawnNightDecoProps();
-        }
+
+			BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC();
+		}
 
 		private void SpawnNightDecoProps()
 		{

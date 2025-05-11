@@ -20,7 +20,7 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			if (controller.CurrentOwningProp.IsCarry)
+			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
 				controller.SetAnimParam((int)AnimationType.Carry, true);
 			}
@@ -50,9 +50,9 @@ namespace Garage.Controller.StateMachine
 			bool isRun = Managers.Input.Control.Player.Run.IsPressed();
 			controller.MovePosition(move, isRun ? controller.RunSpeed : controller.WalkSpeed, controller.RunSpeed);
 
-			float speed = (controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed :
+			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed :
 				((isRun ? controller.RunSpeed : controller.WalkSpeed));
-			float maxSpeed = (controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed : 
+			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed : 
 				controller.RunSpeed;
 
 			controller.MovePosition(move, speed, maxSpeed);

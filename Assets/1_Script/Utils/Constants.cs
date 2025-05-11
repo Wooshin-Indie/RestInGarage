@@ -5,7 +5,7 @@ namespace Garage.Utils
     public static class Constants
     {
         /** PATHS **/
-        public static readonly string PATH_SFX = "";
+        public static readonly string PATH_SFX = "Sounds/SFX/";
 
         /** TAGS **/
 		public static readonly string TAG_CHAT = "Chat";
