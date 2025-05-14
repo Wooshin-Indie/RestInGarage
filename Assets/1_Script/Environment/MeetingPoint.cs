@@ -16,8 +16,7 @@ namespace Garage.Environment
 		[Header("Progress Bar")]
 		[SerializeField] private Image meetingProgress;
 
-		[SerializeField, ReadOnly]
-		private float elapsedTime = 0f;
+		private NetworkVariable<float> elapsedTime = new();
 
 		[SerializeField, ReadOnly]
 		private bool isMeeting = false;
@@ -35,7 +34,7 @@ namespace Garage.Environment
 
 		public void StartMeet()
 		{
-			elapsedTime = 0f;
+			elapsedTime.Value = 0f;
 			gameObject.SetActive(true);
 		}
 
@@ -46,6 +45,8 @@ namespace Garage.Environment
 
 		private void Update()
 		{
+			meetingProgress.fillAmount = elapsedTime.Value / maxTime;
+
 			if (!IsHost) return;
 
 			int playerCount  = Physics.OverlapBoxNonAlloc(transform.position + boxCenter, boxSize * 0.5f, hits, Quaternion.identity, Constants.LAYER_PLAYER);
@@ -54,8 +55,8 @@ namespace Garage.Environment
 			if (isMeeting)
 			{
 				SunManager.Instance.SetTimePhase(TimePhase.Morning, maxTime);
-				elapsedTime += Time.deltaTime;
-				if(elapsedTime > maxTime)
+				elapsedTime.Value+= Time.deltaTime;
+				if(elapsedTime.Value > maxTime)
 				{
 					GameManagerEx.Instance.StartNextStage();
 				}
@@ -63,10 +64,8 @@ namespace Garage.Environment
 			else
 			{
 				SunManager.Instance.SetTimePhase(TimePhase.Night, maxTime);
-				if (elapsedTime > 0f) elapsedTime -= Time.deltaTime;
+				if (elapsedTime.Value > 0f) elapsedTime.Value -= Time.deltaTime;
 			}
-
-			meetingProgress.fillAmount = elapsedTime / maxTime;
 		}
 
 		private void OnDrawGizmos()

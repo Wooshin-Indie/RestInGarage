@@ -4,7 +4,6 @@ using Garage.Structs;
 using Garage.Utils;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -45,12 +44,18 @@ namespace Garage.Manager
 		public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
 		public Action OnDisconnected { get; set; }
 
-		[SerializeField] private MeetingPoint meetingPoint;
+		[SerializeField] private GameObject meetingPointPrefab;
 
+		private MeetingPoint meetingPoint;
 
 		public void StartNextStage()
 		{
-			meetingPoint.EndMeet();
+			if (!isHost) return;
+
+			if (meetingPoint != null)
+			{
+				meetingPoint.EndMeet();
+			}
 
 			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
 			UIManager.Game.PopupStageStart(3f);
@@ -80,7 +85,15 @@ namespace Garage.Manager
 		public void OnStageEnd()
 		{
 			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+			{
+				if (isHost && meetingPoint == null)
+				{
+					GameObject go = Instantiate(meetingPointPrefab);
+					go.GetComponent<NetworkObject>().Spawn();
+					meetingPoint = go.GetComponent<MeetingPoint>();
+				}
 				meetingPoint.StartMeet();
+			}
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
 			BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
