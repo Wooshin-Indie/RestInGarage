@@ -142,8 +142,12 @@ namespace Garage.Manager
 		public void GameStarted()
 		{
 			UIManager.Instance.OnGameStart();
-			OnStageEnd();
-			BuildingManager.Instance.BuildBasicBuildings();
+
+			if (!isHost)
+			{
+				OnStageEnd();
+				BuildingManager.Instance.BuildBasicBuildings();
+			}
 		}
 
 		public void GameEnded()
