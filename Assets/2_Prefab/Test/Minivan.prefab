@@ -899,6 +899,7 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 1847
+  decelerationRate: 1
 --- !u!114 &6328996501251874881
 MonoBehaviour:
   m_ObjectHideFlags: 0

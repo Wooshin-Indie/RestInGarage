@@ -6,9 +6,6 @@ using Garage.Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
-using System;
-using UnityEditor;
-using System.Runtime.ConstrainedExecution;
 
 namespace Garage.Controller
 {
@@ -59,12 +56,12 @@ namespace Garage.Controller
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
 					(direction == VehicleDirection.Down && transform.position.z < 0))
 				{
-					StopVehicle();
+					BrakeVehicle();
 					return;
 				}
 				if (IsObstacleAhead(out float distance) && distance < stopDistance)
 				{
-					StopVehicle();
+					BrakeVehicle();
 					return;
 				}
 			}
@@ -81,7 +78,7 @@ namespace Garage.Controller
 					{
 						if (distance < tmpDistance)
 						{
-							StopVehicle();
+							BrakeVehicle();
 							return;
 						}
 					}
@@ -91,8 +88,12 @@ namespace Garage.Controller
 			MoveForward();
 		}
 
-		private void MoveForward()
+		private Vector3 moveVector = new Vector3(0f, 0f, 5f);
+		private float currentSpeedVelocityRef = 0f; // smooth damp용
+        private float accelerationTime = 1f; // 목표 속도까지 도달하는 데 걸리는 대략적인 시간
+        private void MoveForward()
 		{
+			Debug.Log("MovingMoving");
 			Vector3 pos = rigid.position;
 			float xOffset = targetLaneX - pos.x;
 
@@ -120,12 +121,46 @@ namespace Garage.Controller
 			}
 
 			rigid.MoveRotation(Quaternion.Slerp(rigid.rotation, targetRot, Time.fixedDeltaTime * 2f));
-			rigid.linearVelocity = rigid.rotation * Vector3.forward * moveSpeed;
-		}
 
-		private void StopVehicle()
+            float currentMagnitude = rigid.linearVelocity.magnitude;
+
+            // 목표 속도(moveSpeed)까지 부드럽게 가속합니다.
+            float newSpeedMagnitude = Mathf.SmoothDamp(
+                currentMagnitude,      // 현재 속도 크기
+                moveSpeed,           // 목표 속도 크기
+                ref currentSpeedVelocityRef, // 현재 속도 변화율 (SmoothDamp가 업데이트)
+                accelerationTime / 10,      // 목표 속도 도달 시간
+                Mathf.Infinity,        // 최대 가속도 (제한 없음)
+                Time.fixedDeltaTime    // FixedUpdate 시간 간격
+            );
+
+            // 차량의 현재 정면 방향 벡터를 가져옵니다.
+            Vector3 forwardDirection = direction == VehicleDirection.Up ? Vector3.forward : -Vector3.forward;
+
+			// 새로운 속도 크기와 현재 정면 방향을 사용하여 최종 속도 벡터를 설정합니다.
+			Debug.Log($"vel: {forwardDirection * newSpeedMagnitude}");
+
+			rigid.linearVelocity = forwardDirection * newSpeedMagnitude;
+        }
+
+		float stopThreshold = 0.05f;
+		[SerializeField] private float decelerationRate = 1f;
+        private void BrakeVehicle()
 		{
-			rigid.linearVelocity = Vector3.zero;
+			Debug.Log("Braking");
+			if (rigid.linearVelocity.magnitude > stopThreshold)
+			{
+				// 현재 속도에서 목표 속도(Vector3.zero)로 점차 보간
+				rigid.linearVelocity = Vector3.Lerp(rigid.linearVelocity, Vector3.zero, Time.fixedDeltaTime * decelerationRate);
+                // 또는 SmoothDamp 사용 (더 부드러운 감속)
+                // rigid.velocity = Vector3.SmoothDamp(rigid.velocity, targetVelocity, ref currentVelocityRef, 1f / decelerationRate);
+                // (SmoothDamp를 사용하려면 currentVelocityRef 변수와 smoothTime (1f/decelerationRate) 조정 필요)
+            }
+			else
+			{
+				rigid.linearVelocity = Vector3.zero;
+				rigid.angularVelocity = Vector3.zero;
+			}
 		}
 		
 		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)

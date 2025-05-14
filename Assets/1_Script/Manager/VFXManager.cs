@@ -18,15 +18,11 @@ namespace Garage.Manager
     }
     public enum VFXType
     {
-        None = -1, // 기본값 또는 오류 처리용
-        ExplosionSmall,
-        ExplosionLarge,
-        MuzzleFlashPistol,
-        MuzzleFlashRifle,
-        HitEffectGeneric,
-        HealAura,
-        SmokePoof,
-        CircleBurst
+        None = -1,
+        EngineSmoke,
+        FireExtingusher,
+        RepairSwing,
+        AllPartsRepaired
     }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
@@ -35,7 +31,7 @@ namespace Garage.Manager
         public VFXType Type;
         public Coroutine StopCoroutineRef; // Stop 호출 시 관련 코루틴 중지용 (선택적 최적화)
     }
-    // --- ---
+
 
     public class VFXManager : MonoBehaviour
     {
@@ -46,7 +42,7 @@ namespace Garage.Manager
         private void Awake()
         {
             Init();
-            
+
             InitPool();
         }
 
@@ -62,7 +58,6 @@ namespace Garage.Manager
                 Destroy(this.gameObject);
             }
         }
-
 
         #endregion
 
@@ -89,7 +84,7 @@ namespace Garage.Manager
 
             foreach (VFXData data in vfxList)
             {
-                vfxPoolTransform[data.type] = new GameObject { name = $"poolQueue_{data.type}"}.transform;
+                vfxPoolTransform[data.type] = new GameObject { name = $"poolQueue_{data.type}" }.transform;
                 vfxPoolTransform[data.type].parent = poolRoot;
 
                 vfxDataMap[data.type] = data; // 나중에 프리팹 참조를 위해 저장
@@ -98,9 +93,9 @@ namespace Garage.Manager
 
                 for (int i = 0; i < data.poolSize; i++)
                 {
-                    GameObject go = Instantiate(data.prefab, vfxPoolTransform[data.type]); // Hierarchy 정리
-                    go.SetActive(false);
-                    ParticleSystem ps = go.GetComponent<ParticleSystem>();
+                    GameObject instanceGO = Instantiate(data.prefab, vfxPoolTransform[data.type]); // Hierarchy 정리
+                    instanceGO.SetActive(false);
+                    ParticleSystem ps = instanceGO.GetComponent<ParticleSystem>();
                     // ParticleSystem이 없는 프리팹일 수도 있으므로 null 체크
                     if (ps != null)
                     {
@@ -108,7 +103,7 @@ namespace Garage.Manager
                         CheckStopActionSetting(ps.main, data.type, data.prefab.name);
                     }
                 }
-                
+
             }
         }
 
@@ -127,7 +122,6 @@ namespace Garage.Manager
 
         #endregion
 
-
         #region Play Methods
 
         /// <summary>
@@ -136,24 +130,24 @@ namespace Garage.Manager
         /// <returns>재생된 ParticleSystem 인스턴스 (제어 필요시 사용, null일 수 있음)</returns>
         public ParticleSystem PlayVFX(VFXType type, Vector3 position, Quaternion rotation, Transform parent = null)
         {
-            ParticleSystem ps = GetPooledInstance(type);
-            if (ps == null) return null;
+            ParticleSystem instancePS = GetPooledInstance(type);
+            if (instancePS == null) return null;
 
             // --- 루핑 확인 (One-shot용 함수이므로 경고) ---
-            if (ps.main.loop)
+            if (instancePS.main.loop)
             {
-                Debug.LogWarning($"VFXManager: Attempting to play a looping VFX '{type}' ('{ps.name}') using PlayVFX (for one-shots). Use PlayLoopingVFX instead if you need to stop it later.", ps.gameObject);
+                Debug.LogWarning($"VFXManager: Attempting to play a looping VFX '{type}' ('{instancePS.name}') using PlayVFX (for one-shots). Use PlayLoopingVFX instead if you need to stop it later.", instancePS.gameObject);
                 // 루핑이라도 일단 재생은 시키지만, 자동 반환 로직은 다를 수 있음
             }
 
             // --- 위치, 회전, 부모 설정 및 활성화 ---
-            SetupAndActivate(ps.gameObject, position, rotation, parent);
+            SetupAndActivate(instancePS.gameObject, position, rotation, parent);
 
             // --- 재생 및 자동 반환 코루틴 시작 ---
-            ps.Play();
-            StartCoroutine(ReturnToPoolAfterCompletion(ps, type)); // 완료 후 자동 반환
+            instancePS.Play();
+            StartCoroutine(ReturnToPoolAfterCompletion(instancePS, type)); // 완료 후 자동 반환
 
-            return ps;
+            return instancePS;
         }
 
         /// <summary>
@@ -162,17 +156,17 @@ namespace Garage.Manager
         /// <returns>활성화된 루핑 VFX의 고유 ID (오류 시 -1)</returns>
         public int PlayLoopingVFX(VFXType type, Vector3 position, Quaternion rotation, Transform parent = null)
         {
-            ParticleSystem ps = GetPooledInstance(type);
-            if (ps == null) return -1;
+            ParticleSystem instancePS = GetPooledInstance(type);
+            if (instancePS == null) return -1;
 
             // --- 위치, 회전, 부모 설정 및 활성화 ---
-            SetupAndActivate(ps.gameObject, position, rotation, parent);
+            SetupAndActivate(instancePS.gameObject, position, rotation, parent, false);
 
             // --- 재생 및 활성 목록에 추가 ---
-            ps.Play();
+            instancePS.Play();
 
             int id = nextLoopingEffectId++;
-            ActiveLoopingVFX activeVFX = new ActiveLoopingVFX { ParticleInstance = ps, Type = type };
+            ActiveLoopingVFX activeVFX = new ActiveLoopingVFX { ParticleInstance = instancePS, Type = type };
             activeLoopingEffects.Add(id, activeVFX);
 
             // Debug.Log($"Started looping VFX '{type}' with ID: {id}");
@@ -243,7 +237,6 @@ namespace Garage.Manager
             // Debug.Log($"Stopped {idsToStop.Count} looping VFX of type '{type}'.");
         }
 
-
         #endregion
 
         #region Pooling Internals
@@ -291,21 +284,21 @@ namespace Garage.Manager
         }
 
         // 인스턴스 활성화 및 설정 공통 로직
-        private void SetupAndActivate(GameObject instanceGO, Vector3 position, Quaternion rotation, Transform parent)
+        private void SetupAndActivate(GameObject instanceGO, Vector3 position, Quaternion rotation,
+                            Transform parent, bool worldPositionStays = true)
         {
             instanceGO.transform.position = position;
             instanceGO.transform.rotation = rotation;
             if (parent != null)
             {
-                instanceGO.transform.SetParent(parent, true); // worldPositionStays = true
+                instanceGO.transform.SetParent(parent, worldPositionStays); // worldPositionStays = true
             }
             else
             {
-                instanceGO.transform.SetParent(transform); // Manager를 기본 부모로
+                // instanceGO.transform.SetParent(transform); // Manager를 기본 부모로
             }
             instanceGO.gameObject.SetActive(true);
         }
-
 
         // One-shot VFX 자동 반환 코루틴
         private IEnumerator ReturnToPoolAfterCompletion(ParticleSystem ps, VFXType type)
@@ -331,12 +324,12 @@ namespace Garage.Manager
             }
             // 이미 비활성화된 경우라도 풀에는 다시 넣어야 함
 
-            ps.transform.SetParent(transform); // 부모 리셋
 
             if (vfxPool.TryGetValue(type, out Queue<ParticleSystem> queue))
             {
                 // 풀에 다시 넣기 전에 혹시 이미 들어있는지 확인 (선택적, Queue는 Contains 비효율적)
                 queue.Enqueue(ps);
+                ps.transform.SetParent(vfxPoolTransform[type]); // 부모 리셋
             }
             else
             {
@@ -369,4 +362,5 @@ namespace Garage.Manager
             }
         }
     }
+
 }
