@@ -1178,7 +1178,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 8608552576033507524}
   walkSpeed: 4
   runSpeed: 8
-  carrySpeed: 2
+  carrySpeed: 4
   boxWidth: 1
   boxHeight: 1.8
   meshRenderer: {fileID: 5760093498017814160}

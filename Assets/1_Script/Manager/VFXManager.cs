@@ -21,7 +21,7 @@ namespace Garage.Manager
         None = -1,
         EngineSmoke,
         FireExtingusher,
-        RepairSwing,
+        RepairHammering,
         AllPartsRepaired
     }
     // 활성 루핑 VFX 추적용 내부 클래스

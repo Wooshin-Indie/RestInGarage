@@ -388,6 +388,9 @@ namespace Garage.Controller
 		private void OnHammer()
 		{
 			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+
+			Vector3 VFXpos = currentOwningProp.transform.position;
+			// VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
 
 		private void OnOiling()

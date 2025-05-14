@@ -67,21 +67,10 @@ namespace Garage.Controller
 			}
 			else
 			{
-				if (IsObstacleAhead(out float distance))
+				if (IsObstacleAhead(out float distance) && distance < tmpDistance)
 				{
-					if (!isBypassing)
-					{
-						isBypassing = true;
-						targetLaneX += 5;
-					}
-					else
-					{
-						if (distance < tmpDistance)
-						{
-							BrakeVehicle();
-							return;
-						}
-					}
+					BrakeVehicle();
+					return;
 				}
 			}
 
@@ -138,12 +127,11 @@ namespace Garage.Controller
             Vector3 forwardDirection = direction == VehicleDirection.Up ? Vector3.forward : -Vector3.forward;
 
 			// 새로운 속도 크기와 현재 정면 방향을 사용하여 최종 속도 벡터를 설정합니다.
-			Debug.Log($"vel: {forwardDirection * newSpeedMagnitude}");
-
 			rigid.linearVelocity = forwardDirection * newSpeedMagnitude;
+            Debug.Log($"vel: {rigid.linearVelocity}");
         }
 
-		float stopThreshold = 0.05f;
+        float stopThreshold = 0.05f;
 		[SerializeField] private float decelerationRate = 1f;
         private void BrakeVehicle()
 		{
@@ -385,13 +373,17 @@ namespace Garage.Controller
 		private void HideTire(CarParts part)
 		{
             Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
-			rend.enabled = false;
+			MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
+            rend.enabled = false;
+			collid.enabled = false;
         }
 
 		private void RevealTire(CarParts part)
 		{
             Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
+            MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = true;
+            collid.enabled = true;
         }
     }
 }
