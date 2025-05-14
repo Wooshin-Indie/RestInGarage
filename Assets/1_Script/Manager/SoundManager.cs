@@ -9,7 +9,7 @@ namespace Garage.Manager
 
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
-		EarnMoney, UseMoney }
+		EarnMoney, UseMoney, Alarm, StartUp }
 	public enum SoundType { None, Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.

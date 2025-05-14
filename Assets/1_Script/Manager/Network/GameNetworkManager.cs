@@ -154,6 +154,11 @@ namespace Garage.Manager
 			}
 		}
 
+		public void StartGame()
+		{
+			LockLobby();
+		}
+
 		public void LockLobby()
 		{
 			currentLobby.Value.SetJoinable(false);

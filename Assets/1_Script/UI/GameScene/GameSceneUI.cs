@@ -10,6 +10,7 @@ using UnityEngine;
 using DG.Tweening;
 using Garage.Manager;
 using Garage.UI.Item;
+using Assets._1_Script.UI.GameScene;
 
 namespace Garage.UI.GameScene
 {
@@ -17,10 +18,10 @@ namespace Garage.UI.GameScene
     {
         [Header("HUD")]
         [SerializeField] private BalanceUI balanceText;
+        [SerializeField] private TimerText timerText;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
-
         [SerializeField] private ShopInfo shopInfo;
 
 
@@ -181,5 +182,24 @@ namespace Garage.UI.GameScene
             }
             priceTexts.Clear();
         }
+
+		public void PopupStageStart(float time)
+		{
+            SoundManager.Instance.PlaySfx(SFXType.StartUp, 1f, 1f);
+			Debug.Log("Game Start!");
+		}
+		public void PopupStageEnd(float time)
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Alarm, 1f, 1f);
+			Debug.Log("TIME'S UP!");
+        }
+
+        public void OnTimerChanged(float prevTime, float curTime)
+        {
+            if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
+            {
+                timerText.SetTime(Mathf.FloorToInt(curTime));
+            }
+		}
 	}
 }

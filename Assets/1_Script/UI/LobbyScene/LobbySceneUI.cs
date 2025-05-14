@@ -13,6 +13,8 @@ namespace Garage.UI.LobbyScene
 {
     public class LobbySceneUI : MonoBehaviour
     {
+		[SerializeField] private Transform onlyUIParent;
+
         [Header("Buttons")]
         [SerializeField] private Button disconnectButton;
         [SerializeField] private Button readyButton;
@@ -41,6 +43,11 @@ namespace Garage.UI.LobbyScene
 			public TMP_Text textObject;
 		}
 
+		private void Awake()
+		{
+			GameManagerEx.Instance.OnDisconnected += OnDisconnected;	
+		}
+
 		private void Start()
 		{
 
@@ -52,7 +59,8 @@ namespace Garage.UI.LobbyScene
                 NetworkTransmission.instance.IsTheClientReadyServerRPC(false, GameManagerEx.Instance.MyClientId);
             });
             startButton.onClick.AddListener(() => {
-            });
+				NetworkTransmission.instance.StartGameServerRPC();
+			});
         }
 
 		private void OnDestroy()
@@ -60,6 +68,15 @@ namespace Garage.UI.LobbyScene
 
 		}
 
+		public void OnGameStart()
+		{
+			onlyUIParent.gameObject.SetActive(false);
+		}
+
+		public void OnGameEnd()
+		{
+			onlyUIParent.gameObject.SetActive(true);
+		}
 
 		//private void Update()
 		//{
@@ -157,6 +174,15 @@ namespace Garage.UI.LobbyScene
 			{
 				startButton.gameObject.SetActive(isAllReady);
 			}
+		}
+
+		public void OnDisconnected()
+		{
+			for (int i = 0; i < cardList.Count; i++)
+			{
+				Destroy(cardList[i].gameObject);
+			}
+			cardList.Clear();
 		}
 	}
 }

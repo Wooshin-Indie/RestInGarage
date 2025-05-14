@@ -47,7 +47,7 @@ namespace Garage.Manager
 		{
 			mainUI.SetActive(false);
 			lobbyUI.SetActive(false);
-            //gameUI.SetActive(false);
+			gameUI.SetActive(false);
 
             switch (scene)
 			{
@@ -58,12 +58,15 @@ namespace Garage.Manager
 					break;
 				case SceneEnum.Lobby:
 					lobbyUI.SetActive(true);
+					lobbyUI.GetComponent<LobbySceneUI>().OnGameEnd();
 					break;
-				case SceneEnum.Game:
-					gameUI.SetActive(true);
-                    break;
 			}
 		}
 
+		public void OnGameStart()
+		{
+			lobbyUI.GetComponent<LobbySceneUI>().OnGameStart();
+			gameUI.SetActive(true);
+		}
 	}
 }

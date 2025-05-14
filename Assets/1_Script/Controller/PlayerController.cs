@@ -398,6 +398,12 @@ namespace Garage.Controller
 			}
 		}
 
+		private void OnKick()
+		{
+			// TODO - 여기서 발 차는 함수 호출하면됨
+			Debug.Log("KICK!");
+		}
+
 		#endregion
 	}
 }

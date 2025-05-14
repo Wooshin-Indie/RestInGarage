@@ -1,6 +1,5 @@
 using Garage.Interfaces;
 using Garage.Props;
-using IUtil;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -36,11 +35,12 @@ namespace Garage.Manager
 			{
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
 			}
+
+			GameManagerEx.Instance.OnDisconnected += OnDisconnected;
 		}
 		#endregion
 
 		[Header("Build")]
-		[SerializeField] private GameObject networkManagerPrefab;
 		[SerializeField] private List<Vector2Int> gridOrigin;
 		[SerializeField] private List<Vector2Int> gridSize;
 		[SerializeField] private GameObject gridPrefab;
@@ -63,9 +63,6 @@ namespace Garage.Manager
 		private Material lastAppliedMaterial = null;
 		private int wheelRotate = 0;
 
-		// TODO - 호스트가 게임 시작시 직접 스폰하도록
-		// + 초기 건물들도 여기서 스폰
-		[Button]
 		public void OnGameStart()
 		{
 			gridTiles = new();
@@ -78,13 +75,11 @@ namespace Garage.Manager
 					for (int j = 0; j < gridSize[t].y; j++)
 					{
 						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
-						tile.GetComponent<NetworkObject>().Spawn(); 
+						tile.GetComponent<NetworkObject>().Spawn();
 						tile.SetGridPosition(t, i, j);
 					}
 				}
 			}
-			GameObject go = Instantiate(networkManagerPrefab);
-			go.GetComponent<NetworkObject>().Spawn();
 
 			PlacedBuildings.Clear();
 		}
@@ -115,7 +110,7 @@ namespace Garage.Manager
 		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
 
 		[SerializeField] private List<GameObject> prefabList = new();
-        [SerializeField] private GameObject lightPrefab;
+		[SerializeField] private GameObject lightPrefab;
 		[SerializeField] private List<Vector3> shopPositions = new();
 
 		private Dictionary<ulong, Light> lightDictionary = new();
@@ -129,9 +124,9 @@ namespace Garage.Manager
 			}
 		}
 
-        private void TurnOffLights()
-        {
-			foreach(var light in lightDictionary)
+		private void TurnOffLights()
+		{
+			foreach (var light in lightDictionary)
 			{
 				if (light.Value == null) continue;
 				light.Value.GetComponent<NetworkObject>().Despawn();
@@ -141,30 +136,34 @@ namespace Garage.Manager
 			lightDictionary.Clear();
 		}
 
-        // 스테이지 시작 시 구매하지 않은 빌딩 삭제
-        public void OnStageStart()
+		// 스테이지 시작 시 구매하지 않은 빌딩 삭제
+		public void OnStageStart()
 		{
-			foreach(var entry in ItemDictionary)
+			foreach (var entry in ItemDictionary)
 			{
 				entry.Value.GetComponent<NetworkObject>().Despawn();
 				Destroy(entry.Value.gameObject);
 			}
 
-            foreach (var entry in DecoPropDictionary)
-            {
-                entry.Value.GetComponent<NetworkObject>().Despawn();
-                Destroy(entry.Value.gameObject);
-            }
+			foreach (var entry in DecoPropDictionary)
+			{
+				entry.Value.GetComponent<NetworkObject>().Despawn();
+				Destroy(entry.Value.gameObject);
+			}
 
-            ItemDictionary.Clear();
+			ItemDictionary.Clear();
 			DecoPropDictionary.Clear();
-            TurnOffLights();
+			TurnOffLights();
 			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
 		}
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
-		public void OnStageEnd()
+		public void OnStageEnd(int stageId)
 		{
+			SpawnNightDecoProps();
+
+			if (stageId <= 0) return;
+
 			// HACK - 랜덤으로 바꾸기
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
@@ -178,17 +177,16 @@ namespace Garage.Manager
 				lightDictionary[tmpGo.GetComponent<NetworkObject>().NetworkObjectId].GetComponent<NetworkObject>().Spawn();
 			}
 
-			SpawnNightDecoProps();
 
 			BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC();
 		}
 
 		private void SpawnNightDecoProps()
 		{
-           
-        }
 
-        public void TryPlaceBuilding(OwnableProp prop)
+		}
+
+		public void TryPlaceBuilding(OwnableProp prop)
 		{
 			if (tmpPreview != null)
 			{
@@ -218,7 +216,7 @@ namespace Garage.Manager
 			}
 			return avg / indices.Length;
 		}
-		
+
 		private int IsAbleToPlace(OwnableProp prop)
 		{
 			if (prop.GetComponent<IPlaceable>() == null) return -1;
@@ -304,7 +302,7 @@ namespace Garage.Manager
 			Vector3 forward = playerTransform.forward;
 			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
 			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset
-				  + new Vector3(placeSize.x %2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
+				  + new Vector3(placeSize.x % 2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
 
 			for (int t = 0; t < gridTiles.Count; t++)
 			{
@@ -352,11 +350,11 @@ namespace Garage.Manager
 			Vector3 sumPos = Vector3.zero;
 			for (int t = 0; t < gridTiles.Count; t++)
 			{
-				for(int i = 0; i < gridTiles[t].GetLength(0); i++)
+				for (int i = 0; i < gridTiles[t].GetLength(0); i++)
 				{
 					for (int j = 0; j < gridTiles[t].GetLength(1); j++)
 					{
-						if (gridTiles[t][i, j].prop != null && gridTiles[t][i,j].prop.GetComponent<NetworkObject>().NetworkObjectId == networkId)
+						if (gridTiles[t][i, j].prop != null && gridTiles[t][i, j].prop.GetComponent<NetworkObject>().NetworkObjectId == networkId)
 						{
 							count++;
 							sumPos += gridTiles[t][i, j].transform.position;
@@ -408,5 +406,23 @@ namespace Garage.Manager
 			}
 		}
 
+		private void OnDisconnected()
+		{
+			if (!NetworkManager.Singleton.IsHost) return;
+
+			for (int t = 0; t < gridOrigin.Count; t++)
+			{
+				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
+				for (int i = 0; i < gridSize[t].x; i++)
+				{
+					for (int j = 0; j < gridSize[t].y; j++)
+					{
+						gridTiles[t][i, j].GetComponent<NetworkObject>().Despawn();
+						Destroy(gridTiles[t][i, j].gameObject);
+					}
+				}
+			}
+			gridTiles.Clear();
+		}
 	}
 }
