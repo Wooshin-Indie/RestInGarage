@@ -3925,7 +3925,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9805b7aa0934f3a4ab0d6eb6e58515fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  meetingPoint: {fileID: 0}
+  meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0

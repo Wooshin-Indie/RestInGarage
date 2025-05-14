@@ -132,12 +132,9 @@ namespace Garage.Manager
 
 
 		[ClientRpc]
-		public void OnShopItemRevealedClientRPC()
+		public void OnShopItemRevealedClientRPC(Vector3 position, ulong netId, int buyPrice)
 		{
-			foreach (var item in BuildingManager.Instance.ItemDictionary)
-			{
-				UIManager.Game.RevealItemPrice(item.Value.transform.position - new Vector3(0, 0, 1.5f), item.Key, item.Value.ItemData.BuyPrice);
-			}
+			UIManager.Game.RevealItemPrice(position, netId, buyPrice);
 		}
 
 		[ClientRpc]

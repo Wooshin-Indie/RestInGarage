@@ -54,7 +54,7 @@ namespace Garage.Manager
 
 			if (meetingPoint != null)
 			{
-				meetingPoint.EndMeet();
+				meetingPoint.EndMeetClientRPC();
 			}
 
 			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
@@ -77,7 +77,9 @@ namespace Garage.Manager
 		public void EndStage()
 		{
 			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
-			Invoke(nameof(OnStageEnd), 2f);
+			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+				Invoke(nameof(OnStageEnd), 2f);
+			else OnStageEnd();
 
 			GameSynchronizer.Instance.IsDay.Value = false;
 		}
@@ -92,7 +94,7 @@ namespace Garage.Manager
 					go.GetComponent<NetworkObject>().Spawn();
 					meetingPoint = go.GetComponent<MeetingPoint>();
 				}
-				meetingPoint.StartMeet();
+				meetingPoint.StartMeetClientRPC();
 			}
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;

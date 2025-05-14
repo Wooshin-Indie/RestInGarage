@@ -178,7 +178,10 @@ namespace Garage.Manager
 			}
 
 
-			BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC();
+			foreach (var item in ItemDictionary)
+			{
+				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(0, 0, 1.5f), item.Key, item.Value.ItemData.BuyPrice);
+			}
 		}
 
 		private void SpawnNightDecoProps()

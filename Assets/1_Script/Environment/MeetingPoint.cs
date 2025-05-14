@@ -32,13 +32,15 @@ namespace Garage.Environment
 			}
 		}
 
-		public void StartMeet()
+		[ClientRpc]
+		public void StartMeetClientRPC()
 		{
 			elapsedTime.Value = 0f;
 			gameObject.SetActive(true);
 		}
 
-		public void EndMeet()
+		[ClientRpc]
+		public void EndMeetClientRPC()
 		{
 			gameObject.SetActive(false);
 		}
