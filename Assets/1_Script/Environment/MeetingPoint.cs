@@ -35,7 +35,9 @@ namespace Garage.Environment
 		[ClientRpc]
 		public void StartMeetClientRPC()
 		{
-			elapsedTime.Value = 0f;
+			if (IsHost)
+				elapsedTime.Value = 0f;
+
 			gameObject.SetActive(true);
 		}
 

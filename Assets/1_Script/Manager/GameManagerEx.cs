@@ -48,6 +48,12 @@ namespace Garage.Manager
 
 		private MeetingPoint meetingPoint;
 
+		public void OnHostCreated()
+		{
+			GameSynchronizer.Instance.IsDay.Value = false;
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
+		}
+
 		public void StartNextStage()
 		{
 			if (!isHost) return;
@@ -69,33 +75,32 @@ namespace Garage.Manager
 
 		public void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(20f);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 20f);
+			GameSynchronizer.Instance.SetGameTimer(1000f);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 1000f);
 			BuildingManager.Instance.OnStageStart();
 		}
 
 		public void EndStage()
 		{
+			GameSynchronizer.Instance.IsDay.Value = false;
 			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
 			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
 				Invoke(nameof(OnStageEnd), 2f);
 			else OnStageEnd();
 
-			GameSynchronizer.Instance.IsDay.Value = false;
 		}
 
 		public void OnStageEnd()
 		{
-			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+			if (!isHost) return;
+
+			if (meetingPoint == null)
 			{
-				if (isHost && meetingPoint == null)
-				{
-					GameObject go = Instantiate(meetingPointPrefab);
-					go.GetComponent<NetworkObject>().Spawn();
-					meetingPoint = go.GetComponent<MeetingPoint>();
-				}
-				meetingPoint.StartMeetClientRPC();
+				GameObject go = Instantiate(meetingPointPrefab);
+				go.GetComponent<NetworkObject>().Spawn();
+				meetingPoint = go.GetComponent<MeetingPoint>();
 			}
+			meetingPoint.StartMeetClientRPC();
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
 			BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
@@ -137,7 +142,8 @@ namespace Garage.Manager
 		public void GameStarted()
 		{
 			UIManager.Instance.OnGameStart();
-			StartNextStage();
+			OnStageEnd();
+			BuildingManager.Instance.BuildBasicBuildings();
 		}
 
 		public void GameEnded()
@@ -155,9 +161,10 @@ namespace Garage.Manager
 
 			BuildingManager.Instance.OnGameStart();
 			BuildingManager.Instance.OnStageEnd(0);
+			TrafficManager.Instance.OnStageStart();
 
-			SunManager.Instance.OnChangedToNight();
-			EndStage();
+			SunManager.Instance.OnChangedToNight(); 
+			OnHostCreated();
 		}
 
 		public void ConnectedAsClient()

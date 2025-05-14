@@ -10,7 +10,6 @@ using UnityEngine;
 using DG.Tweening;
 using Garage.Manager;
 using Garage.UI.Item;
-using Assets._1_Script.UI.GameScene;
 
 namespace Garage.UI.GameScene
 {
@@ -185,12 +184,12 @@ namespace Garage.UI.GameScene
 
 		public void PopupStageStart(float time)
 		{
-            SoundManager.Instance.PlaySfx(SFXType.StartUp, 1f, 1f);
+            SoundManager.Instance.PlaySfx(SFXType.StartUp, .9f, 1f);
 			Debug.Log("Game Start!");
 		}
 		public void PopupStageEnd(float time)
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Alarm, 1f, 1f);
+			SoundManager.Instance.PlaySfx(SFXType.Alarm, .8f, 1f);
 			Debug.Log("TIME'S UP!");
         }
 

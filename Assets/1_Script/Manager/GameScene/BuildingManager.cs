@@ -1,5 +1,6 @@
 using Garage.Interfaces;
 using Garage.Props;
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -82,6 +83,46 @@ namespace Garage.Manager
 			}
 
 			PlacedBuildings.Clear();
+		}
+
+		// HACK - 이걸 데이터로 저장해둬야함
+		public void BuildBasicBuildings()
+		{
+			GameObject go = Instantiate(prefabList[0]);
+			go.GetComponent<NetworkObject>().Spawn();
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
+				1, 0, new Vector2Int[8]
+				{
+					new Vector2Int(3, 16),
+					new Vector2Int(3, 17),
+					new Vector2Int(3, 18),
+					new Vector2Int(3, 19),
+					new Vector2Int(4, 16),
+					new Vector2Int(4, 17),
+					new Vector2Int(4, 18),
+					new Vector2Int(4, 19)
+				});
+			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
+			go = Instantiate(prefabList[2]);
+			go.GetComponent<NetworkObject>().Spawn();
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
+				1, 2, new Vector2Int[4]
+				{
+					new Vector2Int(3, 12),
+					new Vector2Int(3, 13),
+					new Vector2Int(4, 12),
+					new Vector2Int(4, 13),
+				});
+
+			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
+			go = Instantiate(prefabList[1]);
+			go.GetComponent<NetworkObject>().Spawn();
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
+				1, 0, new Vector2Int[1]
+				{
+					new Vector2Int(4, 10)
+				});
+			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 		}
 
 		public void RegisterTile(GridTile tile)

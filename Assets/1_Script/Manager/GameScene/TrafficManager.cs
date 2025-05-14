@@ -40,7 +40,6 @@ namespace Garage.Manager
 		/// <summary>
 		/// mapId, stageId 에 따라 spawnPoints를 설정합니다.
 		/// </summary>
-		[Button]
 		public void OnStageStart(/*int mapId, int stageId*/) // 서버에서 호출
 		{
 			spawnPoints.Clear();

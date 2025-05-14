@@ -341,6 +341,7 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
@@ -353,6 +354,7 @@ namespace Garage.Controller
 		private void OnPutTire()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
 

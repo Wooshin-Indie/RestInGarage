@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace Assets._1_Script.UI.GameScene
+namespace Garage.UI.GameScene
 {
 	public class TimerText : MonoBehaviour
 	{
