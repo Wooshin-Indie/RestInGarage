@@ -64,19 +64,20 @@ namespace Garage.Manager
 			}
 
 			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
-			UIManager.Game.PopupStageStart(3f);
+
 			Invoke(nameof(OnStageStart), 3f);
 
 			GameSynchronizer.Instance.IsDay.Value = true;
 			GameSynchronizer.Instance.CurrentStage.Value++;
+			UIManager.Game.OnStartStage(GameSynchronizer.Instance.CurrentStage.Value);
 
 			BuildingManager.Instance.OnStageStart();
 		}
 
 		public void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(1000f);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 1000f);
+			GameSynchronizer.Instance.SetGameTimer(10f);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 10f);
 			BuildingManager.Instance.OnStageStart();
 		}
 
@@ -116,7 +117,7 @@ namespace Garage.Manager
 
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
 			{
-				UIManager.Game.PopupStageEnd(3f);
+				UIManager.Game.OnTimeout();
 				Invoke(nameof(EndStage), 3f);
 			}
 		}
@@ -142,12 +143,8 @@ namespace Garage.Manager
 		public void GameStarted()
 		{
 			UIManager.Instance.OnGameStart();
-
-			if (!isHost)
-			{
-				OnStageEnd();
-				BuildingManager.Instance.BuildBasicBuildings();
-			}
+			OnStageEnd();
+			BuildingManager.Instance.BuildBasicBuildings();
 		}
 
 		public void GameEnded()

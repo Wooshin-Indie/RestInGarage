@@ -18,6 +18,7 @@ namespace Garage.UI.GameScene
         [Header("HUD")]
         [SerializeField] private BalanceUI balanceText;
         [SerializeField] private TimerText timerText;
+        [SerializeField] private StageStartEndUI stageStartEndUI;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
@@ -182,17 +183,6 @@ namespace Garage.UI.GameScene
             priceTexts.Clear();
         }
 
-		public void PopupStageStart(float time)
-		{
-            SoundManager.Instance.PlaySfx(SFXType.StartUp, .9f, 1f);
-			Debug.Log("Game Start!");
-		}
-		public void PopupStageEnd(float time)
-		{
-			SoundManager.Instance.PlaySfx(SFXType.Alarm, .8f, 1f);
-			Debug.Log("TIME'S UP!");
-        }
-
         public void OnTimerChanged(float prevTime, float curTime)
         {
             if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
@@ -200,5 +190,22 @@ namespace Garage.UI.GameScene
                 timerText.SetTime(Mathf.FloorToInt(curTime));
             }
 		}
+
+        public void OnStartStage(int idx)
+		{
+			SoundManager.Instance.PlaySfx(SFXType.StartUp, .9f, 1f);
+			stageStartEndUI.OnStageStart(idx);
+		}
+
+        public void OnTimeout()
+		{
+			SoundManager.Instance.PlaySfx(SFXType.Alarm, .8f, 1f);
+			stageStartEndUI.OnStageTimeout();
+        }
+
+        public void OnGameOver(int idx)
+        {
+
+        }
 	}
 }

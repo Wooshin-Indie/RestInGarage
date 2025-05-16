@@ -1,4 +1,5 @@
 using Garage.Utils;
+using IUtil;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ namespace Garage.Manager
 
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
-		EarnMoney, UseMoney, Alarm, StartUp, Complete }
+		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2 }
 	public enum SoundType { None, Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
@@ -175,6 +176,15 @@ namespace Garage.Manager
 		private AudioClip GetAudioClip(SFXType type)
 		{
 			return Resources.Load<AudioClip>(Constants.PATH_SFX + type.ToString());
+		}
+
+		[Header("TEST")]
+		public SFXType testSFXType;
+		
+		[Button(nameof(testSFXType))]
+		private void TestSFX(SFXType type)
+		{
+			PlaySfx(type, 1f, 1f);
 		}
 
 	}
