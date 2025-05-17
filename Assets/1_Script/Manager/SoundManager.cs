@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Garage.Manager
 {
-
+	public enum AMPType { None, Wind }
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
-		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2 }
-	public enum SoundType { None, Bgm, Sfx }
+		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2, Wrong }
+	public enum SoundType { Ambient, Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
 	/// 게임 실행 시 동적으로 AudioSource를 생성합니다.

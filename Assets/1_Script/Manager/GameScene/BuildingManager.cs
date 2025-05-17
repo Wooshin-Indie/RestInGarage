@@ -1,6 +1,5 @@
 using Garage.Interfaces;
 using Garage.Props;
-using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -83,6 +82,7 @@ namespace Garage.Manager
 			}
 
 			PlacedBuildings.Clear();
+			ItemDictionary.Clear();
 		}
 
 		// HACK - 이걸 데이터로 저장해둬야함
@@ -101,7 +101,8 @@ namespace Garage.Manager
 					new Vector2Int(4, 17),
 					new Vector2Int(4, 18),
 					new Vector2Int(4, 19)
-				});
+				},
+				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 			go = Instantiate(prefabList[2]);
 			go.GetComponent<NetworkObject>().Spawn();
@@ -112,7 +113,8 @@ namespace Garage.Manager
 					new Vector2Int(3, 13),
 					new Vector2Int(4, 12),
 					new Vector2Int(4, 13),
-				});
+				},
+				NetworkManager.Singleton.LocalClientId);
 
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 			go = Instantiate(prefabList[1]);
@@ -121,7 +123,8 @@ namespace Garage.Manager
 				1, 0, new Vector2Int[1]
 				{
 					new Vector2Int(4, 10)
-				});
+				},
+				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 		}
 
@@ -238,7 +241,11 @@ namespace Garage.Manager
 			}
 			SetActiveGrids(false);
 			int gridIdx = IsAbleToPlace(prop);
-			if (gridIdx == -1) return;
+			if (gridIdx == -1)
+			{
+				SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+				return;
+			}
 
 			// 설치 가능하다고 판단되면 서버에게 요청
 			var tilePositions = new List<Vector2Int>();
@@ -248,7 +255,8 @@ namespace Garage.Manager
 				tilePositions.Add(index);
 			}
 
-			BuildingNetworkManager.Instance.TryPlaceServerRpc(prop.NetworkObjectId, gridIdx, wheelRotate, tilePositions.ToArray());
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(prop.NetworkObjectId, gridIdx, wheelRotate, tilePositions.ToArray(),
+				NetworkManager.Singleton.LocalClientId);
 		}
 
 		public Vector3 GetCenterWorldPosition(int index, Vector2Int[] indices)

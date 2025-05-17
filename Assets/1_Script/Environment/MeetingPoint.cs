@@ -1,6 +1,7 @@
 using Garage.Manager;
 using Garage.Utils;
 using IUtil;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,9 @@ namespace Garage.Environment
 		[SerializeField] private float maxTime = 5f;
 
 		[Header("Progress Bar")]
+		[SerializeField] private TextMeshProUGUI stageIdxTmp; 
 		[SerializeField] private Image meetingProgress;
+		[SerializeField] private Image floorImage;
 
 		private NetworkVariable<float> elapsedTime = new();
 
@@ -33,12 +36,13 @@ namespace Garage.Environment
 		}
 
 		[ClientRpc]
-		public void StartMeetClientRPC()
+		public void StartMeetClientRPC(int idx)
 		{
 			if (IsHost)
 				elapsedTime.Value = 0f;
 
 			gameObject.SetActive(true);
+			stageIdxTmp.text = $"Stage {idx.ToString()}";
 		}
 
 		[ClientRpc]
@@ -47,15 +51,36 @@ namespace Garage.Environment
 			gameObject.SetActive(false);
 		}
 
+		private int playerCount;
+		private bool isLocalPlayerDetected = false;
 		private void Update()
 		{
 			meetingProgress.fillAmount = elapsedTime.Value / maxTime;
+			playerCount  = Physics.OverlapBoxNonAlloc(transform.position + boxCenter, boxSize * 0.5f, hits, Quaternion.identity, Constants.LAYER_PLAYER);
+			isLocalPlayerDetected = false;
+			for (int i = 0; i < playerCount; i++)
+			{
+				var networkBehaviour = hits[i].GetComponent<NetworkBehaviour>();
+				if (networkBehaviour != null && networkBehaviour.IsLocalPlayer)
+				{
+					isLocalPlayerDetected = true;
+					break;
+				}
+			}
+
+			if (isLocalPlayerDetected)
+			{
+				floorImage.color = Color.white;
+			}
+			else
+			{
+				floorImage.color = Color.black;
+			}
 
 			if (!IsHost) return;
 
-			int playerCount  = Physics.OverlapBoxNonAlloc(transform.position + boxCenter, boxSize * 0.5f, hits, Quaternion.identity, Constants.LAYER_PLAYER);
-			isMeeting = (playerCount == NetworkManager.Singleton.ConnectedClients.Count);
 
+			isMeeting = (playerCount == NetworkManager.Singleton.ConnectedClients.Count);
 			if (isMeeting)
 			{
 				SunManager.Instance.SetTimePhase(TimePhase.Morning, maxTime);

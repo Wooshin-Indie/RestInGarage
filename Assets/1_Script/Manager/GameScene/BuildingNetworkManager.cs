@@ -1,10 +1,19 @@
 using Garage.Props;
+using Garage.UI.Item;
 using Garage.Utils;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Manager
 {
+
+	public enum BuildFailType
+	{
+		WrongPlace,
+		NoMoney,
+	}
+
 	public class BuildingNetworkManager : NetworkBehaviour
 	{
 		#region Singleton
@@ -31,12 +40,16 @@ namespace Garage.Manager
 		#endregion
 
 		[ServerRpc(RequireOwnership = false)]
-		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices)
+		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices, ulong clientId)
 		{
 			// TODO - 위치에 따라서 살지 팔지 
 			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
 			{
-				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.BuyPrice)) return;
+				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.BuyPrice))
+				{
+					FailToPlaceClientRPC(BuildFailType.NoMoney, clientId);
+					return;
+				}
 				BuildingManager.Instance.PlacedBuildings.Add(propNetId, oProp);
 				BuildingManager.Instance.ItemDictionary.Remove(propNetId);
 			}
@@ -54,8 +67,7 @@ namespace Garage.Manager
 
 			if (!success)
 			{
-				// 자리 부족으로 인한 실패
-				TryPlaceResultClientRpc(false, propNetId, Vector3.zero, 0);
+				FailToPlaceClientRPC(BuildFailType.WrongPlace, clientId);
 				return;
 			}
 
@@ -76,7 +88,7 @@ namespace Garage.Manager
 
 			if (gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
-				EconomyManager.Instance.EarnMoney_HostOnly(oProp.ItemData.SellPrice);
+				EconomyManager.Instance.EarnMoney_HostOnly(prop.ItemData.SellPrice);
 				OwnableProp tmpProp = null;
 				if (BuildingManager.Instance.PlacedBuildings.TryGetValue(propNetId, out tmpProp))
 				{
@@ -107,20 +119,31 @@ namespace Garage.Manager
 				prop.SetGridPosition(position);
 				prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
 
-				TryPlaceResultClientRpc(true, propNetId, position, rotation);
+				TryPlaceResultClientRpc(propNetId, position, rotation);
+			}
+		}
+
+
+		[ClientRpc]
+		private void FailToPlaceClientRPC(BuildFailType type, ulong clientId)
+		{
+			if (clientId != NetworkManager.Singleton.LocalClientId) return;
+
+			SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+			switch (type)
+			{
+				case BuildFailType.WrongPlace:
+					break;
+				case BuildFailType.NoMoney:
+					UIManager.Game.OnInsufficientBalance();
+					break;
 			}
 		}
 
 		[ClientRpc]
-		private void TryPlaceResultClientRpc(bool success, ulong propNetId, Vector3 pos, int rotation)
+		private void TryPlaceResultClientRpc(ulong propNetId, Vector3 pos, int rotation)
 		{
 			if (IsHost) return;
-
-			if (!success)
-			{
-				Debug.Log("설치 실패");
-				return;
-			}
 
 			var obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			var prop = obj.GetComponent<OwnableProp>();
@@ -130,23 +153,34 @@ namespace Garage.Manager
 		}
 
 
-
+		[SerializeField] private GameObject priceTextPrefab;
+		private Dictionary<ulong, ItemPriceText> priceTexts = new();
+		
 		[ClientRpc]
 		public void OnShopItemRevealedClientRPC(Vector3 position, ulong netId, int buyPrice)
 		{
-			UIManager.Game.RevealItemPrice(position, netId, buyPrice);
+			ItemPriceText pt = Instantiate(priceTextPrefab).GetComponent<ItemPriceText>();	
+			pt.SetItemPrice(position, buyPrice);
+			priceTexts.Add(netId, pt);
 		}
 
 		[ClientRpc]
 		public void OnShopItemBuyedClientRPC(ulong netId)
 		{
-			UIManager.Game.EraseItemPrice(netId);
+			if (priceTexts.TryGetValue(netId, out ItemPriceText pt) && pt != null)
+			{
+				Destroy(pt.gameObject);
+			}
 		}
 
 		[ClientRpc]
 		public void OnShopItemEraseAllClientRPC()
 		{
-			UIManager.Game.EraseAllItemPrice();
+			foreach(var item in priceTexts.Values)
+			{
+				Destroy(item.gameObject);
+			}
+			priceTexts.Clear();
 		}
 	}
 }

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.LobbyScene.Items;
@@ -51,7 +52,14 @@ namespace Garage.UI.LobbyScene
 		private void Start()
 		{
 
-			disconnectButton.onClick.AddListener(GameNetworkManager.Instance.Disconnected);
+			disconnectButton.onClick.AddListener(() =>
+			{
+				UIManager.Transition.StartTransition(.5f);
+				DOVirtual.DelayedCall(.5f, () =>
+				{
+					GameNetworkManager.Instance.Disconnected();
+				});
+			});
 			readyButton.onClick.AddListener(() => {
 				NetworkTransmission.instance.IsTheClientReadyServerRPC(true, GameManagerEx.Instance.MyClientId);
 			}); 

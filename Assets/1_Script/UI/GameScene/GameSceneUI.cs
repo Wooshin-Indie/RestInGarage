@@ -9,7 +9,6 @@ using Unity.Netcode;
 using UnityEngine;
 using DG.Tweening;
 using Garage.Manager;
-using Garage.UI.Item;
 
 namespace Garage.UI.GameScene
 {
@@ -100,6 +99,11 @@ namespace Garage.UI.GameScene
             balanceText.SetBalance(balance);
         }
 
+        public void OnInsufficientBalance()
+        {
+            balanceText.OnInsufficientMoney();
+        }
+
         // 완성되면 꺼지는거나 Tire끼웠을때도 뭐 띄워야됨
         public void ApplyProgressToUI(CarParts part, float progress, CarController car)
         {
@@ -155,33 +159,6 @@ namespace Garage.UI.GameScene
             shopInfo.gameObject.SetActive(true);
         }
 
-        [SerializeField] private GameObject priceTextPrefab;
-        private Dictionary<ulong, ItemPriceText> priceTexts = new();
-
-        public void RevealItemPrice(Vector3 pos, ulong netId, int price)
-		{
-            EraseItemPrice(netId);
-
-			priceTexts[netId] = Instantiate(priceTextPrefab, transform).GetComponent<ItemPriceText>();
-			priceTexts[netId].SetItemPrice(pos, price);
-		}
-
-        public void EraseItemPrice(ulong netId)
-		{
-			if (priceTexts.ContainsKey(netId))
-			{
-				if (priceTexts[netId] != null) Destroy(priceTexts[netId].gameObject);
-			}
-		}
-
-        public void EraseAllItemPrice()
-        {
-            foreach(var item in priceTexts.Values)
-            {
-                if(item != null) Destroy(item.gameObject); 
-            }
-            priceTexts.Clear();
-        }
 
         public void OnTimerChanged(float prevTime, float curTime)
         {
