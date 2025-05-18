@@ -159,7 +159,7 @@ namespace Garage.Manager
 
 		public bool isInGame = false;
 
-		[ServerRpc(RequireOwnership = false)]
+		[ServerRpc]
 		public void StartGameServerRPC()
 		{
 			if (!isInGame && GameManagerEx.Instance.IsAllPlayerReady())

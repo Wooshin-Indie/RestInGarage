@@ -2,6 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using Garage.Utils;
+using IUtil;
 
 namespace Garage.UI.GameScene
 {
@@ -26,7 +27,7 @@ namespace Garage.UI.GameScene
 			else
 			{
 				destBalance = 0;
-				balanceText.text = "0";
+				balanceText.text = "$ 0";
 			}
 		}
 
@@ -42,7 +43,7 @@ namespace Garage.UI.GameScene
 			DOTween.To(() => currentBalance, x =>
 			{
 				currentBalance = x;
-				balanceText.text = x.ToString();
+				balanceText.text = $"$ {x.ToString()}";
 			}, destBalance, tweenDuration).SetEase(Ease.OutCubic);
 
 			Sequence fontSizeSeq = DOTween.Sequence();
@@ -58,7 +59,7 @@ namespace Garage.UI.GameScene
 
 			if (text != null)
 			{
-				text.text = (diff > 0 ? "+" : "-") + diff.ToString();
+				text.text = $"{(diff > 0 ? "+" : "-") + diff.ToString()}";
 			}
 
 			rect.anchoredPosition = new Vector2(0, -30);
@@ -67,6 +68,16 @@ namespace Garage.UI.GameScene
 			fxSeq.Append(rect.DOAnchorPosY(-50, tweenDuration).SetEase(Ease.InOutSine));
 			fxSeq.Join(text.DOFade(0, tweenDuration));
 			fxSeq.OnComplete(() => Destroy(instance));
+		}
+
+		public void OnInsufficientMoney()
+		{
+			balanceText.color = Color.red;
+			balanceText.transform.DOShakePosition(.5f, strength: 5f, vibrato: 15)
+				.OnComplete(() =>
+				{
+					balanceText.color = Color.white;
+				});
 		}
 	}
 }

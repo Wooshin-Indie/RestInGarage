@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
@@ -9,16 +10,16 @@ namespace Garage
 		[Header("Overlap Parameter")]
 		[SerializeField] private float boxRadius;
 		[SerializeField] private LayerMask targetLayer;
-
-		VehicleDirection direction = VehicleDirection.None;
-		private Collider[] colliders;
+		private VehicleDirection direction = VehicleDirection.None;
+		public VehicleDirection Direction => direction;
+        private Collider[] colliders;
 
 		private void Awake()
 		{
 			colliders = new Collider[1];
 		}
 
-		public void SetSpawnPoint(VehicleDirection dir)
+		public void SetSpawnDir(VehicleDirection dir)
 		{
 			switch (dir)
 			{

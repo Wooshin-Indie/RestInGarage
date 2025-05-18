@@ -48,8 +48,6 @@ namespace Garage.Controller.StateMachine
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
 			bool isRun = Managers.Input.Control.Player.Run.IsPressed();
-			controller.MovePosition(move, isRun ? controller.RunSpeed : controller.WalkSpeed, controller.RunSpeed);
-
 			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed :
 				((isRun ? controller.RunSpeed : controller.WalkSpeed));
 			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed : 
@@ -87,9 +85,12 @@ namespace Garage.Controller.StateMachine
 				controller.TryEndAction();
 				return;
 			}
-		}
 
-		public override void PhysicsUpdate()
+			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
+				controller.KickCar();
+        }
+
+        public override void PhysicsUpdate()
 		{
 			base.PhysicsUpdate();
 

@@ -3,6 +3,7 @@ using Garage.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using DG.Tweening;
 
 namespace Garage.UI.MainScene
 {
@@ -30,7 +31,11 @@ namespace Garage.UI.MainScene
             });
             hostButton.onClick.AddListener(() =>
 			{
-				GameNetworkManager.Instance.StartHost(Constants.MAX_PLAYERS);
+				UIManager.Transition.StartTransition(.5f);
+                DOVirtual.DelayedCall(.5f, () =>
+                {
+                    GameNetworkManager.Instance.StartHost();
+                });
 			});
             Page2BackButton.onClick.AddListener(() =>
             {

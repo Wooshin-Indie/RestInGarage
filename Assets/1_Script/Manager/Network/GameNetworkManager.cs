@@ -132,12 +132,12 @@ namespace Garage.Manager
 			}
 		}
 
-		public async void StartHost(int maxMembers)
+		public async void StartHost()
 		{
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
-			currentLobby = await SteamMatchmaking.CreateLobbyAsync(maxMembers);
+			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
 		}
 
 		public void StartClient(SteamId steamId)
@@ -147,11 +147,17 @@ namespace Garage.Manager
 			transport.targetSteamId = steamId;
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
+			UIManager.Transition.StartTransition(0f);
 			if (NetworkManager.Singleton.StartClient())
 			{
 				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
 				Debug.Log("Client has started");
 			}
+		}
+
+		public void StartGame()
+		{
+			LockLobby();
 		}
 
 		public void LockLobby()

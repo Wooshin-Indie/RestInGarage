@@ -7,8 +7,7 @@ namespace Garage.Utils
     {
         None = -1,
         Main,
-        Lobby,
-        Game
+        Lobby
     }
 
     public enum PropType
@@ -46,5 +45,12 @@ namespace Garage.Utils
          * 정확한 위치가 필요하다면 CarController에 SerializeField로 부품위치 transform 추가
          * CarStatusUI에 switch-case에 case 추가
          * */
+    }
+
+    public enum KickDirection
+    {
+        // 치이는 차 기준
+        Left,
+        Right
     }
 }

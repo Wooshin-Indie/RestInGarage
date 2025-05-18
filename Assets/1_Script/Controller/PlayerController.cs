@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -5,8 +6,10 @@ using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -45,6 +48,8 @@ namespace Garage.Controller
 
 		
 		private bool isAbleToMove = true;
+		private bool isBeingForced = false;
+		public bool IsBeingForced => isBeingForced;
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
@@ -54,6 +59,7 @@ namespace Garage.Controller
 		private OwnableProp recentlyDetectedProp = null;
 		private OwnableProp currentOwningProp = null;
 		private CarPartBase currentFixablePart = null;
+		private CarController currentKickableCar = null;
 		private CarPartBase preEnlargedFixablePart = null;
 
 		public OwnableProp CurrentOwningProp => currentOwningProp;
@@ -83,7 +89,9 @@ namespace Garage.Controller
 			interactState = new InteractState(this, stateMachine);
 			stateMachine.Init(idleState);
 
-            rigid.maxLinearVelocity = runSpeed;
+            rigid.maxLinearVelocity = 500f;
+
+			Debug.Log("game" + gameObject.layer);
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
@@ -254,10 +262,12 @@ namespace Garage.Controller
 		{
 			if (!isAbleToMove)
 			{
-				rigid.linearVelocity = Vector3.zero; 
+				rigid.linearVelocity = Vector3.zero;
 				SetAnimParam((int)AnimationType.Speed, 0);
 				return;
 			}
+
+			if (isBeingForced) return;
 
 			if(Mathf.Approximately(Mathf.Abs(move.x) + Mathf.Abs(move.y), 0f)) 
 				speed = 0;
@@ -276,7 +286,7 @@ namespace Garage.Controller
 		/// <summary>
 		/// Player의 forward 근처의 물체를 탐지합니다.
 		/// </summary>
-		public void DetectInteractables()
+		public void DetectInteractableParts()
 		{
 			fixablePartDistance = 1000f;
 
@@ -288,6 +298,7 @@ namespace Garage.Controller
 
 			recentlyDetectedProp = null;
 			currentFixablePart = null;
+			currentKickableCar = null;
 
 			for (int i = 0; i < hitCount; i++)
 			{
@@ -296,7 +307,8 @@ namespace Garage.Controller
 
 				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
 					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
-
+				
+				// CarParts탐지
 				if (interactableHits[i].GetComponent<CarPartBase>() != null
 					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
 				{
@@ -306,7 +318,14 @@ namespace Garage.Controller
 						currentFixablePart = interactableHits[i].GetComponent<CarPartBase>();
                     }
 				}
-			}
+
+				// 찰 수 있는 차량 탐지
+                if (interactableHits[i].GetComponent<CarSideDoor>() != null)
+				{
+					currentKickableCar = interactableHits[i].GetComponent<CarSideDoor>().Car;
+					break;
+                }
+            }
 
 
 			if (currentFixablePart == null || currentFixablePart != preEnlargedFixablePart)
@@ -329,9 +348,78 @@ namespace Garage.Controller
 			return sockets[(int)type];
 		}
 
+		// 키 바인딩 필요
+        public void KickCar()
+		{
+			if (currentKickableCar == null) return;
+
+            Vector3 fromMeToCar = currentKickableCar.transform.position - transform.position;
+
+			if (fromMeToCar.x < 0) // <-
+			{
+                currentKickableCar.ApplyKick(KickDirection.Right);
+				transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
+            }
+			else if (fromMeToCar.x > 0) // ->
+            {
+                currentKickableCar.ApplyKick(KickDirection.Left);
+                transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
+            }
+			// 차는 애니메이션 실행
+        }
+
+		[SerializeField] private float knockbackStrength = 5f;
+        void OnCollisionEnter(Collision collision)
+        {
+            if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
+
+            Rigidbody carRigid = collision.collider.GetComponentInParent<Rigidbody>();
+			if (carRigid == null)
+			{
+				Debug.LogWarning("Car Rigidbody can't be found");
+                return;
+            }
+			CarController car = carRigid.GetComponent<CarController>();
+
+			// 힘 안받고있으면 return
+			if (!car.IsBeingForced) return;
+
+            // 튕겨나갈 방향 계산
+            Vector3 knockbackDirection = Vector3.zero;
+            if (collision.contactCount > 0)
+            {
+                knockbackDirection = collision.contacts[0].normal; // 충돌지점에서 플레이어쪽 방향
+                knockbackDirection = knockbackDirection.normalized;
+
+                // 아니면 차량에서 플레이어 방향으로
+                //knockbackDirection = (transform.position - collision.transform.position).normalized;
+            }
+
+			Vector3 targetRotVector3 = -knockbackDirection;
+			targetRotVector3.y = 0;
+            Quaternion targetRot = Quaternion.LookRotation(targetRotVector3);
+			rigid.rotation = targetRot;
+			isBeingForced = true;
+            rigid.AddForce(knockbackDirection * knockbackStrength, ForceMode.Impulse);
+            // 애니메이션 실행
+        }
+
+		[Button]
+		private void IsBeingForcedFalse()
+		{
+			isBeingForced = false;
+		}
+
+        [Button]
+        private void AddForceToPlayer()
+        {
+            isBeingForced = true;
+            rigid.AddForce(new Vector3(1,0,0)* knockbackStrength, ForceMode.Impulse);
+        }
+
         #region Animation Events
 
-		private void OnStartPlace()
+        private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
@@ -341,6 +429,7 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
@@ -353,6 +442,7 @@ namespace Garage.Controller
 		private void OnPutTire()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
 
@@ -388,6 +478,10 @@ namespace Garage.Controller
 		private void OnHammer()
 		{
 			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+
+            //Vector3 VFXpos = currentFixablePart.transform.position;
+            Vector3 VFXpos = currentOwningProp.transform.position;
+			VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
 
 		private void OnOiling()
@@ -396,6 +490,12 @@ namespace Garage.Controller
 			{
 				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 			}
+		}
+
+		private void OnKick()
+		{
+			// TODO - 여기서 발 차는 함수 호출하면됨
+			Debug.Log("KICK!");
 		}
 
 		#endregion

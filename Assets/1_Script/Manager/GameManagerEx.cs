@@ -1,10 +1,10 @@
 using Garage.Controller;
+using Garage.Environment;
 using Garage.Structs;
 using Garage.Utils;
-using IUtil;
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -39,35 +39,95 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
-		public bool IsDay = true;
-
+		public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
-
 		public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
+		public Action OnDisconnected { get; set; }
 
-		/// <summary>
-		/// 서버에서만 호출되는 게임 흐름 제어 함수입니다.
-		/// </summary>
-		[Button]
-		public void ChangeDayAndNight()
+		[SerializeField] private GameObject meetingPointPrefab;
+
+		private MeetingPoint meetingPoint;
+
+		public void OnHostCreated()
 		{
-			foreach (var po in NetworkManager.Singleton.ConnectedClientsList)
+			GameSynchronizer.Instance.IsDay.Value = false;
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
+		}
+
+		public void StartNextStage()
+		{
+			if (!isHost) return;
+
+			if (meetingPoint != null)
 			{
-				//po.PlayerObject.GetComponent<PlayerController>();
+				meetingPoint.EndMeetClientRPC();
 			}
 
-			IsDay = !IsDay;
-			if (IsDay)
-			{
-				BuildingManager.Instance.OnStageStart();
-				SunManager.Instance.OnChangedToDay();
-			}
-			else
-			{
-				BuildingManager.Instance.OnStageEnd();
-                SunManager.Instance.OnChangedToNight();
-            }
+			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
+
+			Invoke(nameof(OnStageStart), 3f);
+
+			GameSynchronizer.Instance.IsDay.Value = true;
+			GameSynchronizer.Instance.CurrentStage.Value++;
+			UIManager.Game.OnStartStage(GameSynchronizer.Instance.CurrentStage.Value);
+
+			BuildingManager.Instance.OnStageStart();
 		}
+
+		public void OnStageStart()
+		{
+			GameSynchronizer.Instance.SetGameTimer(10f);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 10f);
+			BuildingManager.Instance.OnStageStart();
+		}
+
+		public void EndStage()
+		{
+			GameSynchronizer.Instance.IsDay.Value = false;
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
+			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+				Invoke(nameof(OnStageEnd), 2f);
+			else OnStageEnd();
+
+		}
+
+		public void OnStageEnd()
+		{
+			if (!isHost) return;
+
+			if (meetingPoint == null)
+			{
+				GameObject go = Instantiate(meetingPointPrefab);
+				go.GetComponent<NetworkObject>().Spawn();
+				meetingPoint = go.GetComponent<MeetingPoint>();
+				meetingPoint.transform.position = new Vector3(-5f, 0f, -7f);
+			}
+			meetingPoint.StartMeetClientRPC(GameSynchronizer.Instance.CurrentStage.Value + 1);
+
+			if (GameSynchronizer.Instance.IsDay.Value) return;
+			BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+		}
+
+
+		private void OnUpdateTimer()
+		{
+			if (!isHost) return;
+			if (GameSynchronizer.Instance.RemainedTime.Value <= 0f) return;
+
+			GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
+
+			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
+			{
+				UIManager.Game.OnTimeout();
+				Invoke(nameof(EndStage), 3f);
+			}
+		}
+
+		private void Update()
+		{
+			OnUpdateTimer();
+		}
+
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)
 		{
@@ -83,7 +143,9 @@ namespace Garage.Manager
 
 		public void GameStarted()
 		{
-			Managers.Scene.ChangeSceneServer(Utils.SceneEnum.Game);
+			UIManager.Instance.OnGameStart();
+			OnStageEnd();
+			BuildingManager.Instance.BuildBasicBuildings();
 		}
 
 		public void GameEnded()
@@ -96,6 +158,15 @@ namespace Garage.Manager
 			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 			isHost = true;
 			isConnected = true;
+
+			GameSynchronizer.Instance.CurrentStage.Value = 0;
+
+			BuildingManager.Instance.OnGameStart();
+			BuildingManager.Instance.OnStageEnd(0);
+			TrafficManager.Instance.OnStageStart();
+
+			SunManager.Instance.OnChangedToNight(); 
+			OnHostCreated();
 		}
 
 		public void ConnectedAsClient()
@@ -114,6 +185,8 @@ namespace Garage.Manager
 			{
 				Destroy(card);
 			}
+
+			OnDisconnected.Invoke();
 
 			Managers.Scene.ChangeSceneServer(SceneEnum.Main);
 			isHost = false;

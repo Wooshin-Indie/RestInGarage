@@ -1,4 +1,6 @@
+using DG.Tweening;
 using Garage.Utils;
+using IUtil;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -6,11 +8,12 @@ using UnityEngine;
 
 namespace Garage.Manager
 {
-
+	public enum AMBType { Wind, Engine }
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
-		EarnMoney, UseMoney }
-	public enum SoundType { None, Bgm, Sfx }
+		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2, Wrong, SlideUp, SlideDown,
+		Tick }
+	public enum SoundType { Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
 	/// 게임 실행 시 동적으로 AudioSource를 생성합니다.
@@ -19,6 +22,7 @@ namespace Garage.Manager
 	public class SoundManager : MonoBehaviour
 	{
 		private AudioSource[] audioSources = new AudioSource[(int)Enum.GetNames(typeof(SoundType)).Length];
+		private AudioSource[] ambientSources = new AudioSource[(int)Enum.GetNames(typeof(AMBType)).Length];
 
 		private float masterVolume = 1f;
 		private float sfxVolume = 1f;
@@ -67,11 +71,22 @@ namespace Garage.Manager
 			}
 
 			string[] soundTypeNames = Enum.GetNames(typeof(SoundType));
+			string[] ambientTypeNames = Enum.GetNames(typeof(AMBType));
+
 			for (int i = 0; i < soundTypeNames.Length; i++)
 			{
 				GameObject go = new GameObject { name = soundTypeNames[i] };
 				audioSources[i] = go.AddComponent<AudioSource>();
 				go.transform.parent = instance.transform;
+			}
+
+			for (int i = 0; i < ambientTypeNames.Length; i++)
+			{
+				GameObject go = new GameObject { name = ambientTypeNames[i] };
+				ambientSources[i] = go.AddComponent<AudioSource>();
+				go.transform.parent = instance.transform;
+				ambientSources[i].loop = true;
+				ambientSources[i].clip = GetAudioClip((AMBType)i);
 			}
 
 			audioSources[(int)SoundType.Bgm].loop = true;
@@ -83,6 +98,11 @@ namespace Garage.Manager
 			Init();
 		}
 
+		private void Start()
+		{
+			PlayAmbient(AMBType.Engine);
+			PlayAmbient(AMBType.Wind);
+		}
 
 		#region Object Pooling
 
@@ -175,6 +195,59 @@ namespace Garage.Manager
 		private AudioClip GetAudioClip(SFXType type)
 		{
 			return Resources.Load<AudioClip>(Constants.PATH_SFX + type.ToString());
+		}
+		private AudioClip GetAudioClip(AMBType type)
+		{
+			return Resources.Load<AudioClip>(Constants.PATH_AMB + type.ToString());	
+		}
+
+
+		public void PlayAmbient(AMBType type)
+		{
+			ambientSources[(int)type].Play();
+		}
+		public void StopAmbient(AMBType type)
+		{
+			ambientSources[(int)type].Stop();
+		}
+
+		public void BlockBGM(float duration)
+		{
+			for(int i=0; i<ambientSources.Length; i++)
+			{
+				ambientSources[i].DOFade(0f, duration);
+			}
+			audioSources[(int)SoundType.Bgm].DOFade(0f, duration);
+		}
+
+		public void ReleaseBGM(float duration)
+		{
+			switch (Managers.Scene.CurrentScene.SceneEnum) {
+				case SceneEnum.Main:
+
+					PlayAmbient(AMBType.Engine);
+					break;
+				case SceneEnum.Lobby:
+					StopAmbient(AMBType.Engine);
+					break;
+			}
+			for (int i = 0; i < ambientSources.Length; i++)
+			{
+				ambientSources[i].DOFade(1f, duration);
+			}
+			audioSources[(int)SoundType.Bgm].DOFade(1f, duration);
+		}
+
+
+
+
+		[Header("TEST")]
+		public SFXType testSFXType;
+		
+		[Button(nameof(testSFXType))]
+		private void TestSFX(SFXType type)
+		{
+			PlaySfx(type, 1f, 1f);
 		}
 
 	}
