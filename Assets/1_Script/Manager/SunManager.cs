@@ -88,17 +88,17 @@ namespace Garage.Manager
 
 		private void OnUpdateLightSetting()
         {
-            float dotProduct = Vector3.Dot(-transform.forward, Vector3.up);
-            float clampedDot = Mathf.Clamp((dotProduct + 0.9f), 0, 1);
-            float topDot = (1 - Mathf.Clamp01(dotProduct)) * Mathf.Clamp01(Mathf.Sign(dotProduct));
-            float bottomDot = (1 - Mathf.Clamp01(-dotProduct)) * Mathf.Clamp01(Mathf.Sign(-dotProduct));
-            topDot = Mathf.Pow(math.smoothstep(0f, 0.9f, topDot), 5);
-            bottomDot = Mathf.Pow(bottomDot, 5);
+			float dotProduct = Vector3.Dot(-transform.forward, Vector3.up);
+			float clampedDot = Mathf.Clamp((dotProduct + 0.9f), 0, 1);
+			float topDot = (1 - Mathf.Clamp01(dotProduct)) * Mathf.Clamp01(Mathf.Sign(dotProduct));
+			float bottomDot = (1 - Mathf.Clamp01(-dotProduct)) * Mathf.Clamp01(Mathf.Sign(-dotProduct));
+			topDot = Mathf.Pow(math.smoothstep(0f, 0.9f, topDot), 5);
+			bottomDot = Mathf.Pow(bottomDot, 5);
 
-            light.intensity = Mathf.Lerp(0.1f, sunIntensity, Mathf.Pow(clampedDot, 5));
-            light.color = Color.Lerp(dayColour, eveningColour, topDot + bottomDot);
+			light.intensity = Mathf.Lerp(0.1f, sunIntensity, Mathf.Pow(clampedDot, 5));
+			light.color = Color.Lerp(dayColour, eveningColour, topDot + bottomDot);
 
-            RenderSettings.ambientIntensity = Mathf.Lerp(1f, 1.7f, Mathf.Pow(clampedDot, 5));
+			RenderSettings.ambientIntensity = Mathf.Lerp(1f, 1.7f, Mathf.Pow(clampedDot, 5));
         }
         public void OnSceneChanged(SceneEnum scene)
         {

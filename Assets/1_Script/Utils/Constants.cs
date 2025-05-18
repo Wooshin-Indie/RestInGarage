@@ -6,6 +6,7 @@ namespace Garage.Utils
     {
         /** PATHS **/
         public static readonly string PATH_SFX = "Sounds/SFX/";
+        public static readonly string PATH_AMB = "Sounds/Ambient/";
 
         /** TAGS **/
 		public static readonly string TAG_CHAT = "Chat";

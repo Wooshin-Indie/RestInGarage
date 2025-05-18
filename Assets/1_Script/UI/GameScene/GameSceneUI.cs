@@ -164,7 +164,7 @@ namespace Garage.UI.GameScene
         {
             if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
             {
-                timerText.SetTime(Mathf.FloorToInt(curTime));
+                timerText.SetTime(prevTime, curTime);
             }
 		}
 

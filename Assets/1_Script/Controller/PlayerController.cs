@@ -85,6 +85,8 @@ namespace Garage.Controller
 
             rigid.maxLinearVelocity = runSpeed;
 
+			Debug.Log("game" + gameObject.layer);
+
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);

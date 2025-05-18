@@ -112,7 +112,7 @@ namespace Garage.Manager
 		private void OnUpdateTimer()
 		{
 			if (!isHost) return;
-			if (GameSynchronizer.Instance.RemainedTime.Value < 0f) return;
+			if (GameSynchronizer.Instance.RemainedTime.Value <= 0f) return;
 
 			GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 

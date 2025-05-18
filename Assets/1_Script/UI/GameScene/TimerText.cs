@@ -1,3 +1,5 @@
+using DG.Tweening;
+using Garage.Manager;
 using TMPro;
 using UnityEngine;
 
@@ -17,10 +19,26 @@ namespace Garage.UI.GameScene
 			tmpText.text = "";
 		}
 
-		public void SetTime(int time)
+		public void SetTime(float prev, float current)
 		{
-			// TODO - 시간에 따라 째깍째깍 소리 or 글씨 색/크기 변하도록
-			tmpText.text = (time <= 0) ? "" : time.ToString();
+			int prevTime = Mathf.FloorToInt(prev);
+			int curTime = Mathf.FloorToInt(current);
+
+			if (curTime <= 5 && curTime >= 0)
+			{
+				tmpText.color = Color.red;
+				if(curTime != prevTime)
+				{
+					transform.DOShakePosition(.2f, 20f, 30);
+					SoundManager.Instance.PlaySfx(SFXType.Tick, 1f, 1f);
+				}
+			}
+			else
+			{
+				tmpText.color = Color.white;
+			}
+
+			tmpText.text = (curTime < 0) ? "" : curTime.ToString();
 		}
 	}
 }

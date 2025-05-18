@@ -3,6 +3,7 @@ using Garage.UI.Item;
 using Garage.Utils;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.UIElements;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -171,14 +172,16 @@ namespace Garage.Manager
 			{
 				Destroy(pt.gameObject);
 			}
+			priceTexts.Remove(netId);
 		}
 
 		[ClientRpc]
 		public void OnShopItemEraseAllClientRPC()
 		{
-			foreach(var item in priceTexts.Values)
+			foreach(var item in priceTexts)
 			{
-				Destroy(item.gameObject);
+				if (item.Value.gameObject != null)
+					Destroy(item.Value.gameObject);
 			}
 			priceTexts.Clear();
 		}
