@@ -224,6 +224,7 @@ namespace Garage.Manager
 		{
 			switch (Managers.Scene.CurrentScene.SceneEnum) {
 				case SceneEnum.Main:
+
 					PlayAmbient(AMBType.Engine);
 					break;
 				case SceneEnum.Lobby:
