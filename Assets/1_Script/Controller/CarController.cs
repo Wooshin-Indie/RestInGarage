@@ -246,10 +246,12 @@ namespace Garage.Controller
             {
 				var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
 				pc.StateMachine.ChangeState(pc.carryState);
+				SoundManager.Instance.PlaySfx(SFXType.Pop, .7f, .7f);
 				Debug.Log("Repair Ended and Changed to CarryState");
             }
             Debug.Log("Part Repair Totally Ended");
-            UIManager.Game.RemoveCarStatusUI(this, part);
+
+			UIManager.Game.RemoveCarStatusUI(this, part);
 
 			switch (part)
 			{
@@ -271,6 +273,7 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
+			SoundManager.Instance.PlaySfx(SFXType.Complete, .8f, .9f);
             allRepairedVFX.Play();
 			VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
         }

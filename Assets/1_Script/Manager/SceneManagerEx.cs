@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
@@ -13,14 +14,18 @@ namespace Garage.Manager
 		public void Init()
 		{
 			SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
+			SceneManager.sceneLoaded += ((scene, sceneMode) => {
+				UIManager.Transition.EndTransition(1f, .5f);
+				});
 		}
+
 		public void ChangeSceneServer(SceneEnum sceneEnum)
 		{
-			Debug.Log("CHANGE SCENE");
 			UnloadCurrentSceneServer();
 			LoadSceneServer(sceneEnum);
 			UIManager.Instance.OnSceneChanged(sceneEnum);
 			SunManager.Instance.OnSceneChanged(sceneEnum);
+		
 		}
 
 		public void LoadSceneServer(SceneEnum sceneEnum)

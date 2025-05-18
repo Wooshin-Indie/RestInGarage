@@ -91,6 +91,8 @@ namespace Garage.Controller
 
             rigid.maxLinearVelocity = 500f;
 
+			Debug.Log("game" + gameObject.layer);
+
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
@@ -427,6 +429,7 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
@@ -439,6 +442,7 @@ namespace Garage.Controller
 		private void OnPutTire()
 		{
 			if (!IsOwner) return;
+			if (currentOwningProp == null) return;
 
 			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
 
@@ -486,6 +490,12 @@ namespace Garage.Controller
 			{
 				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 			}
+		}
+
+		private void OnKick()
+		{
+			// TODO - 여기서 발 차는 함수 호출하면됨
+			Debug.Log("KICK!");
 		}
 
 		#endregion

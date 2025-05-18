@@ -46,7 +46,6 @@ namespace Garage.Manager
         private float curMapRemoveLength;
         private List<VehicleSpawnPoint> spawnPoints = new List<VehicleSpawnPoint>();
 
-
         /// <summary>
         /// mapId, stageId 에 따라 spawnPoints를 설정합니다.
         /// </summary>
