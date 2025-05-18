@@ -87,6 +87,17 @@ namespace Garage.UI.GameScene
             else Debug.Log($"Key \"{carPart}\" is not in Dictionary");
         }
 
+        public void RemoveAllCarStatusUI(CarController car)
+        {
+            ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
+            Array parts = Enum.GetValues(typeof(CarParts));
+
+            foreach (CarParts part in parts)
+            {
+                RemoveCarStatusUI(car, part);
+            }
+        }    
+
         public void OnBalancedChanged(int prev, int balance)
         {
             if (prev == balance) return;

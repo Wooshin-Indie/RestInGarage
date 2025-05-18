@@ -46,4 +46,11 @@ namespace Garage.Utils
          * CarStatusUI에 switch-case에 case 추가
          * */
     }
+
+    public enum KickDirection
+    {
+        // 치이는 차 기준
+        Left,
+        Right
+    }
 }

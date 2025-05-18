@@ -1091,7 +1091,7 @@ Rigidbody:
   m_GameObject: {fileID: 5535754812663295667}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 5
   m_AngularDrag: 5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -1178,7 +1178,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 8608552576033507524}
   walkSpeed: 4
   runSpeed: 8
-  carrySpeed: 2
+  carrySpeed: 3
   boxWidth: 1
   boxHeight: 1.8
   meshRenderer: {fileID: 5760093498017814160}
@@ -1187,6 +1187,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 9d22253fc47352749a80fe79f559394b, type: 2}
   - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
   - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
+  knockbackStrength: 10
   PlayerID:
     m_InternalValue: 0
 --- !u!1 &5685545249949587409
