@@ -15,7 +15,6 @@ namespace Garage.Manager
 		{
 			SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
 			SceneManager.sceneLoaded += ((scene, sceneMode) => {
-				Debug.Log("SCENE LODADED");
 				UIManager.Transition.EndTransition(1f, .5f);
 				});
 		}

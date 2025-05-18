@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Garage.Manager;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +22,10 @@ namespace Garage.UI
 
 		public void StartTransition(float duration)
 		{
+			if(duration > Mathf.Epsilon)
+			{
+				SoundManager.Instance.PlaySfx(SFXType.SlideUp, .7f, 1f);
+			}
 			backgroundImage.material.SetFloat("_Cutoff", 1f);
 			backgroundImage.gameObject.SetActive(true);
 			backgroundImage.material.DOFloat(0f, "_Cutoff", duration);
@@ -28,8 +33,15 @@ namespace Garage.UI
 
 		public void EndTransition(float waitDuration, float fadeDuration)
 		{
-			backgroundImage.material
-				.DOFloat(1f, "_Cutoff", fadeDuration)
+			if (!backgroundImage.gameObject.activeSelf)
+				return;
+
+            backgroundImage.material.
+				DOFloat(1f, "_Cutoff", fadeDuration)
+				.OnStart(() =>
+				{
+					SoundManager.Instance.PlaySfx(SFXType.SlideDown, .7f, 1f);
+				})
 				.SetDelay(waitDuration)
 				.OnComplete(() =>
 				{
