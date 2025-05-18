@@ -2182,8 +2182,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   carPrefab: {fileID: 8777919558186187492, guid: 8464b1459729d6e408192f516c2fdaba, type: 3}
   spawnPointPrefab: {fileID: 7829846047073531153, guid: bc69de93681bf5549a3465eeedabd7c5, type: 3}
-  spawnPoints: []
-  laneLength: 40
+  spawnPointData1: {fileID: 11400000, guid: 9d0edf5c3882922478a3b9e00873bc01, type: 2}
 --- !u!4 &864579740
 Transform:
   m_ObjectHideFlags: 0
@@ -3211,7 +3210,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e138882362457414c836fdf98c2d2ff8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vfxList: []
+  vfxList:
+  - type: 2
+    prefab: {fileID: 7941810775464629598, guid: b992e683c0eb6634abefb3565d378fad, type: 3}
+    poolSize: 4
+    allowPoolExpansion: 1
+    estimatedDuration: 2
+  - type: 3
+    prefab: {fileID: 4551959964113862117, guid: 0fe5c58b3c060ea409a841b44f7bacad, type: 3}
+    poolSize: 4
+    allowPoolExpansion: 1
+    estimatedDuration: 2
+  - type: 4
+    prefab: {fileID: 77149800604523865, guid: f92de8bf54d1baf429f140678822e378, type: 3}
+    poolSize: 4
+    allowPoolExpansion: 1
+    estimatedDuration: 2
 --- !u!4 &1237778424
 Transform:
   m_ObjectHideFlags: 0

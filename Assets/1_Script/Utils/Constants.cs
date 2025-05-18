@@ -13,7 +13,9 @@ namespace Garage.Utils
         public static readonly string TAG_PLAYER = "Player";
 
         /** LAYERS **/
-        public static readonly int LAYER_PLAYER = 1 << 10;
+        public static readonly int LAYER_VEHICLE = 1 << 9;
+        public static readonly int INT_VEHICLE = 9;
+        public static readonly int LAYER_PLAYER = 1 << 11;
         public static readonly int LAYER_INTERACTABLE = 1 << 10;
 
         /** ANIM PARAMS **/

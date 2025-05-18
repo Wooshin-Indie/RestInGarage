@@ -6,11 +6,18 @@ using Garage.Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
+using System.Collections;
+using UnityEngine.EventSystems;
+using TMPro;
+using Unity.VisualScripting;
+using Garage.Structs.CarPart;
 
 namespace Garage.Controller
 {
 	public class CarController : NetworkBehaviour
 	{
+        private Animator animator;
+
         [Header("Car Parts Transform")]
         [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
 
@@ -33,8 +40,11 @@ namespace Garage.Controller
 		[SerializeField] private LayerMask obstacleLayer;
 
 		private float targetLaneX = 0f;
-		private bool isBypassing = false;
-		private Rigidbody rigid;
+		private float removeLaneLength;
+		private bool isBeingForced = false;
+        public bool IsBeingForced => isBeingForced;
+        private bool isBeingControlled = false;
+        private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[10];
 
 		private CarStatus carStatus;
@@ -42,14 +52,15 @@ namespace Garage.Controller
 
         private void Awake()
 		{
-			rigid = GetComponent<Rigidbody>();
+            animator = GetComponent<Animator>();
+            rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
             smokePS.Stop();
         }
 
 		private void FixedUpdate()
-		{
-			if (!IsHost) return;
+        {
+            if (!IsHost) return;
 
 			if (isAnyBroken)
 			{
@@ -73,7 +84,15 @@ namespace Garage.Controller
 					return;
 				}
 			}
+			
+			// 일정 범위 이상 넘어가면 차량 삭제
+			if (direction == VehicleDirection.Up && transform.position.z > removeLaneLength)
+				TrafficManager.Instance.DespawnCar(this);
+			else if (direction == VehicleDirection.Down && transform.position.z < -removeLaneLength)
+				TrafficManager.Instance.DespawnCar(this);
 
+
+			if (isBeingControlled) return; // 다른 곳에서 통제되고 있을 때 (ex. 차이는 코루틴 실행 중일 때) return
 			MoveForward();
 		}
 
@@ -123,26 +142,19 @@ namespace Garage.Controller
                 Time.fixedDeltaTime    // FixedUpdate 시간 간격
             );
 
-            // 차량의 현재 정면 방향 벡터를 가져옵니다.
             Vector3 forwardDirection = direction == VehicleDirection.Up ? Vector3.forward : -Vector3.forward;
 
-			// 새로운 속도 크기와 현재 정면 방향을 사용하여 최종 속도 벡터를 설정합니다.
 			rigid.linearVelocity = forwardDirection * newSpeedMagnitude;
-            Debug.Log($"vel: {rigid.linearVelocity}");
         }
 
-        float stopThreshold = 0.05f;
+        private float stopThreshold = 0.05f;
 		[SerializeField] private float decelerationRate = 1f;
         private void BrakeVehicle()
 		{
 			Debug.Log("Braking");
 			if (rigid.linearVelocity.magnitude > stopThreshold)
 			{
-				// 현재 속도에서 목표 속도(Vector3.zero)로 점차 보간
 				rigid.linearVelocity = Vector3.Lerp(rigid.linearVelocity, Vector3.zero, Time.fixedDeltaTime * decelerationRate);
-                // 또는 SmoothDamp 사용 (더 부드러운 감속)
-                // rigid.velocity = Vector3.SmoothDamp(rigid.velocity, targetVelocity, ref currentVelocityRef, 1f / decelerationRate);
-                // (SmoothDamp를 사용하려면 currentVelocityRef 변수와 smoothTime (1f/decelerationRate) 조정 필요)
             }
 			else
 			{
@@ -150,8 +162,8 @@ namespace Garage.Controller
 				rigid.angularVelocity = Vector3.zero;
 			}
 		}
-		
-		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
+
+        public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
 		{
 			switch (part)
 			{
@@ -260,8 +272,13 @@ namespace Garage.Controller
 				isAnyBroken = false;
 
             allRepairedVFX.Play();
+			VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
         }
-
+		private IEnumerator OnAllPartsRepairedCoroutine()
+		{
+			// material 값 만져서 빤짝거리게 해야되는데 toonShader적용하고 나서 바꿀 예정
+			yield return null;
+		}
 
         public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
@@ -318,17 +335,27 @@ namespace Garage.Controller
 
 		private VehicleDirection direction = VehicleDirection.None;
 		public VehicleDirection Direction { get => direction; }
-
-        public void SetLane(float laneX, VehicleDirection dir)
+		private Quaternion originRot;
+        public void SetLane(float laneX, float removeLength, VehicleDirection dir)
 		{
-			SetLaneClientRPC(laneX, dir);
+			SetLaneClientRPC(laneX, removeLength, dir);
         }
 
 		[ClientRpc]
-		private void SetLaneClientRPC(float laneX, VehicleDirection dir)
+		private void SetLaneClientRPC(float laneX, float removeLength, VehicleDirection dir)
 		{
             targetLaneX = laneX;
+			removeLaneLength = removeLength;
             direction = dir;
+			switch (direction)
+			{
+				case VehicleDirection.Up:
+                    originRot = Quaternion.Euler(0f, 0f, 0f);
+                    break;
+				case VehicleDirection.Down:
+					originRot = Quaternion.Euler(0f, -180f, 0f);
+                    break;
+			}
         }
 
 		private void OnDrawGizmosSelected()
@@ -375,7 +402,7 @@ namespace Garage.Controller
             Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
 			MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = false;
-			collid.enabled = false;
+			collid.isTrigger = true;
         }
 
 		private void RevealTire(CarParts part)
@@ -383,7 +410,107 @@ namespace Garage.Controller
             Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
             MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = true;
-            collid.enabled = true;
+            collid.isTrigger = false;
+			RestoreOriginRot(1f);
+        }
+
+        private Coroutine rotationCoroutine;
+        private void RestoreOriginRot(float rotationDuration)
+        {
+            if (rotationCoroutine != null)
+            {
+                StopCoroutine(rotationCoroutine);
+            }
+
+            rotationCoroutine = StartCoroutine(RotateOverTime(rotationDuration));
+        }
+        private IEnumerator RotateOverTime(float time)
+        {
+			float originRotY = originRot.eulerAngles.y;
+            float elapsedTime = 0f;
+            while (elapsedTime < time)
+            {
+                rigid.rotation = Quaternion.Slerp(
+					rigid.rotation, 
+					Quaternion.Euler(rigid.rotation.eulerAngles.x, originRotY, rigid.rotation.eulerAngles.z),
+					elapsedTime / time
+					);
+				elapsedTime += Time.fixedDeltaTime;
+
+                yield return new WaitForFixedUpdate();
+            }
+			// 위치도 이참에 targetLaneX로 옮겨줄까 싶은데 일단 보류
+            rigid.rotation = Quaternion.Euler(rigid.rotation.eulerAngles.x, originRotY, rigid.rotation.eulerAngles.z);
+            rotationCoroutine = null;
+        }
+
+        Coroutine kickedCoroutine;
+        public void ApplyKick(KickDirection kickDir)
+        {
+			float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
+			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
+			// 맵 월드좌표는 오른쪽이 +X방향임
+			float distanceX;
+
+            if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
+				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
+			{
+                // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
+                // IsKickedToLeft(animationParameter) = true
+            }
+			else
+			{
+                // IsKickedToRight(animationParameter) = true
+            }
+
+            if (kickDir == KickDirection.Right)
+            {
+                distanceX = -distance;
+            }
+            else
+            {
+                distanceX = distance;
+            }
+
+			if (kickedCoroutine == null)
+				kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+        }
+        private IEnumerator MoveSideways(float distanceX, float time)
+        {
+			isBeingForced = true;
+			isBeingControlled = true;
+            Vector3 startPos = new Vector3(rigid.position.x, rigid.position.y, rigid.position.z);
+			Vector3 targetPos = startPos;
+			targetPos.x += distanceX;
+
+            float elapsedTime = 0f;
+
+            while (elapsedTime < time)
+            {
+                float normalizedT = elapsedTime / time;
+
+                float easeOutQuintT = 1 - Mathf.Pow(1 - normalizedT, 5);
+				rigid.MovePosition(Vector3.Lerp(startPos, targetPos, easeOutQuintT));
+
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            isBeingForced = false;
+            rigid.MovePosition(targetPos);
+
+			// 여기에 emote말풍선 vfx
+			yield return new WaitForSeconds(1f);
+			isBeingControlled = false;
+
+            kickedCoroutine = null;
+            Debug.Log("Moving complete.");
+        }
+
+		[SerializeField] float kickDistance = 3f;
+		[Button]
+		public void MovingTest()
+		{
+            kickedCoroutine = StartCoroutine(MoveSideways(kickDistance, 1f));
         }
     }
 }

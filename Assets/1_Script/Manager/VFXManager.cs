@@ -22,7 +22,8 @@ namespace Garage.Manager
         EngineSmoke,
         FireExtingusher,
         RepairHammering,
-        AllPartsRepaired
+        AllPartsRepaired,
+        PopEmoteGood
     }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
@@ -141,7 +142,7 @@ namespace Garage.Manager
             }
 
             // --- 위치, 회전, 부모 설정 및 활성화 ---
-            SetupAndActivate(instancePS.gameObject, position, rotation, parent);
+            SetupAndActivate(instancePS.gameObject, position, rotation, parent, false);
 
             // --- 재생 및 자동 반환 코루틴 시작 ---
             instancePS.Play();
