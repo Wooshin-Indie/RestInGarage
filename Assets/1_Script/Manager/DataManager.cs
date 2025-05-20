@@ -1,48 +1,10 @@
 using System.IO;
-using System;
 using UnityEngine;
+using Garage.Utils;
+using UnityEngine.Localization.Settings;
 
 namespace Garage.Manager
 {
-	[Serializable]
-	public class SettingData
-	{
-		public SettingData()
-		{
-			sfxVolume = 1f;
-			bgmVolume = 1f;
-			masterVolume = 1f;
-			ambientVolume = 1f;
-			languageIndex = 0;
-			resolutionWidth = 1920;
-			resolutionHeight = 1080;
-			isFullScreen = true;
-		}
-
-
-		public float masterVolume;
-		public float ambientVolume;
-		public float sfxVolume;
-		public float bgmVolume;
-		public int languageIndex;
-		public int resolutionWidth;
-		public int resolutionHeight;
-		public bool isFullScreen;
-
-		// etc...
-
-		public void Clear()
-		{
-			sfxVolume = 1f;
-			bgmVolume = 1f;
-			masterVolume = 1f;
-			ambientVolume = 1f;
-			languageIndex = 0;
-			resolutionWidth = 1920;
-			resolutionHeight = 1080;
-			isFullScreen = true;
-		}
-	}
 	public class DataManager
 	{
 		private string settingDataPath;
@@ -89,11 +51,11 @@ namespace Garage.Manager
 
 		private void ApplyBasicSettings()
 		{
+			Managers.Sound.MasterVolume = settingData.masterVolume;
 			Managers.Sound.BgmVolume = settingData.bgmVolume;
 			Managers.Sound.SfxVolume = settingData.sfxVolume;
-			Managers.Sound.MasterVolume = settingData.masterVolume;
-
-			// LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[settingData.languageIndex];
+			Managers.Sound.AmbientVolume = settingData.ambientVolume;
+			LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[settingData.languageIndex];
 
 			Screen.SetResolution(settingData.resolutionWidth, settingData.resolutionHeight, settingData.isFullScreen);
 		}

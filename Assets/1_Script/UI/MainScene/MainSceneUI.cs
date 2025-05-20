@@ -1,14 +1,16 @@
-using Garage.Manager;
-using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
 using DG.Tweening;
-using IUtil;
+using Garage.Manager;
 using Garage.UI.Item;
+using Garage.Utils;
+using IUtil;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Localization.Settings;
+using UnityEngine.UI;
 
 namespace Garage.UI.MainScene
 {
-    public enum PageEnum
+	public enum PageEnum
     {
         None = 0,
         Main, Multi, Host, Settings,    // == 4
@@ -22,6 +24,7 @@ namespace Garage.UI.MainScene
 		[FoldoutGroup("Page1")]
         [SerializeField] private Button playButton;
         [SerializeField] private Button settingButton;
+        [SerializeField] private Button quitButton;
 
 		[FoldoutGroup("Page2")]
 		[SerializeField] private Button multyPlayButton;
@@ -51,8 +54,13 @@ namespace Garage.UI.MainScene
 		[FoldoutGroup("Page6 - Video")]
 		[SerializeField] private Button resolutionButton;
 		[SerializeField] private Button fullscreenButton;
+		[SerializeField] private Slider brightnessSlider;
 		[SerializeField] private Button page6BackButton;
 
+
+		[FoldoutGroup("Page8 - Video")]
+		[SerializeField] private List<Button> languageButtons = new();
+		[SerializeField] private Button page8BackButton;
 
 
 		private void Start()
@@ -60,9 +68,10 @@ namespace Garage.UI.MainScene
             /** Page 1 **/
             playButton.onClick.AddListener(() => { GoToPage(2); });
             settingButton.onClick.AddListener(() => { GoToPage(4); });
+			quitButton.onClick.AddListener(() => { Application.Quit(); });
 
-            /** Page 2 **/
-            multyPlayButton.onClick.AddListener(() => { GoToPage(3); });
+			/** Page 2 **/
+			multyPlayButton.onClick.AddListener(() => { GoToPage(3); });
 			Page2BackButton.onClick.AddListener(() => { GoToPage(1); });
 
 			/** Page 3 **/
@@ -114,10 +123,26 @@ namespace Garage.UI.MainScene
 			page5BackButton.onClick.AddListener(() => { GoToPage(4); });
 
 			/** Page 6 **/
-
 			resolutionButton.onClick.AddListener(() => { resolutionButton.GetComponent<OptionSelector>().ApplySetting(); });
 			fullscreenButton.onClick.AddListener(() => { fullscreenButton.GetComponent<OptionSelector>().ApplySetting(); });
+			brightnessSlider.onValueChanged.AddListener((value) =>
+			{
+				Managers.Data.BasicSettingData.brightness = value;
+				Screen.brightness = value;
+			});
 			page6BackButton.onClick.AddListener(() => { GoToPage(4); });
+
+
+			/** Page 8 **/
+			for(int i=0; i< languageButtons.Count; i++)
+			{
+				int t = i;
+				languageButtons[i].onClick.AddListener(() => { 
+					Managers.Data.BasicSettingData.languageIndex = t; 
+					LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[t];
+				});
+			}
+			page8BackButton.onClick.AddListener(() => { GoToPage(4); });
 		}
 
         private void UpdateSettings(int idx)
@@ -136,6 +161,7 @@ namespace Garage.UI.MainScene
 				case PageEnum.Video:
 					resolutionButton.GetComponent<OptionSelector>().SetUIAsCurrentSetting();
 					fullscreenButton.GetComponent<OptionSelector>().SetUIAsCurrentSetting();
+					brightnessSlider.value = Managers.Data.BasicSettingData.brightness;
 					break;
 				case PageEnum.Control:
 					break;

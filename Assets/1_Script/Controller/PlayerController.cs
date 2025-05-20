@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -6,10 +5,8 @@ using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -429,14 +426,15 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
-			if (currentOwningProp == null) return;
 
+			isAbleToMove = true;
+			if (currentOwningProp == null) return;
+			
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
 				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
 			}
 			currentOwningProp = null;
-			isAbleToMove = true;
 		}
 
 		private void OnPutTire()

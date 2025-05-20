@@ -71,6 +71,11 @@ namespace Garage.UI.LobbyScene
 			});
         }
 
+		private void OnEnable()
+		{
+			startButton.gameObject.SetActive(false);
+		}
+
 		private void OnDestroy()
 		{
 

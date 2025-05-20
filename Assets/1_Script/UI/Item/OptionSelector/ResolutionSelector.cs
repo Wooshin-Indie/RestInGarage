@@ -6,9 +6,10 @@ namespace Garage.UI.Item
 	public class ResolutionSelector : OptionSelector
 	{
 		private Vector2Int[] resolutions = {
-			new Vector2Int(2560, 1440),
+
+			new Vector2Int(1280, 720),
 			new Vector2Int(1920, 1080),
-			new Vector2Int(1280, 720)
+			new Vector2Int(2560, 1440)
 		};
 
 		public override void ApplySetting()

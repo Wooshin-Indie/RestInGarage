@@ -29,28 +29,14 @@ namespace Garage.Manager
 		private float bgmVolume = 1f;
 
 		/** Properties **/
-		public float SfxVolume
-		{
-			get { return sfxVolume; }
-			set
-			{
-				sfxVolume = value;
-			}
-		}
-		public float BgmVolume
-		{
-			get { return bgmVolume; }
-			set
-			{
-				bgmVolume = value;
-			}
-		}
 		public float MasterVolume
 		{
 			get => masterVolume;
 			set
 			{
 				masterVolume = value;
+				BgmVolume = bgmVolume;
+				AmbientVolume = ambientVolume;
 			}
 		}
 		public float AmbientVolume
@@ -59,6 +45,27 @@ namespace Garage.Manager
 			set
 			{
 				ambientVolume = value;
+				for (int i = 0; i < ambientSources.Length; i++)
+				{
+					ambientSources[i].volume = masterVolume * ambientVolume;
+				}
+			}
+		}
+		public float BgmVolume
+		{
+			get { return bgmVolume; }
+			set
+			{
+				bgmVolume = value;
+				audioSources[(int)SoundType.Bgm].volume = masterVolume * bgmVolume;
+			}
+		}
+		public float SfxVolume
+		{
+			get { return sfxVolume; }
+			set
+			{
+				sfxVolume = value;
 			}
 		}
 
@@ -89,15 +96,7 @@ namespace Garage.Manager
 
 			audioSources[(int)SoundType.Bgm].loop = true;
 			InitPool();
-		}
 
-		private void Awake()
-		{
-			Init();
-		}
-
-		private void Start()
-		{
 			PlayAmbient(AMBType.Engine);
 			PlayAmbient(AMBType.Wind);
 		}
