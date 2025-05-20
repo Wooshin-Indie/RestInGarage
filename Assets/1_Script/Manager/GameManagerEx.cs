@@ -45,6 +45,7 @@ namespace Garage.Manager
 		public Action OnDisconnected { get; set; }
 
 		[SerializeField] private GameObject meetingPointPrefab;
+		[SerializeField] private float stageTimer;
 
 		private MeetingPoint meetingPoint;
 
@@ -76,8 +77,8 @@ namespace Garage.Manager
 
 		public void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(10f);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 10f);
+			GameSynchronizer.Instance.SetGameTimer(stageTimer);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
 			BuildingManager.Instance.OnStageStart();
 		}
 

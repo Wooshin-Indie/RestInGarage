@@ -72,7 +72,7 @@ namespace Garage.Manager
 		{
 			if (result != Result.OK)
 			{
-				Debug.Log("Lobby was not created");
+				Debug.Log("Lobby was not created, result: " + result);
 				return;
 			}
 			lobby.SetPublic();

@@ -4450,6 +4450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
+  stageTimer: 100
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
@@ -4478,13 +4479,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridOrigin:
-  - {x: -3, y: -5}
-  - {x: -20, y: -5}
-  - {x: -30, y: -5}
+  - {x: -5, y: -10}
+  - {x: -18, y: -10}
   gridSize:
-  - {x: 5, y: 20}
-  - {x: 5, y: 20}
-  - {x: 5, y: 5}
+  - {x: 4, y: 20}
+  - {x: 4, y: 20}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}

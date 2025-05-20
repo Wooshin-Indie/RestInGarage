@@ -93,14 +93,14 @@ namespace Garage.Manager
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				1, 0, new Vector2Int[8]
 				{
+					new Vector2Int(2, 16),
+					new Vector2Int(2, 17),
+					new Vector2Int(2, 18),
+					new Vector2Int(2, 19),
 					new Vector2Int(3, 16),
 					new Vector2Int(3, 17),
 					new Vector2Int(3, 18),
-					new Vector2Int(3, 19),
-					new Vector2Int(4, 16),
-					new Vector2Int(4, 17),
-					new Vector2Int(4, 18),
-					new Vector2Int(4, 19)
+					new Vector2Int(3, 19)
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
@@ -109,10 +109,10 @@ namespace Garage.Manager
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				1, 2, new Vector2Int[4]
 				{
-					new Vector2Int(3, 12),
-					new Vector2Int(3, 13),
-					new Vector2Int(4, 12),
-					new Vector2Int(4, 13),
+					new Vector2Int(0, 12),
+					new Vector2Int(0, 13),
+					new Vector2Int(1, 12),
+					new Vector2Int(1, 13),
 				},
 				NetworkManager.Singleton.LocalClientId);
 
@@ -122,7 +122,7 @@ namespace Garage.Manager
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				1, 0, new Vector2Int[1]
 				{
-					new Vector2Int(4, 10)
+					new Vector2Int(3, 10)
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());

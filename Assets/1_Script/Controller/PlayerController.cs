@@ -44,7 +44,7 @@ namespace Garage.Controller
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[7];
+		private int[] animIDs = new int[9];
 
 		
 		private bool isAbleToMove = true;
@@ -100,6 +100,8 @@ namespace Garage.Controller
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
 			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
 			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
+			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
+			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 		}
 
 		public override void OnNetworkSpawn()
@@ -351,21 +353,11 @@ namespace Garage.Controller
 		// 키 바인딩 필요
         public void KickCar()
 		{
-			if (currentKickableCar == null) return;
+            if (currentKickableCar == null) return;
 
-            Vector3 fromMeToCar = currentKickableCar.transform.position - transform.position;
-
-			if (fromMeToCar.x < 0) // <-
-			{
-                currentKickableCar.ApplyKick(KickDirection.Right);
-				transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
-            }
-			else if (fromMeToCar.x > 0) // ->
-            {
-                currentKickableCar.ApplyKick(KickDirection.Left);
-                transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
-            }
 			// 차는 애니메이션 실행
+			isBeingForced = true;
+            SetAnimParam((int)AnimationType.Kick);
         }
 
 		[SerializeField] private float knockbackStrength = 5f;
@@ -401,7 +393,9 @@ namespace Garage.Controller
 			rigid.rotation = targetRot;
 			isBeingForced = true;
             rigid.AddForce(knockbackDirection * knockbackStrength, ForceMode.Impulse);
-            // 애니메이션 실행
+
+			// 애니메이션 실행
+			SetAnimParam((int)AnimationType.KnockBack);
         }
 
 		[Button]
@@ -494,8 +488,33 @@ namespace Garage.Controller
 
 		private void OnKick()
 		{
-			// TODO - 여기서 발 차는 함수 호출하면됨
-			Debug.Log("KICK!");
+            if (currentKickableCar == null) return;
+
+            Vector3 fromMeToCar = currentKickableCar.transform.position - transform.position;
+
+            if (fromMeToCar.x < 0) // <-
+            {
+                currentKickableCar.ApplyKick(KickDirection.Right);
+                transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
+            }
+            else if (fromMeToCar.x > 0) // ->
+            {
+                currentKickableCar.ApplyKick(KickDirection.Left);
+                transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
+            }
+
+            Debug.Log("KICK!");
+		}
+
+		private void OnKickEnd()
+		{
+			isBeingForced = false;
+
+        }
+
+		private void OnGettingUp()
+		{
+			isBeingForced = false;
 		}
 
 		#endregion

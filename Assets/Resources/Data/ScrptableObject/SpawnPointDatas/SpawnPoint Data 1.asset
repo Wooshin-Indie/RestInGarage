@@ -15,8 +15,8 @@ MonoBehaviour:
   spawningPoints:
   - SpawnPointX: -10
     Direction: 2
-  - SpawnPointX: 0
+  - SpawnPointX: 2
     Direction: 1
   laneLength: 40
-  laneWidth: 9
+  laneWidth: 8
   removeLength: 40

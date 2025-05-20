@@ -11,16 +11,17 @@ using UnityEngine.EventSystems;
 using TMPro;
 using Unity.VisualScripting;
 using Garage.Structs.CarPart;
+using UnityEngine.Rendering;
 
 namespace Garage.Controller
 {
 	public class CarController : NetworkBehaviour
 	{
         private Animator animator;
+		private int[] animIDs = new int[2];
 
         [Header("Car Parts Transform")]
         [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
-
 		[SerializeField] private ParticleSystem smokePS;
 		[SerializeField] private ParticleSystem allRepairedVFX;
 
@@ -52,7 +53,9 @@ namespace Garage.Controller
 
         private void Awake()
 		{
-            animator = GetComponent<Animator>();
+            animator = GetComponentInChildren<Animator>();
+            animIDs[0] = Animator.StringToHash("IsKickedToLeft");
+            animIDs[1] = Animator.StringToHash("IsKickedToRight");
             rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
             smokePS.Stop();
@@ -458,12 +461,12 @@ namespace Garage.Controller
             if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
 				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
 			{
-                // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
-                // IsKickedToLeft(animationParameter) = true
+				// 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
+				//SetAnimParam(0);
             }
 			else
 			{
-                // IsKickedToRight(animationParameter) = true
+                //SetAnimParam(1);
             }
 
             if (kickDir == KickDirection.Right)
@@ -514,6 +517,31 @@ namespace Garage.Controller
 		public void MovingTest()
 		{
             kickedCoroutine = StartCoroutine(MoveSideways(kickDistance, 1f));
+        }
+
+
+        public void SetAnimParam(int id)
+        {
+            animator.SetTrigger(animIDs[id]);
+            if (IsHost)
+            {
+                ChangeAnimatorParamClientRPC(id);
+            }
+            else
+            {
+                ChangeAnimatorParamServerRPC(id);
+            }
+        }
+        [ServerRpc(RequireOwnership = false)]
+        private void ChangeAnimatorParamServerRPC(int id)
+        {
+            ChangeAnimatorParamClientRPC(id);
+        }
+        [ClientRpc]
+        private void ChangeAnimatorParamClientRPC(int id)
+        {
+            if (IsOwner) return;
+            animator.SetTrigger(animIDs[id]);
         }
     }
 }
