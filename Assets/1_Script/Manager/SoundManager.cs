@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Garage.Utils;
-using IUtil;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,15 +18,15 @@ namespace Garage.Manager
 	/// 게임 실행 시 동적으로 AudioSource를 생성합니다.
 	/// audioClip 은 ResourceManager에서 동적으로 로드합니다.
 	/// </summary>
-	public class SoundManager : MonoBehaviour
+	public class SoundManager
 	{
 		private AudioSource[] audioSources = new AudioSource[(int)Enum.GetNames(typeof(SoundType)).Length];
 		private AudioSource[] ambientSources = new AudioSource[(int)Enum.GetNames(typeof(AMBType)).Length];
 
 		private float masterVolume = 1f;
+		private float ambientVolume = 1f;
 		private float sfxVolume = 1f;
 		private float bgmVolume = 1f;
-
 
 		/** Properties **/
 		public float SfxVolume
@@ -54,21 +53,20 @@ namespace Garage.Manager
 				masterVolume = value;
 			}
 		}
+		public float AmbientVolume
+		{
+			get => ambientVolume;
+			set
+			{
+				ambientVolume = value;
+			}
+		}
 
-		private static SoundManager instance;
-		public static SoundManager Instance { get => instance; }
-
+		Transform root = null;
 		public void Init()
 		{
-			if (null == instance)
-			{
-				instance = this;
-				DontDestroyOnLoad(this.gameObject);
-			}
-			else
-			{
-				Destroy(this.gameObject);
-			}
+			Transform root = new GameObject { name = "@SoundManager" }.transform;
+
 
 			string[] soundTypeNames = Enum.GetNames(typeof(SoundType));
 			string[] ambientTypeNames = Enum.GetNames(typeof(AMBType));
@@ -77,14 +75,14 @@ namespace Garage.Manager
 			{
 				GameObject go = new GameObject { name = soundTypeNames[i] };
 				audioSources[i] = go.AddComponent<AudioSource>();
-				go.transform.parent = instance.transform;
+				go.transform.parent = root;
 			}
 
 			for (int i = 0; i < ambientTypeNames.Length; i++)
 			{
 				GameObject go = new GameObject { name = ambientTypeNames[i] };
 				ambientSources[i] = go.AddComponent<AudioSource>();
-				go.transform.parent = instance.transform;
+				go.transform.parent = root;
 				ambientSources[i].loop = true;
 				ambientSources[i].clip = GetAudioClip((AMBType)i);
 			}
@@ -112,7 +110,7 @@ namespace Garage.Manager
 		private void InitPool(int cnt = 10)
 		{
 			poolRoot = new GameObject { name = "_poolRoot" }.transform;
-			poolRoot.parent = instance.transform;
+			poolRoot.parent = root;
 
 			for (int i = 0; i < cnt; i++)
 			{
@@ -236,18 +234,6 @@ namespace Garage.Manager
 				ambientSources[i].DOFade(1f, duration);
 			}
 			audioSources[(int)SoundType.Bgm].DOFade(1f, duration);
-		}
-
-
-
-
-		[Header("TEST")]
-		public SFXType testSFXType;
-		
-		[Button(nameof(testSFXType))]
-		private void TestSFX(SFXType type)
-		{
-			PlaySfx(type, 1f, 1f);
 		}
 
 	}

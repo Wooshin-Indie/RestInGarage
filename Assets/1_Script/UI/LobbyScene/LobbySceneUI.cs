@@ -191,6 +191,12 @@ namespace Garage.UI.LobbyScene
 				Destroy(cardList[i].gameObject);
 			}
 			cardList.Clear();
+
+			for (int i = 0; i < messageList.Count; i++)
+			{
+				Destroy(messageList[i].textObject);
+			}
+			messageList.Clear();
 		}
 	}
 }

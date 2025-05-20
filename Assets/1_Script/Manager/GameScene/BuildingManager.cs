@@ -243,7 +243,7 @@ namespace Garage.Manager
 			int gridIdx = IsAbleToPlace(prop);
 			if (gridIdx == -1)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+				Managers.Sound.PlaySfx(SFXType.Wrong, .7f, 1f);
 				return;
 			}
 

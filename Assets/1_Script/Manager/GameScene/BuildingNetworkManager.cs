@@ -130,7 +130,7 @@ namespace Garage.Manager
 		{
 			if (clientId != NetworkManager.Singleton.LocalClientId) return;
 
-			SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Wrong, .7f, 1f);
 			switch (type)
 			{
 				case BuildFailType.WrongPlace:

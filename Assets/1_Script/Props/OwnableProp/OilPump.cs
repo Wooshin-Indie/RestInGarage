@@ -36,7 +36,7 @@ namespace Garage.Props
 
 			if (GameManagerEx.Instance.IsDay)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Tape, .8f, .8f);
+				Managers.Sound.PlaySfx(SFXType.Tape, .8f, .8f);
 			}
 		}
 

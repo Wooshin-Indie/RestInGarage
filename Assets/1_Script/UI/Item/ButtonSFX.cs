@@ -18,12 +18,12 @@ namespace Garage.UI.Item
 
 		void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
 		{
-			SoundManager.Instance.PlaySfx(pressSfx, pressVolume, pressPitch);
+			Managers.Sound.PlaySfx(pressSfx, pressVolume, pressPitch);
 		}
 
 		void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
 		{
-			SoundManager.Instance.PlaySfx(hoverSfx, hoverVolume, hoverPitch);
+			Managers.Sound.PlaySfx(hoverSfx, hoverVolume, hoverPitch);
 		}
 	}
 }

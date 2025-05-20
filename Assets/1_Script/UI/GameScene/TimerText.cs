@@ -30,7 +30,7 @@ namespace Garage.UI.GameScene
 				if(curTime != prevTime)
 				{
 					transform.DOShakePosition(.2f, 20f, 30);
-					SoundManager.Instance.PlaySfx(SFXType.Tick, 1f, 1f);
+					Managers.Sound.PlaySfx(SFXType.Tick, 1f, 1f);
 				}
 			}
 			else

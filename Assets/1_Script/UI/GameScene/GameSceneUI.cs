@@ -103,9 +103,9 @@ namespace Garage.UI.GameScene
             if (prev == balance) return;
 
             if (prev < balance)
-                SoundManager.Instance.PlaySfx(SFXType.EarnMoney, 1f, 1f);
+				Managers.Sound.PlaySfx(SFXType.EarnMoney, 1f, 1f);
             else
-				SoundManager.Instance.PlaySfx(SFXType.UseMoney, .8f, .8f);
+				Managers.Sound.PlaySfx(SFXType.UseMoney, .8f, .8f);
 
             balanceText.SetBalance(balance);
         }
@@ -181,13 +181,13 @@ namespace Garage.UI.GameScene
 
         public void OnStartStage(int idx)
 		{
-			SoundManager.Instance.PlaySfx(SFXType.StartUp, .9f, 1f);
+			Managers.Sound.PlaySfx(SFXType.StartUp, .9f, 1f);
 			stageStartEndUI.OnStageStart(idx);
 		}
 
         public void OnTimeout()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Alarm, .8f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Alarm, .8f, 1f);
 			stageStartEndUI.OnStageTimeout();
         }
 
