@@ -451,21 +451,23 @@ namespace Garage.Controller
         }
 
         Coroutine kickedCoroutine;
-        public void ApplyKick(KickDirection kickDir)
-        {
-			float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
-			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
+
+		[ServerRpc(RequireOwnership = false)]
+		public void AppltKickServerRPC(KickDirection kickDir)
+		{
+            float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
+            float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
 			// 맵 월드좌표는 오른쪽이 +X방향임
-			float distanceX;
+            float distanceX;
 
             if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
-				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
-			{
-				// 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
-				//SetAnimParam(0);
+                (direction == VehicleDirection.Down && kickDir == KickDirection.Left))
+            {
+                // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
+                //SetAnimParam(0);
             }
-			else
-			{
+            else
+            {
                 //SetAnimParam(1);
             }
 
@@ -478,9 +480,15 @@ namespace Garage.Controller
                 distanceX = distance;
             }
 
-			if (kickedCoroutine == null)
-				kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+			ApplyKickClientRPC(distanceX);
         }
+		[ClientRpc]
+		private void ApplyKickClientRPC(float distanceX)
+		{
+            if (kickedCoroutine == null)
+                kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+        }
+
         private IEnumerator MoveSideways(float distanceX, float time)
         {
 			isBeingForced = true;

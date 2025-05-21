@@ -152,6 +152,7 @@ namespace Garage.Manager
 			{
 				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
 				Debug.Log("Client has started");
+				// TODO - 여기서 카메라 할당
 			}
 		}
 

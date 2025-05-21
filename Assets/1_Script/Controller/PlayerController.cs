@@ -28,7 +28,7 @@ namespace Garage.Controller
 
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
-		[SerializeField] private Transform cameraTransform;
+		//[SerializeField] private Transform cameraTransform;
 
 		[FoldoutGroup("Player Speeds")]
 		[SerializeField] private float walkSpeed;
@@ -108,8 +108,11 @@ namespace Garage.Controller
 		{
 			base.OnNetworkSpawn();
 
-			cameraTransform.gameObject.SetActive(IsOwner);
-			PlayerID.OnValueChanged += OnPlayerIDChanged;
+			//cameraTransform.gameObject.SetActive(IsOwner);
+			if (IsOwner)
+				CameraManager.Instance.SetPlayerCameraTarget(this.transform);
+
+            PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
 		private void Update()
@@ -494,12 +497,12 @@ namespace Garage.Controller
 
             if (fromMeToCar.x < 0) // <-
             {
-                currentKickableCar.ApplyKick(KickDirection.Right);
+                currentKickableCar.AppltKickServerRPC(KickDirection.Right);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
             }
             else if (fromMeToCar.x > 0) // ->
             {
-                currentKickableCar.ApplyKick(KickDirection.Left);
+                currentKickableCar.AppltKickServerRPC(KickDirection.Left);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
             }
 
