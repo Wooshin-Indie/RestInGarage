@@ -50,13 +50,15 @@ namespace Garage.UI.MainScene
         [SerializeField] private Slider sfxSlider;
         [SerializeField] private Button page5BackButton;
 
-
 		[FoldoutGroup("Page6 - Video")]
 		[SerializeField] private Button resolutionButton;
 		[SerializeField] private Button fullscreenButton;
 		[SerializeField] private Slider brightnessSlider;
 		[SerializeField] private Button page6BackButton;
 
+		[FoldoutGroup("Page7 - Control")]
+
+		[SerializeField] private Button page7BackButton;
 
 		[FoldoutGroup("Page8 - Video")]
 		[SerializeField] private List<Button> languageButtons = new();
@@ -132,9 +134,11 @@ namespace Garage.UI.MainScene
 			});
 			page6BackButton.onClick.AddListener(() => { GoToPage(4); });
 
+			/** Page 7 **/
+			page7BackButton.onClick.AddListener(() => { GoToPage(4); });
 
 			/** Page 8 **/
-			for(int i=0; i< languageButtons.Count; i++)
+			for (int i=0; i< languageButtons.Count; i++)
 			{
 				int t = i;
 				languageButtons[i].onClick.AddListener(() => { 

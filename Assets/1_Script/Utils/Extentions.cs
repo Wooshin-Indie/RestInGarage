@@ -1,6 +1,7 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Components;
 
 namespace Garage.Utils
 {
@@ -50,6 +51,15 @@ namespace Garage.Utils
 			{
 				rigid.rotation = quat;
 			}
+		}
+
+		public static void SetLocalizedString(this TextMeshProUGUI tmp, string table, string key)
+		{
+			tmp.GetComponent<LocalizeStringEvent>().StringReference = new UnityEngine.Localization.LocalizedString
+			{
+				TableReference = table,
+				TableEntryReference = key
+			};
 		}
 	}
 }

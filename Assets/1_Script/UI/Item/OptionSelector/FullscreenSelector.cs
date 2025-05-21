@@ -1,4 +1,5 @@
 using Garage.Manager;
+using Garage.Utils;
 using UnityEngine;
 
 namespace Garage.UI.Item
@@ -47,8 +48,8 @@ namespace Garage.UI.Item
 
 		protected override void UpdateLabel()
 		{
-			optionLabel.text = isFullscreen[currentIndex] ? "Full Screen" : "Window Screen";
-
+			optionLabel.SetLocalizedString(Constants.TABLE_MAINUI, optionLabel.text = isFullscreen[currentIndex] 
+				? "FullScreen" : "WindowScreen");
 			Managers.Data.BasicSettingData.isFullScreen = isFullscreen[currentIndex];
 		}
 	}

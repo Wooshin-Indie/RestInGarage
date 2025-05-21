@@ -17,7 +17,83 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: c9db1a5278d7d89429479971482d5447, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 205578304397312
+    m_Localized: PLAY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206257756479488
+    m_Localized: SETTINGS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206376224595968
+    m_Localized: QUIT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206540234465280
+    m_Localized: MULTI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206659935707136
+    m_Localized: BACK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206814453866496
+    m_Localized: HOST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206931772743680
+    m_Localized: GUEST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207101524615168
+    m_Localized: AUDIO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207250657288192
+    m_Localized: VIDEO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207331741573120
+    m_Localized: CONTROL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207422330150912
+    m_Localized: LANGUAGE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207696817987584
+    m_Localized: Master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207819300052992
+    m_Localized: Ambient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207931870978048
+    m_Localized: BGM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207996752666624
+    m_Localized: SFX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 208806777626624
+    m_Localized: Resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 208999631724544
+    m_Localized: FullScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 209169882718208
+    m_Localized: Brightness
+    m_Metadata:
+      m_Items: []
+  - m_Id: 214100719083520
+    m_Localized: WindowScreen
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
