@@ -1174,7 +1174,6 @@ MonoBehaviour:
   - {fileID: 8904382118372160319}
   - {fileID: 1498925718915739369}
   - {fileID: 4550578250525319074}
-  cameraTransform: {fileID: 0}
   walkSpeed: 4
   runSpeed: 8
   carrySpeed: 3

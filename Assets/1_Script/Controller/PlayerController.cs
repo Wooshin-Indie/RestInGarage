@@ -110,7 +110,11 @@ namespace Garage.Controller
 
 			//cameraTransform.gameObject.SetActive(IsOwner);
 			if (IsOwner)
-				CameraManager.Instance.SetPlayerCameraTarget(this.transform);
+            {
+				Debug.Log("NetworkSpawned");
+                // OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
+                CameraManager.Instance.SetTargetPlayer(this.transform);
+            }
 
             PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
@@ -497,12 +501,12 @@ namespace Garage.Controller
 
             if (fromMeToCar.x < 0) // <-
             {
-                currentKickableCar.AppltKickServerRPC(KickDirection.Right);
+                currentKickableCar.ApplyKickServerRPC(KickDirection.Right);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
             }
             else if (fromMeToCar.x > 0) // ->
             {
-                currentKickableCar.AppltKickServerRPC(KickDirection.Left);
+                currentKickableCar.ApplyKickServerRPC(KickDirection.Left);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
             }
 

@@ -6,7 +6,8 @@ namespace Garage.Controller
 {
     public class CameraManager : MonoBehaviour
     {
-        private CameraController mainCam;
+        private CameraController mainCam = null;
+        private Transform targetTransform = null;
 
         #region Singleton
         private static CameraManager instance;
@@ -42,12 +43,26 @@ namespace Garage.Controller
         // 현재 씬에서 메인 카메라를 찾아 CameraController 스크립트 참조를 할당하는 메소드
         private void FindAndAssignCameraInCurrentScene()
         {
-            GameObject mainCameraOb = GameObject.FindWithTag("MainCamera");
+            //GameObject mainCameraOb = GameObject.FindWithTag("MainCamera");
+            GameObject mainCameraOb = Camera.main != null ? Camera.main.gameObject : null;
+
             if (mainCameraOb != null)
             {
                 mainCam = mainCameraOb.GetComponent<CameraController>();
-                if (mainCameraOb == null)
+                if (mainCam != null)
+                {
+                    Debug.Log("Detected 'CameraController' in MainCamera: " + mainCam);
+                    mainCam.SetTarget(targetTransform);
+                }
+                else if (mainCam == null)
+                {
                     Debug.Log("Can't find 'CameraController' in MainCamera");
+                }
+
+                if (targetTransform == null)
+                    Debug.Log("CurrentTarget: null");
+                else
+                    Debug.Log("CurrentTarget: " + targetTransform);
             }
             else
             {
@@ -55,11 +70,13 @@ namespace Garage.Controller
             }
         }
 
-        public void SetPlayerCameraTarget(Transform playerTransform)
+        public void SetTargetPlayer(Transform playerTransform)
         {
+            targetTransform = playerTransform;
+
             if (mainCam != null)
             {
-                mainCam.SetTarget(playerTransform);
+                mainCam.SetTarget(targetTransform);
             }
             else
             {
@@ -67,7 +84,7 @@ namespace Garage.Controller
                 FindAndAssignCameraInCurrentScene();
                 if (mainCam != null)
                 {
-                    mainCam.SetTarget(playerTransform);
+                    mainCam.SetTarget(targetTransform);
                 }
             }
         }

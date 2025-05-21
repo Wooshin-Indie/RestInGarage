@@ -453,7 +453,7 @@ namespace Garage.Controller
         Coroutine kickedCoroutine;
 
 		[ServerRpc(RequireOwnership = false)]
-		public void AppltKickServerRPC(KickDirection kickDir)
+		public void ApplyKickServerRPC(KickDirection kickDir)
 		{
             float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
             float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
