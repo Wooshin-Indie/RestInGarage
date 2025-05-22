@@ -1,7 +1,5 @@
-using Garage.UI.GameScene.Items;
 using Garage.Utils;
 using System;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace Garage.Structs
@@ -18,7 +16,7 @@ namespace Garage.Structs
 
             while (count > 0)
             {
-                int idx = UnityEngine.Random.Range(0, values.Length);
+                int idx = UnityEngine.Random.Range(0, values.Length-1);
                 if ((isBroken & (1 << idx)) == 0) // LSB부터 idx번째 isBroken이 0이면 실행
                 {
                     isBroken |= 1 << idx; // (1 << idx) 에 해당하는 비트 켜기
@@ -26,17 +24,24 @@ namespace Garage.Structs
                 }
             }
 
+            // HACK - 임시 테스트용
+			fireProgress = (tc++ % 2 == 0) ? .1f : -1f;
+
             progress = new float[values.Length];
         }
+
+        public static int tc = 0;
 
         public int isBroken; // CarParts 상태를 LSB부터 비트마스킹
         private int hasTire;
         private float[] progress; // 0 ~ 1
+        private float fireProgress = -1f;
 
+		public float FireProgress { get => fireProgress; set => fireProgress = value > 1.1f ? 1.1f : value; }
         public int HasTire { get => hasTire; set => hasTire = value; }
         public float[] Progress { get => progress; set => progress = value; }
 
-        public bool IsProgressFull(CarParts part)
+		public bool IsProgressFull(CarParts part)
         {
             return progress[(int)part] >= 1f;
         }
@@ -71,5 +76,16 @@ namespace Garage.Structs
         {
             return isBroken != 0;
         }
-    }
+
+        public bool IsFiring()
+        {
+            return fireProgress > 0f;
+		}
+
+        public void ExtinguishFire(float gage)
+        {
+            fireProgress += gage;
+        }
+
+	}
 }

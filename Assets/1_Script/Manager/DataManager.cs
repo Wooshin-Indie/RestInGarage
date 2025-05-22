@@ -49,7 +49,7 @@ namespace Garage.Manager
 			}
 		}
 
-		private void ApplyBasicSettings()
+		public void ApplyBasicSettings()
 		{
 			Managers.Sound.MasterVolume = settingData.masterVolume;
 			Managers.Sound.BgmVolume = settingData.bgmVolume;

@@ -60,7 +60,7 @@ namespace Garage.UI.MainScene
 
 		[SerializeField] private Button page7BackButton;
 
-		[FoldoutGroup("Page8 - Video")]
+		[FoldoutGroup("Page8 - Language")]
 		[SerializeField] private List<Button> languageButtons = new();
 		[SerializeField] private Button page8BackButton;
 
@@ -155,6 +155,7 @@ namespace Garage.UI.MainScene
             {
 				case PageEnum.Settings:
 					Managers.Data.SaveAll();
+					Managers.Data.ApplyBasicSettings();
 					break;
                 case PageEnum.Audio:
 					masterSlider.value = Managers.Data.BasicSettingData.masterVolume;

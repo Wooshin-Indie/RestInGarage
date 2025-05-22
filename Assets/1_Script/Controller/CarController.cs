@@ -7,10 +7,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
 using System.Collections;
-using UnityEngine.EventSystems;
-using TMPro;
-using Unity.VisualScripting;
-using Garage.Structs.CarPart;
+using UnityEditor;
 
 namespace Garage.Controller
 {
@@ -23,6 +20,9 @@ namespace Garage.Controller
 
 		[SerializeField] private ParticleSystem smokePS;
 		[SerializeField] private ParticleSystem allRepairedVFX;
+		[SerializeField] private ParticleSystem firePS;
+		[SerializeField] private ParticleSystem extinguishPS;
+		[SerializeField] private ParticleSystem explosionPS;
 
         [FoldoutGroup("Move Parameters")]
 		[SerializeField] private float moveSpeed = 5f;
@@ -56,11 +56,16 @@ namespace Garage.Controller
             rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
             smokePS.Stop();
-        }
+			firePS.Stop();
+			extinguishPS.Stop();
+			explosionPS.Stop();
+		}
 
 		private void FixedUpdate()
         {
             if (!IsHost) return;
+
+			OnUpdateFire();
 
 			if (isAnyBroken)
 			{
@@ -96,12 +101,12 @@ namespace Garage.Controller
 			MoveForward();
 		}
 
+
 		private Vector3 moveVector = new Vector3(0f, 0f, 5f);
 		private float currentSpeedVelocityRef = 0f; // smooth damp용
         private float accelerationTime = 1f; // 목표 속도까지 도달하는 데 걸리는 대략적인 시간
         private void MoveForward()
 		{
-			Debug.Log("MovingMoving");
 			Vector3 pos = rigid.position;
 			float xOffset = targetLaneX - pos.x;
 
@@ -151,7 +156,6 @@ namespace Garage.Controller
 		[SerializeField] private float decelerationRate = 1f;
         private void BrakeVehicle()
 		{
-			Debug.Log("Braking");
 			if (rigid.linearVelocity.magnitude > stopThreshold)
 			{
 				rigid.linearVelocity = Vector3.Lerp(rigid.linearVelocity, Vector3.zero, Time.fixedDeltaTime * decelerationRate);
@@ -184,10 +188,106 @@ namespace Garage.Controller
 				case CarParts.Engine:
 					ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					break;
+				case CarParts.Fire:
+					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					break;
+
 			}
 		}
 
-        private void AddTireLogic(CarParts part)
+
+		private bool isFired = false;
+		private bool isExploded = false;
+		private float prevFireProgress = -1f;
+		private float boomRadius = 12f;
+
+		private float fireGageSpeed = .05f;
+		private float extinguishGageSpeed = .5f;
+		private float maxFireHeight = 1.5f;
+		private void OnUpdateFire()
+		{
+			if (carStatus.IsFiring())
+			{
+				isFired = true;
+				if (carStatus.FireProgress > 1f)
+					OnCarExplosion();
+				else
+					carStatus.ExtinguishFire(Time.deltaTime * fireGageSpeed);
+				// TODO - CLIENT RPC
+				UIManager.Game.UpdateCarFiringUI(this, carStatus.FireProgress);
+
+				if (!firePS.isPlaying)
+					firePS.Play();
+
+				var main = firePS.main;
+				main.startSizeY = maxFireHeight * Mathf.Clamp(carStatus.FireProgress, 0, 1);
+			}
+			else
+			{
+				if (isFired)
+				{
+					UIManager.Game.RemoveCarStatusUI(this, CarParts.Fire);
+					isFired = false;
+					firePS.Stop();
+				}
+			}
+
+			if (prevFireProgress > carStatus.FireProgress)
+			{
+				if (!extinguishPS.isPlaying)
+					extinguishPS.Play();
+			}
+			else
+				extinguishPS.Stop();
+
+			prevFireProgress = carStatus.FireProgress;
+		}
+		private void OnCarExplosion()
+		{
+			if (isExploded) return;
+
+			Managers.Sound.PlaySfx(SFXType.Boom, 1.2f, 1f);
+			explosionPS.Play();
+			isExploded = true;
+			// TODO - 카메라 떨림, 불 전염 등...
+
+			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
+			HashSet<CarController> processed = new HashSet<CarController>();
+
+			for (int i = 0; i < hits.Length; i++)
+			{
+				CarController controller = hits[i].GetComponentInParent<CarController>();
+				if (controller == null) continue;
+
+				if (processed.Add(controller))
+				{
+					controller.OnFired();
+				}
+			}
+		}
+
+		/// <summary>
+		/// 주변 차가 터져서 해당 차가 불타는 경우 호출
+		/// </summary>
+		public void OnFired()
+		{
+			if (!carStatus.IsFiring())
+				carStatus.FireProgress = .3f;
+			else
+				carStatus.FireProgress += .3f;
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void ExtinguishFireServerRPC(float deltaTime, ulong clinetId)
+		{
+			if (carStatus.IsFiring())
+			{
+				carStatus.ExtinguishFire(deltaTime * -extinguishGageSpeed);
+			}
+		}
+
+
+		private void AddTireLogic(CarParts part)
         {
             carStatus.AddTire(part);
             UIManager.Game.OnTireInserted(this, part);

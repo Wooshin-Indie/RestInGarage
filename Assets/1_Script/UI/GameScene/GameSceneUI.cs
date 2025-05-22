@@ -46,7 +46,28 @@ namespace Garage.UI.GameScene
             // 여기서 carStatusInfo에 있는 CarStatusUI들 전부 Update
         }
 
-        public void GenerateCarStatusUIs(CarController car, CarStatus status)
+        public void UpdateCarFiringUI(CarController car, float progress)
+        {
+            if(!carStatusInfo.TryGetValue(car.GetComponent<NetworkObject>().NetworkObjectId, out Dictionary<CarParts, CarStatusUI> dict))
+            {
+                Debug.LogError("car status - Init doesn't work well.");
+                return;
+            }
+            if(dict.TryGetValue(CarParts.Fire, out CarStatusUI statusUI))
+			{
+				statusUI.ApplyFill(progress);
+            }
+            else
+            {
+			    CarStatusUI tmpUI = Instantiate(carStatusUIPrefab, transform).GetComponent<CarStatusUI>();
+                dict.Add(CarParts.Fire, tmpUI);
+			    tmpUI.InitCarStatusUI(car, CarParts.Fire);
+                tmpUI.ApplyFill(progress);
+            }
+		}
+
+
+		public void GenerateCarStatusUIs(CarController car, CarStatus status)
         {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
 
@@ -63,8 +84,8 @@ namespace Garage.UI.GameScene
                     carStatusInfo[carID].Add(v, tmpUI);
                     tmpUI.InitCarStatusUI(car, v);
                 }
-            }
-        }
+			}
+		}
 
         public void RemoveCarStatusUI(CarController car, CarParts carPart)
         { 

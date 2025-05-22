@@ -1181,6 +1181,11 @@ MonoBehaviour:
   carrySpeed: 3
   boxWidth: 1
   boxHeight: 1.8
+  fireExLength: 5.29
+  fireExRadius: 1.36
+  fireExLayer:
+    serializedVersion: 2
+    m_Bits: 4096
   meshRenderer: {fileID: 5760093498017814160}
   playerMaterial:
   - {fileID: 2100000, guid: 43080622186391047aff385f2a362d86, type: 2}

@@ -67,6 +67,7 @@ namespace Garage.Props
 					if (IsAction.Value)
 					{
 						fireExPS.transform.rotation = controller.transform.rotation;
+						controller.ExtinguishFire(transform.position);
 					}
 
 					return;

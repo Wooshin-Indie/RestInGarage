@@ -117,7 +117,7 @@ namespace Garage.Manager
 				NetworkManager.Singleton.LocalClientId);
 
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
-			go = Instantiate(prefabList[1]);
+			go = Instantiate(prefabList[3]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				1, 0, new Vector2Int[1]

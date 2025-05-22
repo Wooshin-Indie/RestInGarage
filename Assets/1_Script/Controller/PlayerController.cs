@@ -36,6 +36,10 @@ namespace Garage.Controller
 		[SerializeField] private float boxWidth;
 		[SerializeField] private float boxHeight;
 
+		[SerializeField] private float fireExLength = 5f;
+		[SerializeField] private float fireExRadius = 1f;
+		[SerializeField] private LayerMask fireExLayer;
+
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
@@ -340,7 +344,24 @@ namespace Garage.Controller
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-        public Transform GetSocket(PropType type) 
+
+
+        public void ExtinguishFire(Vector3 position)
+		{
+			Vector3 sprayEndPosition = position + transform.forward * fireExLength;
+
+			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, fireExRadius, interactableHits, fireExLayer);
+
+			for (int i = 0; i<counts; i++)
+			{
+				CarPartBase part = interactableHits[i].GetComponent<CarPartBase>();
+				if (part == null) continue;
+
+				part.Interact(this, currentOwningProp);
+			}
+		}
+
+		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
@@ -497,5 +518,16 @@ namespace Garage.Controller
 		}
 
 		#endregion
+
+		void OnDrawGizmos()
+		{
+			Gizmos.color = Color.cyan;
+
+			Vector3 start = transform.position;
+			Vector3 end = transform.position + transform.forward * fireExLength;
+
+			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
+		}
+
 	}
 }

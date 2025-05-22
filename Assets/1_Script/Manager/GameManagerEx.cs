@@ -76,8 +76,8 @@ namespace Garage.Manager
 
 		public void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(10f);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 10f);
+			GameSynchronizer.Instance.SetGameTimer(1000f);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 1000f);
 			BuildingManager.Instance.OnStageStart();
 		}
 
@@ -213,7 +213,7 @@ namespace Garage.Manager
 
 				if (isHost)
 				{
-					NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
+					// NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
 				}
 				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);
