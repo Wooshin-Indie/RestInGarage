@@ -216,9 +216,8 @@ namespace Garage.Controller
 					if (carStatus.IsFiring())
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
+				UpdateFireProgressClientRPC(carStatus.FireProgress);
 			}
-
-			UpdateFireProgressClientRPC(carStatus.FireProgress);
 		}
 		private void OnCarExplosion()
 		{
@@ -271,7 +270,7 @@ namespace Garage.Controller
 		[ClientRpc]
 		private void UpdateFireProgressClientRPC(float progress)
 		{
-			UpdateFireProgressLogic(carStatus.FireProgress);
+			UpdateFireProgressLogic(progress);
 		}
 		private void UpdateFireProgressLogic(float progress)
 		{
