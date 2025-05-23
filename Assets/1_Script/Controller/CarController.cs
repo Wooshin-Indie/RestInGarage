@@ -63,9 +63,9 @@ namespace Garage.Controller
 
 		private void FixedUpdate()
         {
+			OnUpdateFire();
             if (!IsHost) return;
 
-			OnUpdateFire();
 
 			if (isAnyBroken)
 			{
@@ -201,21 +201,87 @@ namespace Garage.Controller
 		private float prevFireProgress = -1f;
 		private float boomRadius = 12f;
 
-		private float fireGageSpeed = .05f;
-		private float extinguishGageSpeed = .5f;
+		private float fireTime = 20f;
+		private float extinguishTime = 3f;
 		private float maxFireHeight = 1.5f;
+
 		private void OnUpdateFire()
 		{
-			if (carStatus.IsFiring())
+			if (IsHost)
 			{
-				isFired = true;
 				if (carStatus.FireProgress > 1f)
 					OnCarExplosion();
 				else
-					carStatus.ExtinguishFire(Time.deltaTime * fireGageSpeed);
-				// TODO - CLIENT RPC
-				UIManager.Game.UpdateCarFiringUI(this, carStatus.FireProgress);
+				{
+					if (carStatus.IsFiring())
+						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
+				}
+			}
 
+			UpdateFireProgressClientRPC(carStatus.FireProgress);
+		}
+		private void OnCarExplosion()
+		{
+			if (isExploded) return;
+			isExploded = true;
+
+			OnCarExplosionClientRPC();
+			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
+			HashSet<CarController> processed = new HashSet<CarController>();
+
+			for (int i = 0; i < hits.Length; i++)
+			{
+				CarController controller = hits[i].GetComponentInParent<CarController>();
+				if (controller == null) continue;
+
+				if (processed.Add(controller))
+				{
+					controller.OnFired();
+				}
+			}
+		}
+
+		[ClientRpc]
+		private void OnCarExplosionClientRPC()
+		{
+			Managers.Sound.PlaySfx(SFXType.Boom, 1.2f, 1f);
+			explosionPS.Play();
+		}
+
+		/// <summary>
+		/// 주변 차가 터져서 해당 차가 불타는 경우 호출
+		/// </summary>
+		public void OnFired()
+		{
+			if (!carStatus.IsFiring())
+				carStatus.FireProgress = .3f;
+			else
+				carStatus.FireProgress += .3f;
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void ExtinguishFireServerRPC(float deltaTime, ulong clinetId)
+		{
+			if (carStatus.IsFiring())
+			{
+				carStatus.ExtinguishFire(deltaTime / -extinguishTime);
+			}
+		}
+
+		[ClientRpc]
+		private void UpdateFireProgressClientRPC(float progress)
+		{
+			UpdateFireProgressLogic(carStatus.FireProgress);
+		}
+		private void UpdateFireProgressLogic(float progress)
+		{
+			carStatus.FireProgress = progress;
+
+			if (carStatus.IsFiring())
+			{
+				isFired = true;
+
+				UIManager.Game.UpdateCarFiringUI(this, carStatus.FireProgress);
 				if (!firePS.isPlaying)
 					firePS.Play();
 
@@ -242,49 +308,7 @@ namespace Garage.Controller
 
 			prevFireProgress = carStatus.FireProgress;
 		}
-		private void OnCarExplosion()
-		{
-			if (isExploded) return;
 
-			Managers.Sound.PlaySfx(SFXType.Boom, 1.2f, 1f);
-			explosionPS.Play();
-			isExploded = true;
-			// TODO - 카메라 떨림, 불 전염 등...
-
-			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
-			HashSet<CarController> processed = new HashSet<CarController>();
-
-			for (int i = 0; i < hits.Length; i++)
-			{
-				CarController controller = hits[i].GetComponentInParent<CarController>();
-				if (controller == null) continue;
-
-				if (processed.Add(controller))
-				{
-					controller.OnFired();
-				}
-			}
-		}
-
-		/// <summary>
-		/// 주변 차가 터져서 해당 차가 불타는 경우 호출
-		/// </summary>
-		public void OnFired()
-		{
-			if (!carStatus.IsFiring())
-				carStatus.FireProgress = .3f;
-			else
-				carStatus.FireProgress += .3f;
-		}
-
-		[ServerRpc(RequireOwnership = false)]
-		private void ExtinguishFireServerRPC(float deltaTime, ulong clinetId)
-		{
-			if (carStatus.IsFiring())
-			{
-				carStatus.ExtinguishFire(deltaTime * -extinguishGageSpeed);
-			}
-		}
 
 
 		private void AddTireLogic(CarParts part)

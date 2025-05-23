@@ -42,6 +42,11 @@ namespace Garage.Manager
 			RemainedTime.OnValueChanged += UIManager.Game.OnTimerChanged;
 		}
 
+		[ClientRpc]
+		public void OnStageStartClientRPC()
+		{
+			UIManager.Game.OnStartStage(CurrentStage.Value);
+		}
 
 	}
 }

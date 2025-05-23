@@ -69,7 +69,7 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.IsDay.Value = true;
 			GameSynchronizer.Instance.CurrentStage.Value++;
-			UIManager.Game.OnStartStage(GameSynchronizer.Instance.CurrentStage.Value);
+			GameSynchronizer.Instance.OnStageStartClientRPC();
 
 			BuildingManager.Instance.OnStageStart();
 		}
@@ -145,7 +145,7 @@ namespace Garage.Manager
 		{
 			UIManager.Instance.OnGameStart();
 			OnStageEnd();
-			BuildingManager.Instance.BuildBasicBuildings();
+			if (isHost) BuildingManager.Instance.BuildBasicBuildings();
 		}
 
 		public void GameEnded()
