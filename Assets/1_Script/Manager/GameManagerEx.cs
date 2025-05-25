@@ -112,9 +112,9 @@ namespace Garage.Manager
 
 			if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
 
-			SoundManager.Instance.PlaySfx(SFXType.ShopCar, () =>
+			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
 			{
-				SoundManager.Instance.PlaySfx(SFXType.ShopPop);
+				Managers.Sound.PlaySfx(SFXType.ShopPop);
                 BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
             });
 		}

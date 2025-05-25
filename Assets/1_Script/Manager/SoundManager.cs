@@ -198,15 +198,9 @@ namespace Garage.Manager
 
             audioSources[(int)SoundType.Sfx].PlayOneShot(GetAudioClip(sfxType), sfxVolume * masterVolume);
 
-            StartCoroutine(OnCompleteSFX(sfxType, onComplete));
-        }
-
-        private IEnumerator OnCompleteSFX(SFXType sfxType, Action onComplete)
-        {
-            float audioClipLength = GetAudioClip(sfxType).length;
-            yield return new WaitForSeconds(audioClipLength);
-
-            onComplete?.Invoke();
+			DOVirtual.DelayedCall(GetAudioClip(sfxType).length, () => {
+				onComplete?.Invoke();
+				});
         }
 
         private AudioClip GetAudioClip(SFXType type)

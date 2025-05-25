@@ -134,6 +134,7 @@ namespace Garage.Manager
 
 		public async void StartHost()
 		{
+			Debug.Log("START HOST");
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;

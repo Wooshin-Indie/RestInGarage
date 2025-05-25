@@ -1305,19 +1305,19 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   meshRenderer: {fileID: 887303938605825394}
   wheelRenderers:
-  - {fileID: 5730687744767251907}
-  - {fileID: 2988957854642742657}
-  - {fileID: 5314833165263083093}
-  - {fileID: 1619282818579576891}
-  PartTransforms:
-  - {fileID: 5692470933502196293}
-  - {fileID: 3051104202472021215}
-  - {fileID: 4186624889950207944}
-  - {fileID: 3769595973028358513}
+  - {fileID: 5665638846310536103}
+  - {fileID: 7215588707187440136}
+  - {fileID: 2187639937170403820}
+  - {fileID: 5370637977126698524}
+  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
+  partTransforms:
+  - {fileID: 8041272041018744069}
+  - {fileID: 3781791651026239495}
+  - {fileID: 2500824168236261039}
+  - {fileID: 595378631967705911}
   - {fileID: 2699854035467288266}
   - {fileID: 1737208953049834002}
   - {fileID: 158817233349960750}
-  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   smokePS: {fileID: 5948674790323583871}
   allRepairedVFX: {fileID: 1194757143094643351}
   firePS: {fileID: 2795864106373277652}
@@ -1733,8 +1733,7 @@ PrefabInstance:
       propertyPath: playOnAwake
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 8439259731528600779, guid: 5aa508c2ca9f08b428d1b68e80f6f4fc, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -1775,7 +1774,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
