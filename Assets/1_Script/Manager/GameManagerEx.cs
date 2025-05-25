@@ -69,7 +69,7 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.IsDay.Value = true;
 			GameSynchronizer.Instance.CurrentStage.Value++;
-			GameSynchronizer.Instance.OnStageStartClientRPC();
+			GameSynchronizer.Instance.OnStageStartClientRPC(GameSynchronizer.Instance.CurrentStage.Value);
 
 			BuildingManager.Instance.OnStageStart();
 		}

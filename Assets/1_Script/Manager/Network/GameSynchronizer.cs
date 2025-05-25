@@ -43,9 +43,9 @@ namespace Garage.Manager
 		}
 
 		[ClientRpc]
-		public void OnStageStartClientRPC()
+		public void OnStageStartClientRPC(int idx)
 		{
-			UIManager.Game.OnStartStage(CurrentStage.Value);
+			UIManager.Game.OnStartStage(idx);
 		}
 
 	}

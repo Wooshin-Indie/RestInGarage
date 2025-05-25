@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
 using System.Collections;
-using UnityEditor;
+using DG.Tweening;
 
 namespace Garage.Controller
 {
@@ -15,9 +15,16 @@ namespace Garage.Controller
 	{
         private Animator animator;
 
+		[SerializeField] private MeshRenderer meshRenderer;
+		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
+
         [Header("Car Parts Transform")]
         [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
 
+		[FoldoutGroup("Materials")]
+		[SerializeField] private Material brokenCarMat;
+
+		[FoldoutGroup("Particle Systems")]
 		[SerializeField] private ParticleSystem smokePS;
 		[SerializeField] private ParticleSystem allRepairedVFX;
 		[SerializeField] private ParticleSystem firePS;
@@ -38,6 +45,7 @@ namespace Garage.Controller
 		[SerializeField] private float boxWidth = 1f;
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
+
 
 		private float targetLaneX = 0f;
 		private float removeLaneLength;
@@ -198,6 +206,8 @@ namespace Garage.Controller
 
 		private bool isFired = false;
 		private bool isExploded = false;
+		public bool IsExploded => isExploded;
+
 		private float prevFireProgress = -1f;
 		private float boomRadius = 12f;
 
@@ -216,7 +226,8 @@ namespace Garage.Controller
 					if (carStatus.IsFiring())
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
-				UpdateFireProgressClientRPC(carStatus.FireProgress);
+				if (!isExploded)
+					UpdateFireProgressClientRPC(carStatus.FireProgress);
 			}
 		}
 		private void OnCarExplosion()
@@ -243,8 +254,35 @@ namespace Garage.Controller
 		[ClientRpc]
 		private void OnCarExplosionClientRPC()
 		{
+			isExploded = true;
 			Managers.Sound.PlaySfx(SFXType.Boom, 1.2f, 1f);
 			explosionPS.Play();
+			firePS.gameObject.SetActive(false);
+			UIManager.Game.RemoveAllCarStatusUI(this);
+
+			Material mat = Instantiate(brokenCarMat);
+			meshRenderer.materials = new Material[2]
+			{
+				mat,
+				mat
+			};
+			for (int i = 0; i < wheelRenderers.Count; i++)
+				wheelRenderers[i].material = mat;
+
+			float currentValue = 1f;
+			mat.SetInt("_TransparentEnabled", 1);
+			DOTween.To(() => currentValue, x =>
+			{
+				currentValue = x;
+				mat.SetFloat("_Tweak_transparency", x);
+			}, -1f, 3f)
+			.OnComplete(() =>
+			{
+				if (IsHost)
+				{
+					TrafficManager.Instance.DespawnCar(this);
+				}
+			});
 		}
 
 		/// <summary>
@@ -264,6 +302,13 @@ namespace Garage.Controller
 			if (carStatus.IsFiring())
 			{
 				carStatus.ExtinguishFire(deltaTime / -extinguishTime);
+				
+				if (!carStatus.IsFiring())
+				{
+					isAnyBroken = carStatus.IsThereAnyBroken();
+					if (!isAnyBroken) // 모든 part 고쳐졌을 때
+						OnAllPartsRepairedClientRPC();
+				}
 			}
 		}
 
@@ -274,6 +319,8 @@ namespace Garage.Controller
 		}
 		private void UpdateFireProgressLogic(float progress)
 		{
+			if (isExploded) return;
+
 			carStatus.FireProgress = progress;
 
 			if (carStatus.IsFiring())
@@ -398,7 +445,7 @@ namespace Garage.Controller
 
 			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
             allRepairedVFX.Play();
-			VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
+			// VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
         }
 		private IEnumerator OnAllPartsRepairedCoroutine()
 		{
@@ -408,7 +455,7 @@ namespace Garage.Controller
 
         public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
-			if (!carStatus.IsBroken(part)) return false;
+			if (!carStatus.IsBroken(part) || isExploded) return false;
 
 			switch (part)
 			{
@@ -418,7 +465,6 @@ namespace Garage.Controller
 				case CarParts.RRT:
 					return (prop is TireProp && carStatus.IsTireEmpty(part))
 						|| (prop is WrenchProp && !carStatus.IsTireEmpty(part));
-
                 case CarParts.Oil:
 					return prop is OilPump;
 				case CarParts.Engine:

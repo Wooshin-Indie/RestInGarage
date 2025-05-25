@@ -202,6 +202,10 @@ namespace Garage.UI.LobbyScene
 				Destroy(messageList[i].textObject);
 			}
 			messageList.Clear();
+
+			startButton.gameObject.SetActive(false);
+			notreadyButton.gameObject.SetActive(false);
+			readyButton.gameObject.SetActive(true);
 		}
 	}
 }

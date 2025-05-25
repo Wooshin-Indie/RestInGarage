@@ -78,7 +78,7 @@ namespace Garage.Controller
 
 		private void Awake()
 		{
-			interactableHits = new Collider[5];
+			interactableHits = new Collider[10];
 
 			animator = GetComponent<Animator>();
 			rigid = GetComponent<Rigidbody>();
@@ -308,7 +308,7 @@ namespace Garage.Controller
 
 				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
 					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
-				
+
 				// CarParts탐지
 				if (interactableHits[i].GetComponent<CarPartBase>() != null
 					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
@@ -324,7 +324,6 @@ namespace Garage.Controller
                 if (interactableHits[i].GetComponent<CarSideDoor>() != null)
 				{
 					currentKickableCar = interactableHits[i].GetComponent<CarSideDoor>().Car;
-					break;
                 }
             }
 
@@ -500,7 +499,7 @@ namespace Garage.Controller
 
             //Vector3 VFXpos = currentFixablePart.transform.position;
             Vector3 VFXpos = currentOwningProp.transform.position;
-			VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
+			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
 
 		private void OnOiling()

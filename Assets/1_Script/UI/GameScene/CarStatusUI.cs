@@ -47,8 +47,11 @@ namespace Garage.UI.GameScene.Items
 
         public void OnUpdate()
         {
-            Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
-            transform.position = tmpPos;
+            if (partPos != null)
+            {
+                Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
+                transform.position = tmpPos;
+            }
         }
 
         public void InitCarStatusUI(CarController carCtr, CarParts carPart)
@@ -159,5 +162,5 @@ namespace Garage.UI.GameScene.Items
             else
                 iconImage.sprite = tireEmptyImage;
         }
-    }
+	}
 }

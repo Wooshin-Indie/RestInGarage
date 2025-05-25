@@ -74,7 +74,7 @@ namespace Garage.Structs
         }
         public bool IsThereAnyBroken()
         {
-            return isBroken != 0;
+            return isBroken != 0 || fireProgress > 0f;
         }
 
         public bool IsFiring()

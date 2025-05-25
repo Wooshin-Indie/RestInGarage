@@ -864,7 +864,7 @@ Transform:
   m_GameObject: {fileID: 8764425251928233167}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.663, y: 0.786, z: -0.174}
+  m_LocalPosition: {x: -0.584, y: 0.786, z: -0.174}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1016,6 +1016,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  meshRenderer: {fileID: 887303938605825394}
+  wheelRenderers:
+  - {fileID: 5730687744767251907}
+  - {fileID: 2988957854642742657}
+  - {fileID: 5314833165263083093}
+  - {fileID: 1619282818579576891}
   PartTransforms:
   - {fileID: 5692470933502196293}
   - {fileID: 3051104202472021215}
@@ -1024,6 +1030,7 @@ MonoBehaviour:
   - {fileID: 2699854035467288266}
   - {fileID: 1737208953049834002}
   - {fileID: 158817233349960750}
+  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   smokePS: {fileID: 5948674790323583871}
   allRepairedVFX: {fileID: 1194757143094643351}
   firePS: {fileID: 2795864106373277652}
