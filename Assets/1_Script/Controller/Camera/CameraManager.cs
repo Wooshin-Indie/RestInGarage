@@ -66,7 +66,7 @@ namespace Garage.Controller
             }
             else
             {
-                Debug.LogError("Can't find 'MainCamera' object");
+                Debug.Log("Can't find 'MainCamera' object");
             }
         }
 

@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using Garage;
 using Garage.Utils;
 using Garage.Structs;
+using System;
 
 namespace Garage.Manager
 {
@@ -20,6 +21,8 @@ namespace Garage.Manager
         void Awake()
         {
             Init();
+
+            curStageData = stageData[0]; // 로비에서 사용할 스테이지 정보
         }
 
         private void Init()
@@ -38,12 +41,10 @@ namespace Garage.Manager
 
         [SerializeField] private GameObject carPrefab;
         [SerializeField] private GameObject spawnPointPrefab;
-        //[SerializeField] private List<LaneData> spawningPoints = new List<LaneData>();
-        [SerializeField] private SpawnPointData spawnPointData1;
-        private float curMapLaneLength;
-        private float curMapLaneWidth;
-        public float CurMapLaneWidth => curMapLaneWidth;
-        private float curMapRemoveLength;
+        [SerializeField] private GameObject lanePrefab;
+        [SerializeField] private List<StageData> stageData;
+        private StageData curStageData;
+        public StageData CurStageData => curStageData;
         private List<VehicleSpawnPoint> spawnPoints = new List<VehicleSpawnPoint>();
 
         /// <summary>
@@ -52,26 +53,29 @@ namespace Garage.Manager
         [Button]
 		public void OnStageStart(/*int mapId, int stageId*/) // 서버에서 호출
 		{
+            curStageData = stageData[0]; // 파라미터로 받아와야됨
+
 			spawnPoints.Clear();
-            curMapLaneLength = spawnPointData1.LaneLength;
-            curMapLaneWidth = spawnPointData1.LaneWidth;
-            curMapRemoveLength = spawnPointData1.RemoveLength;
-            foreach (var sp in spawnPointData1.SpawningPoints)
+            foreach (var sp in curStageData.SpawningPoints)
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);
                 //Up이면 아래쪽(z축 -쪽)에 스폰, Down이면 위쪽(z축 +쪽)에 스폰
-                point.z = (sp.Direction == VehicleDirection.Up ? -curMapLaneLength : curMapLaneLength);
+                point.z = (sp.Direction == VehicleDirection.Up ? -curStageData.LaneLength : curStageData.LaneLength);
                 VehicleSpawnPoint vsp = Instantiate(spawnPointPrefab, point, Quaternion.identity)
 									.GetComponent<VehicleSpawnPoint>();
 				vsp.SetSpawnDir(sp.Direction);
                 spawnPoints.Add(vsp);
             }
-		}
 
-		/// <summary>
-		/// 자동 스폰 or 게임 오버 시 남아있는 차들을 정리합니다.
-		/// </summary>
-		public void OnStageEnd()
+            OnStageStarted?.Invoke(curStageData);
+        }
+
+        public event Action<StageData> OnStageStarted;
+
+        /// <summary>
+        /// 자동 스폰 or 게임 오버 시 남아있는 차들을 정리합니다.
+        /// </summary>
+        public void OnStageEnd()
 		{
 
 		}
@@ -83,12 +87,12 @@ namespace Garage.Manager
 
 			if (availableSpawnPoints.Count > 0)
 			{
-				VehicleSpawnPoint spawnPoint = availableSpawnPoints[Random.Range(0, availableSpawnPoints.Count)];
+				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
                 CarController car = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
-                car.SetLane(spawnPoint.transform.position.x, curMapRemoveLength, spawnPoint.Direction);
+                car.SetLane(spawnPoint.transform.position.x, curStageData.RemoveLength, spawnPoint.Direction);
                 car.InitCarStatusServer();
 			}
 			else return;

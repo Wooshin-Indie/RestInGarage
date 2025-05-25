@@ -92,6 +92,8 @@ namespace Garage.Manager
 
 		}
 
+
+
 		public void OnStageEnd()
 		{
 			if (!isHost) return;
@@ -101,12 +103,20 @@ namespace Garage.Manager
 				GameObject go = Instantiate(meetingPointPrefab);
 				go.GetComponent<NetworkObject>().Spawn();
 				meetingPoint = go.GetComponent<MeetingPoint>();
-				meetingPoint.transform.position = new Vector3(-5f, 0f, -7f);
+				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
 			}
 			meetingPoint.StartMeetClientRPC(GameSynchronizer.Instance.CurrentStage.Value + 1);
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
-			BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+
+
+			if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
+
+			SoundManager.Instance.PlaySfx(SFXType.ShopCar, () =>
+			{
+				SoundManager.Instance.PlaySfx(SFXType.ShopPop);
+                BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+            });
 		}
 
 

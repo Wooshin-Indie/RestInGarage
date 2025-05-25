@@ -281,7 +281,7 @@ namespace Garage.Controller
 			if(Mathf.Approximately(Mathf.Abs(move.x) + Mathf.Abs(move.y), 0f)) 
 				speed = 0;
 
-			moveDir = new Vector3(move.x, 0f, move.y).normalized;
+			moveDir = new Vector3(move.y, 0f, -move.x).normalized;
 			moveDir *= speed;
 			rigid.linearVelocity = moveDir;
 

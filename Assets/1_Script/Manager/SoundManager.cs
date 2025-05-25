@@ -2,9 +2,12 @@ using DG.Tweening;
 using Garage.Utils;
 using IUtil;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Rendering;
 
 namespace Garage.Manager
 {
@@ -12,7 +15,7 @@ namespace Garage.Manager
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
 		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2, Wrong, SlideUp, SlideDown,
-		Tick }
+		Tick, ShopCar, ShopPop }
 	public enum SoundType { Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
@@ -192,7 +195,24 @@ namespace Garage.Manager
 			return audioSource;
 		}
 
-		private AudioClip GetAudioClip(SFXType type)
+		public void PlaySfx(SFXType sfxType, Action onComplete)
+		{
+            if (sfxType == SFXType.None) return;
+
+            audioSources[(int)SoundType.Sfx].PlayOneShot(GetAudioClip(sfxType), sfxVolume * masterVolume);
+
+            StartCoroutine(OnCompleteSFX(sfxType, onComplete));
+        }
+
+        private IEnumerator OnCompleteSFX(SFXType sfxType, Action onComplete)
+        {
+            float audioClipLength = GetAudioClip(sfxType).length;
+            yield return new WaitForSeconds(audioClipLength);
+
+            onComplete?.Invoke();
+        }
+
+        private AudioClip GetAudioClip(SFXType type)
 		{
 			return Resources.Load<AudioClip>(Constants.PATH_SFX + type.ToString());
 		}
