@@ -39,7 +39,8 @@ namespace Garage.Utils
         RLT, // Rear Left Tire
         RRT, // Rear Right Tire
         Engine,
-        Oil
+        Oil,
+        Fire
         /* 부품 하나 늘리려면 해야하는 것:
          * CarParts enum에 추가(여기 스크립트)
          * 정확한 위치가 필요하다면 CarController에 SerializeField로 부품위치 transform 추가

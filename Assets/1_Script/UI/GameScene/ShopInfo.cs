@@ -47,13 +47,13 @@ namespace Garage.UI.GameScene
 			if (data != null)
 			{
 				UpdateUI(data);
-				SoundManager.Instance.PlaySfx(SFXType.Whoosh, .85f, 1.1f);
+				Managers.Sound.PlaySfx(SFXType.Whoosh, .85f, 1.1f);
 				currentTween = rect.DOAnchorPos(outScreenPos, tweenDuration)
 								   .SetEase(Ease.InOutSine);
 			}
 			else
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Whoosh, .85f, .9f);
+				Managers.Sound.PlaySfx(SFXType.Whoosh, .85f, .9f);
 				currentTween = rect.DOAnchorPos(inScreenPos, tweenDuration)
 								   .SetEase(Ease.OutBack);
 			}

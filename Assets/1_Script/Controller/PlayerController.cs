@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -6,10 +5,8 @@ using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -38,6 +35,10 @@ namespace Garage.Controller
 		[FoldoutGroup("Ray Settings")]
 		[SerializeField] private float boxWidth;
 		[SerializeField] private float boxHeight;
+
+		[SerializeField] private float fireExLength = 5f;
+		[SerializeField] private float fireExRadius = 1f;
+		[SerializeField] private LayerMask fireExLayer;
 
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
@@ -77,7 +78,7 @@ namespace Garage.Controller
 
 		private void Awake()
 		{
-			interactableHits = new Collider[5];
+			interactableHits = new Collider[10];
 
 			animator = GetComponent<Animator>();
 			rigid = GetComponent<Rigidbody>();
@@ -316,7 +317,7 @@ namespace Garage.Controller
 
 				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
 					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
-				
+
 				// CarParts탐지
 				if (interactableHits[i].GetComponent<CarPartBase>() != null
 					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
@@ -332,7 +333,6 @@ namespace Garage.Controller
                 if (interactableHits[i].GetComponent<CarSideDoor>() != null)
 				{
 					currentKickableCar = interactableHits[i].GetComponent<CarSideDoor>().Car;
-					break;
                 }
             }
 
@@ -352,7 +352,24 @@ namespace Garage.Controller
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-        public Transform GetSocket(PropType type) 
+
+
+        public void ExtinguishFire(Vector3 position)
+		{
+			Vector3 sprayEndPosition = position + transform.forward * fireExLength;
+
+			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, fireExRadius, interactableHits, fireExLayer);
+
+			for (int i = 0; i<counts; i++)
+			{
+				CarPartBase part = interactableHits[i].GetComponent<CarPartBase>();
+				if (part == null) continue;
+
+				part.Interact(this, currentOwningProp);
+			}
+		}
+
+		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
@@ -430,14 +447,15 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
-			if (currentOwningProp == null) return;
 
+			isAbleToMove = true;
+			if (currentOwningProp == null) return;
+			
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
 				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
 			}
 			currentOwningProp = null;
-			isAbleToMove = true;
 		}
 
 		private void OnPutTire()
@@ -445,7 +463,7 @@ namespace Garage.Controller
 			if (!IsOwner) return;
 			if (currentOwningProp == null) return;
 
-			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Put, 1.3f, 1f);
 
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
@@ -469,27 +487,27 @@ namespace Garage.Controller
 		{
 			// TODO - 바닥 텍스쳐에 따라 소리 다르게 하면 좋을듯?
 			// 지금은 자갈 밟는 소리임
-			SoundManager.Instance.PlaySfx(SFXType.Walk, .7f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Walk, .7f, 1f);
 		}
 		private void OnCrouch()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Wrench, .5f, 1.1f);
+			Managers.Sound.PlaySfx(SFXType.Wrench, .5f, 1.1f);
 		}
 
 		private void OnHammer()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+			Managers.Sound.PlaySfx(SFXType.Hammer, .8f, 1.2f);
 
             //Vector3 VFXpos = currentFixablePart.transform.position;
             Vector3 VFXpos = currentOwningProp.transform.position;
-			VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
+			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
 
 		private void OnOiling()
 		{
 			if(currentOwningProp is OilPump)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+				Managers.Sound.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 			}
 		}
 
@@ -525,5 +543,16 @@ namespace Garage.Controller
 		}
 
 		#endregion
+
+		void OnDrawGizmos()
+		{
+			Gizmos.color = Color.cyan;
+
+			Vector3 start = transform.position;
+			Vector3 end = transform.position + transform.forward * fireExLength;
+
+			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
+		}
+
 	}
 }

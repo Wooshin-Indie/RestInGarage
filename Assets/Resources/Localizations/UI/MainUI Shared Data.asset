@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: MainUI Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: MainUI
+  m_TableCollectionNameGuidString: c9db1a5278d7d89429479971482d5447
+  m_Entries:
+  - m_Id: 205578304397312
+    m_Key: Play
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206257756479488
+    m_Key: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206376224595968
+    m_Key: Quit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206540234465280
+    m_Key: MULTI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206659935707136
+    m_Key: BACK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206814453866496
+    m_Key: HOST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206931772743680
+    m_Key: GUEST
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207101524615168
+    m_Key: AUDIO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207250657288192
+    m_Key: VIDEO
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207331741573120
+    m_Key: CONTROL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207422330150912
+    m_Key: LANGUAGE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207696817987584
+    m_Key: Master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207819300052992
+    m_Key: Ambient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207931870978048
+    m_Key: BGM
+    m_Metadata:
+      m_Items: []
+  - m_Id: 207996752666624
+    m_Key: SFX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 208806777626624
+    m_Key: Resolution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 208999631724544
+    m_Key: FullScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 209169882718208
+    m_Key: Brightness
+    m_Metadata:
+      m_Items: []
+  - m_Id: 214100719083520
+    m_Key: WindowScreen
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 3028548071622705500
+  references:
+    version: 2
+    RefIds:
+    - rid: 3028548071622705500
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1747758490637

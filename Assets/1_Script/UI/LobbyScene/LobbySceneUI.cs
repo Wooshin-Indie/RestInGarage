@@ -72,6 +72,11 @@ namespace Garage.UI.LobbyScene
             });
         }
 
+		private void OnEnable()
+		{
+			startButton.gameObject.SetActive(false);
+		}
+
 		private void OnDestroy()
 		{
 
@@ -192,6 +197,16 @@ namespace Garage.UI.LobbyScene
 				Destroy(cardList[i].gameObject);
 			}
 			cardList.Clear();
+
+			for (int i = 0; i < messageList.Count; i++)
+			{
+				Destroy(messageList[i].textObject);
+			}
+			messageList.Clear();
+
+			startButton.gameObject.SetActive(false);
+			notreadyButton.gameObject.SetActive(false);
+			readyButton.gameObject.SetActive(true);
 		}
 	}
 }

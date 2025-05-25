@@ -47,8 +47,11 @@ namespace Garage.UI.GameScene.Items
 
         public void OnUpdate()
         {
-            Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
-            transform.position = tmpPos;
+            if (partPos != null)
+            {
+                Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
+                transform.position = tmpPos;
+            }
         }
 
         public void InitCarStatusUI(CarController carCtr, CarParts carPart)
@@ -90,7 +93,12 @@ namespace Garage.UI.GameScene.Items
                     iconImage.sprite = oilImage;
                     SetUIScale(carPart);
                     break;
-            }
+				case CarParts.Fire:
+					iconImage.sprite = oilImage;
+                    maskToFill.GetComponent<Image>().color = Color.red;
+					SetUIScale(carPart);
+					break;
+			}
 
             partPos = car.PartTransforms[(int)carPart];
         }
@@ -104,14 +112,12 @@ namespace Garage.UI.GameScene.Items
                 {
                     case CarParts.FLT: // 왼쪽이면 좌우반전
                     case CarParts.RLT:
-                        uiRect.localScale = new Vector3(1f, 1f, 1f);
+					case CarParts.Oil:
+						uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                     case CarParts.FRT:
                     case CarParts.RRT:
                         uiRect.localScale = new Vector3(-1f, 1f, 1f);
-                        break;
-                    case CarParts.Oil:
-                        uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                 }
             }
@@ -121,14 +127,12 @@ namespace Garage.UI.GameScene.Items
                 {
                     case CarParts.FLT:
                     case CarParts.RLT:
-                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+					case CarParts.Oil:
+						uiRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                     case CarParts.FRT:
                     case CarParts.RRT:
                         uiRect.localScale = new Vector3(1f, 1f, 1f);
-                        break;
-                    case CarParts.Oil:
-                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
@@ -158,5 +162,5 @@ namespace Garage.UI.GameScene.Items
             else
                 iconImage.sprite = tireEmptyImage;
         }
-    }
+	}
 }

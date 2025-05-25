@@ -104,6 +104,7 @@ namespace Garage.Manager
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
+
 			go = Instantiate(prefabList[2]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
@@ -115,9 +116,9 @@ namespace Garage.Manager
 					new Vector2Int(2, 5),
 				},
 				NetworkManager.Singleton.LocalClientId);
-
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
-			go = Instantiate(prefabList[1]);
+
+			go = Instantiate(prefabList[3]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[1]
@@ -126,6 +127,18 @@ namespace Garage.Manager
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
+
+
+			go = Instantiate(prefabList[1]);
+			go.GetComponent<NetworkObject>().Spawn();
+			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
+				1, 0, new Vector2Int[1]
+				{
+					new Vector2Int(4, 8)
+				},
+				NetworkManager.Singleton.LocalClientId);
+			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
+
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -246,7 +259,7 @@ namespace Garage.Manager
 			int gridIdx = IsAbleToPlace(prop);
 			if (gridIdx == -1)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+				Managers.Sound.PlaySfx(SFXType.Wrong, .7f, 1f);
 				return;
 			}
 

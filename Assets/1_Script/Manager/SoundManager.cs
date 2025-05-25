@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Garage.Utils;
-using IUtil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,30 +14,44 @@ namespace Garage.Manager
 	public enum BGMType { None }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
 		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2, Wrong, SlideUp, SlideDown,
-		Tick, ShopCar, ShopPop }
+		Tick, Boom, ShopCar, ShopPop}
 	public enum SoundType { Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
 	/// 게임 실행 시 동적으로 AudioSource를 생성합니다.
 	/// audioClip 은 ResourceManager에서 동적으로 로드합니다.
 	/// </summary>
-	public class SoundManager : MonoBehaviour
+	public class SoundManager
 	{
 		private AudioSource[] audioSources = new AudioSource[(int)Enum.GetNames(typeof(SoundType)).Length];
 		private AudioSource[] ambientSources = new AudioSource[(int)Enum.GetNames(typeof(AMBType)).Length];
 
 		private float masterVolume = 1f;
+		private float ambientVolume = 1f;
 		private float sfxVolume = 1f;
 		private float bgmVolume = 1f;
 
-
 		/** Properties **/
-		public float SfxVolume
+		public float MasterVolume
 		{
-			get { return sfxVolume; }
+			get => masterVolume;
 			set
 			{
-				sfxVolume = value;
+				masterVolume = value;
+				BgmVolume = bgmVolume;
+				AmbientVolume = ambientVolume;
+			}
+		}
+		public float AmbientVolume
+		{
+			get => ambientVolume;
+			set
+			{
+				ambientVolume = value;
+				for (int i = 0; i < ambientSources.Length; i++)
+				{
+					ambientSources[i].volume = masterVolume * ambientVolume;
+				}
 			}
 		}
 		public float BgmVolume
@@ -47,31 +60,23 @@ namespace Garage.Manager
 			set
 			{
 				bgmVolume = value;
+				audioSources[(int)SoundType.Bgm].volume = masterVolume * bgmVolume;
 			}
 		}
-		public float MasterVolume
+		public float SfxVolume
 		{
-			get => masterVolume;
+			get { return sfxVolume; }
 			set
 			{
-				masterVolume = value;
+				sfxVolume = value;
 			}
 		}
 
-		private static SoundManager instance;
-		public static SoundManager Instance { get => instance; }
-
+		Transform root = null;
 		public void Init()
 		{
-			if (null == instance)
-			{
-				instance = this;
-				DontDestroyOnLoad(this.gameObject);
-			}
-			else
-			{
-				Destroy(this.gameObject);
-			}
+			Transform root = new GameObject { name = "@SoundManager" }.transform;
+
 
 			string[] soundTypeNames = Enum.GetNames(typeof(SoundType));
 			string[] ambientTypeNames = Enum.GetNames(typeof(AMBType));
@@ -80,29 +85,21 @@ namespace Garage.Manager
 			{
 				GameObject go = new GameObject { name = soundTypeNames[i] };
 				audioSources[i] = go.AddComponent<AudioSource>();
-				go.transform.parent = instance.transform;
+				go.transform.parent = root;
 			}
 
 			for (int i = 0; i < ambientTypeNames.Length; i++)
 			{
 				GameObject go = new GameObject { name = ambientTypeNames[i] };
 				ambientSources[i] = go.AddComponent<AudioSource>();
-				go.transform.parent = instance.transform;
+				go.transform.parent = root;
 				ambientSources[i].loop = true;
 				ambientSources[i].clip = GetAudioClip((AMBType)i);
 			}
 
 			audioSources[(int)SoundType.Bgm].loop = true;
 			InitPool();
-		}
 
-		private void Awake()
-		{
-			Init();
-		}
-
-		private void Start()
-		{
 			PlayAmbient(AMBType.Engine);
 			PlayAmbient(AMBType.Wind);
 		}
@@ -115,7 +112,7 @@ namespace Garage.Manager
 		private void InitPool(int cnt = 10)
 		{
 			poolRoot = new GameObject { name = "_poolRoot" }.transform;
-			poolRoot.parent = instance.transform;
+			poolRoot.parent = root;
 
 			for (int i = 0; i < cnt; i++)
 			{
@@ -256,18 +253,6 @@ namespace Garage.Manager
 				ambientSources[i].DOFade(1f, duration);
 			}
 			audioSources[(int)SoundType.Bgm].DOFade(1f, duration);
-		}
-
-
-
-
-		[Header("TEST")]
-		public SFXType testSFXType;
-		
-		[Button(nameof(testSFXType))]
-		private void TestSFX(SFXType type)
-		{
-			PlaySfx(type, 1f, 1f);
 		}
 
 	}

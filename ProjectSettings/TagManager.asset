@@ -20,6 +20,7 @@ TagManager:
   - Vehicle
   - Interactable
   - Player
+  - Fire
   - PlayerWall
   - 
   - 
