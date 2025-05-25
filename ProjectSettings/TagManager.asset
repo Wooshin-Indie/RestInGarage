@@ -21,6 +21,7 @@ TagManager:
   - Interactable
   - Player
   - Fire
+  - PlayerWall
   - 
   - 
   - 

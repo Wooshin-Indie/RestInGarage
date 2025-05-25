@@ -57,7 +57,7 @@ namespace Garage.Manager
 
 		public Dictionary<ulong, OwnableProp> PlacedBuildings = new();
 		public Dictionary<ulong, OwnableProp> ItemDictionary = new();
-		public Dictionary<ulong, GameObject> DecoPropDictionary = new();
+		public Dictionary<ulong, GameObject> NightDecoPropDictionary = new();
 
 		GameObject tmpPreview = null;
 		private Material lastAppliedMaterial = null;
@@ -91,16 +91,16 @@ namespace Garage.Manager
 			GameObject go = Instantiate(prefabList[0]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
-				1, 0, new Vector2Int[8]
+				0, 0, new Vector2Int[8]
 				{
-					new Vector2Int(3, 16),
-					new Vector2Int(3, 17),
-					new Vector2Int(3, 18),
-					new Vector2Int(3, 19),
-					new Vector2Int(4, 16),
-					new Vector2Int(4, 17),
-					new Vector2Int(4, 18),
-					new Vector2Int(4, 19)
+					new Vector2Int(2, 6),
+					new Vector2Int(2, 7),
+					new Vector2Int(2, 8),
+					new Vector2Int(2, 9),
+					new Vector2Int(3, 6),
+					new Vector2Int(3, 7),
+					new Vector2Int(3, 8),
+					new Vector2Int(3, 9) 
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
@@ -108,12 +108,12 @@ namespace Garage.Manager
 			go = Instantiate(prefabList[2]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
-				1, 2, new Vector2Int[4]
+				0, 2, new Vector2Int[4]
 				{
-					new Vector2Int(3, 12),
-					new Vector2Int(3, 13),
-					new Vector2Int(4, 12),
-					new Vector2Int(4, 13),
+					new Vector2Int(1, 4),
+					new Vector2Int(1, 5),
+					new Vector2Int(2, 4),
+					new Vector2Int(2, 5),
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
@@ -121,9 +121,9 @@ namespace Garage.Manager
 			go = Instantiate(prefabList[3]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
-				1, 0, new Vector2Int[1]
+				0, 0, new Vector2Int[1]
 				{
-					new Vector2Int(4, 10)
+					new Vector2Int(3, 3)
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
@@ -167,6 +167,7 @@ namespace Garage.Manager
 		// HACK - 나중엔 ResourceManager에서 로드해서 갖고있어야됨
 
 		[SerializeField] private List<GameObject> prefabList = new();
+		[SerializeField] private List<GameObject> nightDecoPrefabList = new();
 		[SerializeField] private GameObject lightPrefab;
 		[SerializeField] private List<Vector3> shopPositions = new();
 
@@ -202,14 +203,14 @@ namespace Garage.Manager
 				Destroy(entry.Value.gameObject);
 			}
 
-			foreach (var entry in DecoPropDictionary)
+			foreach (var entry in NightDecoPropDictionary)
 			{
 				entry.Value.GetComponent<NetworkObject>().Despawn();
 				Destroy(entry.Value.gameObject);
 			}
 
 			ItemDictionary.Clear();
-			DecoPropDictionary.Clear();
+			NightDecoPropDictionary.Clear();
 			TurnOffLights();
 			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
 		}
@@ -224,7 +225,7 @@ namespace Garage.Manager
 			// HACK - 랜덤으로 바꾸기
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
-				GameObject tmpGo = Instantiate(prefabList[i], shopPositions[i], Quaternion.Euler(0f, -90f, 0f));
+				GameObject tmpGo = Instantiate(prefabList[i], shopPositions[i], Quaternion.identity);
 				tmpGo.GetComponent<NetworkObject>().Spawn();
 				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
 				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());
@@ -237,14 +238,16 @@ namespace Garage.Manager
 
 			foreach (var item in ItemDictionary)
 			{
-				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(0, 0, 1.5f), item.Key, item.Value.ItemData.BuyPrice);
+				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.BuyPrice);
 			}
 		}
 
 		private void SpawnNightDecoProps()
 		{
-
-		}
+            GameObject tmpGo = Instantiate(nightDecoPrefabList[0], new Vector3(16, 0 ,4), Quaternion.Euler(0f, 173f, 0f));
+			tmpGo.GetComponent<NetworkObject>().Spawn();
+            NightDecoPropDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo);
+        }
 
 		public void TryPlaceBuilding(OwnableProp prop)
 		{

@@ -72,7 +72,7 @@ namespace Garage.Manager
 		{
 			if (result != Result.OK)
 			{
-				Debug.Log("Lobby was not created");
+				Debug.Log("Lobby was not created, result: " + result);
 				return;
 			}
 			lobby.SetPublic();
@@ -152,6 +152,7 @@ namespace Garage.Manager
 			{
 				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
 				Debug.Log("Client has started");
+				// TODO - 여기서 카메라 할당
 			}
 		}
 

@@ -14,17 +14,17 @@ namespace Garage.Controller
 	public class CarController : NetworkBehaviour
 	{
         private Animator animator;
+		private int[] animIDs = new int[2];
 
 		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
-
-        [Header("Car Parts Transform")]
-        [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
 
 		[FoldoutGroup("Materials")]
 		[SerializeField] private Material brokenCarMat;
 
 		[FoldoutGroup("Particle Systems")]
+        [SerializeField] private List<Transform> partTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
+        public List<Transform> PartTransforms => partTransforms;
 		[SerializeField] private ParticleSystem smokePS;
 		[SerializeField] private ParticleSystem allRepairedVFX;
 		[SerializeField] private ParticleSystem firePS;
@@ -60,7 +60,9 @@ namespace Garage.Controller
 
         private void Awake()
 		{
-            animator = GetComponent<Animator>();
+            animator = GetComponentInChildren<Animator>();
+            animIDs[0] = Animator.StringToHash("IsKickedToLeft");
+            animIDs[1] = Animator.StringToHash("IsKickedToRight");
             rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
             smokePS.Stop();
@@ -571,16 +573,16 @@ namespace Garage.Controller
 
 		private void HideTire(CarParts part)
 		{
-            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
-			MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
+            Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
+			MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = false;
 			collid.isTrigger = true;
         }
 
 		private void RevealTire(CarParts part)
 		{
-            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
-            MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
+            Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
+            MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = true;
             collid.isTrigger = false;
 			RestoreOriginRot(1f);
@@ -617,22 +619,24 @@ namespace Garage.Controller
         }
 
         Coroutine kickedCoroutine;
-        public void ApplyKick(KickDirection kickDir)
-        {
-			float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
-			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
+
+		[ServerRpc(RequireOwnership = false)]
+		public void ApplyKickServerRPC(KickDirection kickDir)
+		{
+            float distanceByLane = TrafficManager.Instance.CurStageData.LaneWidth / 3f;
+            float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
 			// 맵 월드좌표는 오른쪽이 +X방향임
-			float distanceX;
+            float distanceX;
 
             if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
-				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
-			{
+                (direction == VehicleDirection.Down && kickDir == KickDirection.Left))
+            {
                 // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
-                // IsKickedToLeft(animationParameter) = true
+                //SetAnimParam(0);
             }
-			else
-			{
-                // IsKickedToRight(animationParameter) = true
+            else
+            {
+                //SetAnimParam(1);
             }
 
             if (kickDir == KickDirection.Right)
@@ -644,9 +648,15 @@ namespace Garage.Controller
                 distanceX = distance;
             }
 
-			if (kickedCoroutine == null)
-				kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+			ApplyKickClientRPC(distanceX);
         }
+		[ClientRpc]
+		private void ApplyKickClientRPC(float distanceX)
+		{
+            if (kickedCoroutine == null)
+                kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+        }
+
         private IEnumerator MoveSideways(float distanceX, float time)
         {
 			isBeingForced = true;
@@ -683,6 +693,31 @@ namespace Garage.Controller
 		public void MovingTest()
 		{
             kickedCoroutine = StartCoroutine(MoveSideways(kickDistance, 1f));
+        }
+
+
+        public void SetAnimParam(int id)
+        {
+            animator.SetTrigger(animIDs[id]);
+            if (IsHost)
+            {
+                ChangeAnimatorParamClientRPC(id);
+            }
+            else
+            {
+                ChangeAnimatorParamServerRPC(id);
+            }
+        }
+        [ServerRpc(RequireOwnership = false)]
+        private void ChangeAnimatorParamServerRPC(int id)
+        {
+            ChangeAnimatorParamClientRPC(id);
+        }
+        [ClientRpc]
+        private void ChangeAnimatorParamClientRPC(int id)
+        {
+            if (IsOwner) return;
+            animator.SetTrigger(animIDs[id]);
         }
     }
 }

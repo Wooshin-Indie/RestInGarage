@@ -67,8 +67,9 @@ namespace Garage.UI.LobbyScene
                 NetworkTransmission.instance.IsTheClientReadyServerRPC(false, GameManagerEx.Instance.MyClientId);
             });
             startButton.onClick.AddListener(() => {
-				NetworkTransmission.instance.StartGameServerRPC();
-			});
+                NetworkTransmission.instance.StartGameServerRPC();
+                //GameManagerEx.Instance.GameStarted();
+            });
         }
 
 		private void OnEnable()

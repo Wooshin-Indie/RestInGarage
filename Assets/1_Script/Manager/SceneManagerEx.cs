@@ -37,9 +37,10 @@ namespace Garage.Manager
 			}
 			else
 			{
-				Debug.Log("SCENE LOAD :" + sceneEnum.ToString());
+				Debug.Log("SCENE LOAD START :" + sceneEnum.ToString());
 				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
-			}
+                Debug.Log("SCENE LOAD END :" + sceneEnum.ToString());
+            }
 		}
 
 		public void UnloadCurrentSceneServer()
