@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -6,10 +5,8 @@ using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -28,7 +25,7 @@ namespace Garage.Controller
 
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
-		[SerializeField] private Transform cameraTransform;
+		//[SerializeField] private Transform cameraTransform;
 
 		[FoldoutGroup("Player Speeds")]
 		[SerializeField] private float walkSpeed;
@@ -39,12 +36,16 @@ namespace Garage.Controller
 		[SerializeField] private float boxWidth;
 		[SerializeField] private float boxHeight;
 
+		[SerializeField] private float fireExLength = 5f;
+		[SerializeField] private float fireExRadius = 1f;
+		[SerializeField] private LayerMask fireExLayer;
+
 		[TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[7];
+		private int[] animIDs = new int[9];
 
 		
 		private bool isAbleToMove = true;
@@ -77,7 +78,7 @@ namespace Garage.Controller
 
 		private void Awake()
 		{
-			interactableHits = new Collider[5];
+			interactableHits = new Collider[10];
 
 			animator = GetComponent<Animator>();
 			rigid = GetComponent<Rigidbody>();
@@ -100,14 +101,23 @@ namespace Garage.Controller
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
 			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
 			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
+			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
+			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 		}
 
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
 
-			cameraTransform.gameObject.SetActive(IsOwner);
-			PlayerID.OnValueChanged += OnPlayerIDChanged;
+			//cameraTransform.gameObject.SetActive(IsOwner);
+			if (IsOwner)
+            {
+				Debug.Log("NetworkSpawned");
+                // OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
+                CameraManager.Instance.SetTargetPlayer(this.transform);
+            }
+
+            PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
 		private void Update()
@@ -272,7 +282,7 @@ namespace Garage.Controller
 			if(Mathf.Approximately(Mathf.Abs(move.x) + Mathf.Abs(move.y), 0f)) 
 				speed = 0;
 
-			moveDir = new Vector3(move.x, 0f, move.y).normalized;
+			moveDir = new Vector3(move.y, 0f, -move.x).normalized;
 			moveDir *= speed;
 			rigid.linearVelocity = moveDir;
 
@@ -307,7 +317,7 @@ namespace Garage.Controller
 
 				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
 					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
-				
+
 				// CarParts탐지
 				if (interactableHits[i].GetComponent<CarPartBase>() != null
 					&& interactableHits[i].GetComponent<CarPartBase>().IsAbleToInteract(currentOwningProp))
@@ -323,7 +333,6 @@ namespace Garage.Controller
                 if (interactableHits[i].GetComponent<CarSideDoor>() != null)
 				{
 					currentKickableCar = interactableHits[i].GetComponent<CarSideDoor>().Car;
-					break;
                 }
             }
 
@@ -343,7 +352,24 @@ namespace Garage.Controller
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
-        public Transform GetSocket(PropType type) 
+
+
+        public void ExtinguishFire(Vector3 position)
+		{
+			Vector3 sprayEndPosition = position + transform.forward * fireExLength;
+
+			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, fireExRadius, interactableHits, fireExLayer);
+
+			for (int i = 0; i<counts; i++)
+			{
+				CarPartBase part = interactableHits[i].GetComponent<CarPartBase>();
+				if (part == null) continue;
+
+				part.Interact(this, currentOwningProp);
+			}
+		}
+
+		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
 		}
@@ -351,21 +377,11 @@ namespace Garage.Controller
 		// 키 바인딩 필요
         public void KickCar()
 		{
-			if (currentKickableCar == null) return;
+            if (currentKickableCar == null) return;
 
-            Vector3 fromMeToCar = currentKickableCar.transform.position - transform.position;
-
-			if (fromMeToCar.x < 0) // <-
-			{
-                currentKickableCar.ApplyKick(KickDirection.Right);
-				transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
-            }
-			else if (fromMeToCar.x > 0) // ->
-            {
-                currentKickableCar.ApplyKick(KickDirection.Left);
-                transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
-            }
 			// 차는 애니메이션 실행
+			isBeingForced = true;
+            SetAnimParam((int)AnimationType.Kick);
         }
 
 		[SerializeField] private float knockbackStrength = 5f;
@@ -401,7 +417,9 @@ namespace Garage.Controller
 			rigid.rotation = targetRot;
 			isBeingForced = true;
             rigid.AddForce(knockbackDirection * knockbackStrength, ForceMode.Impulse);
-            // 애니메이션 실행
+
+			// 애니메이션 실행
+			SetAnimParam((int)AnimationType.KnockBack);
         }
 
 		[Button]
@@ -429,14 +447,15 @@ namespace Garage.Controller
 		private void OnEndPlace()
 		{
 			if (!IsOwner) return;
-			if (currentOwningProp == null) return;
 
+			isAbleToMove = true;
+			if (currentOwningProp == null) return;
+			
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
 				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
 			}
 			currentOwningProp = null;
-			isAbleToMove = true;
 		}
 
 		private void OnPutTire()
@@ -444,7 +463,7 @@ namespace Garage.Controller
 			if (!IsOwner) return;
 			if (currentOwningProp == null) return;
 
-			SoundManager.Instance.PlaySfx(SFXType.Put, 1.3f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Put, 1.3f, 1f);
 
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
@@ -468,36 +487,72 @@ namespace Garage.Controller
 		{
 			// TODO - 바닥 텍스쳐에 따라 소리 다르게 하면 좋을듯?
 			// 지금은 자갈 밟는 소리임
-			SoundManager.Instance.PlaySfx(SFXType.Walk, .7f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Walk, .7f, 1f);
 		}
 		private void OnCrouch()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Wrench, .5f, 1.1f);
+			Managers.Sound.PlaySfx(SFXType.Wrench, .5f, 1.1f);
 		}
 
 		private void OnHammer()
 		{
-			SoundManager.Instance.PlaySfx(SFXType.Hammer, .8f, 1.2f);
+			Managers.Sound.PlaySfx(SFXType.Hammer, .8f, 1.2f);
 
             //Vector3 VFXpos = currentFixablePart.transform.position;
             Vector3 VFXpos = currentOwningProp.transform.position;
-			VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
+			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
 
 		private void OnOiling()
 		{
 			if(currentOwningProp is OilPump)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+				Managers.Sound.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
 			}
 		}
 
 		private void OnKick()
 		{
-			// TODO - 여기서 발 차는 함수 호출하면됨
-			Debug.Log("KICK!");
+            if (currentKickableCar == null) return;
+
+            Vector3 fromMeToCar = currentKickableCar.transform.position - transform.position;
+
+            if (fromMeToCar.x < 0) // <-
+            {
+                currentKickableCar.ApplyKickServerRPC(KickDirection.Right);
+                transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
+            }
+            else if (fromMeToCar.x > 0) // ->
+            {
+                currentKickableCar.ApplyKickServerRPC(KickDirection.Left);
+                transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
+            }
+
+            Debug.Log("KICK!");
+		}
+
+		private void OnKickEnd()
+		{
+			isBeingForced = false;
+
+        }
+
+		private void OnGettingUp()
+		{
+			isBeingForced = false;
 		}
 
 		#endregion
+
+		void OnDrawGizmos()
+		{
+			Gizmos.color = Color.cyan;
+
+			Vector3 start = transform.position;
+			Vector3 end = transform.position + transform.forward * fireExLength;
+
+			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
+		}
+
 	}
 }

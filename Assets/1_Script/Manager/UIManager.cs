@@ -4,8 +4,6 @@ using Garage.UI.GameScene;
 using Garage.Utils;
 using UnityEngine;
 using Garage.UI;
-using Unity.Netcode;
-using Unity.VisualScripting;
 
 namespace Garage.Manager
 {

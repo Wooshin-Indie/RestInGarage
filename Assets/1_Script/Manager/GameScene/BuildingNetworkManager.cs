@@ -3,7 +3,6 @@ using Garage.UI.Item;
 using Garage.Utils;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.UIElements;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -130,7 +129,7 @@ namespace Garage.Manager
 		{
 			if (clientId != NetworkManager.Singleton.LocalClientId) return;
 
-			SoundManager.Instance.PlaySfx(SFXType.Wrong, .7f, 1f);
+			Managers.Sound.PlaySfx(SFXType.Wrong, .7f, 1f);
 			switch (type)
 			{
 				case BuildFailType.WrongPlace:

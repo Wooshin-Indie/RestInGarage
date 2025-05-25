@@ -1,7 +1,6 @@
 using Garage.Controller;
 using Garage.Props;
 using Garage.Utils;
-using System.Collections;
 using UnityEngine;
 
 namespace Garage.Structs.CarPart

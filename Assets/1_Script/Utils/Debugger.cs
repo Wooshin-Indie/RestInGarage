@@ -1,4 +1,6 @@
-
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace Garage.Utils
@@ -32,6 +34,38 @@ namespace Garage.Utils
 			Debug.DrawLine(corners[4], corners[6], color);
 			Debug.DrawLine(corners[5], corners[7], color);
 			Debug.DrawLine(corners[6], corners[7], color);
+		}
+
+
+
+		public static void DrawCapsuleGizmo(Transform transform, Vector3 p1, Vector3 p2, float radius)
+		{
+#if UNITY_EDITOR
+			Handles.color = Color.cyan;
+
+			Vector3 up = (p2 - p1).normalized;
+			float height = Vector3.Distance(p1, p2);
+			float halfHeight = Mathf.Max(0f, height / 2f - radius);
+
+			// 중심 방향 계산
+			Vector3 center = (p1 + p2) / 2f;
+			Quaternion rotation = Quaternion.LookRotation(up);
+
+			// 반구 시각화
+			Handles.DrawWireArc(p1, Vector3.right, Vector3.up, 360, radius);
+			Handles.DrawWireArc(p2, Vector3.right, Vector3.up, 360, radius);
+			Handles.DrawWireDisc(p1, up, radius);
+			Handles.DrawWireDisc(p2, up, radius);
+
+			// 원기둥 측면 연결
+			Vector3 right = Vector3.Cross(up, Vector3.up).normalized * radius;
+			Vector3 forward = Vector3.Cross(right, up).normalized * radius;
+
+			Handles.DrawLine(p1 + right, p2 + right);
+			Handles.DrawLine(p1 - right, p2 - right);
+			Handles.DrawLine(p1 + forward, p2 + forward);
+			Handles.DrawLine(p1 - forward, p2 - forward);
+#endif
 		}
 	}
 }

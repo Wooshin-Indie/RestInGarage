@@ -24,10 +24,10 @@ namespace Garage.UI
 		{
 			if(duration > Mathf.Epsilon)
 			{
-				SoundManager.Instance.PlaySfx(SFXType.SlideUp, .7f, 1f);
+				Managers.Sound.PlaySfx(SFXType.SlideUp, .7f, 1f);
 			}
 
-			SoundManager.Instance.BlockBGM(1f);
+			Managers.Sound.BlockBGM(1f);
 			backgroundImage.material.SetFloat("_Cutoff", 1f);
 			backgroundImage.gameObject.SetActive(true);
 			backgroundImage.material.DOFloat(0f, "_Cutoff", duration);
@@ -42,8 +42,8 @@ namespace Garage.UI
 				DOFloat(1f, "_Cutoff", fadeDuration)
 				.OnStart(() =>
 				{
-					SoundManager.Instance.ReleaseBGM(1f);
-					SoundManager.Instance.PlaySfx(SFXType.SlideDown, .7f, 1f);
+					Managers.Sound.ReleaseBGM(1f);
+					Managers.Sound.PlaySfx(SFXType.SlideDown, .7f, 1f);
 				})
 				.SetDelay(waitDuration)
 				.OnComplete(() =>

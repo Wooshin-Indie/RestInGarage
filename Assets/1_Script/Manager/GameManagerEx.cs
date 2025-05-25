@@ -45,6 +45,7 @@ namespace Garage.Manager
 		public Action OnDisconnected { get; set; }
 
 		[SerializeField] private GameObject meetingPointPrefab;
+		[SerializeField] private float stageTimer;
 
 		private MeetingPoint meetingPoint;
 
@@ -69,15 +70,15 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.IsDay.Value = true;
 			GameSynchronizer.Instance.CurrentStage.Value++;
-			UIManager.Game.OnStartStage(GameSynchronizer.Instance.CurrentStage.Value);
+			GameSynchronizer.Instance.OnStageStartClientRPC(GameSynchronizer.Instance.CurrentStage.Value);
 
 			BuildingManager.Instance.OnStageStart();
 		}
 
 		public void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(10f);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, 10f);
+			GameSynchronizer.Instance.SetGameTimer(stageTimer);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
 			BuildingManager.Instance.OnStageStart();
 		}
 
@@ -91,6 +92,8 @@ namespace Garage.Manager
 
 		}
 
+
+
 		public void OnStageEnd()
 		{
 			if (!isHost) return;
@@ -100,12 +103,20 @@ namespace Garage.Manager
 				GameObject go = Instantiate(meetingPointPrefab);
 				go.GetComponent<NetworkObject>().Spawn();
 				meetingPoint = go.GetComponent<MeetingPoint>();
-				meetingPoint.transform.position = new Vector3(-5f, 0f, -7f);
+				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
 			}
 			meetingPoint.StartMeetClientRPC(GameSynchronizer.Instance.CurrentStage.Value + 1);
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
-			BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+
+
+			if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
+
+			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
+			{
+				Managers.Sound.PlaySfx(SFXType.ShopPop);
+                BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+            });
 		}
 
 
@@ -145,7 +156,7 @@ namespace Garage.Manager
 		{
 			UIManager.Instance.OnGameStart();
 			OnStageEnd();
-			BuildingManager.Instance.BuildBasicBuildings();
+			if (isHost) BuildingManager.Instance.BuildBasicBuildings();
 		}
 
 		public void GameEnded()

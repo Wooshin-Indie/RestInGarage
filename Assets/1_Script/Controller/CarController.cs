@@ -7,22 +7,29 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Garage.Props;
 using System.Collections;
-using UnityEngine.EventSystems;
-using TMPro;
-using Unity.VisualScripting;
-using Garage.Structs.CarPart;
+using DG.Tweening;
 
 namespace Garage.Controller
 {
 	public class CarController : NetworkBehaviour
 	{
         private Animator animator;
+		private int[] animIDs = new int[2];
 
-        [Header("Car Parts Transform")]
-        [SerializeField] public List<Transform> PartTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
+		[SerializeField] private MeshRenderer meshRenderer;
+		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
 
+		[FoldoutGroup("Materials")]
+		[SerializeField] private Material brokenCarMat;
+
+		[FoldoutGroup("Particle Systems")]
+        [SerializeField] private List<Transform> partTransforms = new List<Transform>(); // 넣을 때 CarParts enum 순서 맞춰서 넣기
+        public List<Transform> PartTransforms => partTransforms;
 		[SerializeField] private ParticleSystem smokePS;
 		[SerializeField] private ParticleSystem allRepairedVFX;
+		[SerializeField] private ParticleSystem firePS;
+		[SerializeField] private ParticleSystem extinguishPS;
+		[SerializeField] private ParticleSystem explosionPS;
 
         [FoldoutGroup("Move Parameters")]
 		[SerializeField] private float moveSpeed = 5f;
@@ -39,6 +46,7 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
+
 		private float targetLaneX = 0f;
 		private float removeLaneLength;
 		private bool isBeingForced = false;
@@ -52,15 +60,22 @@ namespace Garage.Controller
 
         private void Awake()
 		{
-            animator = GetComponent<Animator>();
+            animator = GetComponentInChildren<Animator>();
+            animIDs[0] = Animator.StringToHash("IsKickedToLeft");
+            animIDs[1] = Animator.StringToHash("IsKickedToRight");
             rigid = GetComponent<Rigidbody>();
 			carStatus = new CarStatus();
             smokePS.Stop();
-        }
+			firePS.Stop();
+			extinguishPS.Stop();
+			explosionPS.Stop();
+		}
 
 		private void FixedUpdate()
         {
+			OnUpdateFire();
             if (!IsHost) return;
+
 
 			if (isAnyBroken)
 			{
@@ -96,12 +111,12 @@ namespace Garage.Controller
 			MoveForward();
 		}
 
+
 		private Vector3 moveVector = new Vector3(0f, 0f, 5f);
 		private float currentSpeedVelocityRef = 0f; // smooth damp용
         private float accelerationTime = 1f; // 목표 속도까지 도달하는 데 걸리는 대략적인 시간
         private void MoveForward()
 		{
-			Debug.Log("MovingMoving");
 			Vector3 pos = rigid.position;
 			float xOffset = targetLaneX - pos.x;
 
@@ -151,7 +166,6 @@ namespace Garage.Controller
 		[SerializeField] private float decelerationRate = 1f;
         private void BrakeVehicle()
 		{
-			Debug.Log("Braking");
 			if (rigid.linearVelocity.magnitude > stopThreshold)
 			{
 				rigid.linearVelocity = Vector3.Lerp(rigid.linearVelocity, Vector3.zero, Time.fixedDeltaTime * decelerationRate);
@@ -184,10 +198,168 @@ namespace Garage.Controller
 				case CarParts.Engine:
 					ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					break;
+				case CarParts.Fire:
+					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					break;
+
 			}
 		}
 
-        private void AddTireLogic(CarParts part)
+
+		private bool isFired = false;
+		private bool isExploded = false;
+		public bool IsExploded => isExploded;
+
+		private float prevFireProgress = -1f;
+		private float boomRadius = 12f;
+
+		private float fireTime = 20f;
+		private float extinguishTime = 3f;
+		private float maxFireHeight = 1.5f;
+
+		private void OnUpdateFire()
+		{
+			if (IsHost)
+			{
+				if (carStatus.FireProgress > 1f)
+					OnCarExplosion();
+				else
+				{
+					if (carStatus.IsFiring())
+						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
+				}
+				if (!isExploded)
+					UpdateFireProgressClientRPC(carStatus.FireProgress);
+			}
+		}
+		private void OnCarExplosion()
+		{
+			if (isExploded) return;
+			isExploded = true;
+
+			OnCarExplosionClientRPC();
+			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
+			HashSet<CarController> processed = new HashSet<CarController>();
+
+			for (int i = 0; i < hits.Length; i++)
+			{
+				CarController controller = hits[i].GetComponentInParent<CarController>();
+				if (controller == null) continue;
+
+				if (processed.Add(controller))
+				{
+					controller.OnFired();
+				}
+			}
+		}
+
+		[ClientRpc]
+		private void OnCarExplosionClientRPC()
+		{
+			isExploded = true;
+			Managers.Sound.PlaySfx(SFXType.Boom, 1.2f, 1f);
+			explosionPS.Play();
+			firePS.gameObject.SetActive(false);
+			UIManager.Game.RemoveAllCarStatusUI(this);
+
+			Material mat = Instantiate(brokenCarMat);
+			meshRenderer.materials = new Material[2]
+			{
+				mat,
+				mat
+			};
+			for (int i = 0; i < wheelRenderers.Count; i++)
+				wheelRenderers[i].material = mat;
+
+			float currentValue = 1f;
+			mat.SetInt("_TransparentEnabled", 1);
+			DOTween.To(() => currentValue, x =>
+			{
+				currentValue = x;
+				mat.SetFloat("_Tweak_transparency", x);
+			}, -1f, 3f)
+			.OnComplete(() =>
+			{
+				if (IsHost)
+				{
+					TrafficManager.Instance.DespawnCar(this);
+				}
+			});
+		}
+
+		/// <summary>
+		/// 주변 차가 터져서 해당 차가 불타는 경우 호출
+		/// </summary>
+		public void OnFired()
+		{
+			if (!carStatus.IsFiring())
+				carStatus.FireProgress = .3f;
+			else
+				carStatus.FireProgress += .3f;
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void ExtinguishFireServerRPC(float deltaTime, ulong clinetId)
+		{
+			if (carStatus.IsFiring())
+			{
+				carStatus.ExtinguishFire(deltaTime / -extinguishTime);
+				
+				if (!carStatus.IsFiring())
+				{
+					isAnyBroken = carStatus.IsThereAnyBroken();
+					if (!isAnyBroken) // 모든 part 고쳐졌을 때
+						OnAllPartsRepairedClientRPC();
+				}
+			}
+		}
+
+		[ClientRpc]
+		private void UpdateFireProgressClientRPC(float progress)
+		{
+			UpdateFireProgressLogic(progress);
+		}
+		private void UpdateFireProgressLogic(float progress)
+		{
+			if (isExploded) return;
+
+			carStatus.FireProgress = progress;
+
+			if (carStatus.IsFiring())
+			{
+				isFired = true;
+
+				UIManager.Game.UpdateCarFiringUI(this, carStatus.FireProgress);
+				if (!firePS.isPlaying)
+					firePS.Play();
+
+				var main = firePS.main;
+				main.startSizeY = maxFireHeight * Mathf.Clamp(carStatus.FireProgress, 0, 1);
+			}
+			else
+			{
+				if (isFired)
+				{
+					UIManager.Game.RemoveCarStatusUI(this, CarParts.Fire);
+					isFired = false;
+					firePS.Stop();
+				}
+			}
+
+			if (prevFireProgress > carStatus.FireProgress)
+			{
+				if (!extinguishPS.isPlaying)
+					extinguishPS.Play();
+			}
+			else
+				extinguishPS.Stop();
+
+			prevFireProgress = carStatus.FireProgress;
+		}
+
+
+
+		private void AddTireLogic(CarParts part)
         {
             carStatus.AddTire(part);
             UIManager.Game.OnTireInserted(this, part);
@@ -246,7 +418,7 @@ namespace Garage.Controller
             {
 				var pc = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
 				pc.StateMachine.ChangeState(pc.carryState);
-				SoundManager.Instance.PlaySfx(SFXType.Pop, .7f, .7f);
+				Managers.Sound.PlaySfx(SFXType.Pop, .7f, .7f);
 				Debug.Log("Repair Ended and Changed to CarryState");
             }
             Debug.Log("Part Repair Totally Ended");
@@ -273,9 +445,9 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
-			SoundManager.Instance.PlaySfx(SFXType.Complete, .8f, .9f);
+			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
             allRepairedVFX.Play();
-			VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
+			// VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
         }
 		private IEnumerator OnAllPartsRepairedCoroutine()
 		{
@@ -285,7 +457,7 @@ namespace Garage.Controller
 
         public bool IsAbleToInteract(CarParts part, OwnableProp prop)
 		{
-			if (!carStatus.IsBroken(part)) return false;
+			if (!carStatus.IsBroken(part) || isExploded) return false;
 
 			switch (part)
 			{
@@ -295,7 +467,6 @@ namespace Garage.Controller
 				case CarParts.RRT:
 					return (prop is TireProp && carStatus.IsTireEmpty(part))
 						|| (prop is WrenchProp && !carStatus.IsTireEmpty(part));
-
                 case CarParts.Oil:
 					return prop is OilPump;
 				case CarParts.Engine:
@@ -402,16 +573,16 @@ namespace Garage.Controller
 
 		private void HideTire(CarParts part)
 		{
-            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
-			MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
+            Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
+			MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = false;
 			collid.isTrigger = true;
         }
 
 		private void RevealTire(CarParts part)
 		{
-            Renderer rend = PartTransforms[(int)part].GetComponent<Renderer>();
-            MeshCollider collid = PartTransforms[(int)part].GetComponent<MeshCollider>();
+            Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
+            MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
             rend.enabled = true;
             collid.isTrigger = false;
 			RestoreOriginRot(1f);
@@ -448,22 +619,24 @@ namespace Garage.Controller
         }
 
         Coroutine kickedCoroutine;
-        public void ApplyKick(KickDirection kickDir)
-        {
-			float distanceByLane = TrafficManager.Instance.CurMapLaneWidth / 3f;
-			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
+
+		[ServerRpc(RequireOwnership = false)]
+		public void ApplyKickServerRPC(KickDirection kickDir)
+		{
+            float distanceByLane = TrafficManager.Instance.CurStageData.LaneWidth / 3f;
+            float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
 			// 맵 월드좌표는 오른쪽이 +X방향임
-			float distanceX;
+            float distanceX;
 
             if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
-				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
-			{
+                (direction == VehicleDirection.Down && kickDir == KickDirection.Left))
+            {
                 // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
-                // IsKickedToLeft(animationParameter) = true
+                //SetAnimParam(0);
             }
-			else
-			{
-                // IsKickedToRight(animationParameter) = true
+            else
+            {
+                //SetAnimParam(1);
             }
 
             if (kickDir == KickDirection.Right)
@@ -475,9 +648,15 @@ namespace Garage.Controller
                 distanceX = distance;
             }
 
-			if (kickedCoroutine == null)
-				kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+			ApplyKickClientRPC(distanceX);
         }
+		[ClientRpc]
+		private void ApplyKickClientRPC(float distanceX)
+		{
+            if (kickedCoroutine == null)
+                kickedCoroutine = StartCoroutine(MoveSideways(distanceX, 1f));
+        }
+
         private IEnumerator MoveSideways(float distanceX, float time)
         {
 			isBeingForced = true;
@@ -514,6 +693,31 @@ namespace Garage.Controller
 		public void MovingTest()
 		{
             kickedCoroutine = StartCoroutine(MoveSideways(kickDistance, 1f));
+        }
+
+
+        public void SetAnimParam(int id)
+        {
+            animator.SetTrigger(animIDs[id]);
+            if (IsHost)
+            {
+                ChangeAnimatorParamClientRPC(id);
+            }
+            else
+            {
+                ChangeAnimatorParamServerRPC(id);
+            }
+        }
+        [ServerRpc(RequireOwnership = false)]
+        private void ChangeAnimatorParamServerRPC(int id)
+        {
+            ChangeAnimatorParamClientRPC(id);
+        }
+        [ClientRpc]
+        private void ChangeAnimatorParamClientRPC(int id)
+        {
+            if (IsOwner) return;
+            animator.SetTrigger(animIDs[id]);
         }
     }
 }

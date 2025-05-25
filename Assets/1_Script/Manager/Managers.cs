@@ -1,4 +1,3 @@
-using System.Resources;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -26,16 +25,23 @@ namespace Garage.Manager
 			}
 
 			_scene.Init();
+			_sound.Init();
 			_input.Init();
+			_data.Init();
 		}
 
 		private static ResourceManager _resource = new ResourceManager();
 		private static SceneManagerEx _scene = new SceneManagerEx();
 		private static InputManager _input = new InputManager();
+		private static DataManager _data = new DataManager();
+		private static SoundManager _sound = new SoundManager();
+
 
 
 		public static ResourceManager Resource { get => _resource; }
 		public static SceneManagerEx Scene { get => _scene; }
 		public static InputManager Input { get => _input; }
+		public static DataManager Data{ get => _data; }
+		public static SoundManager Sound { get => _sound; }
 	}
 }
