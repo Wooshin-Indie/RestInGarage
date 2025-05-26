@@ -680,8 +680,10 @@ namespace Garage.Controller
             isBeingForced = false;
             rigid.MovePosition(targetPos);
 
-			// 여기에 emote말풍선 vfx
-			yield return new WaitForSeconds(1f);
+            targetLaneX += distanceX;
+
+            // 여기에 emote말풍선 vfx
+            yield return new WaitForSeconds(1f);
 			isBeingControlled = false;
 
             kickedCoroutine = null;
