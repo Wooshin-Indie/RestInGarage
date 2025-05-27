@@ -17,6 +17,7 @@ namespace Garage.Controller.StateMachine
         public virtual void LogicUpdate()           // Logic Update  
 		{
             controller.DetectInteractableParts();
+            controller.DetectFrontCarAndMakeTransparent();
         }           
         public virtual void PhysicsUpdate()         // Only Physics Update
 		{

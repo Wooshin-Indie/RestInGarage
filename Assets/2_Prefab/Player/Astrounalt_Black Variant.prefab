@@ -1191,6 +1191,9 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
   - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
   knockbackStrength: 10
+  transparentLayer:
+    serializedVersion: 2
+    m_Bits: 512
   PlayerID:
     m_InternalValue: 0
 --- !u!1 &5685545249949587409
