@@ -22,3 +22,4 @@ MonoBehaviour:
   laneLength: 40
   laneWidth: 8
   removeLength: 40
+  camRotation: {x: 48, y: 82, z: 0}

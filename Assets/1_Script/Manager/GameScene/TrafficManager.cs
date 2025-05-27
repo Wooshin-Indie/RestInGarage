@@ -53,9 +53,10 @@ namespace Garage.Manager
         [Button]
 		public void OnStageStart(/*int mapId, int stageId*/) // 서버에서 호출
 		{
-            curStageData = stageData[0]; // 파라미터로 받아와야됨
+            curStageData = stageData[0]; // TODO - 파라미터로 받아와야됨
+            // TODO - StageData 바뀔 때마다 콜백으로 StageData 내부 필드 참조하는 곳들 업데이트해줘야됨 (차량, 플레이어, 카메라 등등)
 
-			spawnPoints.Clear();
+            spawnPoints.Clear();
             foreach (var sp in curStageData.SpawningPoints)
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);

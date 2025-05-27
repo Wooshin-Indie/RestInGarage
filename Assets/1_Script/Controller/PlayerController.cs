@@ -75,6 +75,7 @@ namespace Garage.Controller
 		public CarryState carryState;
 		public InteractState interactState;
 
+		private Vector3 camRot;
 
 		private void Awake()
 		{
@@ -93,6 +94,8 @@ namespace Garage.Controller
             rigid.maxLinearVelocity = 500f;
 
 			Debug.Log("game" + gameObject.layer);
+
+			camRot = TrafficManager.Instance.CurStageData.CamRotation;
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
@@ -554,5 +557,26 @@ namespace Garage.Controller
 			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
 		}
 
+
+		private RaycastHit[] hits = new RaycastHit[10];
+		[SerializeField] private LayerMask transparentLayer;
+		public bool IsBehindOfCar(out CarController carInFront)
+		{
+			int count = Physics.RaycastNonAlloc(transform.position, -camRot, hits, 3f, transparentLayer);
+
+			carInFront = null;
+
+            for (int i = 0; i < count; i++)
+			{
+				carInFront = hits[i].transform.GetComponent<CarController>();
+
+                if (carInFront != null)
+				{
+					return true;
+				}
+            }
+
+			return false;
+		}
 	}
 }

@@ -14,12 +14,14 @@ namespace Garage.Controller
 		[SerializeField] private Vector3 fixedRotation;
         [SerializeField] private Transform target; // 플레이어가 할당될 타겟
         [SerializeField] private float smoothSpeed = 10f; // 카메라 이동 부드러움 정도
+        private Vector3 standardPoint;  // standard point를 저장해놔야됨
         private StageData curStageData;
         private float playerRangeX; // x+ 방향(윗방향) 플레이어 움직임 범위
 
         private void Awake()
         {
             curStageData = TrafficManager.Instance.CurStageData;
+            standardPoint = curStageData.StandardPoint;
             playerRangeX = curStageData.PlayerRangeX;
             TrafficManager.Instance.OnStageStarted += SetStageInfo;
         }
@@ -111,10 +113,10 @@ namespace Garage.Controller
             }
         }
         [SerializeField] private float ratio = 3;
+
         private void OnUpdateCamera1()
         {
             float cameraBoomLength = 20;
-            Vector3 standardPoint = new Vector3(-5, 0, 3); // standard point를 저장해놔야됨
             Vector3 defaultPos = standardPoint + cameraBoomLength * (-transform.forward);
             // 플레이어 z가 +6 or -6일 때 z축 화면이동 멈춰야됨
             float zOffset = (target.position.z - 2) / ratio;

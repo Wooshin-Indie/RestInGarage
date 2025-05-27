@@ -721,5 +721,10 @@ namespace Garage.Controller
             if (IsOwner) return;
             animator.SetTrigger(animIDs[id]);
         }
+
+		public void MakeCarBodyTransparent()
+		{
+
+		}
     }
 }
