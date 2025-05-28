@@ -11,6 +11,7 @@ namespace Garage.UI.GameScene.Items
         [SerializeField] private Image iconImage;
         [SerializeField] private RectTransform maskToFill;
         [SerializeField] private RectTransform bubbleRect;
+        [SerializeField] private RectTransform imageRect;
 
         [Header("Car Part Images")]
         [SerializeField] private Sprite tireEmptyImage;
@@ -24,7 +25,7 @@ namespace Garage.UI.GameScene.Items
         private RectTransform uiRect;
         private Vector2 originSize;
 
-        private void Start()
+        private void Awake()
         {
             mainCam = Camera.main;
             uiRect = GetComponent<RectTransform>();
@@ -89,6 +90,7 @@ namespace Garage.UI.GameScene.Items
                     break;
                 case CarParts.Engine:
                     iconImage.sprite = engineImage;
+                    SetUIScale(carPart);
                     break;
                 case CarParts.Oil:
                     iconImage.sprite = oilImage;
@@ -104,20 +106,34 @@ namespace Garage.UI.GameScene.Items
             partPos = car.PartTransforms[(int)carPart];
         }
         
-        private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 이미지반전
+        private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 스케일(좌우반전) 및 피봇 조정
         {
             if (car.Direction == VehicleDirection.Up)
             {
                 switch (carPart)
                 {
                     case CarParts.FLT:
-                    case CarParts.FRT:
-					case CarParts.Oil:
-                        bubbleRect.localScale = new Vector3(1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(1f, -1f, 1f);
                         break;
-                    case CarParts.RLT: // 아래바퀴쪽은 좌우반전
+                    case CarParts.FRT:
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        uiRect.localScale = new Vector3(1f, -1f, 1f);
+                        imageRect.localScale = new Vector3(1f, -1f, 1f);
+                        break;
+                    case CarParts.Engine:
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+                        imageRect.localScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.RLT:
+                        uiRect.localScale = new Vector3(-1f, -1f, 1f);
+                        break;
                     case CarParts.RRT:
-                        bubbleRect.localScale = new Vector3(-1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.Fire:
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
@@ -126,13 +142,25 @@ namespace Garage.UI.GameScene.Items
                 switch (carPart)
                 {
                     case CarParts.FLT:
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+                        break;
                     case CarParts.FRT:
-					case CarParts.Oil:
-                        bubbleRect.localScale = new Vector3(-1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(-1f, -1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        uiRect.localScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.Engine:
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                     case CarParts.RLT:
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
+                        break;
                     case CarParts.RRT:
-                        bubbleRect.localScale = new Vector3(1f, 1f, 1f);
+                        uiRect.localScale = new Vector3(1f, -1f, 1f);
+                        break;
+                    case CarParts.Fire:
+                        uiRect.localScale = new Vector3(1f, 1f, 1f);
                         break;
                 }
             }

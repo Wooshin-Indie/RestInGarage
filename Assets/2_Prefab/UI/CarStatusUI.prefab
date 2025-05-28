@@ -249,6 +249,7 @@ MonoBehaviour:
   iconImage: {fileID: 6396230657544560110}
   maskToFill: {fileID: 7726733695548502693}
   bubbleRect: {fileID: 4066907006411006830}
+  imageRect: {fileID: 1815360366855600378}
   tireEmptyImage: {fileID: 21300000, guid: 456b1754ef6935742a0f1d5ca253e8ef, type: 3}
   tireImage: {fileID: 21300000, guid: 55d16922091956841a592191cac061c8, type: 3}
   engineImage: {fileID: 21300000, guid: d359ab28ccb5fd744a613dc391c7f947, type: 3}

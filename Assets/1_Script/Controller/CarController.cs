@@ -737,46 +737,51 @@ namespace Garage.Controller
 
 		public void MakeCarBodyTransparent()
 		{
-            float currentValue = instanceMats[0].GetFloat("_Tweak_transparency");
             Debug.Log("투명화 메소드 실행");
             int n = instanceMats.Length;
             for(int i = 0; i < n; i++)
             {
-                if (transparencyTweens[i] != null && transparencyTweens[i].IsActive())
+				int idx = i;
+                if (transparencyTweens[idx] != null && transparencyTweens[idx].IsActive())
 				{
-                    transparencyTweens[i].Kill();
-                    Debug.Log("restoreTweens 뒤짐");
+                    transparencyTweens[idx].Kill();
+                    Debug.Log("원래 restoreTweens 뒤짐");
                 }
 
-                instanceMats[i].SetInt("_TransparentEnabled", 1);
-				transparencyTweens[i] = DOTween.To(() => currentValue, x =>
+                float currentValue = instanceMats[idx].GetFloat("_Tweak_transparency");
+
+                instanceMats[idx].SetInt("_TransparentEnabled", 1);
+				transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
                 {
                     currentValue = x;
-                    instanceMats[i].SetFloat("_Tweak_transparency", x);
+                    instanceMats[idx].SetFloat("_Tweak_transparency", x);
                 }, -0.8f, 2f);
             }
         }
 
 		public void RestoreCarBodyTransparency()
 		{
-            float currentValue = instanceMats[0].GetFloat("_Tweak_transparency");
+            
             Debug.Log("복원 메소드 실행");
             int n = instanceMats.Length;
             for (int i = 0; i < n; i++)
             {
-				if (transparencyTweens[i] != null && transparencyTweens[i].IsActive())
+				int idx = i;
+				if (transparencyTweens[idx] != null && transparencyTweens[idx].IsActive())
 				{
-                    transparencyTweens[i].Kill();
-                    Debug.Log("makeTweens 뒤짐");
+                    transparencyTweens[idx].Kill();
+                    Debug.Log("원래 makeTweens 뒤짐");
                 }
 
-                transparencyTweens[i] = DOTween.To(() => currentValue, x =>
+                float currentValue = instanceMats[idx].GetFloat("_Tweak_transparency");
+
+                transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
                 {
                     currentValue = x;
-                    instanceMats[i].SetFloat("_Tweak_transparency", x);
+                    instanceMats[idx].SetFloat("_Tweak_transparency", x);
                 }, 0f, 2f).OnComplete(() =>
 				{
-                    instanceMats[i].SetInt("_TransparentEnabled", 0);
+                    instanceMats[idx].SetInt("_TransparentEnabled", 0);
                 });
             }
         }
