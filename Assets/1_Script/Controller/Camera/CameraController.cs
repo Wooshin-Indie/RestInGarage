@@ -11,7 +11,6 @@ namespace Garage.Controller
 	public class CameraController : MonoBehaviour
 	{
 		[SerializeField] private float cameraBoomLength;
-		[SerializeField] private Vector3 fixedRotation;
         [SerializeField] private Transform target; // 플레이어가 할당될 타겟
         [SerializeField] private float smoothSpeed = 10f; // 카메라 이동 부드러움 정도
         private Vector3 standardPoint;  // standard point를 저장해놔야됨
@@ -46,32 +45,23 @@ namespace Garage.Controller
             }
 
             curStageData = stageData;
+            transform.rotation = Quaternion.Euler(curStageData.CamRotation);
             playerRangeX = curStageData.PlayerRangeX;
         }
 
         // 원래 카메라 작동방식, 카메라가 플레이어의 자식에 있어야 함
-        private void OnUpdateTopDownCamera()
-		{
-            float phi = fixedRotation.y * Mathf.Deg2Rad;
-            float theta = fixedRotation.x * Mathf.Deg2Rad;
+  //      private void OnUpdateTopDownCamera()
+		//{
+  //          float phi = fixedRotation.y * Mathf.Deg2Rad;
+  //          float theta = fixedRotation.x * Mathf.Deg2Rad;
 
-            float x = cameraBoomLength * Mathf.Cos(theta) * Mathf.Sin(phi);
-            float y = cameraBoomLength * Mathf.Sin(theta);
-            float z = -cameraBoomLength * Mathf.Cos(theta) * Mathf.Cos(phi);
+  //          float x = cameraBoomLength * Mathf.Cos(theta) * Mathf.Sin(phi);
+  //          float y = cameraBoomLength * Mathf.Sin(theta);
+  //          float z = -cameraBoomLength * Mathf.Cos(theta) * Mathf.Cos(phi);
 
-            transform.position = transform.parent.position + new Vector3(x, y, z);
-            transform.rotation = Quaternion.Euler(fixedRotation);
-        }
-
-        [SerializeField] private Vector3 defaultTestPos;
-        private Vector3 UpperAreaPos;
-        private void OnUpdateCameraTest()
-        { // 카메라 각도, 위치 테스트 후 bake하는 용도
-            Vector3 cameraBackward = -transform.forward;
-
-            transform.rotation = Quaternion.Euler(fixedRotation);
-            transform.position = defaultTestPos + cameraBoomLength * cameraBackward;
-        }
+  //          transform.position = transform.parent.position + new Vector3(x, y, z);
+  //          transform.rotation = Quaternion.Euler(fixedRotation);
+  //      }
 
         private void OnUpdateCamera()
         {

@@ -747,15 +747,21 @@ namespace Garage.Controller
                     transparencyTweens[idx].Kill();
                     Debug.Log("원래 restoreTweens 뒤짐");
                 }
-
+				
                 float currentValue = instanceMats[idx].GetFloat("_Tweak_transparency");
 
                 instanceMats[idx].SetInt("_TransparentEnabled", 1);
-				transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
+                instanceMats[idx].SetInt("_TransparentZWrite", 0);
+                instanceMats[idx].SetFloat("_ARSampler_AlphaOn", 1f);
+                instanceMats[idx].SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                instanceMats[idx].SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+
+                //instanceMats[idx].EnableKeyword("");
+                transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
                 {
                     currentValue = x;
                     instanceMats[idx].SetFloat("_Tweak_transparency", x);
-                }, -0.8f, 2f);
+                }, -0.8f, 1f);
             }
         }
 
@@ -779,7 +785,7 @@ namespace Garage.Controller
                 {
                     currentValue = x;
                     instanceMats[idx].SetFloat("_Tweak_transparency", x);
-                }, 0f, 2f).OnComplete(() =>
+                }, 0f, 1f).OnComplete(() =>
 				{
                     instanceMats[idx].SetInt("_TransparentEnabled", 0);
                 });
