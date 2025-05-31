@@ -24,6 +24,7 @@ namespace Garage.Manager
 				Destroy(this.gameObject);
 			}
 
+			_resource.Init();
 			_scene.Init();
 			_sound.Init();
 			_input.Init();

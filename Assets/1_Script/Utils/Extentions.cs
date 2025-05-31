@@ -61,5 +61,14 @@ namespace Garage.Utils
 				TableEntryReference = key
 			};
 		}
+
+		public static int GetRandomValue(this Vector2Int v)
+		{
+			return UnityEngine.Random.Range(v.x, v.y + 1);
+		}
+		public static float GetRandomValue(this Vector2 v)
+		{
+			return UnityEngine.Random.Range(v.x, v.y);
+		}
 	}
 }

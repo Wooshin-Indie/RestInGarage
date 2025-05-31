@@ -21,3 +21,13 @@ MonoBehaviour:
   laneWidth: 8
   removeLength: 40
   camRotation: {x: 48, y: 82, z: 0}
+  maxStage: 5
+  laneCounts: 0000000000000000000000000000000000000000
+  spawnInterval:
+  - {x: 1000, y: 1000}
+  - {x: 10, y: 15}
+  - {x: 6, y: 6}
+  - {x: 5, y: 5}
+  - {x: 4, y: 4}
+  earnMoney: {x: 40, y: 50}
+  eraseMoney: {x: 100, y: 200}

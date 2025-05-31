@@ -6094,7 +6094,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  carPrefab: {fileID: 8777919558186187492, guid: 8464b1459729d6e408192f516c2fdaba, type: 3}
+  carPrefab:
+  - {fileID: 8777919558186187492, guid: 8464b1459729d6e408192f516c2fdaba, type: 3}
+  - {fileID: 6036943006681877870, guid: affd65c6c8bad6f438c35382c581f299, type: 3}
+  - {fileID: 3526656333118620634, guid: cacb113296c6b574f9ee6f490eaee098, type: 3}
   spawnPointPrefab: {fileID: 7829846047073531153, guid: bc69de93681bf5549a3465eeedabd7c5, type: 3}
   lanePrefab: {fileID: 0}
   stageData:

@@ -53,6 +53,14 @@ namespace Garage.Manager
             return true;
         }
 
+        public void EraseMoney_HostOnly(int pay)
+        {
+            if (!IsHost) return;
+
+            if (Balance.Value < pay) Balance.Value = 0;
+			else Balance.Value -= pay;
+		}
+
         public void EarnMoney_HostOnly(int money)
 		{
             if (!IsHost) return;

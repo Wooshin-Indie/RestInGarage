@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
-using System.Runtime.CompilerServices;
-using Garage;
 using Garage.Utils;
 using Garage.Structs;
 using System;
@@ -39,7 +37,7 @@ namespace Garage.Manager
         }
         #endregion
 
-        [SerializeField] private GameObject carPrefab;
+        [SerializeField] private List<GameObject> carPrefab = new();
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
         [SerializeField] private List<StageData> stageData;
@@ -89,7 +87,7 @@ namespace Garage.Manager
 			if (availableSpawnPoints.Count > 0)
 			{
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
-                CarController car = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation).
+                CarController car = Instantiate(carPrefab[UnityEngine.Random.Range(0, carPrefab.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 

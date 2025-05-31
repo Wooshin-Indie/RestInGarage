@@ -383,6 +383,7 @@ namespace Garage.Controller
         public void KickCar()
 		{
             if (currentKickableCar == null) return;
+			if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
 			// 차는 애니메이션 실행
 			isBeingForced = true;
@@ -532,8 +533,6 @@ namespace Garage.Controller
                 currentKickableCar.ApplyKickServerRPC(KickDirection.Left);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
             }
-
-            Debug.Log("KICK!");
 		}
 
 		private void OnKickEnd()
