@@ -9,16 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b6c989ba87d03f4da9f6a32dee6c21e, type: 3}
-  m_Name: StageData2
+  m_Script: {fileID: 11500000, guid: de45e07a64f68914f98a3c7e4eba5bd6, type: 3}
+  m_Name: 2_Yellow
   m_EditorClassIdentifier: 
-  spawningPoints:
-  - SpawnPointX: -10
-    Direction: 2
-  - SpawnPointX: 2
-    Direction: 1
-  - SpawnPointX: 14
-    Direction: 2
-  laneLength: 40
-  laneWidth: 8
-  removeLength: 40
+  carMaterial: {fileID: 2100000, guid: 18adc75eeeb75394c87c6cbf512cb333, type: 2}

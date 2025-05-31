@@ -49,7 +49,7 @@ namespace Garage.UI.GameScene.Items
         {
             if (partPos != null)
             {
-                Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
+                Vector3 tmpPos = Camera.main.WorldToScreenPoint(partPos.position);
                 transform.position = tmpPos;
             }
         }

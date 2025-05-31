@@ -14,10 +14,20 @@ namespace Garage.Structs
     [CreateAssetMenu(fileName = "Stage Data", menuName = "SO/Stage Data")]
     public class StageData : ScriptableObject
     {
+        [Header("Map Info")]
         [SerializeField] private List<LaneData> spawningPoints = new List<LaneData>();
         [SerializeField] private float laneLength;  // 차량이 스폰부터 정비소까지 달려오는 거리
         [SerializeField] private float laneWidth;
         [SerializeField] private float removeLength; // 정비소부터 사라지는 곳 까지의 거리
+
+        [Header("Wave Info")]
+        [SerializeField] private int maxStage;
+        [SerializeField] private int[] laneCounts;
+        [SerializeField] private Vector2[] spawnInterval;
+        [SerializeField] private Vector2Int earnMoney;
+        [SerializeField] private Vector2Int eraseMoney;
+
+
         private float playerRangeX; // 스테이지 시작 시 플레이어가 움직일 수 있는 범위
         private void OnEnable()
         {
@@ -31,12 +41,16 @@ namespace Garage.Structs
                     playerRangeX = 20;
                     break;
             }
-        }
+		}
 
         public List<LaneData> SpawningPoints => spawningPoints;
         public float LaneLength => laneLength;
         public float LaneWidth => laneWidth;
         public float RemoveLength => removeLength;
         public float PlayerRangeX => playerRangeX;
+
+        public Vector2Int EraseMoney => eraseMoney;
+        public Vector2Int EarnMoney => earnMoney;
+        public Vector2[] SpawnInterval => spawnInterval;
     }
 }
