@@ -8,6 +8,7 @@ using Unity.Netcode;
 using Garage.Props;
 using System.Collections;
 using DG.Tweening;
+using System.Linq;
 
 namespace Garage.Controller
 {
@@ -53,9 +54,11 @@ namespace Garage.Controller
         public bool IsBeingForced => isBeingForced;
         private bool isBeingControlled = false;
         private Rigidbody rigid;
-		private Collider[] hitResults = new Collider[10];
+		private Collider[] hitResults = new Collider[30];
+		private Material[] instanceMats;
+		private Tween[] transparencyTweens;
 
-		private CarStatus carStatus;
+        private CarStatus carStatus;
 		public CarStatus CarStatus { get => carStatus; }
 
         private void Awake()
@@ -69,7 +72,17 @@ namespace Garage.Controller
 			firePS.Stop();
 			extinguishPS.Stop();
 			explosionPS.Stop();
-		}
+
+			var mats = meshRenderer.materials;
+			instanceMats = new Material[mats.Length];
+			transparencyTweens = new Tween[mats.Length];
+            int n = mats.Length;
+			for(int i = 0; i < n; i++)
+			{
+				instanceMats[i] = Instantiate(mats[i]);
+            }
+			meshRenderer.materials = instanceMats;
+        }
 
 		private void FixedUpdate()
         {
@@ -222,7 +235,7 @@ namespace Garage.Controller
 			if (IsHost)
 			{
 				if (carStatus.FireProgress > 1f)
-					OnCarExplosion();
+					OnCarExplosion_HostOnly();
 				else
 				{
 					if (carStatus.IsFiring())
@@ -232,11 +245,13 @@ namespace Garage.Controller
 					UpdateFireProgressClientRPC(carStatus.FireProgress);
 			}
 		}
-		private void OnCarExplosion()
+
+		private void OnCarExplosion_HostOnly()
 		{
 			if (isExploded) return;
 			isExploded = true;
 
+			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<StageData>(GameSynchronizer.Instance.CurrentStage.Value).EraseMoney.GetRandomValue());
 			OnCarExplosionClientRPC();
 			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
 			HashSet<CarController> processed = new HashSet<CarController>();
@@ -308,8 +323,10 @@ namespace Garage.Controller
 				if (!carStatus.IsFiring())
 				{
 					isAnyBroken = carStatus.IsThereAnyBroken();
-					if (!isAnyBroken) // 모든 part 고쳐졌을 때
+					if (!isAnyBroken)
+					{
 						OnAllPartsRepairedClientRPC();
+					}
 				}
 			}
 		}
@@ -445,6 +462,7 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
+			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<StageData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
 			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
             allRepairedVFX.Play();
 			// VFXManager.Instance.PlayVFX(VFXType.PopEmoteGood, Vector3.up * 2, Quaternion.identity, transform);
@@ -490,7 +508,6 @@ namespace Garage.Controller
 				for (int i = 0; i < hitCount; i++)
 				{
 					if (hitResults[i].transform.IsChildOf(transform)) continue;
-
 					float dist = Vector3.Distance(transform.position, hitResults[i].ClosestPoint(transform.position));
 					if (dist < closestDist)
 						closestDist = dist;
@@ -544,11 +561,21 @@ namespace Garage.Controller
 		}
         public void InitCarStatusServer()
         {
-			InitCarStatusLogic();
-            InitCarStatusClientRPC(carStatus.isBroken);
+			int vehicleDataIdx = UnityEngine.Random.Range(0, Managers.Resource.GetDataLength<VehicleData>());
+			InitCarStatusLogic(vehicleDataIdx);
+            InitCarStatusClientRPC(carStatus.isBroken, vehicleDataIdx);
         }
-		private void InitCarStatusLogic()
+
+		private void InitCarStatusLogic(int vehicleDataIdx)
 		{
+			VehicleData data = Managers.Resource.GetData<VehicleData>(vehicleDataIdx);
+
+			meshRenderer.materials = new Material[]
+			{
+				data.CarMaterial,
+				data.CarMaterial
+			};
+
 			for(int i = 0; i < 4; i++)
 			{
 				if (carStatus.IsBroken((CarParts)i))
@@ -563,12 +590,12 @@ namespace Garage.Controller
             UIManager.Game.GenerateCarStatusUIs(this, carStatus);
         }
 		[ClientRpc]
-		private void InitCarStatusClientRPC(int carStatusIsBroken)
+		private void InitCarStatusClientRPC(int carStatusIsBroken, int vehicleDataIdx)
         {
             if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
 
-            InitCarStatusLogic();
+            InitCarStatusLogic(vehicleDataIdx);
         }
 
 		private void HideTire(CarParts part)
@@ -680,8 +707,10 @@ namespace Garage.Controller
             isBeingForced = false;
             rigid.MovePosition(targetPos);
 
-			// 여기에 emote말풍선 vfx
-			yield return new WaitForSeconds(1f);
+            targetLaneX += distanceX;
+
+            // 여기에 emote말풍선 vfx
+            yield return new WaitForSeconds(1f);
 			isBeingControlled = false;
 
             kickedCoroutine = null;
@@ -718,6 +747,63 @@ namespace Garage.Controller
         {
             if (IsOwner) return;
             animator.SetTrigger(animIDs[id]);
+        }
+
+		public void MakeCarBodyTransparent()
+		{
+            Debug.Log("투명화 메소드 실행");
+            int n = instanceMats.Length;
+            for(int i = 0; i < n; i++)
+            {
+				int idx = i;
+                if (transparencyTweens[idx] != null && transparencyTweens[idx].IsActive())
+				{
+                    transparencyTweens[idx].Kill();
+                    Debug.Log("원래 restoreTweens 뒤짐");
+                }
+				
+                float currentValue = instanceMats[idx].GetFloat("_Tweak_transparency");
+
+                instanceMats[idx].SetInt("_TransparentEnabled", 1);
+                instanceMats[idx].SetInt("_TransparentZWrite", 0);
+                instanceMats[idx].SetFloat("_ARSampler_AlphaOn", 1f);
+                instanceMats[idx].SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                instanceMats[idx].SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+
+                //instanceMats[idx].EnableKeyword("");
+                transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
+                {
+                    currentValue = x;
+                    instanceMats[idx].SetFloat("_Tweak_transparency", x);
+                }, -0.8f, 1f);
+            }
+        }
+
+		public void RestoreCarBodyTransparency()
+		{
+            
+            Debug.Log("복원 메소드 실행");
+            int n = instanceMats.Length;
+            for (int i = 0; i < n; i++)
+            {
+				int idx = i;
+				if (transparencyTweens[idx] != null && transparencyTweens[idx].IsActive())
+				{
+                    transparencyTweens[idx].Kill();
+                    Debug.Log("원래 makeTweens 뒤짐");
+                }
+
+                float currentValue = instanceMats[idx].GetFloat("_Tweak_transparency");
+
+                transparencyTweens[idx] = DOTween.To(() => currentValue, x =>
+                {
+                    currentValue = x;
+                    instanceMats[idx].SetFloat("_Tweak_transparency", x);
+                }, 0f, 1f).OnComplete(() =>
+				{
+                    instanceMats[idx].SetInt("_TransparentEnabled", 0);
+                });
+            }
         }
     }
 }

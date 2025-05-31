@@ -81,7 +81,7 @@ namespace Garage.Manager
 				}
 
 				float fullRotation = Mathf.Lerp(0f, 360f, (currentTime + 0.75f) % 1f);
-				transform.localEulerAngles = new Vector3(fullRotation, 0f, 0f);
+				transform.localEulerAngles = new Vector3(fullRotation, 20f, 0f);
 			}
 		}
 

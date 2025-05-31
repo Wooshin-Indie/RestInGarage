@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
-using System.Runtime.CompilerServices;
-using Garage;
 using Garage.Utils;
 using Garage.Structs;
 using System;
@@ -39,7 +37,7 @@ namespace Garage.Manager
         }
         #endregion
 
-        [SerializeField] private GameObject carPrefab;
+        [SerializeField] private List<GameObject> carPrefab = new();
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
         [SerializeField] private List<StageData> stageData;
@@ -53,9 +51,10 @@ namespace Garage.Manager
         [Button]
 		public void OnStageStart(/*int mapId, int stageId*/) // 서버에서 호출
 		{
-            curStageData = stageData[0]; // 파라미터로 받아와야됨
+            curStageData = stageData[0]; // TODO - 파라미터로 받아와야됨
+            // TODO - StageData 바뀔 때마다 콜백으로 StageData 내부 필드 참조하는 곳들 업데이트해줘야됨 (차량, 플레이어, 카메라 등등)
 
-			spawnPoints.Clear();
+            spawnPoints.Clear();
             foreach (var sp in curStageData.SpawningPoints)
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);
@@ -88,7 +87,7 @@ namespace Garage.Manager
 			if (availableSpawnPoints.Count > 0)
 			{
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
-                CarController car = Instantiate(carPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation).
+                CarController car = Instantiate(carPrefab[UnityEngine.Random.Range(0, carPrefab.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 

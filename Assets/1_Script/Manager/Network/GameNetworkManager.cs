@@ -30,8 +30,6 @@ namespace Garage.Manager
 				return;
 			}
 		}
-
-
 		private void Start()
 		{
 			transport = GetComponent<FacepunchTransport>();
@@ -45,7 +43,6 @@ namespace Garage.Manager
 			SteamFriends.OnGameLobbyJoinRequested += SteamFriends_OnGameLobbyJoinRequested;
 
 		}
-
 		private void OnDestroy()
 		{
 			SteamMatchmaking.OnLobbyCreated -= SteamMatchmaking_OnLobbyCreated;
@@ -62,7 +59,6 @@ namespace Garage.Manager
 			NetworkManager.Singleton.OnClientConnectedCallback -= Singleton_OnClientConnectedCallback;
 			NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
 		}
-
 		private void OnApplicationQuit()
 		{
 			Disconnected();
@@ -83,7 +79,6 @@ namespace Garage.Manager
 			NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, NetworkManager.Singleton.LocalClientId);
 			// PlayerSpawner.Instance.SpawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 		}
-
 		private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
 			Debug.Log("LobbyEntered!");
@@ -104,7 +99,6 @@ namespace Garage.Manager
 			GameManagerEx.Instance.SendMessageToChat($"{friend.Name} has left", friend.Id, true);
 			NetworkTransmission.instance.RemoveMeFromDictionaryServerRPC(friend.Id);
 		}
-
 		private void SteamMatchMaking_OnLobbyInvite(Friend friend, Lobby lobby)
 		{
 			Debug.Log($"Invite from {friend.Name}");
@@ -140,7 +134,6 @@ namespace Garage.Manager
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
 		}
-
 		public void StartClient(SteamId steamId)
 		{
 			NetworkManager.Singleton.OnClientConnectedCallback += Singleton_OnClientConnectedCallback;
@@ -156,22 +149,18 @@ namespace Garage.Manager
 				// TODO - 여기서 카메라 할당
 			}
 		}
-
 		public void StartGame()
 		{
 			LockLobby();
 		}
-
 		public void LockLobby()
 		{
 			currentLobby.Value.SetJoinable(false);
 		}
-
 		public void UnlockLobby()
 		{
 			currentLobby.Value.SetJoinable(true);
 		}
-
 		public async void Disconnected()
 		{
 			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
@@ -214,13 +203,10 @@ namespace Garage.Manager
 			NetworkTransmission.instance.IsTheClientReadyServerRPC(false, clientId);
 			Debug.Log($"Client has connected : {clientId}");
 		}
-
 		private void Singleton_OnServerStarted()
 		{
 			Debug.Log("Host started");
 			GameManagerEx.Instance.HostCreated();
 		}
-
-
 	}
 }

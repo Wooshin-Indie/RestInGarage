@@ -75,6 +75,7 @@ namespace Garage.Controller
 		public CarryState carryState;
 		public InteractState interactState;
 
+		private Vector3 camDir;
 
 		private void Awake()
 		{
@@ -93,6 +94,10 @@ namespace Garage.Controller
             rigid.maxLinearVelocity = 500f;
 
 			Debug.Log("game" + gameObject.layer);
+
+			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurStageData.CamRotation);
+			camDir = rot * Vector3.forward;
+			camDir = camDir.normalized;
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
@@ -378,6 +383,7 @@ namespace Garage.Controller
         public void KickCar()
 		{
             if (currentKickableCar == null) return;
+			if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
 			// 차는 애니메이션 실행
 			isBeingForced = true;
@@ -527,8 +533,6 @@ namespace Garage.Controller
                 currentKickableCar.ApplyKickServerRPC(KickDirection.Left);
                 transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
             }
-
-            Debug.Log("KICK!");
 		}
 
 		private void OnKickEnd()
@@ -554,5 +558,52 @@ namespace Garage.Controller
 			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
 		}
 
+
+		private CarController curTransparentCar = null;
+		private CarController tmpRaycastedCar = null;
+		private RaycastHit[] hits = new RaycastHit[10];
+		[SerializeField] private LayerMask transparentLayer;
+		public void DetectFrontCarAndMakeTransparent()
+		{
+			int count = Physics.RaycastNonAlloc(transform.position, -camDir, hits, 3f, transparentLayer);
+			Debug.DrawRay(transform.position, -camDir * 3f, Color.red);
+
+            tmpRaycastedCar = null; // raycast 된거 없을 때 처리
+            for (int i = 0; i < count; i++)
+			{
+                tmpRaycastedCar = hits[i].transform.GetComponent<CarController>();
+
+                if (tmpRaycastedCar != null)
+				{
+					break;
+				}
+            }
+
+			if (curTransparentCar == tmpRaycastedCar)
+			{
+                Debug.Log("똑같으므로 리턴");
+                return;
+            }
+
+			if (curTransparentCar == null && tmpRaycastedCar != null) // 원래 투명화된 차량 없었을 때
+			{
+				curTransparentCar = tmpRaycastedCar;
+				curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
+				Debug.Log("새로 투명화");
+            }
+            else if (curTransparentCar != null && tmpRaycastedCar == null) // 투명화된 차량 있는데 밖으로 벗어났을 때
+			{
+				curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
+                curTransparentCar = null;
+                Debug.Log("차량 복원");
+            }
+			else // 투명화된 차량이 있는데 새로운 차량이 raycast 됐을 때
+			{
+                curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
+                curTransparentCar = tmpRaycastedCar;
+                curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
+                Debug.Log("기존 차량 복원 및 새로 투명화");
+            }
+        }
 	}
 }

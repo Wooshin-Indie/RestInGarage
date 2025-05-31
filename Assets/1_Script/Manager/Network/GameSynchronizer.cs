@@ -1,4 +1,8 @@
+using Garage.Structs;
+using Garage.Utils;
 using Unity.Netcode;
+using UnityEditor.Analytics;
+using UnityEngine;
 
 namespace Garage.Manager
 {
@@ -40,13 +44,33 @@ namespace Garage.Manager
 		{
 			RemainedTime.OnValueChanged -= UIManager.Game.OnTimerChanged;
 			RemainedTime.OnValueChanged += UIManager.Game.OnTimerChanged;
+			RemainedTime.OnValueChanged -= OnRemainedTimeChanged;
+			RemainedTime.OnValueChanged += OnRemainedTimeChanged;
 		}
 
 		[ClientRpc]
 		public void OnStageStartClientRPC(int idx)
 		{
+			nextLogTime = float.MaxValue;
 			UIManager.Game.OnStartStage(idx);
 		}
 
+
+		private float nextLogTime = float.MaxValue;
+		private void OnRemainedTimeChanged(float previous, float current)
+		{
+			if (!IsHost) return;
+
+			if (current <= nextLogTime)
+			{
+				TrafficManager.Instance.SpawnCar();
+				SetNextSpawnTime(current);
+			}
+		}
+		private void SetNextSpawnTime(float currentTime)
+		{
+			float interval = Managers.Resource.GetData<StageData>(0).SpawnInterval[CurrentStage.Value].GetRandomValue();
+			nextLogTime = currentTime - interval;
+		}
 	}
 }
