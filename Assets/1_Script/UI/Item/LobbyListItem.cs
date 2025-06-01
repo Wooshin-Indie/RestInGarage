@@ -21,6 +21,7 @@ namespace Garage.UI.Item
 
             GetComponent<Button>().onClick.AddListener(() =>
             {
+                Debug.Log("lobby join");
                 GameNetworkManager.Instance.JoinLobby(lobby);
             });
         }

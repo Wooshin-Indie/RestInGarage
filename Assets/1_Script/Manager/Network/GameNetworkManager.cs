@@ -5,10 +5,6 @@ using Steamworks.Data;
 using Netcode.Transports.Facepunch;
 using System.Threading.Tasks;
 using Garage.Utils;
-using System.Linq;
-using Garage.Structs;
-using UnityEngine.Localization.SmartFormat.Utilities;
-using System.Runtime.InteropServices;
 
 namespace Garage.Manager
 {
@@ -85,9 +81,11 @@ namespace Garage.Manager
 		}
 		private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
-			Debug.Log("LobbyEntered!");
 			if (NetworkManager.Singleton.IsHost) return;
-			StartClient(currentLobby.Value.Owner.Id);
+
+			currentLobby = lobby;
+			GameManagerEx.Instance.ConnectedAsClient();
+			StartClient(lobby.Owner.Id);
 		}
 		private void SteamMatchmaking_OnLobbyJoined(Lobby lobby, Friend friend)
 		{
@@ -124,8 +122,6 @@ namespace Garage.Manager
 			}
 			else
 			{
-				currentLobby = lobby;
-				GameManagerEx.Instance.ConnectedAsClient();
 				Debug.Log("Joined Lobby");
 			}
 		}
@@ -208,7 +204,6 @@ namespace Garage.Manager
 			try
 			{
 				await lobby.Join();
-				Debug.Log("Lobby enter successed");
 			}
 			catch (System.Exception e)
 			{

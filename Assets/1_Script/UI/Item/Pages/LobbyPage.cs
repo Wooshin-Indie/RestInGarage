@@ -30,8 +30,9 @@ namespace Garage.UI.Item
 		{
 			for (int i = 0; i < lobbies.Length; i++)
 			{
+				Lobby lobby = lobbies[i];
 				GameObject go = Instantiate(listItemPrefab, itemParent);
-				go.GetComponent<LobbyListItem>().SetLobbyInfo(lobbies[i]);
+				go.GetComponent<LobbyListItem>().SetLobbyInfo(lobby);
 				itemList.Add(go);
 			}
 
