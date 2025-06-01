@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Garage.Utils;
 using System.Linq;
 using Garage.Structs;
+using UnityEngine.Localization.SmartFormat.Utilities;
+using System.Runtime.InteropServices;
 
 namespace Garage.Manager
 {
@@ -189,11 +191,9 @@ namespace Garage.Manager
 			NetworkManager.Singleton.Shutdown(true);
 			GameManagerEx.Instance.Disconnected();
 		}
-
 		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
 		{
 			var query = SteamMatchmaking.LobbyList
-			//	.WithKeyValue("region", "KR")
 				.FilterDistanceClose();
 
 			var lobbies = await query.RequestAsync();
@@ -202,6 +202,18 @@ namespace Garage.Manager
 
 			callback.Invoke(lobbies);
 			return;
+		}
+		public async void JoinLobby(Lobby lobby)
+		{
+			try
+			{
+				await lobby.Join();
+				Debug.Log("Lobby enter successed");
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogWarning($"Lobby enter failed : {e.Message}");
+			}
 		}
 
 		private void Singleton_OnClientDisconnectedCallback(ulong clientId)

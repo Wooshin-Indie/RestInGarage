@@ -44,7 +44,7 @@ namespace Garage.UI.Item
 		private float targetPosY;
 		private float targetPosX;
 
-		private void Update()
+		protected virtual void Update()
 		{
 			if (prevSelectedObject != null && EventSystem.current.currentSelectedGameObject != prevSelectedObject)
 			{

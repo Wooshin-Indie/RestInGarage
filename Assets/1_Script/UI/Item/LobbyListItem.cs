@@ -1,7 +1,9 @@
+using Garage.Manager;
 using Garage.Utils;
 using Steamworks.Data;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Garage.UI.Item
 {
@@ -16,6 +18,11 @@ namespace Garage.UI.Item
         {
             lobbyName.text = $"{lobby.GetData(Constants.KEY_LOBBYNAME)}";
             lobbyMembers.text = $"{lobby.MemberCount}/{Constants.MAX_PLAYERS}";
+
+            GetComponent<Button>().onClick.AddListener(() =>
+            {
+                GameNetworkManager.Instance.JoinLobby(lobby);
+            });
         }
     }
 }

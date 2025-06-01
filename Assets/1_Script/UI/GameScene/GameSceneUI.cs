@@ -117,6 +117,11 @@ namespace Garage.UI.GameScene
             {
                 RemoveCarStatusUI(car, part);
             }
+
+            if(carStatusInfo.ContainsKey(carID))
+            {
+                carStatusInfo.Remove(carID);
+            }
         }    
 
         public void OnBalancedChanged(int prev, int balance)
