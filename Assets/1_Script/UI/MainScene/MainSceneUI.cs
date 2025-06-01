@@ -1,10 +1,10 @@
 using DG.Tweening;
 using Garage.Manager;
 using Garage.UI.Item;
-using Garage.Utils;
 using IUtil;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.Composites;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
@@ -13,8 +13,9 @@ namespace Garage.UI.MainScene
 	public enum PageEnum
     {
         None = 0,
-        Main, Multi, Host, Settings,    // == 4
-        Audio, Video, Control, Language // == 8
+        Main, Multi, Host, Settings,		// == 4
+        Audio, Video, Control, Language,	// == 8
+		Lobby, 
     }
 
     public class MainSceneUI : MonoBehaviour
@@ -57,24 +58,27 @@ namespace Garage.UI.MainScene
 		[SerializeField] private Button page6BackButton;
 
 		[FoldoutGroup("Page7 - Control")]
-
 		[SerializeField] private Button page7BackButton;
 
 		[FoldoutGroup("Page8 - Language")]
 		[SerializeField] private List<Button> languageButtons = new();
 		[SerializeField] private Button page8BackButton;
 
+		[FoldoutGroup("Page9 - Lobby")]
+		[SerializeField] private LobbyPage lobbyPage;
+		[SerializeField] private Button page9BackButton;
+
 
 		private void Start()
 		{
             /** Page 1 **/
-            playButton.onClick.AddListener(() => { GoToPage(2); });
-            settingButton.onClick.AddListener(() => { GoToPage(4); });
+            playButton.onClick.AddListener(() => { GoToPage(PageEnum.Multi); });
+            settingButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
 			quitButton.onClick.AddListener(() => { Application.Quit(); });
 
 			/** Page 2 **/
-			multyPlayButton.onClick.AddListener(() => { GoToPage(3); });
-			Page2BackButton.onClick.AddListener(() => { GoToPage(1); });
+			multyPlayButton.onClick.AddListener(() => { GoToPage(PageEnum.Host); });
+			Page2BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Main); });
 
 			/** Page 3 **/
 			hostButton.onClick.AddListener(() =>
@@ -86,14 +90,24 @@ namespace Garage.UI.MainScene
                 });
 				// TODO - MainUI 초기화 코드 필요
 			});
-            Page3BackButton.onClick.AddListener(() => { GoToPage(2); });
+			guestButton.onClick.AddListener(() =>
+			{
+				GoToPage(PageEnum.Lobby);
+				lobbyPage.StartLoading();
+				GameNetworkManager.Instance.FindLobbiesWithCallback((lobbies) =>
+				{
+					lobbyPage.OnRevealLobbyData(lobbies);
+				});
+			});
+
+            Page3BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Multi); });
 
             /** Page 4 **/
-            audioButton.onClick.AddListener(() => { GoToPage(5); });
-			videoButton.onClick.AddListener(() => { GoToPage(6); });
-			controlButton.onClick.AddListener(() => { GoToPage(7); });
-			languageButton.onClick.AddListener(() => { GoToPage(8); });
-            page4BackButton.onClick.AddListener(() => { GoToPage(1); });
+            audioButton.onClick.AddListener(() => { GoToPage(PageEnum.Audio); });
+			videoButton.onClick.AddListener(() => { GoToPage(PageEnum.Video); });
+			controlButton.onClick.AddListener(() => { GoToPage(PageEnum.Control); });
+			languageButton.onClick.AddListener(() => { GoToPage(PageEnum.Language); });
+            page4BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Main); });
 
             AddListenersToSetting();
 		}
@@ -122,7 +136,7 @@ namespace Garage.UI.MainScene
 				Managers.Sound.SfxVolume = value;
 				// TODO - SFX소리 나게 하면 좋을듯
 			});
-			page5BackButton.onClick.AddListener(() => { GoToPage(4); });
+			page5BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
 
 			/** Page 6 **/
 			resolutionButton.onClick.AddListener(() => { resolutionButton.GetComponent<OptionSelector>().ApplySetting(); });
@@ -132,10 +146,10 @@ namespace Garage.UI.MainScene
 				Managers.Data.BasicSettingData.brightness = value;
 				Screen.brightness = value;
 			});
-			page6BackButton.onClick.AddListener(() => { GoToPage(4); });
+			page6BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
 
 			/** Page 7 **/
-			page7BackButton.onClick.AddListener(() => { GoToPage(4); });
+			page7BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
 
 			/** Page 8 **/
 			for (int i=0; i< languageButtons.Count; i++)
@@ -146,12 +160,14 @@ namespace Garage.UI.MainScene
 					LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[t];
 				});
 			}
-			page8BackButton.onClick.AddListener(() => { GoToPage(4); });
+			page8BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
+
+			page9BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Host); });
 		}
 
-        private void UpdateSettings(int idx)
+        private void UpdateSettings(PageEnum page)
         {
-            switch ((PageEnum)idx)
+            switch (page)
             {
 				case PageEnum.Settings:
 					Managers.Data.SaveAll();
@@ -180,11 +196,11 @@ namespace Garage.UI.MainScene
 
 		}
 
-		private void GoToPage(int n)
+		private void GoToPage(PageEnum page)
 		{
             InactiveAllPages();
-            SetActivePage(n);
-			UpdateSettings(n);
+            SetActivePage((int)page);
+			UpdateSettings(page);
 		}
 
         private void InactiveAllPages()

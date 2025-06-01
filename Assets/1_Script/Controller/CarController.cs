@@ -9,6 +9,7 @@ using Garage.Props;
 using System.Collections;
 using DG.Tweening;
 using System.Linq;
+using UnityEditor.Recorder.Input;
 
 namespace Garage.Controller
 {
@@ -456,9 +457,14 @@ namespace Garage.Controller
 					break;
             }
         }
+
+		private bool isAllPartsRepaired = false;
         [ClientRpc]
         private void OnAllPartsRepairedClientRPC()
         {
+			if(isAllPartsRepaired) return;
+			isAllPartsRepaired = true;
+
 			if (!IsHost)
 				isAnyBroken = false;
 

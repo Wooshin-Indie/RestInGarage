@@ -91,6 +91,10 @@ MonoBehaviour:
     m_Key: WindowScreen
     m_Metadata:
       m_Items: []
+  - m_Id: 4217503908536320
+    m_Key: Lobby
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

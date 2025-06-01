@@ -5,6 +5,8 @@ using Steamworks.Data;
 using Netcode.Transports.Facepunch;
 using System.Threading.Tasks;
 using Garage.Utils;
+using System.Linq;
+using Garage.Structs;
 
 namespace Garage.Manager
 {
@@ -133,6 +135,9 @@ namespace Garage.Manager
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
+
+			currentLobby.Value.SetData(Constants.KEY_LOBBYNAME, $"{SteamClient.Name}'s lobby");
+			// HACK - 임시로 kr이라 해둠. 현재 Steam 사용자의 위치를 알 수가 없음
 		}
 		public void StartClient(SteamId steamId)
 		{
@@ -185,6 +190,19 @@ namespace Garage.Manager
 			GameManagerEx.Instance.Disconnected();
 		}
 
+		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
+		{
+			var query = SteamMatchmaking.LobbyList
+			//	.WithKeyValue("region", "KR")
+				.FilterDistanceClose();
+
+			var lobbies = await query.RequestAsync();
+
+			if (lobbies == null) return;
+
+			callback.Invoke(lobbies);
+			return;
+		}
 
 		private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
@@ -208,5 +226,6 @@ namespace Garage.Manager
 			Debug.Log("Host started");
 			GameManagerEx.Instance.HostCreated();
 		}
+
 	}
 }

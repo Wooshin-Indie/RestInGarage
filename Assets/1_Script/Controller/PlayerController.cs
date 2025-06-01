@@ -505,6 +505,7 @@ namespace Garage.Controller
 			Managers.Sound.PlaySfx(SFXType.Hammer, .8f, 1.2f);
 
             //Vector3 VFXpos = currentFixablePart.transform.position;
+			if (!IsOwner) return;
             Vector3 VFXpos = currentOwningProp.transform.position;
 			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
