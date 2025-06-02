@@ -132,10 +132,10 @@ namespace Garage.Manager
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
-			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
 
+			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
 			currentLobby.Value.SetData(Constants.KEY_LOBBYNAME, $"{SteamClient.Name}'s lobby");
-			// HACK - 임시로 kr이라 해둠. 현재 Steam 사용자의 위치를 알 수가 없음
+			currentLobby.Value.SetData(Constants.KEY_GAMENAME, Constants.VALUE_GAMENAME);
 		}
 		public void StartClient(SteamId steamId)
 		{
@@ -190,6 +190,7 @@ namespace Garage.Manager
 		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
 		{
 			var query = SteamMatchmaking.LobbyList
+				.WithKeyValue(Constants.KEY_GAMENAME, Constants.VALUE_GAMENAME)
 				.FilterDistanceClose();
 
 			var lobbies = await query.RequestAsync();

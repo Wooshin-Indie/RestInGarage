@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -62,7 +63,11 @@ namespace Garage.Manager
 				isDisconnected = true;
 				Debug.LogWarning("[HeartbeatChecker] : Host Disconnected");
 
-				// NetworkManager.Singleton.Shutdown();
+				UIManager.Transition.StartTransition(.5f);
+				DOVirtual.DelayedCall(.5f, () =>
+				{
+					GameNetworkManager.Instance.Disconnected();
+				});
 			}
 		}
 

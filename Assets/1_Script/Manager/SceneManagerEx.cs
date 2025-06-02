@@ -55,8 +55,11 @@ namespace Garage.Manager
 			{
 				SceneManager.UnloadSceneAsync("MainScene");
 			}
-			else{
-				NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+			else {
+				if (NetworkManager.Singleton.IsHost)
+					NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+				else
+					SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
 			}
 		}
 

@@ -39,7 +39,10 @@ namespace Garage.Utils
         public static readonly string NAME_SERVER = "_SERVER";
 
         public static readonly string KEY_LOBBYNAME = "LobbyName";
+        public static readonly string KEY_GAMENAME = "GameName";
         public static readonly string KEY_PASSWORD = "Password";
+
+        public static readonly string VALUE_GAMENAME = "RestInGarage";
 
         public static readonly Color[] COLOR_PLAYER =
         {
