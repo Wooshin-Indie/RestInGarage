@@ -9,6 +9,7 @@ using Garage.Props;
 using System.Collections;
 using DG.Tweening;
 using System.Linq;
+using Unity.VisualScripting;
 
 namespace Garage.Controller
 {
@@ -53,6 +54,7 @@ namespace Garage.Controller
 		private bool isBeingForced = false;
         public bool IsBeingForced => isBeingForced;
         private bool isBeingControlled = false;
+		private bool isStageEnded = false;
         private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[30];
 		private Material[] instanceMats;
@@ -89,8 +91,11 @@ namespace Garage.Controller
 			OnUpdateFire();
             if (!IsHost) return;
 
-
-			if (isAnyBroken)
+			if (isStageEnded)
+			{
+                MoveForward();
+            }
+			else if (isAnyBroken)
 			{
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
 					(direction == VehicleDirection.Down && transform.position.z < 0))
@@ -805,5 +810,11 @@ namespace Garage.Controller
                 });
             }
         }
+
+		private void OnStageEnd()
+		{
+			moveSpeed = moveSpeed * 3;
+			isStageEnded = true;
+		}
     }
 }

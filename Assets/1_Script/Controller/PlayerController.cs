@@ -266,7 +266,7 @@ namespace Garage.Controller
 			{
 				stateMachine.ChangeState(carryState);
 			}
-		}
+        }
 
 		private Vector3 moveDir = Vector3.zero;
 		/// <summary>
@@ -358,6 +358,25 @@ namespace Garage.Controller
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
 
+		private bool isFireUIsEnlarged = false;
+		public void UpdateSizeOfFireUIs()
+		{
+			if (currentOwningProp is not Extinguisher)
+			{
+				if (isFireUIsEnlarged)
+				{
+					isFireUIsEnlarged = false;
+                    UIManager.Game.ReduceAllFireUIs();
+                }
+
+                return;
+			}
+            
+            Debug.Log("Enlarging : Extinguisher");
+			isFireUIsEnlarged = true;
+            UIManager.Game.EnlargeAllFireUIs();
+            
+        }
 
         public void ExtinguishFire(Vector3 position)
 		{
@@ -504,6 +523,7 @@ namespace Garage.Controller
 		{
 			Managers.Sound.PlaySfx(SFXType.Hammer, .8f, 1.2f);
 
+			if (!IsOwner) return;
             //Vector3 VFXpos = currentFixablePart.transform.position;
             Vector3 VFXpos = currentOwningProp.transform.position;
 			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);

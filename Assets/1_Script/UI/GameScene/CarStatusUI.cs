@@ -274,12 +274,16 @@ namespace Garage.UI.GameScene.Items
         private float uiExpandDuration = 0.2f;
         public void EnlargeCarPartUI()
         {
+            if (isEnlarged == true) return;
+
             isEnlarged = true;
             bubbleUIRect.DOScale(1.5f * bubbleUIScale, uiExpandDuration).SetEase(Ease.OutCubic);
             blinkingUIRect.DOScale(Vector2.zero, uiExpandDuration).SetEase(Ease.OutCubic);
         }
         public void ReduceCarPartUI()
         {
+            if (isEnlarged == false) return;
+
             isEnlarged = false;
             bubbleUIRect.DOScale(Vector2.zero, uiExpandDuration).SetEase(Ease.OutCubic);
             blinkingUIRect.DOScale(Vector2.one, uiExpandDuration).SetEase(Ease.OutCubic);
