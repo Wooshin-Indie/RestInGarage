@@ -297,11 +297,8 @@ namespace Garage.Manager
 		private float gatheringTime = 3f;
 		private void GatherAllPlayersOnStageEnd()
 		{
-			foreach(KeyValuePair<ulong, PlayerInfo> player in playerInfo)
-			{
-                NetworkManager.Singleton.SpawnManager.
-					GetPlayerNetworkObject(player.Key).GetComponent<PlayerController>().GatherPlayerOnStageEnd(gatheringTime);
-			}
+            NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().
+				GetComponent<PlayerController>().GatherPlayerOnStageEndClientRPC(gatheringTime);
         }
 
 		public void Quit()

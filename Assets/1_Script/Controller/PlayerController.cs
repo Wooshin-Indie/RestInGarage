@@ -634,7 +634,8 @@ namespace Garage.Controller
             }
         }
 
-		public void GatherPlayerOnStageEnd(float gatheringTime)
+		[ClientRpc]
+		public void GatherPlayerOnStageEndClientRPC(float gatheringTime)
 		{
 			isInputLocked = true;
             StartCoroutine(GatherPlayerOnStageEndCoroutine(gatheringTime));
