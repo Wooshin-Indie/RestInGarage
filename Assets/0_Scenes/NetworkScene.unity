@@ -2565,6 +2565,7 @@ MonoBehaviour:
   timerText: {fileID: 320912578}
   stageStartEndUI: {fileID: 277396893}
   carStatusUIPrefab: {fileID: 5610953079502897029, guid: 04ab8def65fa474428575f6bce85258d, type: 3}
+  carCountdownUIPrefab: {fileID: 6385409884066586337, guid: 5536f68162c573b418de6e71dea2a660, type: 3}
   shopInfo: {fileID: 5301772727738478027}
 --- !u!114 &404230441
 MonoBehaviour:
@@ -5240,7 +5241,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -11523,7 +11524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
-  stageTimer: 1000
+  stageTimer: 30
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
@@ -15319,7 +15320,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17039,7 +17040,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

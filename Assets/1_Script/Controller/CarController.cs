@@ -48,6 +48,8 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
+		private float gameoverTime = 0f;
+		public float GameoverTime { get => gameoverTime; set => gameoverTime = value; }
 
 		private float targetLaneX = 0f;
 		private float removeLaneLength;
@@ -811,5 +813,17 @@ namespace Garage.Controller
                 });
             }
         }
+
+		[ClientRpc]
+		public void ShowCountdownUIClientRPC(float elapsedTime, float maxTime)
+		{
+			UIManager.Game.ShowCountdownUI(this, elapsedTime, maxTime);
+		}
+
+		[ClientRpc]
+		public void HideCountdownUIClientRPC()
+		{
+			UIManager.Game.HideCountdownUI(this);
+		}
     }
 }

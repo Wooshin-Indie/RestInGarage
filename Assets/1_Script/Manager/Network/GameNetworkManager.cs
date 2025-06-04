@@ -86,6 +86,8 @@ namespace Garage.Manager
 			currentLobby = lobby;
 			GameManagerEx.Instance.ConnectedAsClient();
 			StartClient(lobby.Owner.Id);
+
+			NetworkTransmission.instance.StartHeartbeat();
 		}
 		private void SteamMatchmaking_OnLobbyJoined(Lobby lobby, Friend friend)
 		{
@@ -166,6 +168,8 @@ namespace Garage.Manager
 		}
 		public async void Disconnected()
 		{
+
+			NetworkTransmission.instance.EndHeartbeat();
 			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 			if (NetworkManager.Singleton.IsHost)
 			{

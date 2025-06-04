@@ -79,6 +79,8 @@ namespace Garage.Manager
 
 		}
 
+        private Dictionary<ulong, CarController> carControllers = new();
+
 		[Button]
 		public void SpawnCar() // 서버에서 호출
 		{
@@ -91,6 +93,8 @@ namespace Garage.Manager
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
+                carControllers.Add(car.NetworkObjectId, car);
+
                 car.SetLane(spawnPoint.transform.position.x, curStageData.RemoveLength, spawnPoint.Direction);
                 car.InitCarStatusServer();
 			}
@@ -100,8 +104,28 @@ namespace Garage.Manager
 		public void DespawnCar(CarController car)
 		{
 			UIManager.Game.RemoveAllCarStatusUI(car);
+
+            carControllers.Remove(car.NetworkObjectId);
             car.GetComponent<NetworkObject>().Despawn();
 			Destroy(car.gameObject);
 		}
+
+        public void DespawnAllVehicles()
+        {
+            foreach(var vehicle in carControllers)
+			{
+				UIManager.Game.RemoveAllCarStatusUI(vehicle.Value);
+				vehicle.Value.GetComponent<NetworkObject>().Despawn();
+				Destroy(vehicle.Value.gameObject);
+			}
+            carControllers.Clear();
+        }
+
+        public void BeforeDespawnAllVehicles(float duration) 
+        {
+            // TODO - FadeOut하거나 모든 CarController에게 Progress증가 멈추도록 해야됨
+        }
+
+
 	}
 }
