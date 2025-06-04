@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Garage.Controller;
 using Garage.Environment;
 using Garage.Structs;
@@ -85,8 +86,13 @@ namespace Garage.Manager
 		public void EndStage()
 		{
 			GameSynchronizer.Instance.IsDay.Value = false;
-			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
-			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 5f);
+			GatherAllPlayersOnStageEnd();
+			DOVirtual.DelayedCall(gatheringTime, () =>
+			{
+                TrafficManager.Instance.OnStageEnd();
+            });
+            if (GameSynchronizer.Instance.CurrentStage.Value != 0)
 				Invoke(nameof(OnStageEnd), 2f);
 			else OnStageEnd();
 
@@ -287,6 +293,16 @@ namespace Garage.Manager
 
 			return true;
 		}
+
+		private float gatheringTime = 3f;
+		private void GatherAllPlayersOnStageEnd()
+		{
+			foreach(KeyValuePair<ulong, PlayerInfo> player in playerInfo)
+			{
+                NetworkManager.Singleton.SpawnManager.
+					GetPlayerNetworkObject(player.Key).GetComponent<PlayerController>().GatherPlayerOnStageEnd(gatheringTime);
+			}
+        }
 
 		public void Quit()
 		{

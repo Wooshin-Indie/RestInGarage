@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -5,8 +6,11 @@ using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
+using Steamworks;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -50,7 +54,8 @@ namespace Garage.Controller
 		
 		private bool isAbleToMove = true;
 		private bool isBeingForced = false;
-		public bool IsBeingForced => isBeingForced;
+        private bool isInputLocked = false;
+        public bool IsBeingForced => isBeingForced;
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
@@ -129,8 +134,11 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			stateMachine.CurState.HandleInput();
-			stateMachine.CurState.LogicUpdate();
+			if (!isInputLocked)
+			{
+                stateMachine.CurState.HandleInput();
+                stateMachine.CurState.LogicUpdate();
+            }
 
 			OnUpdateSynchronization();
 		}
@@ -624,6 +632,53 @@ namespace Garage.Controller
                 curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
                 Debug.Log("기존 차량 복원 및 새로 투명화");
             }
+        }
+
+		public void GatherPlayerOnStageEnd(float gatheringTime)
+		{
+			isInputLocked = true;
+            StartCoroutine(GatherPlayerOnStageEndCoroutine(gatheringTime));
+            DOVirtual.DelayedCall(gatheringTime + 3f, () => {
+                isInputLocked = false;
+            });
+        }
+
+        private IEnumerator GatherPlayerOnStageEndCoroutine(float time)
+		{
+			float destX = 0;
+			float elapsedTime = 0f;
+
+			if(transform.position.x < -7)
+			{
+				destX = -6f;
+            }
+			else if(transform.position.x > 0)
+			{
+                destX = -1f;
+            }
+			else
+			{
+				destX = transform.position.x;
+			}
+
+            Vector2 moveDir = new Vector2(0f, destX - transform.position.x);
+
+			while (elapsedTime < time)
+			{
+				if (Mathf.Abs(destX - transform.position.x) < 0.5f)
+                {
+                    Debug.Log("GatheringComplete...");
+                    break;
+                }
+				Debug.Log("Gathering...");
+                MovePosition(moveDir, runSpeed, runSpeed);
+
+				elapsedTime += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+
+			rigid.linearVelocity = Vector2.zero;
+			transform.rotation = Quaternion.Euler(0f, -90f, 0f);
         }
 	}
 }

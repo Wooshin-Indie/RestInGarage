@@ -109,11 +109,11 @@ namespace Garage.Controller
             float cameraBoomLength = 20;
             Vector3 defaultPos = standardPoint + cameraBoomLength * (-transform.forward);
             // 플레이어 z가 +6 or -6일 때 z축 화면이동 멈춰야됨
-            float zOffset = (target.position.z - 2) / ratio;
-            if (zOffset * ratio > 6)
-                zOffset = 6 / ratio;
-            else if (zOffset * ratio < -6)
-                zOffset = -6 / ratio;
+            float zOffset = (target.position.z) / ratio;
+            if (zOffset * ratio > 9)
+                zOffset = 9 / ratio;
+            else if (zOffset * ratio < -9)
+                zOffset = -9 / ratio;
 
             if (target.position.x < -15) // 아래쪽
             {

@@ -243,7 +243,7 @@ namespace Garage.Controller
 					OnCarExplosion_HostOnly();
 				else
 				{
-					if (carStatus.IsFiring())
+					if (carStatus.IsFiring() && Mathf.Abs(transform.position.z) < 20f)
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
 				if (!isExploded)
@@ -811,9 +811,9 @@ namespace Garage.Controller
             }
         }
 
-		private void OnStageEnd()
+		public void OnStageEnd()
 		{
-			moveSpeed = moveSpeed * 3;
+			moveSpeed = moveSpeed * 4;
 			isStageEnded = true;
 		}
     }

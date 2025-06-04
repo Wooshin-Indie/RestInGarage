@@ -11035,7 +11035,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
-  stageTimer: 1000
+  stageTimer: 20
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
