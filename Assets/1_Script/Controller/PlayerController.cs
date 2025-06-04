@@ -634,10 +634,16 @@ namespace Garage.Controller
             }
         }
 
-		[ClientRpc]
-		public void GatherPlayerOnStageEndClientRPC(float gatheringTime)
+		[ServerRpc(RequireOwnership = false)]
+		public void GatherPlayerOnStageEndServerRPC(float gatheringTime)
 		{
-			isInputLocked = true;
+			GatherPlayerOnStageEndClientRPC(gatheringTime);
+        }
+
+		[ClientRpc]
+		private void GatherPlayerOnStageEndClientRPC(float gatheringTime)
+		{
+            isInputLocked = true;
             StartCoroutine(GatherPlayerOnStageEndCoroutine(gatheringTime));
             DOVirtual.DelayedCall(gatheringTime + 3f, () => {
                 isInputLocked = false;
@@ -668,18 +674,16 @@ namespace Garage.Controller
 			{
 				if (Mathf.Abs(destX - transform.position.x) < 0.5f)
                 {
-                    Debug.Log("GatheringComplete...");
                     break;
                 }
-				Debug.Log("Gathering...");
                 MovePosition(moveDir, runSpeed, runSpeed);
 
 				elapsedTime += Time.deltaTime;
                 yield return new WaitForEndOfFrame();
             }
 
-			rigid.linearVelocity = Vector2.zero;
-			transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+            MovePosition(Vector2.zero, runSpeed, runSpeed);
+            transform.rotation = Quaternion.Euler(0f, -90f, 0f);
         }
 	}
 }

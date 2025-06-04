@@ -298,7 +298,7 @@ namespace Garage.Manager
 		private void GatherAllPlayersOnStageEnd()
 		{
             NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().
-				GetComponent<PlayerController>().GatherPlayerOnStageEndClientRPC(gatheringTime);
+				GetComponent<PlayerController>().GatherPlayerOnStageEndServerRPC(gatheringTime);
         }
 
 		public void Quit()
