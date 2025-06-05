@@ -86,8 +86,6 @@ namespace Garage.Manager
 			currentLobby = lobby;
 			GameManagerEx.Instance.ConnectedAsClient();
 			StartClient(lobby.Owner.Id);
-
-			NetworkTransmission.instance.StartHeartbeat();
 		}
 		private void SteamMatchmaking_OnLobbyJoined(Lobby lobby, Friend friend)
 		{
@@ -150,8 +148,6 @@ namespace Garage.Manager
 			if (NetworkManager.Singleton.StartClient())
 			{
 				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
-				Debug.Log("Client has started");
-				// TODO - 여기서 카메라 할당
 			}
 		}
 		public void StartGame()
@@ -232,6 +228,8 @@ namespace Garage.Manager
 			GameManagerEx.Instance.MyClientId = clientId;
 			NetworkTransmission.instance.IsTheClientReadyServerRPC(false, clientId);
 			Debug.Log($"Client has connected : {clientId}");
+
+			NetworkTransmission.instance.StartHeartbeat();
 		}
 		private void Singleton_OnServerStarted()
 		{

@@ -83,7 +83,7 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		private void SendPingServerRpc(ServerRpcParams rpcParams = default)
 		{
-			if (!NetworkManager.Singleton.IsServer)
+			if (!NetworkManager.Singleton.IsHost)
 				return;
 
 			ReceivePongClientRpc(rpcParams.Receive.SenderClientId);

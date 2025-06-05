@@ -6,6 +6,7 @@ using IUtil;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -96,10 +97,7 @@ namespace Garage.Manager
 				player.Value.PlayerObject.GetComponent<PlayerController>().EndAllInteraction();
 			}
 			Managers.Spawn.OnStageEnd();
-			TrafficManager.Instance.DespawnAllVehicles();
 		}
-
-
 
 		public void OnStageEnd()
 		{
@@ -135,7 +133,6 @@ namespace Garage.Manager
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
 			{
 				UIManager.Game.OnTimeout();
-				TrafficManager.Instance.BeforeDespawnAllVehicles(3f);
 				Invoke(nameof(EndStage), 3f);
 			}
 		}
