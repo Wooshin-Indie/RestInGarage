@@ -3,14 +3,17 @@ using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
+using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
 using Steamworks;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -277,11 +280,12 @@ namespace Garage.Controller
         }
 
 		private Vector3 moveDir = Vector3.zero;
-		/// <summary>
-		/// move 방향으로 speed의 속도로 움직입니다.
-		/// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
-		/// </summary>
-		public void MovePosition(Vector2 move, float speed, float maxSpeed)
+        /// <summary>
+        /// move 방향으로 speed의 속도로 움직입니다.
+        /// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
+        /// move의 x,y축은 인게임카메라를 기준으로 함
+        /// </summary>
+        public void MovePosition(Vector2 move, float speed, float maxSpeed)
 		{
 			if (!isAbleToMove)
 			{
@@ -296,7 +300,10 @@ namespace Garage.Controller
 				speed = 0;
 
 			moveDir = new Vector3(move.y, 0f, -move.x).normalized;
-			moveDir *= speed;
+            // 이렇게 게임 축에 맞게 바꿔놨기때문에 transform좌표로 직접 메소드를 호출해서 쓰려면 move 인자를
+			// Vector2(transform.position.z - targetPos.z, targetPos.x - transform.position.x)
+			// 이렇게 보내야됨
+            moveDir *= speed;
 			rigid.linearVelocity = moveDir;
 
 			if (moveDir.sqrMagnitude > .1f)
@@ -541,7 +548,7 @@ namespace Garage.Controller
 		{
 			if(currentOwningProp is OilPump)
 			{
-				Managers.Sound.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+				Managers.Sound.PlaySfx(SFXType.Glug, .9f, UnityEngine.Random.Range(.85f, 1.15f));
 			}
 		}
 
@@ -634,45 +641,67 @@ namespace Garage.Controller
             }
         }
 
-		[ServerRpc(RequireOwnership = false)]
-		public void GatherPlayerOnStageEndServerRPC(float gatheringTime)
+		public void AwayFromLanesOnStageEnd_HostOnly(float gatheringTime)
 		{
-			GatherPlayerOnStageEndClientRPC(gatheringTime);
+			int curStageIdx = GameSynchronizer.Instance.CurrentStage.Value;
+
+			List<LaneData> spawnPoints = Managers.Resource.GetData<StageData>(curStageIdx).SpawningPoints;
+            int laneNum = spawnPoints.Count;
+			float laneWidth = Managers.Resource.GetData<StageData>(curStageIdx).LaneWidth;
+
+            Vector2[] laneXwidths = new Vector2[laneNum]; // 차선 폭 계산해서 거기서 벗어나게 함
+			for (int i = 0; i < laneNum; i++)
+			{
+				float laneX = spawnPoints[i].SpawnPointX;
+                laneXwidths[i].x = laneX - laneWidth;
+				laneXwidths[i].y = laneX + laneWidth;
+            }
+
+            AwayFromLanesOnStageEndClientRPC(gatheringTime, laneXwidths);
         }
 
 		[ClientRpc]
-		private void GatherPlayerOnStageEndClientRPC(float gatheringTime)
+		private void AwayFromLanesOnStageEndClientRPC(float gatheringTime, Vector2[] laneXwidths)
 		{
+			if (!IsOwner) return;
+
             isInputLocked = true;
-            StartCoroutine(GatherPlayerOnStageEndCoroutine(gatheringTime));
-            DOVirtual.DelayedCall(gatheringTime + 3f, () => {
-                isInputLocked = false;
-            });
+			Vector3 curPos = transform.position;
+			Vector3 targetPos = curPos;
+
+			for (int i = 0; i < laneXwidths.Length; i++)
+			{
+				if (laneXwidths[i].IsBetween(curPos.x))
+				{
+					targetPos.x = laneXwidths[i].GetCloserValue(curPos.x);
+
+					break;
+                }
+            }
+
+			if (targetPos.x != curPos.x)
+				StartCoroutine(RunToTargetPosCoroutine(gatheringTime, targetPos, () =>
+				{
+                transform.rotation = Quaternion.Euler(-transform.forward);
+				}));
+			else
+                transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+
+            DOVirtual.DelayedCall(gatheringTime + 3f, () =>
+			{
+				isInputLocked = false;
+			});
         }
 
-        private IEnumerator GatherPlayerOnStageEndCoroutine(float time)
+        private IEnumerator RunToTargetPosCoroutine(float maxTime, Vector3 targetPos, Action onComplete)
 		{
-			float destX = 0;
 			float elapsedTime = 0f;
 
-			if(transform.position.x < -7)
-			{
-				destX = -6f;
-            }
-			else if(transform.position.x > 0)
-			{
-                destX = -1f;
-            }
-			else
-			{
-				destX = transform.position.x;
-			}
+            Vector2 moveDir = new Vector2(transform.position.z - targetPos.z, targetPos.x - transform.position.x);
 
-            Vector2 moveDir = new Vector2(0f, destX - transform.position.x);
-
-			while (elapsedTime < time)
+			while (elapsedTime < maxTime)
 			{
-				if (Mathf.Abs(destX - transform.position.x) < 0.5f)
+				if (Vector3.Distance(targetPos, transform.position) < 0.5f)
                 {
                     break;
                 }
@@ -683,7 +712,8 @@ namespace Garage.Controller
             }
 
             MovePosition(Vector2.zero, runSpeed, runSpeed);
-            transform.rotation = Quaternion.Euler(0f, -90f, 0f);
+
+			onComplete?.Invoke();
         }
 	}
 }

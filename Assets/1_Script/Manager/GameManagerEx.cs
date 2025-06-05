@@ -6,6 +6,7 @@ using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -87,7 +88,7 @@ namespace Garage.Manager
 		{
 			GameSynchronizer.Instance.IsDay.Value = false;
 			SunManager.Instance.SetTimePhase(TimePhase.Night, 5f);
-			GatherAllPlayersOnStageEnd();
+			AllPlayersAwayFromLanesOnStageEnd();
 			DOVirtual.DelayedCall(gatheringTime, () =>
 			{
                 TrafficManager.Instance.OnStageEnd();
@@ -295,10 +296,15 @@ namespace Garage.Manager
 		}
 
 		private float gatheringTime = 3f;
-		private void GatherAllPlayersOnStageEnd()
+		private void AllPlayersAwayFromLanesOnStageEnd()
 		{
-            NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().
-				GetComponent<PlayerController>().GatherPlayerOnStageEndServerRPC(gatheringTime);
+			List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
+
+			foreach (ulong clientId in clientIds)
+            {
+                NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
+                    GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(gatheringTime);
+            }
         }
 
 		public void Quit()
