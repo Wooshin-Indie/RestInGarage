@@ -18,6 +18,7 @@ namespace Garage.Controller.StateMachine
 		{
             controller.DetectInteractableParts();
             controller.DetectFrontCarAndMakeTransparent();
+            controller.UpdateSizeOfFireUIs();
         }           
         public virtual void PhysicsUpdate()         // Only Physics Update
 		{

@@ -1,6 +1,7 @@
+using Garage.Controller;
 using Garage.Manager;
 using Garage.Utils;
-using Unity.Netcode;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garage
@@ -8,15 +9,17 @@ namespace Garage
     public class VehicleSpawnPoint : MonoBehaviour
     {
 		[Header("Overlap Parameter")]
-		[SerializeField] private float boxRadius;
+		[SerializeField] private float safeBoxRadius;
+		[SerializeField] private float gameoverBoxRadius;
 		[SerializeField] private LayerMask targetLayer;
+
 		private VehicleDirection direction = VehicleDirection.None;
 		public VehicleDirection Direction => direction;
         private Collider[] colliders;
 
 		private void Awake()
 		{
-			colliders = new Collider[1];
+			colliders = new Collider[30];
 		}
 
 		public void SetSpawnDir(VehicleDirection dir)
@@ -33,50 +36,69 @@ namespace Garage
 			direction = dir;
 		}
 
-		private int detectedCounts = 0;
+		private int safeCounts = 0;
+		private int gameoverCounts = 0;
 		public bool IsAbleToSpawn()
-        {
-			return detectedCounts == 0;
+		{
+			return safeCounts == 0;
 		}
 
-		private ulong prevCarId = ulong.MaxValue;
-		private float elapsedTime = 0f;
-
 		// HACK - 임시로 저장한 기준
-		private float waitForCountSec = 2f;
+		private float waitForCountSec = 7f;
 		private float waitForOverSec = 5f;
 
+
+		private HashSet<CarController> currentlyInside = new HashSet<CarController>();
+		private HashSet<CarController> previouslyInside = new HashSet<CarController>();
+
+
+		private float elapsedTime = 0f;
 		private void FixedUpdate()
 		{
-			detectedCounts = Physics.OverlapBoxNonAlloc(transform.position, Vector3.one * boxRadius, colliders, Quaternion.identity, targetLayer);
+			safeCounts = Physics.OverlapBoxNonAlloc(transform.position, Vector3.one * safeBoxRadius, colliders, Quaternion.identity, targetLayer);
+			CountdownProcess();
+		}
 
+		private void CountdownProcess()
+		{
+			previouslyInside.Clear();
+			foreach (var car in currentlyInside)
+				previouslyInside.Add(car);
 
-			if (detectedCounts == 1) 
+			currentlyInside.Clear();
+
+			HashSet<CarController> processedCars = new HashSet<CarController>();
+			gameoverCounts = Physics.OverlapBoxNonAlloc(transform.position, Vector3.one * gameoverBoxRadius, colliders, Quaternion.identity, targetLayer);
+
+			for (int i = 0; i < gameoverCounts; i++)
 			{
-				if (prevCarId == colliders[0].GetComponentInParent<NetworkObject>().NetworkObjectId)
+				CarController car = colliders[i].GetComponentInParent<CarController>();
+				if (car == null || processedCars.Contains(car)) continue;
+
+				processedCars.Add(car);
+
+				car.GameoverTime += Time.fixedDeltaTime;
+				float elapsedTime = car.GameoverTime;
+
+				currentlyInside.Add(car);
+
+				if (elapsedTime >= waitForCountSec && elapsedTime < waitForCountSec + waitForOverSec)
 				{
-					elapsedTime += Time.fixedDeltaTime;
+					car.ShowCountdownUIClientRPC(elapsedTime - waitForCountSec, waitForOverSec);
 				}
-				else
+				else if (elapsedTime >= waitForCountSec + waitForOverSec)
 				{
-					prevCarId = colliders[0].GetComponentInParent<NetworkObject>().NetworkObjectId;
-					elapsedTime = 0f;
+					Debug.Log("GAME OVER");
 				}
-			}
-			else
-			{
-				elapsedTime = 0f;
-				prevCarId = ulong.MaxValue;
 			}
 
-			if (elapsedTime < waitForCountSec) { /* Wait for countdown */ }
-			else if (elapsedTime < waitForCountSec + waitForOverSec)
+			foreach (var car in previouslyInside)
 			{
-				Debug.Log($"Time left for over : {(int)(waitForCountSec + waitForOverSec - elapsedTime)}");
-			}
-			else
-			{
-				Debug.Log("GAME OVER");
+				if (!currentlyInside.Contains(car))
+				{
+					car.GameoverTime = 0f;
+					car.HideCountdownUIClientRPC();
+				}
 			}
 		}
 
@@ -84,7 +106,9 @@ namespace Garage
 		{
 			Gizmos.color = Color.green;
 			Gizmos.matrix = Matrix4x4.TRS(transform.position, Quaternion.identity, Vector3.one);
-			Gizmos.DrawWireCube(Vector3.zero, Vector3.one * boxRadius * 2);
+			Gizmos.DrawWireCube(Vector3.zero, Vector3.one * safeBoxRadius * 2);
+
+			Gizmos.DrawWireCube(Vector3.zero, Vector3.one * gameoverBoxRadius * 2);
 		}
 
 	}

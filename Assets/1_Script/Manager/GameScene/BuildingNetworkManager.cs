@@ -14,7 +14,7 @@ namespace Garage.Manager
 		NoMoney,
 	}
 
-	public class BuildingNetworkManager : NetworkBehaviour
+	public class BuildingNetworkManager : NetworkBehaviour	
 	{
 		#region Singleton
 		private static BuildingNetworkManager instance;

@@ -14,7 +14,6 @@ namespace Garage.Props
 		{
 			base.StartInteraction(newOwnerClientId);
 
-
 			if (GameManagerEx.Instance.IsDay)
 			{
 				SpawnTireServerRpc(newOwnerClientId);
@@ -25,9 +24,7 @@ namespace Garage.Props
 		[ServerRpc(RequireOwnership = false)]
 		private void SpawnTireServerRpc(ulong newOwnerClientId)
 		{
-			GameObject go = Instantiate(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity);
-			NetworkObject networkObject = go.GetComponent<NetworkObject>();
-			networkObject.Spawn();
+			GameObject go = Managers.Spawn.Spawn(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
 			go.GetComponent<TireProp>().TryInteract(newOwnerClientId);
 		}
 

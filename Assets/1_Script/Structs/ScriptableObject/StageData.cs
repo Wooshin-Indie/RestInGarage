@@ -20,8 +20,8 @@ namespace Garage.Structs
         [SerializeField] private float laneWidth;
         [SerializeField] private float removeLength; // 정비소부터 사라지는 곳 까지의 거리
         [SerializeField] private Vector3 camRotation;
-        private Vector3 stdPointWith2Lane = new Vector3(-5, 0, 3);
-        private Vector3 stdPointWith3Lane = new Vector3(-8, 0, 3);
+        private Vector3 stdPointWith2Lane = new Vector3(-5, 0, 0);
+        private Vector3 stdPointWith3Lane = new Vector3(-8, 0, 0);
         private Vector3 standardPoint;
 
         [Header("Wave Info")]

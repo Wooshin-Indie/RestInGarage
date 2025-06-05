@@ -36,6 +36,7 @@ namespace Garage.Manager
 		private static InputManager _input = new InputManager();
 		private static DataManager _data = new DataManager();
 		private static SoundManager _sound = new SoundManager();
+		private static SpawnManager _spawn = new SpawnManager();
 
 
 
@@ -44,5 +45,6 @@ namespace Garage.Manager
 		public static InputManager Input { get => _input; }
 		public static DataManager Data{ get => _data; }
 		public static SoundManager Sound { get => _sound; }
+		public static SpawnManager Spawn { get => _spawn; }	
 	}
 }

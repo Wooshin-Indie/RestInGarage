@@ -1,7 +1,9 @@
+using DG.Tweening;
 using Garage.Controller;
 using Garage.Environment;
 using Garage.Structs;
 using Garage.Utils;
+using IUtil;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -85,14 +87,22 @@ namespace Garage.Manager
 		public void EndStage()
 		{
 			GameSynchronizer.Instance.IsDay.Value = false;
-			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
-			if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 5f);
+			AllPlayersAwayFromLanesOnStageEnd();
+			DOVirtual.DelayedCall(awayMoveTime, () =>
+			{
+                TrafficManager.Instance.OnStageEnd();
+            });
+            if (GameSynchronizer.Instance.CurrentStage.Value != 0)
 				Invoke(nameof(OnStageEnd), 2f);
 			else OnStageEnd();
 
+			foreach (var player in NetworkManager.Singleton.ConnectedClients)
+			{
+				player.Value.PlayerObject.GetComponent<PlayerController>().EndAllInteraction();
+			}
+			Managers.Spawn.OnStageEnd();
 		}
-
-
 
 		public void OnStageEnd()
 		{
@@ -108,8 +118,6 @@ namespace Garage.Manager
 			meetingPoint.StartMeetClientRPC(GameSynchronizer.Instance.CurrentStage.Value + 1);
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
-
-
 			if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
 
 			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
@@ -130,7 +138,8 @@ namespace Garage.Manager
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
 			{
 				UIManager.Game.OnTimeout();
-				Invoke(nameof(EndStage), 3f);
+				InputLockToAllPlayers();
+                Invoke(nameof(EndStage), 3f);
 			}
 		}
 
@@ -138,7 +147,6 @@ namespace Garage.Manager
 		{
 			OnUpdateTimer();
 		}
-
 
 		public void SendMessageToChat(string text, ulong fromwho, bool server)
 		{
@@ -287,6 +295,29 @@ namespace Garage.Manager
 
 			return true;
 		}
+
+		private float awayMoveTime = 3f;
+		private void AllPlayersAwayFromLanesOnStageEnd()
+		{
+			List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
+
+			foreach (ulong clientId in clientIds)
+            {
+                NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
+                    GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(awayMoveTime);
+            }
+        }
+
+		private void InputLockToAllPlayers()
+		{
+            List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
+
+            foreach (ulong clientId in clientIds)
+            {
+                NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
+                    GetComponent<PlayerController>().InputLockToPlayer_HostOnly();
+            }
+        }
 
 		public void Quit()
 		{

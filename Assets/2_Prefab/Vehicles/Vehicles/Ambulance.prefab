@@ -603,7 +603,7 @@ MonoBehaviour:
   boxHeight: 1
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1847
+    m_Bits: 3895
   decelerationRate: 1
   kickDistance: 3
 --- !u!1 &3715176043198427016

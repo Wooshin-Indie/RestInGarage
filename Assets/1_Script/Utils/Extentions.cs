@@ -1,5 +1,6 @@
 using DG.Tweening;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Localization.Components;
 
@@ -70,5 +71,38 @@ namespace Garage.Utils
 		{
 			return UnityEngine.Random.Range(v.x, v.y);
 		}
+
+		public static bool IsBetween(this Vector2 v, float value)
+		{
+			float min;
+			float max;
+			if (v.x <= v.y)
+            {
+				min = v.x;
+                max = v.y;
+            }
+			else
+            {
+                min = v.y;
+                max = v.x;
+            }
+
+			if (min <= value && value <= max)
+			{
+				return true;
+			}
+			else
+				return false;
+        }
+
+		public static float GetCloserValue(this Vector2 v, float value)
+		{
+			if (Mathf.Abs(value - v.x) <= Mathf.Abs(value - v.y))
+			{
+				return v.x;
+			}
+			else
+				return v.y;
+        }
 	}
 }

@@ -1,12 +1,19 @@
+using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
+using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
+using Steamworks;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -50,7 +57,8 @@ namespace Garage.Controller
 		
 		private bool isAbleToMove = true;
 		private bool isBeingForced = false;
-		public bool IsBeingForced => isBeingForced;
+        private bool isInputLocked = false;
+        public bool IsBeingForced => isBeingForced;
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
@@ -129,8 +137,11 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			stateMachine.CurState.HandleInput();
-			stateMachine.CurState.LogicUpdate();
+			if (!isInputLocked)
+			{
+                stateMachine.CurState.HandleInput();
+                stateMachine.CurState.LogicUpdate();
+            }
 
 			OnUpdateSynchronization();
 		}
@@ -266,14 +277,28 @@ namespace Garage.Controller
 			{
 				stateMachine.ChangeState(carryState);
 			}
+        }
+
+		/// <summary>
+		/// 스테이지 종료 시
+		/// 강제로 Interaction을 끊는 함수
+		/// </summary>
+		public void EndAllInteraction()
+		{
+			stateMachine.ChangeState(idleState);
+			TryEndAction();
+			TryEndInteract();
+			currentOwningProp = null;
+			currentFixablePart = null;
 		}
 
 		private Vector3 moveDir = Vector3.zero;
-		/// <summary>
-		/// move 방향으로 speed의 속도로 움직입니다.
-		/// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
-		/// </summary>
-		public void MovePosition(Vector2 move, float speed, float maxSpeed)
+        /// <summary>
+        /// move 방향으로 speed의 속도로 움직입니다.
+        /// maxSpeed 로는 Animation의 BlendTree 값을 조절합니다.
+        /// move의 x,y축은 인게임카메라를 기준으로 함
+        /// </summary>
+        public void MovePosition(Vector2 move, float speed, float maxSpeed)
 		{
 			if (!isAbleToMove)
 			{
@@ -288,7 +313,10 @@ namespace Garage.Controller
 				speed = 0;
 
 			moveDir = new Vector3(move.y, 0f, -move.x).normalized;
-			moveDir *= speed;
+            // 이렇게 게임 축에 맞게 바꿔놨기때문에 transform좌표로 직접 메소드를 호출해서 쓰려면 move 인자를
+			// Vector2(transform.position.z - targetPos.z, targetPos.x - transform.position.x)
+			// 이렇게 보내야됨
+            moveDir *= speed;
 			rigid.linearVelocity = moveDir;
 
 			if (moveDir.sqrMagnitude > .1f)
@@ -352,12 +380,29 @@ namespace Garage.Controller
 				preEnlargedFixablePart = currentFixablePart;
             }
 			
-
-
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
 
+		private bool isFireUIsEnlarged = false;
+		public void UpdateSizeOfFireUIs()
+		{
+			if (currentOwningProp is not Extinguisher)
+			{
+				if (isFireUIsEnlarged)
+				{
+					isFireUIsEnlarged = false;
+                    UIManager.Game.ReduceAllFireUIs();
+                }
+
+                return;
+			}
+            
+            Debug.Log("Enlarging : Extinguisher");
+			isFireUIsEnlarged = true;
+            UIManager.Game.EnlargeAllFireUIs();
+            
+        }
 
         public void ExtinguishFire(Vector3 position)
 		{
@@ -428,19 +473,6 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.KnockBack);
         }
 
-		[Button]
-		private void IsBeingForcedFalse()
-		{
-			isBeingForced = false;
-		}
-
-        [Button]
-        private void AddForceToPlayer()
-        {
-            isBeingForced = true;
-            rigid.AddForce(new Vector3(1,0,0)* knockbackStrength, ForceMode.Impulse);
-        }
-
         #region Animation Events
 
         private void OnStartPlace()
@@ -504,7 +536,9 @@ namespace Garage.Controller
 		{
 			Managers.Sound.PlaySfx(SFXType.Hammer, .8f, 1.2f);
 
+			if (!IsOwner) return;
             //Vector3 VFXpos = currentFixablePart.transform.position;
+			if (!IsOwner) return;
             Vector3 VFXpos = currentOwningProp.transform.position;
 			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}
@@ -513,7 +547,7 @@ namespace Garage.Controller
 		{
 			if(currentOwningProp is OilPump)
 			{
-				Managers.Sound.PlaySfx(SFXType.Glug, .9f, Random.Range(.85f, 1.15f));
+				Managers.Sound.PlaySfx(SFXType.Glug, .9f, UnityEngine.Random.Range(.85f, 1.15f));
 			}
 		}
 
@@ -605,5 +639,93 @@ namespace Garage.Controller
                 Debug.Log("기존 차량 복원 및 새로 투명화");
             }
         }
-	}
+
+		public void AwayFromLanesOnStageEnd_HostOnly(float awayMoveTime)
+		{
+			int curStageIdx = GameSynchronizer.Instance.CurrentStage.Value;
+
+			List<LaneData> spawnPoints = Managers.Resource.GetData<StageData>(curStageIdx).SpawningPoints;
+            int laneNum = spawnPoints.Count;
+			float laneWidthHalf = Managers.Resource.GetData<StageData>(curStageIdx).LaneWidth / 2;
+
+            Vector2[] laneXwidths = new Vector2[laneNum]; // 차선 폭 계산해서 거기서 벗어나게 함
+			for (int i = 0; i < laneNum; i++)
+			{
+				float laneX = spawnPoints[i].SpawnPointX;
+                laneXwidths[i].x = laneX - laneWidthHalf;
+				laneXwidths[i].y = laneX + laneWidthHalf;
+            }
+
+            AwayFromLanesOnStageEndClientRPC(awayMoveTime, laneXwidths);
+        }
+
+		[ClientRpc]
+		private void AwayFromLanesOnStageEndClientRPC(float awayMoveTime, Vector2[] laneXwidths)
+		{
+			if (!IsOwner) return;
+
+			Vector3 curPos = transform.position;
+			Vector3 targetPos = curPos;
+
+			for (int i = 0; i < laneXwidths.Length; i++)
+			{
+				if (laneXwidths[i].IsBetween(curPos.x))
+				{
+					targetPos.x = laneXwidths[i].GetCloserValue(curPos.x);
+
+					break;
+                }
+            }
+
+			if (targetPos.x != curPos.x)
+				StartCoroutine(RunToTargetPosCoroutine(awayMoveTime, targetPos, () =>
+				{
+					Debug.Log("-transform.forward: " + -transform.rotation.eulerAngles);
+					transform.rotation = Quaternion.Euler(-transform.rotation.eulerAngles);
+				}));
+
+            DOVirtual.DelayedCall(awayMoveTime + 3f, () =>
+			{
+				isInputLocked = false;
+			});
+        }
+
+        private IEnumerator RunToTargetPosCoroutine(float maxTime, Vector3 targetPos, Action onComplete)
+		{
+			float elapsedTime = 0f;
+
+            Vector2 moveDir = new Vector2(transform.position.z - targetPos.z, targetPos.x - transform.position.x);
+
+			while (elapsedTime < maxTime)
+			{
+				if (Vector3.Distance(targetPos, transform.position) < 0.5f)
+                {
+                    break;
+                }
+                MovePosition(moveDir, runSpeed, runSpeed);
+
+				elapsedTime += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+
+            MovePosition(Vector2.zero, runSpeed, runSpeed);
+
+			onComplete?.Invoke();
+        }
+
+        public void InputLockToPlayer_HostOnly()
+        {
+			InputLockToPlayerClientRPC();
+        }
+
+        [ClientRpc]
+        private void InputLockToPlayerClientRPC()
+        {
+            if (!IsOwner) return;
+
+            isInputLocked = true;
+            rigid.linearVelocity = Vector3.zero;
+            SetAnimParam((int)AnimationType.Speed, 0);
+        }
+    }
 }

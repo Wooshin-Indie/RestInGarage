@@ -47,12 +47,15 @@ namespace Garage.Controller
 		[SerializeField] private float boxHeight = 1f;
 		[SerializeField] private LayerMask obstacleLayer;
 
+		private float gameoverTime = 0f;
+		public float GameoverTime { get => gameoverTime; set => gameoverTime = value; }
 
 		private float targetLaneX = 0f;
 		private float removeLaneLength;
 		private bool isBeingForced = false;
         public bool IsBeingForced => isBeingForced;
         private bool isBeingControlled = false;
+		private bool isStageEnded = false;
         private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[30];
 		private Material[] instanceMats;
@@ -89,8 +92,11 @@ namespace Garage.Controller
 			OnUpdateFire();
             if (!IsHost) return;
 
-
-			if (isAnyBroken)
+			if (isStageEnded)
+			{
+                MoveForward();
+            }
+			else if (isAnyBroken)
 			{
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
 					(direction == VehicleDirection.Down && transform.position.z < 0))
@@ -238,7 +244,7 @@ namespace Garage.Controller
 					OnCarExplosion_HostOnly();
 				else
 				{
-					if (carStatus.IsFiring())
+					if (carStatus.IsFiring() && IsInBoundary())
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
 				if (!isExploded)
@@ -456,9 +462,14 @@ namespace Garage.Controller
 					break;
             }
         }
+
+		private bool isAllPartsRepaired = false;
         [ClientRpc]
         private void OnAllPartsRepairedClientRPC()
         {
+			if(isAllPartsRepaired) return;
+			isAllPartsRepaired = true;
+
 			if (!IsHost)
 				isAnyBroken = false;
 
@@ -805,5 +816,31 @@ namespace Garage.Controller
                 });
             }
         }
+
+		public void OnStageEnd()
+		{
+			moveSpeed = moveSpeed * 4;
+			isStageEnded = true;
+		}
+
+		public bool IsInBoundary() // 차량이 정해놓은 맵 범위 안에 있는지 (불타는 범위안에 있는지 확인하려고 써둠)
+		{
+			if (Mathf.Abs(transform.position.z) < 20f)
+				return true;
+			else
+				return false;
+        }
+        
+		[ClientRpc]
+		public void ShowCountdownUIClientRPC(float elapsedTime, float maxTime)
+		{
+			UIManager.Game.ShowCountdownUI(this, elapsedTime, maxTime);
+		}
+
+		[ClientRpc]
+		public void HideCountdownUIClientRPC()
+		{
+			UIManager.Game.HideCountdownUI(this);
+		}
     }
 }
