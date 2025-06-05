@@ -665,7 +665,6 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-            isInputLocked = true;
 			Vector3 curPos = transform.position;
 			Vector3 targetPos = curPos;
 
@@ -682,10 +681,9 @@ namespace Garage.Controller
 			if (targetPos.x != curPos.x)
 				StartCoroutine(RunToTargetPosCoroutine(awayMoveTime, targetPos, () =>
 				{
-                transform.rotation = Quaternion.Euler(-transform.forward);
+					Debug.Log("-transform.forward: " + -transform.rotation.eulerAngles);
+					transform.rotation = Quaternion.Euler(-transform.rotation.eulerAngles);
 				}));
-			else
-                transform.rotation = Quaternion.Euler(0f, -90f, 0f);
 
             DOVirtual.DelayedCall(awayMoveTime + 3f, () =>
 			{
@@ -715,5 +713,20 @@ namespace Garage.Controller
 
 			onComplete?.Invoke();
         }
-	}
+
+        public void InputLockToPlayer_HostOnly()
+        {
+			InputLockToPlayerClientRPC();
+        }
+
+        [ClientRpc]
+        private void InputLockToPlayerClientRPC()
+        {
+            if (!IsOwner) return;
+
+            isInputLocked = true;
+            rigid.linearVelocity = Vector3.zero;
+            SetAnimParam((int)AnimationType.Speed, 0);
+        }
+    }
 }

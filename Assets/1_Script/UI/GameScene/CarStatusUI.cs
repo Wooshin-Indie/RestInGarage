@@ -13,9 +13,10 @@ namespace Garage.UI.GameScene.Items
     {
         [Header("Bubble UI")]
         [SerializeField] private RectTransform bubbleUIRect;
-        [SerializeField] private RectTransform maskToFill;
         [SerializeField] private RectTransform bubbleImageRect;
-        [SerializeField] private Image bubbleIconImage;
+        [SerializeField] private RectTransform maskToFill;
+        [SerializeField] private RectTransform iconRectInBubble;
+        [SerializeField] private Image iconImageInBubble;
 
         [Header("Blinking UI")]
         [SerializeField] private RectTransform blinkingUIRect;
@@ -35,7 +36,7 @@ namespace Garage.UI.GameScene.Items
 
         private Camera mainCam;
         private CarController car;
-        private Transform partPos;
+        private Transform partTransform;
         private Vector3 bubbleUIScale = Vector3.one;
         private bool isEnlarged = false;
         private Color blinkOriginColor;
@@ -71,19 +72,27 @@ namespace Garage.UI.GameScene.Items
 
         public void OnUpdate()
         {
-            if (partPos == null) return;
+            if (partTransform == null) return;
 
             if (!isEnlarged)
             {
                 if (curPart != CarParts.Fire)
+                {
                     OnUpdateBlinking();
+                    OnUpdateScreenPos();
+                }
                 else
+                {
                     OnUpdateFireBlinking();
+                    OnUpdateFireScreenPos();
+                }
+                return;
             }
 
-            Vector3 tmpPos = mainCam.WorldToScreenPoint(partPos.position);
-            transform.position = tmpPos;
-            
+            if (curPart != CarParts.Fire)
+                OnUpdateScreenPos();
+            else
+                OnUpdateFireScreenPos();
         }
 
         private float elapsedTime = 0f;
@@ -105,6 +114,7 @@ namespace Garage.UI.GameScene.Items
         }
 
         private Color tmpColor = Color.white;
+        private float screenEdgeMargin = 80f;
         private void OnUpdateFireBlinking()
         {
             blinkDuration = Mathf.Lerp(1f, 0.05f, maskToFill.anchorMax.y);
@@ -144,6 +154,42 @@ namespace Garage.UI.GameScene.Items
             }
         }
 
+        private void OnUpdateScreenPos()
+        {
+            Vector3 screenPos = mainCam.WorldToScreenPoint(partTransform.position);
+            transform.position = screenPos;
+        }
+
+        private bool isFirstInBoundary = false;
+        private void OnUpdateFireScreenPos()
+        {
+            Vector3 screenPos = mainCam.WorldToScreenPoint(partTransform.position);
+
+            if (car.IsInBoundary())
+            {
+                if (screenPos.x <= 0)
+                {
+                    screenPos.x = screenEdgeMargin;
+                    EnlargeCarPartUI();
+                }
+                else if (screenPos.x >= mainCam.pixelWidth)
+                {
+                    screenPos.x = mainCam.pixelWidth - screenEdgeMargin;
+                    EnlargeCarPartUI();
+                }
+                else
+                {
+                    if (!isFirstInBoundary)
+                    {
+                        isFirstInBoundary = true;
+                        ReduceCarPartUI();
+                    }
+                }
+            }
+
+            transform.position = screenPos;
+        }
+
         public void InitCarStatusUI(CarController carCtr, CarParts carPart)
         {
             car = carCtr;
@@ -162,44 +208,44 @@ namespace Garage.UI.GameScene.Items
             {
                 // 이미지, 사이즈, 좌우반전, 위치 초기화
                 case CarParts.FLT:
-                    bubbleIconImage.sprite = tireEmptyImage;
+                    iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.FRT:
-                    bubbleIconImage.sprite = tireEmptyImage;
+                    iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.RLT:
-                    bubbleIconImage.sprite = tireEmptyImage;
+                    iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.RRT:
-                    bubbleIconImage.sprite = tireEmptyImage;
+                    iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.Engine:
-                    bubbleIconImage.sprite = engineImage;
+                    iconImageInBubble.sprite = engineImage;
                     blinkingIconImage.sprite = wranchBlinkImage;
                     SetUIScale(carPart);
                     break;
                 case CarParts.Oil:
-                    bubbleIconImage.sprite = oilImage;
+                    iconImageInBubble.sprite = oilImage;
                     blinkingIconImage.sprite = oilBlinkImage;
                     SetUIScale(carPart);
                     break;
 				case CarParts.Fire:
-					bubbleIconImage.sprite = oilImage;
+					iconImageInBubble.sprite = oilImage;
                     blinkingIconImage.sprite = fireBlinkImage;
                     maskToFill.GetComponent<Image>().color = Color.red;
 					SetUIScale(carPart);
 					break;
 			}
 
-            partPos = car.PartTransforms[(int)carPart];
+            partTransform = car.PartTransforms[(int)carPart];
         }
         
         private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 스케일(좌우반전) 및 피봇 조정
@@ -217,11 +263,11 @@ namespace Garage.UI.GameScene.Items
                         break;
                     case CarParts.Oil:
                         bubbleUIScale = new Vector3(1f, -1f, 1f);
-                        bubbleImageRect.localScale = new Vector3(1f, -1f, 1f);
+                        iconRectInBubble.localScale = new Vector3(1f, -1f, 1f);
                         break;
                     case CarParts.Engine:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
-                        bubbleImageRect.localScale = new Vector3(-1f, 1f, 1f);
+                        iconRectInBubble.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                     case CarParts.RLT:
                         bubbleUIScale = new Vector3(-1f, -1f, 1f);
@@ -232,6 +278,7 @@ namespace Garage.UI.GameScene.Items
                         break;
                     case CarParts.Fire:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        bubbleImageRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
@@ -261,6 +308,7 @@ namespace Garage.UI.GameScene.Items
                         break;
                     case CarParts.Fire:
                         bubbleUIScale = new Vector3(1f, 1f, 1f);
+                        bubbleImageRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
@@ -293,14 +341,19 @@ namespace Garage.UI.GameScene.Items
         {
             if(inserted)
             {
-                bubbleIconImage.sprite = tireImage;
+                iconImageInBubble.sprite = tireImage;
                 blinkingIconImage.sprite = wranchBlinkImage;
             }
             else
             {
-                bubbleIconImage.sprite = tireEmptyImage;
+                iconImageInBubble.sprite = tireEmptyImage;
                 blinkingIconImage.sprite = tireBlinkImage;
             }
+        }
+
+        private void ChangeBubbleImage()
+        {
+
         }
 	}
 }

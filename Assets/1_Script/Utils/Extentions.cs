@@ -97,7 +97,7 @@ namespace Garage.Utils
 
 		public static float GetCloserValue(this Vector2 v, float value)
 		{
-			if (Mathf.Abs(value - v.x) >= Mathf.Abs(value - v.y))
+			if (Mathf.Abs(value - v.x) <= Mathf.Abs(value - v.y))
 			{
 				return v.x;
 			}

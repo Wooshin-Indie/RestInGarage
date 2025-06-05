@@ -137,7 +137,8 @@ namespace Garage.Manager
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
 			{
 				UIManager.Game.OnTimeout();
-				Invoke(nameof(EndStage), 3f);
+				InputLockToAllPlayers();
+                Invoke(nameof(EndStage), 3f);
 			}
 		}
 
@@ -304,6 +305,17 @@ namespace Garage.Manager
             {
                 NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
                     GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(awayMoveTime);
+            }
+        }
+
+		private void InputLockToAllPlayers()
+		{
+            List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
+
+            foreach (ulong clientId in clientIds)
+            {
+                NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
+                    GetComponent<PlayerController>().InputLockToPlayer_HostOnly();
             }
         }
 

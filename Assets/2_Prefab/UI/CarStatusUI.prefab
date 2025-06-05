@@ -346,9 +346,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bubbleUIRect: {fileID: 1270767915866726750}
+  bubbleImageRect: {fileID: 7894721644788972200}
   maskToFill: {fileID: 7730267936408427851}
-  bubbleImageRect: {fileID: 6066973281823630516}
-  bubbleIconImage: {fileID: 7570636051626726258}
+  iconRectInBubble: {fileID: 6066973281823630516}
+  iconImageInBubble: {fileID: 7570636051626726258}
   blinkingUIRect: {fileID: 3408542236555620341}
   blinkingIconImage: {fileID: 112845755372654813}
   tireEmptyImage: {fileID: 21300000, guid: 456b1754ef6935742a0f1d5ca253e8ef, type: 3}

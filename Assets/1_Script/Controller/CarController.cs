@@ -243,7 +243,7 @@ namespace Garage.Controller
 					OnCarExplosion_HostOnly();
 				else
 				{
-					if (carStatus.IsFiring() && Mathf.Abs(transform.position.z) < 20f)
+					if (carStatus.IsFiring() && IsInBoundary())
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
 				if (!isExploded)
@@ -816,5 +816,13 @@ namespace Garage.Controller
 			moveSpeed = moveSpeed * 4;
 			isStageEnded = true;
 		}
+
+		public bool IsInBoundary() // 차량이 정해놓은 맵 범위 안에 있는지 (불타는 범위안에 있는지 확인하려고 써둠)
+		{
+			if (Mathf.Abs(transform.position.z) < 20f)
+				return true;
+			else
+				return false;
+        }
     }
 }
