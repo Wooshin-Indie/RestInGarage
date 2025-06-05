@@ -89,7 +89,7 @@ namespace Garage.Manager
 			GameSynchronizer.Instance.IsDay.Value = false;
 			SunManager.Instance.SetTimePhase(TimePhase.Night, 5f);
 			AllPlayersAwayFromLanesOnStageEnd();
-			DOVirtual.DelayedCall(gatheringTime, () =>
+			DOVirtual.DelayedCall(awayMoveTime, () =>
 			{
                 TrafficManager.Instance.OnStageEnd();
             });
@@ -295,7 +295,7 @@ namespace Garage.Manager
 			return true;
 		}
 
-		private float gatheringTime = 3f;
+		private float awayMoveTime = 3f;
 		private void AllPlayersAwayFromLanesOnStageEnd()
 		{
 			List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
@@ -303,7 +303,7 @@ namespace Garage.Manager
 			foreach (ulong clientId in clientIds)
             {
                 NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).
-                    GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(gatheringTime);
+                    GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(awayMoveTime);
             }
         }
 

@@ -641,27 +641,27 @@ namespace Garage.Controller
             }
         }
 
-		public void AwayFromLanesOnStageEnd_HostOnly(float gatheringTime)
+		public void AwayFromLanesOnStageEnd_HostOnly(float awayMoveTime)
 		{
 			int curStageIdx = GameSynchronizer.Instance.CurrentStage.Value;
 
 			List<LaneData> spawnPoints = Managers.Resource.GetData<StageData>(curStageIdx).SpawningPoints;
             int laneNum = spawnPoints.Count;
-			float laneWidth = Managers.Resource.GetData<StageData>(curStageIdx).LaneWidth;
+			float laneWidthHalf = Managers.Resource.GetData<StageData>(curStageIdx).LaneWidth / 2;
 
             Vector2[] laneXwidths = new Vector2[laneNum]; // 차선 폭 계산해서 거기서 벗어나게 함
 			for (int i = 0; i < laneNum; i++)
 			{
 				float laneX = spawnPoints[i].SpawnPointX;
-                laneXwidths[i].x = laneX - laneWidth;
-				laneXwidths[i].y = laneX + laneWidth;
+                laneXwidths[i].x = laneX - laneWidthHalf;
+				laneXwidths[i].y = laneX + laneWidthHalf;
             }
 
-            AwayFromLanesOnStageEndClientRPC(gatheringTime, laneXwidths);
+            AwayFromLanesOnStageEndClientRPC(awayMoveTime, laneXwidths);
         }
 
 		[ClientRpc]
-		private void AwayFromLanesOnStageEndClientRPC(float gatheringTime, Vector2[] laneXwidths)
+		private void AwayFromLanesOnStageEndClientRPC(float awayMoveTime, Vector2[] laneXwidths)
 		{
 			if (!IsOwner) return;
 
@@ -680,14 +680,14 @@ namespace Garage.Controller
             }
 
 			if (targetPos.x != curPos.x)
-				StartCoroutine(RunToTargetPosCoroutine(gatheringTime, targetPos, () =>
+				StartCoroutine(RunToTargetPosCoroutine(awayMoveTime, targetPos, () =>
 				{
                 transform.rotation = Quaternion.Euler(-transform.forward);
 				}));
 			else
                 transform.rotation = Quaternion.Euler(0f, -90f, 0f);
 
-            DOVirtual.DelayedCall(gatheringTime + 3f, () =>
+            DOVirtual.DelayedCall(awayMoveTime + 3f, () =>
 			{
 				isInputLocked = false;
 			});
