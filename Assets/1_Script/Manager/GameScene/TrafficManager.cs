@@ -44,6 +44,7 @@ namespace Garage.Manager
         private StageData curStageData;
         public StageData CurStageData => curStageData;
         private List<VehicleSpawnPoint> spawnPoints = new List<VehicleSpawnPoint>();
+        private Dictionary<ulong, CarController> curStageCars = new Dictionary<ulong, CarController>();
 
         /// <summary>
         /// mapId, stageId 에 따라 spawnPoints를 설정합니다.
@@ -76,8 +77,11 @@ namespace Garage.Manager
         /// </summary>
         public void OnStageEnd()
 		{
-
-		}
+            foreach (var carDict in curStageCars)
+            {
+                carDict.Value.OnStageEnd();
+            }
+        }
 
 		[Button]
 		public void SpawnCar() // 서버에서 호출
@@ -91,6 +95,8 @@ namespace Garage.Manager
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
 
+                curStageCars.Add(car.GetComponent<NetworkObject>().NetworkObjectId, car);
+
                 car.SetLane(spawnPoint.transform.position.x, curStageData.RemoveLength, spawnPoint.Direction);
                 car.InitCarStatusServer();
 			}
@@ -102,7 +108,8 @@ namespace Garage.Manager
 			UIManager.Game.RemoveAllCarStatusUI(car);
 
             car.GetComponent<NetworkObject>().Despawn();
-			Destroy(car.gameObject);
+            curStageCars.Remove(car.GetComponent<NetworkObject>().NetworkObjectId);
+            Destroy(car.gameObject);
 		}
 
 	}

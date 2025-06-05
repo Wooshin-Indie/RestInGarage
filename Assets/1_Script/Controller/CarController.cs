@@ -9,7 +9,6 @@ using Garage.Props;
 using System.Collections;
 using DG.Tweening;
 using System.Linq;
-using UnityEditor.Recorder.Input;
 
 namespace Garage.Controller
 {
@@ -56,6 +55,7 @@ namespace Garage.Controller
 		private bool isBeingForced = false;
         public bool IsBeingForced => isBeingForced;
         private bool isBeingControlled = false;
+		private bool isStageEnded = false;
         private Rigidbody rigid;
 		private Collider[] hitResults = new Collider[30];
 		private Material[] instanceMats;
@@ -92,8 +92,11 @@ namespace Garage.Controller
 			OnUpdateFire();
             if (!IsHost) return;
 
-
-			if (isAnyBroken)
+			if (isStageEnded)
+			{
+                MoveForward();
+            }
+			else if (isAnyBroken)
 			{
 				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
 					(direction == VehicleDirection.Down && transform.position.z < 0))
@@ -241,7 +244,7 @@ namespace Garage.Controller
 					OnCarExplosion_HostOnly();
 				else
 				{
-					if (carStatus.IsFiring())
+					if (carStatus.IsFiring() && IsInBoundary())
 						carStatus.ExtinguishFire(Time.fixedDeltaTime / fireTime);
 				}
 				if (!isExploded)
@@ -814,6 +817,20 @@ namespace Garage.Controller
             }
         }
 
+		public void OnStageEnd()
+		{
+			moveSpeed = moveSpeed * 4;
+			isStageEnded = true;
+		}
+
+		public bool IsInBoundary() // 차량이 정해놓은 맵 범위 안에 있는지 (불타는 범위안에 있는지 확인하려고 써둠)
+		{
+			if (Mathf.Abs(transform.position.z) < 20f)
+				return true;
+			else
+				return false;
+        }
+        
 		[ClientRpc]
 		public void ShowCountdownUIClientRPC(float elapsedTime, float maxTime)
 		{

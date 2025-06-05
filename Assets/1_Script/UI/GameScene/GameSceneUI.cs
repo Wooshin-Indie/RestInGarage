@@ -181,6 +181,26 @@ namespace Garage.UI.GameScene
             curEnlaredPartBase = null;
         }
 
+        public void EnlargeAllFireUIs()
+        {
+            foreach (var carDic in carStatusInfo)
+            {
+                if(carDic.Value.TryGetValue(CarParts.Fire, out CarStatusUI carUI))
+                {
+                    carUI.EnlargeCarPartUI();
+                }
+            }
+        }
+        public void ReduceAllFireUIs()
+        {
+            foreach (var carDic in carStatusInfo)
+            {
+                if (carDic.Value.TryGetValue(CarParts.Fire, out CarStatusUI carUI))
+                {
+                    carUI.ReduceCarPartUI();
+                }
+            }
+        }
         private Dictionary<ulong, CarCountdownUI> carCountdownInfo = new();
         public void ShowCountdownUI(CarController car, float elapsedTime, float maxTime)
         {
