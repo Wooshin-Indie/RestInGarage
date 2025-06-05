@@ -94,6 +94,10 @@ MonoBehaviour:
     m_Localized: "\uCC3D \uBAA8\uB4DC"
     m_Metadata:
       m_Items: []
+  - m_Id: 4217503908536320
+    m_Localized: "\uB85C\uBE44"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

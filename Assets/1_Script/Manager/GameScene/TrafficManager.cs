@@ -106,9 +106,11 @@ namespace Garage.Manager
 		public void DespawnCar(CarController car)
 		{
 			UIManager.Game.RemoveAllCarStatusUI(car);
+
             car.GetComponent<NetworkObject>().Despawn();
             curStageCars.Remove(car.GetComponent<NetworkObject>().NetworkObjectId);
             Destroy(car.gameObject);
 		}
+
 	}
 }

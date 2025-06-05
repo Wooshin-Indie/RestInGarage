@@ -3,9 +3,6 @@ using Garage.Utils;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
-using Newtonsoft.Json.Bson;
-using Unity.VisualScripting;
-using UnityEditor.Localization.Plugins.XLIFF.V20;
 
 namespace Garage.UI.GameScene.Items
 {

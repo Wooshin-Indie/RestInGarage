@@ -94,6 +94,10 @@ MonoBehaviour:
     m_Localized: WindowScreen
     m_Metadata:
       m_Items: []
+  - m_Id: 4217503908536320
+    m_Localized: Lobby
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

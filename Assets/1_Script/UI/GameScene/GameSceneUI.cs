@@ -9,6 +9,8 @@ using Unity.Netcode;
 using UnityEngine;
 using DG.Tweening;
 using Garage.Manager;
+using UnityEngine.UI;
+using Garage.UI.Item;
 
 namespace Garage.UI.GameScene
 {
@@ -21,6 +23,7 @@ namespace Garage.UI.GameScene
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
+        [SerializeField] private GameObject carCountdownUIPrefab;
         [SerializeField] private ShopInfo shopInfo;
 
 
@@ -40,6 +43,7 @@ namespace Garage.UI.GameScene
             {
                 foreach(var j in i.Value)
                 {
+                    if (j.Value == null) continue;
                     j.Value.OnUpdate();
                 }
             }
@@ -65,8 +69,6 @@ namespace Garage.UI.GameScene
                 tmpUI.ApplyFill(progress);
             }
 		}
-
-
 		public void GenerateCarStatusUIs(CarController car, CarStatus status)
         {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
@@ -86,12 +88,12 @@ namespace Garage.UI.GameScene
                 }
 			}
 		}
-
         public void RemoveCarStatusUI(CarController car, CarParts carPart)
-        { 
+        {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
 
-            if (carStatusInfo[carID].ContainsKey(carPart))
+            if (!carStatusInfo.ContainsKey(carID)) return;
+            if (carStatusInfo[carID].ContainsKey(carPart) && carStatusInfo[carID][carPart] != null)
             {
                 Transform curUiTf = carStatusInfo[carID][carPart].transform;
                 Sequence uiScaleSeq = DOTween.Sequence();
@@ -99,24 +101,26 @@ namespace Garage.UI.GameScene
                 uiScaleSeq.Append(curUiTf.DOScale(Vector3.zero, 0.2f).SetEase(Ease.OutCubic));
                 uiScaleSeq.OnComplete(() =>
                 {
-                    Destroy(carStatusInfo[carID][carPart].gameObject);
-                    carStatusInfo[carID].Remove(carPart);
+                    Destroy(curUiTf.gameObject);
                 });
 
                 uiScaleSeq.Play();
             }
             else Debug.Log($"Key \"{carPart}\" is not in Dictionary");
         }
-
         public void RemoveAllCarStatusUI(CarController car)
         {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
             Array parts = Enum.GetValues(typeof(CarParts));
 
+            if (!carStatusInfo.ContainsKey(carID)) return;
+
             foreach (CarParts part in parts)
             {
                 RemoveCarStatusUI(car, part);
             }
+
+            carStatusInfo.Remove(carID);
         }    
 
         public void OnBalancedChanged(int prev, int balance)
@@ -130,7 +134,6 @@ namespace Garage.UI.GameScene
 
             balanceText.SetBalance(balance);
         }
-
         public void OnInsufficientBalance()
         {
             balanceText.OnInsufficientMoney();
@@ -198,21 +201,49 @@ namespace Garage.UI.GameScene
                 }
             }
         }
+        private Dictionary<ulong, CarCountdownUI> carCountdownInfo = new();
+        public void ShowCountdownUI(CarController car, float elapsedTime, float maxTime)
+        {
+            // Set fill amount
+            ulong carID = car.NetworkObjectId;
+            CarCountdownUI countUI;
 
-        public void OnTireInserted(CarController car, CarParts tire)
+			if (carCountdownInfo.TryGetValue(carID, out countUI))
+            {
+                countUI.SetAmount(elapsedTime / maxTime);
+            }
+            else
+            {
+				countUI = Instantiate(carCountdownUIPrefab, transform).GetComponent<CarCountdownUI>();
+                carCountdownInfo[carID] = countUI;
+				countUI.SetAmount(elapsedTime / maxTime);
+            }
+
+            if (countUI == null) return;
+
+			countUI.SetPosition(Camera.main.WorldToScreenPoint(car.transform.position));
+		}
+
+		public void HideCountdownUI(CarController car)
+		{
+            if (carCountdownInfo.TryGetValue(car.NetworkObjectId, out CarCountdownUI countUI))
+            {
+                Destroy(countUI.gameObject);
+				carCountdownInfo.Remove(car.NetworkObjectId);
+			}
+		}
+
+		public void OnTireInserted(CarController car, CarParts tire)
         {
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
             carStatusInfo[carID][tire].ChangeTireImage();
 		}
-
         // 화면에 Shop Item 정보를 띄움
         public void PopupItemInfo(ItemData data)
         {
             shopInfo.SetInfo(data);
             shopInfo.gameObject.SetActive(true);
         }
-
-
         public void OnTimerChanged(float prevTime, float curTime)
         {
             if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
@@ -220,19 +251,16 @@ namespace Garage.UI.GameScene
                 timerText.SetTime(prevTime, curTime);
             }
 		}
-
         public void OnStartStage(int idx)
 		{
 			Managers.Sound.PlaySfx(SFXType.StartUp, .9f, 1f);
 			stageStartEndUI.OnStageStart(idx);
 		}
-
         public void OnTimeout()
 		{
 			Managers.Sound.PlaySfx(SFXType.Alarm, .8f, 1f);
 			stageStartEndUI.OnStageTimeout();
         }
-
         public void OnGameOver(int idx)
         {
 

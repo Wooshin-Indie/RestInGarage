@@ -9,8 +9,8 @@ namespace Garage.UI.Item
 {
 	public class PageUI : MonoBehaviour
 	{
-		[SerializeField] private RectTransform arrowUI;
-		[SerializeField] private List<Selectable> buttons = new();
+		[SerializeField] protected RectTransform arrowUI;
+		[SerializeField] protected List<Selectable> buttons = new();
 
 		void Start()
 		{
@@ -30,7 +30,7 @@ namespace Garage.UI.Item
 			}
 		}
 
-		private void OnEnable()
+		protected virtual void OnEnable()
 		{
 			EventSystem.current.SetSelectedGameObject(buttons[0].gameObject);
 			targetPosX = buttons[0].gameObject.transform.position.x - ((RectTransform)buttons[0].gameObject.transform).rect.width/2;
@@ -44,7 +44,7 @@ namespace Garage.UI.Item
 		private float targetPosY;
 		private float targetPosX;
 
-		private void Update()
+		protected virtual void Update()
 		{
 			if (prevSelectedObject != null && EventSystem.current.currentSelectedGameObject != prevSelectedObject)
 			{

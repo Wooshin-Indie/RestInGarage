@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -30,19 +31,13 @@ namespace Garage.Manager
 		private float pingSentTime;		// 가장 최근 ping 보낸 시간
 		private bool isDisconnected = true;
 
-		public float LastPingMs { get; private set; } = -1;
+		private bool isHeartbeating = false;
 
-		private void Start()
-		{
-			if (IsClient && !IsHost)
-			{
-				lastPongTime = Time.time;
-				pingTimer = pingInterval;
-			}
-		}
+		public float LastPingMs { get; private set; } = -1;
 
 		private void Update()
 		{
+			if (!isHeartbeating) return;
 			if (!IsClient || IsHost) return;
 
 			pingTimer -= Time.deltaTime;
@@ -62,19 +57,37 @@ namespace Garage.Manager
 				isDisconnected = true;
 				Debug.LogWarning("[HeartbeatChecker] : Host Disconnected");
 
-				// NetworkManager.Singleton.Shutdown();
+				UIManager.Transition.StartTransition(.5f);
+				DOVirtual.DelayedCall(.5f, () =>
+				{
+					GameNetworkManager.Instance.Disconnected();
+				});
 			}
+		}
+
+		public void StartHeartbeat()
+		{
+			if (IsClient && !IsHost)
+			{
+				lastPongTime = Time.time;
+				pingTimer = pingInterval;
+				isHeartbeating = true;
+			}
+		}
+
+		public void EndHeartbeat()
+		{
+			isHeartbeating = false;
 		}
 
 		[ServerRpc(RequireOwnership = false)]
 		private void SendPingServerRpc(ServerRpcParams rpcParams = default)
 		{
-			if (!NetworkManager.Singleton.IsServer)
+			if (!NetworkManager.Singleton.IsHost)
 				return;
 
 			ReceivePongClientRpc(rpcParams.Receive.SenderClientId);
 		}
-
 		[ClientRpc]
 		private void ReceivePongClientRpc(ulong clientId)
 		{
@@ -92,6 +105,8 @@ namespace Garage.Manager
 			LastPingMs = (Time.time - pingSentTime) * 1000.0f;
 			Debug.Log($"[HeartbeatChecker] Ping: {LastPingMs:F0} ms");
 		}
+
+
 		#endregion
 
 		[ServerRpc(RequireOwnership = false)]

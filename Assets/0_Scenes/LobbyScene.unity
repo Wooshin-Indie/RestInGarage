@@ -116494,10 +116494,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraBoomLength: 15
-  fixedRotation: {x: 48, y: 82, z: 0}
   target: {fileID: 0}
   smoothSpeed: 3
-  defaultTestPos: {x: 0, y: 0, z: 0}
   ratio: 2
 --- !u!1 &105121060732940984
 GameObject:

@@ -25,9 +25,15 @@ namespace Garage.Manager
 			LoadSceneServer(sceneEnum);
 			UIManager.Instance.OnSceneChanged(sceneEnum);
 			SunManager.Instance.OnSceneChanged(sceneEnum);
-		
 		}
 
+		public void ChangeScene(SceneEnum sceneEnum)
+		{
+			UnloadCurrentSceneServer();
+
+			UIManager.Instance.OnSceneChanged(sceneEnum);
+			SunManager.Instance.OnSceneChanged(sceneEnum);
+		}
 		public void LoadSceneServer(SceneEnum sceneEnum)
 		{
 			CurrentScene?.Clear();
@@ -37,9 +43,7 @@ namespace Garage.Manager
 			}
 			else
 			{
-				Debug.Log("SCENE LOAD START :" + sceneEnum.ToString());
 				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
-                Debug.Log("SCENE LOAD END :" + sceneEnum.ToString());
             }
 		}
 
@@ -51,8 +55,11 @@ namespace Garage.Manager
 			{
 				SceneManager.UnloadSceneAsync("MainScene");
 			}
-			else{
-				NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+			else {
+				if (NetworkManager.Singleton.IsHost)
+					NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+				else
+					SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
 			}
 		}
 

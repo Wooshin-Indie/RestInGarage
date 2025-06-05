@@ -279,6 +279,19 @@ namespace Garage.Controller
 			}
         }
 
+		/// <summary>
+		/// 스테이지 종료 시
+		/// 강제로 Interaction을 끊는 함수
+		/// </summary>
+		public void EndAllInteraction()
+		{
+			stateMachine.ChangeState(idleState);
+			TryEndAction();
+			TryEndInteract();
+			currentOwningProp = null;
+			currentFixablePart = null;
+		}
+
 		private Vector3 moveDir = Vector3.zero;
         /// <summary>
         /// move 방향으로 speed의 속도로 움직입니다.
@@ -367,8 +380,6 @@ namespace Garage.Controller
 				preEnlargedFixablePart = currentFixablePart;
             }
 			
-
-
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
@@ -462,19 +473,6 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.KnockBack);
         }
 
-		[Button]
-		private void IsBeingForcedFalse()
-		{
-			isBeingForced = false;
-		}
-
-        [Button]
-        private void AddForceToPlayer()
-        {
-            isBeingForced = true;
-            rigid.AddForce(new Vector3(1,0,0)* knockbackStrength, ForceMode.Impulse);
-        }
-
         #region Animation Events
 
         private void OnStartPlace()
@@ -540,6 +538,7 @@ namespace Garage.Controller
 
 			if (!IsOwner) return;
             //Vector3 VFXpos = currentFixablePart.transform.position;
+			if (!IsOwner) return;
             Vector3 VFXpos = currentOwningProp.transform.position;
 			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
 		}

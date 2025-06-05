@@ -81,9 +81,11 @@ namespace Garage.Manager
 		}
 		private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
-			Debug.Log("LobbyEntered!");
 			if (NetworkManager.Singleton.IsHost) return;
-			StartClient(currentLobby.Value.Owner.Id);
+
+			currentLobby = lobby;
+			GameManagerEx.Instance.ConnectedAsClient();
+			StartClient(lobby.Owner.Id);
 		}
 		private void SteamMatchmaking_OnLobbyJoined(Lobby lobby, Friend friend)
 		{
@@ -120,8 +122,6 @@ namespace Garage.Manager
 			}
 			else
 			{
-				currentLobby = lobby;
-				GameManagerEx.Instance.ConnectedAsClient();
 				Debug.Log("Joined Lobby");
 			}
 		}
@@ -132,7 +132,10 @@ namespace Garage.Manager
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+
 			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
+			currentLobby.Value.SetData(Constants.KEY_LOBBYNAME, $"{SteamClient.Name}'s lobby");
+			currentLobby.Value.SetData(Constants.KEY_GAMENAME, Constants.VALUE_GAMENAME);
 		}
 		public void StartClient(SteamId steamId)
 		{
@@ -145,8 +148,6 @@ namespace Garage.Manager
 			if (NetworkManager.Singleton.StartClient())
 			{
 				UIManager.Instance.OnSceneChanged(SceneEnum.Lobby);
-				Debug.Log("Client has started");
-				// TODO - 여기서 카메라 할당
 			}
 		}
 		public void StartGame()
@@ -163,6 +164,8 @@ namespace Garage.Manager
 		}
 		public async void Disconnected()
 		{
+
+			NetworkTransmission.instance.EndHeartbeat();
 			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 			if (NetworkManager.Singleton.IsHost)
 			{
@@ -184,7 +187,30 @@ namespace Garage.Manager
 			NetworkManager.Singleton.Shutdown(true);
 			GameManagerEx.Instance.Disconnected();
 		}
+		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
+		{
+			var query = SteamMatchmaking.LobbyList
+				.WithKeyValue(Constants.KEY_GAMENAME, Constants.VALUE_GAMENAME)
+				.FilterDistanceClose();
 
+			var lobbies = await query.RequestAsync();
+
+			if (lobbies == null) return;
+
+			callback.Invoke(lobbies);
+			return;
+		}
+		public async void JoinLobby(Lobby lobby)
+		{
+			try
+			{
+				await lobby.Join();
+			}
+			catch (System.Exception e)
+			{
+				Debug.LogWarning($"Lobby enter failed : {e.Message}");
+			}
+		}
 
 		private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
@@ -202,11 +228,14 @@ namespace Garage.Manager
 			GameManagerEx.Instance.MyClientId = clientId;
 			NetworkTransmission.instance.IsTheClientReadyServerRPC(false, clientId);
 			Debug.Log($"Client has connected : {clientId}");
+
+			NetworkTransmission.instance.StartHeartbeat();
 		}
 		private void Singleton_OnServerStarted()
 		{
 			Debug.Log("Host started");
 			GameManagerEx.Instance.HostCreated();
 		}
+
 	}
 }

@@ -44,7 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 096d4bf426ef95445b85bd3049f930ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxRadius: 3
+  safeBoxRadius: 3
+  gameoverBoxRadius: 15
   targetLayer:
     serializedVersion: 2
     m_Bits: 512
