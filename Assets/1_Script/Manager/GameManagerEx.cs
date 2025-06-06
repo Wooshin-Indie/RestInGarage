@@ -3,10 +3,10 @@ using Garage.Controller;
 using Garage.Environment;
 using Garage.Structs;
 using Garage.Utils;
-using IUtil;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -44,7 +44,12 @@ namespace Garage.Manager
 		public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
 		public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
-		public Action OnDisconnected { get; set; }
+
+		public Action OnDisconnectedAction { get; set; }
+		public Action OnBeforeStageStartAction { get; set; }
+		public Action OnAfterStageStartAction { get; set; }
+		public Action OnBeforeStageEndAction { get; set; }
+		public Action OnAfterStageEndAction { get; set; }
 
 		[SerializeField] private GameObject meetingPointPrefab;
 		[SerializeField] private float stageTimer;
@@ -57,6 +62,11 @@ namespace Garage.Manager
 			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
 		}
 
+		private float startStageDuration = 3f;
+
+		/// <summary>
+		/// Stage를 시작할 때 호출하는 함수
+		/// </summary>
 		public void StartNextStage()
 		{
 			if (!isHost) return;
@@ -66,9 +76,8 @@ namespace Garage.Manager
 				meetingPoint.EndMeetClientRPC();
 			}
 
-			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
-
-			Invoke(nameof(OnStageStart), 3f);
+			SunManager.Instance.SetTimePhase(TimePhase.Morning, startStageDuration);
+			Invoke(nameof(OnStageStart), startStageDuration);
 
 			GameSynchronizer.Instance.IsDay.Value = true;
 			GameSynchronizer.Instance.CurrentStage.Value++;
@@ -77,7 +86,11 @@ namespace Garage.Manager
 			BuildingManager.Instance.OnStageStart();
 		}
 
-		public void OnStageStart()
+		/// <summary>
+		/// startStageDuration 후에 호출되는 함수
+		/// ex. 타이머 시작, BuildingManager Init
+		/// </summary>
+		private void OnStageStart()
 		{
 			GameSynchronizer.Instance.SetGameTimer(stageTimer);
 			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
@@ -104,7 +117,7 @@ namespace Garage.Manager
 			Managers.Spawn.OnStageEnd();
 		}
 
-		public void OnStageEnd()
+		private void OnStageEnd()
 		{
 			if (!isHost) return;
 
@@ -126,7 +139,6 @@ namespace Garage.Manager
                 BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
             });
 		}
-
 
 		private void OnUpdateTimer()
 		{
@@ -205,7 +217,7 @@ namespace Garage.Manager
 				Destroy(card);
 			}
 
-			OnDisconnected.Invoke();
+			OnDisconnectedAction.Invoke();
 
 			Managers.Scene.ChangeSceneServer(SceneEnum.Main);
 			isHost = false;
@@ -270,7 +282,6 @@ namespace Garage.Manager
 			}
 			UIManager.Lobby.OnRemovePlayerFromDictionary(value);
 		}
-
 		public void UpdatePlayerIsReady(bool isReady, ulong clientId)
 		{
 			foreach (KeyValuePair<ulong, PlayerInfo> player in playerInfo)
@@ -282,7 +293,6 @@ namespace Garage.Manager
 				}
 			}
 		}
-
 		public bool IsAllPlayerReady()
 		{
 			foreach (KeyValuePair<ulong, PlayerInfo> player in playerInfo)
@@ -307,7 +317,6 @@ namespace Garage.Manager
                     GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(awayMoveTime);
             }
         }
-
 		private void InputLockToAllPlayers()
 		{
             List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();

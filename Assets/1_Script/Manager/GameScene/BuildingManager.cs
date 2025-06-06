@@ -36,7 +36,7 @@ namespace Garage.Manager
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
 			}
 
-			GameManagerEx.Instance.OnDisconnected += OnDisconnected;
+			GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
 		}
 		#endregion
 

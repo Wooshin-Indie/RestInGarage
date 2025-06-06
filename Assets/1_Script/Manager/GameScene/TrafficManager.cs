@@ -94,11 +94,10 @@ namespace Garage.Manager
                 CarController car = Instantiate(carPrefab[UnityEngine.Random.Range(0, carPrefab.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
+                car.InitCarController(spawnPoint);
 
                 curStageCars.Add(car.GetComponent<NetworkObject>().NetworkObjectId, car);
 
-                car.SetLane(spawnPoint.transform.position.x, curStageData.RemoveLength, spawnPoint.Direction);
-                car.InitCarStatusServer();
 			}
 			else return;
 		}

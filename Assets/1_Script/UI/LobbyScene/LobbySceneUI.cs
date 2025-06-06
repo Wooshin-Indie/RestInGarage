@@ -46,7 +46,7 @@ namespace Garage.UI.LobbyScene
 
 		private void Awake()
 		{
-			GameManagerEx.Instance.OnDisconnected += OnDisconnected;	
+			GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;	
 		}
 
 		private void Start()

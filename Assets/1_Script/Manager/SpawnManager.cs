@@ -1,22 +1,18 @@
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Garage.Manager
 {
 	public class SpawnManager
 	{
-		private List<GameObject> propList = new();
+
+		private Dictionary<ulong, GameObject> propDict = new();		// stage마다 초기화할 Prop들
 
 		public void Init()
 		{
 
-		}
-
-		public GameObject Instantiate(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
-		{
-			GameObject go = Object.Instantiate(prefab, position, rotation, parent);
-			return go;
 		}
 
 		public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
@@ -30,20 +26,29 @@ namespace Garage.Manager
 			}
 
 			go.GetComponent<NetworkObject>().Spawn();
-			propList.Add(go);
+			propDict.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go);
 			return go;
+		}
+
+		public void Despawn(ulong netId)
+		{
+			if(propDict.TryGetValue(netId, out GameObject obj))
+			{
+				obj.GetComponent<NetworkObject>().Despawn(true);
+				propDict.Remove(netId);
+			}
 		}
 
 		public void OnStageEnd()
 		{
-			for(int i=0; i<propList.Count; i++)
+			foreach (var entry in propDict)
 			{
-				if (propList[i] != null)
+				if (entry.Value != null)
 				{
-					Object.Destroy(propList[i]);
+					entry.Value.GetComponent<NetworkObject>().Despawn(true);
 				}
 			}
-			propList.Clear();
+			propDict.Clear();
 		}
 	}
 }
