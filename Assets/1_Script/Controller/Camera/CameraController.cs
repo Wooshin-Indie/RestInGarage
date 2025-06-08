@@ -7,25 +7,22 @@ namespace Garage.Controller
 	public class CameraController : MonoBehaviour
 	{
 		[SerializeField] private float cameraBoomLength;
-        [SerializeField] private Transform target; // 플레이어가 할당될 타겟
-        [SerializeField] private float smoothSpeed = 10f; // 카메라 이동 부드러움 정도
-        private Vector3 standardPoint;  // standard point를 저장해놔야됨
-        private StageData curStageData;
-        private float playerRangeX; // x+ 방향(윗방향) 플레이어 움직임 범위
+        [SerializeField] private Transform target;          // 플레이어가 할당될 타겟
+        [SerializeField] private float smoothSpeed = 10f;   // 카메라 이동 부드러움 정도
 
-        private void Awake()
-        {
-            curStageData = TrafficManager.Instance.CurStageData;
-            standardPoint = curStageData.StandardPoint;
-            playerRangeX = curStageData.PlayerRangeX;
-            TrafficManager.Instance.OnStageStarted += SetStageInfo;
+        private Vector3 standardPoint;                      // standard point를 저장해놔야됨
+        private float playerRangeX;                         // x+ 방향(윗방향) 플레이어 움직임 범위
+
+		private void Start()
+		{
+
         }
 
-        private void Update()
+		private void Update()
 		{
             if (target == null) return;
 
-            OnUpdateCamera1();
+            OnUpdateCamera();
         }
 
         public void SetTarget(Transform newTarget)
@@ -33,21 +30,17 @@ namespace Garage.Controller
             target = newTarget;
         }
 
-        private void SetStageInfo(StageData stageData)
+        public void SetStageInfo(int idx)
         {
-            if (curStageData.PlayerRangeX != stageData.PlayerRangeX)
-            {
-                // TODO - 차선 개수 따라서 카메라를 가운데쪽으로 lerp
-            }
-
-            curStageData = stageData;
-            transform.rotation = Quaternion.Euler(curStageData.CamRotation);
-            playerRangeX = curStageData.PlayerRangeX;
+            MapData stageData = Managers.Resource.GetData<MapData>(idx);
+			standardPoint = stageData.StandardPoint;
+			playerRangeX = stageData.PlayerRangeX;
+            transform.rotation = Quaternion.Euler(stageData.CamRotation);
         }
 
         [SerializeField] private float ratio = 3;
 
-        private void OnUpdateCamera1()
+        private void OnUpdateCamera()
         {
             float cameraBoomLength = 20;
             Vector3 defaultPos = standardPoint + cameraBoomLength * (-transform.forward);

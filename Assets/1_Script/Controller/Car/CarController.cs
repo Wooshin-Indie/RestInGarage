@@ -35,19 +35,19 @@ namespace Garage.Controller
 		[SerializeField, Tooltip("Basic velocity for vehicle")] 
 		private float moveSpeed = 5f;
 		
-		[SerializeField, Tooltip("Distance to start braking to avoid a crash")] 
+		[SerializeField, Tooltip("Distance to start braking to avoid a crash (IsAnybroken)")] 
 		private float stopDistance = 15f;
 
-		[SerializeField, Tooltip("")] 
+		[SerializeField, Tooltip("Distance to start braking to avoid a crash (!IsAnybroken)")] 
 		private float tmpDistance = 7f;
 
 		[SerializeField, Tooltip("")] 
 		private float steeringStrength;
 
-		[SerializeField, Tooltip("")] 
+		[SerializeField, Tooltip("최대 steering 각도")] 
 		private float maxSteerAngle;
 		
-		[SerializeField, Tooltip("")] 
+		[SerializeField, Tooltip("Lane에 충분히 가까워졌는지 판단하는 Threshold")] 
 		private float laneSnapThreshold;
 
 		[FoldoutGroup("Overlap Parameters")]
@@ -275,7 +275,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void InitCarController(VehicleSpawnPoint spawnPoint)
 		{
-			SetLaneClientRPC(spawnPoint.transform.position.x, Managers.Resource.GetData<StageData>(0).RemoveLength, spawnPoint.Direction);
+			SetLaneClientRPC(spawnPoint.transform.position.x, Managers.Resource.GetData<MapData>(0).RemoveLength, spawnPoint.Direction);
 
 			int vehicleDataIdx = UnityEngine.Random.Range(0, Managers.Resource.GetDataLength<VehicleData>());
 			InitCarStatusLogic(vehicleDataIdx);

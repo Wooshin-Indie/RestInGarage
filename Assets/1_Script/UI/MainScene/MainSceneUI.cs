@@ -85,9 +85,9 @@ namespace Garage.UI.MainScene
 				UIManager.Transition.StartTransition(.5f);
                 DOVirtual.DelayedCall(.5f, () =>
                 {
-                    GameNetworkManager.Instance.StartHost();
+					// HACK - 임시로 0 이라고 해둠
+                    GameNetworkManager.Instance.StartHost(0);
                 });
-				// TODO - MainUI 초기화 코드 필요
 			});
 			guestButton.onClick.AddListener(() =>
 			{

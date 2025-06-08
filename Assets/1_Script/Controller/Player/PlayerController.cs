@@ -101,9 +101,6 @@ namespace Garage.Controller
 
 			Debug.Log("game" + gameObject.layer);
 
-			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurStageData.CamRotation);
-			camDir = rot * Vector3.forward;
-			camDir = camDir.normalized;
 
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
@@ -129,6 +126,11 @@ namespace Garage.Controller
             }
 
             PlayerID.OnValueChanged += OnPlayerIDChanged;
+		}
+
+		private void Start()
+		{
+			GameManagerEx.Instance.OnStartGameAction += SetMapInfo;
 		}
 
 		private void Update()
@@ -177,6 +179,12 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
+		private void SetMapInfo(int mapIdx)
+		{
+			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurStageData.CamRotation);
+			camDir = rot * Vector3.forward;
+			camDir = camDir.normalized;
+		}
 		public Transform GetSocket(PropType type) 
 		{
 			return sockets[(int)type];
@@ -288,11 +296,11 @@ namespace Garage.Controller
 
 		public void AwayFromLanesOnStageEnd_HostOnly(float awayMoveTime)
 		{
-			int curStageIdx = GameSynchronizer.Instance.CurrentStage.Value;
+			int curMapIdx = GameSynchronizer.Instance.MapIdx.Value;
 
-			List<LaneData> spawnPoints = Managers.Resource.GetData<StageData>(curStageIdx).SpawningPoints;
+			List<LaneData> spawnPoints = Managers.Resource.GetData<MapData>(curMapIdx).SpawningPoints;
             int laneNum = spawnPoints.Count;
-			float laneWidthHalf = Managers.Resource.GetData<StageData>(curStageIdx).LaneWidth / 2;
+			float laneWidthHalf = Managers.Resource.GetData<MapData>(curMapIdx).LaneWidth / 2;
 
             Vector2[] laneXwidths = new Vector2[laneNum]; // 차선 폭 계산해서 거기서 벗어나게 함
 			for (int i = 0; i < laneNum; i++)

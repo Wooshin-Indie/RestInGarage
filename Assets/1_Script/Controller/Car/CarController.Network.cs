@@ -92,7 +92,7 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
-			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<StageData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
+			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
 			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
 			allRepairedVFX.Play();
 		}

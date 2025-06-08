@@ -81,6 +81,7 @@ namespace Garage.Manager
 		}
 		private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
+			GameManagerEx.Instance.OnLobbyEnteredAction.Invoke(lobby);
 			if (NetworkManager.Singleton.IsHost) return;
 
 			currentLobby = lobby;
@@ -126,12 +127,13 @@ namespace Garage.Manager
 			}
 		}
 
-		public async void StartHost()
+		public async void StartHost(int mapIdx)
 		{
 			Debug.Log("START HOST");
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
 			NetworkManager.Singleton.StartHost();
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+			GameSynchronizer.Instance.MapIdx.Value = mapIdx;
 
 			currentLobby = await SteamMatchmaking.CreateLobbyAsync(Constants.MAX_PLAYERS);
 			currentLobby.Value.SetData(Constants.KEY_LOBBYNAME, $"{SteamClient.Name}'s lobby");
@@ -233,7 +235,6 @@ namespace Garage.Manager
 		}
 		private void Singleton_OnServerStarted()
 		{
-			Debug.Log("Host started");
 			GameManagerEx.Instance.HostCreated();
 		}
 

@@ -32,6 +32,22 @@ namespace Garage.Manager
 		public NetworkVariable<bool> IsDay = new();
 		public NetworkVariable<int> CurrentStage = new();
 		public NetworkVariable<float> RemainedTime = new();
+		public NetworkVariable<int> MapIdx = new();
+
+		private void Start()
+		{
+			GameManagerEx.Instance.OnBeforeStageStartAction += (() =>
+			{
+				IsDay.Value = true;
+				CurrentStage.Value++;
+				OnStageStartClientRPC(GameSynchronizer.Instance.CurrentStage.Value);
+			});
+
+			GameManagerEx.Instance.OnBeforeStageEndAction += (() =>
+			{
+				IsDay.Value = false;
+			});
+		}
 
 		public void SetGameTimer(float time)
 		{
@@ -67,7 +83,7 @@ namespace Garage.Manager
 		}
 		private void SetNextSpawnTime(float currentTime)
 		{
-			float interval = Managers.Resource.GetData<StageData>(0).SpawnInterval[CurrentStage.Value].GetRandomValue();
+			float interval = Managers.Resource.GetData<MapData>(0).SpawnInterval[CurrentStage.Value].GetRandomValue();
 			nextLogTime = currentTime - interval;
 		}
 	}

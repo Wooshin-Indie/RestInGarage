@@ -8,7 +8,7 @@ namespace Garage.Manager
 	public class ResourceManager
 	{
 		private readonly string vehicleDataPath = "Data/ScriptableObject/VehicleDatas";
-		private readonly string stageDataPath = "Data/ScriptableObject/StageDatas";
+		private readonly string mapDataPath = "Data/ScriptableObject/MapDatas";
 		private readonly string itemDataPath = "Data/ScriptableObject/ItemDatas";
 
 		private Dictionary<Type, ScriptableObject[]> soDatas;
@@ -22,7 +22,7 @@ namespace Garage.Manager
 
 			soDatas = new();
 			soDatas[typeof(VehicleData)] = Resources.LoadAll<VehicleData>(vehicleDataPath);
-			soDatas[typeof(StageData)] = Resources.LoadAll<StageData>(stageDataPath);
+			soDatas[typeof(MapData)] = Resources.LoadAll<MapData>(mapDataPath);
 			soDatas[typeof(ItemData)] = Resources.LoadAll<ItemData>(itemDataPath);
 		}
 

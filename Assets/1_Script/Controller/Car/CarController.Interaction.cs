@@ -96,7 +96,7 @@ namespace Garage.Controller
 			RevealTire(part);
 		}
 
-		// TODO - 이건 StageData에 있어야될듯?
+		// TODO - 이건 VehicleData에 있어야될듯?
 		private float boomRadius = 12f;
 		private float fireTime = 20f;
 		private float extinguishTime = 3f;
@@ -170,7 +170,7 @@ namespace Garage.Controller
 			if (isExploded) return;
 			isExploded = true;
 
-			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<StageData>(GameSynchronizer.Instance.CurrentStage.Value).EraseMoney.GetRandomValue());
+			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EraseMoney.GetRandomValue());
 			OnCarExplosionClientRPC();
 			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
 			HashSet<CarController> processed = new HashSet<CarController>();

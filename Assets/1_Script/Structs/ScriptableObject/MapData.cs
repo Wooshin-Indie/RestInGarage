@@ -12,7 +12,7 @@ namespace Garage.Structs
     }
 
     [CreateAssetMenu(fileName = "Stage Data", menuName = "SO/Stage Data")]
-    public class StageData : ScriptableObject
+    public class MapData : ScriptableObject
     {
         [Header("Map Info")]
         [SerializeField] private List<LaneData> spawningPoints = new List<LaneData>();
@@ -31,6 +31,8 @@ namespace Garage.Structs
         [SerializeField] private Vector2Int earnMoney;
         [SerializeField] private Vector2Int eraseMoney;
 
+        [Header("Shop Info")]
+        [SerializeField] private List<Vector3> itemPositions = new();
 
         private float playerRangeX; // 스테이지 시작 시 플레이어가 움직일 수 있는 범위
         private void OnEnable()
@@ -60,5 +62,7 @@ namespace Garage.Structs
         public Vector2Int EraseMoney => eraseMoney;
         public Vector2Int EarnMoney => earnMoney;
         public Vector2[] SpawnInterval => spawnInterval;
-    }
+        public List<Vector3> ItemPositions => itemPositions;
+
+	}
 }

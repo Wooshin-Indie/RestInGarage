@@ -15,6 +15,11 @@ namespace Garage.Manager
 
 		}
 
+		public void Start()
+		{
+			GameManagerEx.Instance.OnBeforeStageEndAction += OnStageEnd;
+		}
+
 		public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
 		{
 			GameObject go = Object.Instantiate(prefab, position, rotation, parent);

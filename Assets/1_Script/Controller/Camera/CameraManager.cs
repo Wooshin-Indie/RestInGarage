@@ -32,13 +32,14 @@ namespace Garage.Controller
                 Destroy(this.gameObject);
             }
         }
-        #endregion
+		#endregion
 
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+		private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Debug.Log($"New Scene Loaded: {scene.name}. Find Camera Again.");
             FindAndAssignCameraInCurrentScene();
-        }
+            mainCam?.SetStageInfo(GameSynchronizer.Instance.MapIdx.Value);
+		}
 
         // 현재 씬에서 메인 카메라를 찾아 CameraController 스크립트 참조를 할당하는 메소드
         private void FindAndAssignCameraInCurrentScene()
