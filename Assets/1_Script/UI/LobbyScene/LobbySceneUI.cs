@@ -46,7 +46,7 @@ namespace Garage.UI.LobbyScene
 
 		private void Awake()
 		{
-			GameManagerEx.Instance.OnDisconnected += OnDisconnected;	
+			GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;	
 		}
 
 		private void Start()
@@ -67,8 +67,8 @@ namespace Garage.UI.LobbyScene
                 NetworkTransmission.instance.IsTheClientReadyServerRPC(false, GameManagerEx.Instance.MyClientId);
             });
             startButton.onClick.AddListener(() => {
+				// TODO - MapIndex 넘겨야됨
                 NetworkTransmission.instance.StartGameServerRPC();
-                //GameManagerEx.Instance.GameStarted();
             });
         }
 

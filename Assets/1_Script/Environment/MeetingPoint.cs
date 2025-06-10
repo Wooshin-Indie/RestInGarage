@@ -27,12 +27,23 @@ namespace Garage.Environment
 
 		private Collider[] hits = new Collider[4];
 
-		private void Start()
+		private void Awake()
 		{
-			if (!GetComponent<NetworkObject>().IsSpawned)
+
+		}
+
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+
+			GameManagerEx.Instance.OnBeforeStageStartAction += (() =>
 			{
-				GetComponent<NetworkObject>().Spawn();
-			}
+				EndMeetClientRPC();
+			});
+			GameManagerEx.Instance.OnAfterStageEndAction += ((curStage) =>
+			{
+				StartMeetClientRPC(curStage + 1);
+			});
 		}
 
 		[ClientRpc]

@@ -1,5 +1,6 @@
 using Garage.Interfaces;
 using Garage.Props;
+using Garage.Structs;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -36,9 +37,14 @@ namespace Garage.Manager
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
 			}
 
-			GameManagerEx.Instance.OnDisconnected += OnDisconnected;
+			GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
 		}
 		#endregion
+
+		private void Start()
+		{
+			GameManagerEx.Instance.OnBeforeStageStartAction += OnStageStart;
+		}
 
 		[Header("Build")]
 		[SerializeField] private List<Vector2Int> gridOrigin;
@@ -85,9 +91,12 @@ namespace Garage.Manager
 			ItemDictionary.Clear();
 		}
 
-		// HACK - 이걸 데이터로 저장해둬야함
-		public void BuildBasicBuildings()
+		private List<Vector3> shopPositions = new();
+		public void BuildBasicBuildings(int mapIdx)
 		{
+			shopPositions = Managers.Resource.GetData<MapData>(mapIdx).ItemPositions;
+
+			// TODO - Map마다 지을 빌딩이 다를수도 있음 - mapIdx로 SO 받아와서 처리
 			GameObject go = Instantiate(prefabList[0]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
@@ -169,8 +178,7 @@ namespace Garage.Manager
 		[SerializeField] private List<GameObject> prefabList = new();
 		[SerializeField] private List<GameObject> nightDecoPrefabList = new();
 		[SerializeField] private GameObject lightPrefab;
-		[SerializeField] private List<Vector3> shopPositions = new();
-
+		
 		private Dictionary<ulong, Light> lightDictionary = new();
 
 		public void OnBuyItem(ulong networkId)

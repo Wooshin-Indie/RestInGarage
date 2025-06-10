@@ -4,6 +4,7 @@ using Garage.UI.GameScene;
 using Garage.Utils;
 using UnityEngine;
 using Garage.UI;
+using System;
 
 namespace Garage.Manager
 {
@@ -44,6 +45,13 @@ namespace Garage.Manager
 		public static LobbySceneUI Lobby { get {  return instance.lobbyUI.GetComponent<LobbySceneUI>(); } }
 		public static GameSceneUI Game { get { return instance.gameUI.GetComponent<GameSceneUI>(); } }
 		public static TransitionUI Transition { get { return instance.transitionUI.GetComponent<TransitionUI>(); } }
+
+		private void Start()
+		{
+			GameManagerEx.Instance.OnStartGameAction += ((int index) => {
+				OnGameStart();
+			});
+		}
 
 		// HACK - UI를 다 메모리에 올려놓는 방식임.
 		// 메모리 부족하면 실시간으로 Instantiate 하는 방식으로 바꿔야됨
