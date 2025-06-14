@@ -160,19 +160,23 @@ namespace Garage.Controller
 			currentFixablePart = null;
 		}
 
-		private float fixablePartDistance = 100f;
+		private float fixablePartDistance = 1000f;
+		private float interactableDistance = 1000f;
+		private OwnableProp prevDetectedProp = null;
 		/// <summary>
 		/// Player의 forward 근처의 물체를 탐지합니다.
 		/// </summary>
 		public void DetectInteractableParts()
 		{
 			fixablePartDistance = 1000f;
+			interactableDistance = 1000f;
 
 			Vector3 boxSize = new Vector3(boxWidth, boxHeight, boxWidth);
 			Vector3 boxCenter = transform.position + transform.forward * (boxSize.z / 2f + 0.5f) + new Vector3(0f, boxSize.y / 2, 0f);
 
 			int targetLayer = Constants.LAYER_INTERACTABLE;
 			int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.5f, interactableHits, transform.rotation, targetLayer);
+
 
 			recentlyDetectedProp = null;
 			currentFixablePart = null;
@@ -183,8 +187,14 @@ namespace Garage.Controller
 				if (currentOwningProp != null && interactableHits[i].GetComponent<OwnableProp>() == currentOwningProp)
 					continue;
 
-				if (recentlyDetectedProp == null && interactableHits[i].GetComponent<OwnableProp>() != null)
-					recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
+				if (interactableHits[i].GetComponent<OwnableProp>() != null && !interactableHits[i].GetComponent<OwnableProp>().IsOwned())
+				{
+					if (transform.position.ManhatanDistance(interactableHits[i].transform.position) < fixablePartDistance)
+					{
+						fixablePartDistance = transform.position.ManhatanDistance(interactableHits[i].transform.position);
+						recentlyDetectedProp = interactableHits[i].GetComponent<OwnableProp>();
+					}
+				}
 
 				// CarParts탐지
 				if (interactableHits[i].GetComponent<CarPartBase>() != null
@@ -215,6 +225,9 @@ namespace Garage.Controller
 				preEnlargedFixablePart = currentFixablePart;
 			}
 
+			recentlyDetectedProp?.OnTargetted();
+			if (prevDetectedProp != recentlyDetectedProp) prevDetectedProp?.OnUntargetted();
+			prevDetectedProp = recentlyDetectedProp;
 			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}

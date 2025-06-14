@@ -7,8 +7,6 @@ using Steamworks.Data;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
-using UnityEditor.Analytics;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -258,7 +256,7 @@ namespace Garage.Manager
 
 				if (isHost)
 				{
-					NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
+					// NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
 				}
 				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);

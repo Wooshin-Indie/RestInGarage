@@ -257,6 +257,8 @@ MonoBehaviour:
     m_InternalValue: 0
   RemainedTime:
     m_InternalValue: 0
+  MapIdx:
+    m_InternalValue: 0
 --- !u!1 &85962487
 GameObject:
   m_ObjectHideFlags: 0
@@ -6181,9 +6183,6 @@ MonoBehaviour:
   - {fileID: 3526656333118620634, guid: cacb113296c6b574f9ee6f490eaee098, type: 3}
   spawnPointPrefab: {fileID: 7829846047073531153, guid: bc69de93681bf5549a3465eeedabd7c5, type: 3}
   lanePrefab: {fileID: 0}
-  stageData:
-  - {fileID: 11400000, guid: 9d0edf5c3882922478a3b9e00873bc01, type: 2}
-  - {fileID: 11400000, guid: f07a031222bd28447b7d60f9b364d462, type: 2}
 --- !u!4 &864579740
 Transform:
   m_ObjectHideFlags: 0
@@ -11571,11 +11570,6 @@ MonoBehaviour:
   nightDecoPrefabList:
   - {fileID: 5002811844654477903, guid: 2a70cbf25ad7aeb44b7c405f4f832bee, type: 3}
   lightPrefab: {fileID: 1088789332951765597, guid: 19201ba5f45fb5540ba9e68173741c5f, type: 3}
-  shopPositions:
-  - {x: 0, y: 0, z: 0}
-  - {x: -5, y: 0, z: 0}
-  - {x: -10, y: 0, z: 0}
-  - {x: -15, y: 0, z: 0}
 --- !u!1 &1419189502
 GameObject:
   m_ObjectHideFlags: 0

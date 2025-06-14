@@ -5,6 +5,7 @@ using Steamworks.Data;
 using Netcode.Transports.Facepunch;
 using System.Threading.Tasks;
 using Garage.Utils;
+using IUtil;
 
 namespace Garage.Manager
 {
@@ -129,9 +130,11 @@ namespace Garage.Manager
 
 		public async void StartHost(int mapIdx)
 		{
-			Debug.Log("START HOST");
 			NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
-			NetworkManager.Singleton.StartHost();
+			if (NetworkManager.Singleton.StartHost())
+			{
+				Debug.Log("START HOST");
+			}
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 			GameSynchronizer.Instance.MapIdx.Value = mapIdx;
 
@@ -166,7 +169,7 @@ namespace Garage.Manager
 		}
 		public async void Disconnected()
 		{
-
+			Debug.Log("DISCONNECTED");
 			NetworkTransmission.instance.EndHeartbeat();
 			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 			if (NetworkManager.Singleton.IsHost)
@@ -214,8 +217,13 @@ namespace Garage.Manager
 			}
 		}
 
+		public void OpenInviteWindow()
+		{
+			SteamFriends.OpenGameInviteOverlay(currentLobby.Value.Id);
+		}
 		private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
+			Debug.Log("SINGLETON _ DISCONNECTED");
 			NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
 			if (clientId == 0)
 			{

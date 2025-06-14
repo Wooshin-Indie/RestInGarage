@@ -456,6 +456,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 7802466916749981617}
   m_SourcePrefab: {fileID: 100100000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}
+--- !u!23 &8084718555020574602 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}
+  m_PrefabInstance: {fileID: 8084718555022600170}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8084718555022500170 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}
@@ -562,6 +567,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: 921609f520b9f194a93d936f8de025f3, type: 2}
+  renderer: {fileID: 8084718555020574602}
+  targetColor: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
   isCarry: 0
   initPos: {x: -0.948, y: 1.045, z: 0.223}
   initRot: {x: -37.267, y: -94.248, z: 2.575}
