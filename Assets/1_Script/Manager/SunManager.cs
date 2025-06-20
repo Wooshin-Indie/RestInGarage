@@ -40,7 +40,7 @@ namespace Garage.Manager
         {
             Init();
             light = GetComponent<Light>();
-            OnSceneChanged(SceneEnum.Main);
+            OnSceneChangeStarted(SceneEnum.Main);
 		}
 
         private void Init()
@@ -99,7 +99,7 @@ namespace Garage.Manager
 
 			RenderSettings.ambientIntensity = Mathf.Lerp(1f, 1.7f, Mathf.Pow(clampedDot, 5));
         }
-        public void OnSceneChanged(SceneEnum scene)
+        public void OnSceneChangeStarted(SceneEnum scene)
         {
             curScene = scene;
             switch (scene)

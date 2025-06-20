@@ -54,4 +54,15 @@ namespace Garage.Utils
         Left,
         Right
     }
+
+    // Steamworks.LobbyType 에서 가져옴
+    public enum LobbyType
+    {
+        None = -1,
+        Private,
+        FriendsOnly,
+        Public,
+        Invisible,
+        PrivateUnique
+    }
 }

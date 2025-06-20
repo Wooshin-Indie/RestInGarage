@@ -4,10 +4,13 @@ using Garage.Environment;
 using Garage.Structs;
 using Garage.Utils;
 using IUtil;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Garage.Manager
 {
@@ -81,7 +84,8 @@ namespace Garage.Manager
 		{
 			GameSynchronizer.Instance.SetGameTimer(stageTimer);
 			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
-			BuildingManager.Instance.OnStageStart();
+            TrafficManager.Instance.OnStageStart();
+            BuildingManager.Instance.OnStageStart();
 		}
 
 		public void EndStage()
@@ -174,24 +178,31 @@ namespace Garage.Manager
 
 		public void HostCreated()
 		{
-			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 			isHost = true;
 			isConnected = true;
+        }
 
-			GameSynchronizer.Instance.CurrentStage.Value = 0;
+		// 로비에서 게임 시작
+		public void OnGameStartInLobby_HostOnly()
+		{
+			if (!isHost) return;
 
-			BuildingManager.Instance.OnGameStart();
-			BuildingManager.Instance.OnStageEnd(0);
-			TrafficManager.Instance.OnStageStart();
+            foreach (ulong clientId in playerInfo.Keys)
+            {
+                NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value =
+                    playerInfo[clientId].playerId;
+            }
 
-			SunManager.Instance.OnChangedToNight(); 
-			OnHostCreated();
-		}
+            GameSynchronizer.Instance.CurrentStage.Value = 0;
+            BuildingManager.Instance.OnGameStart();
+            BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+
+            SunManager.Instance.OnChangedToNight();
+            OnHostCreated();
+        }
 
 		public void ConnectedAsClient()
 		{
-			Managers.Scene.UnloadCurrentSceneServer();
-
 			isHost = false;
 			isConnected = true;
 		}
@@ -230,13 +241,9 @@ namespace Garage.Manager
 					}
 				}
 
-				if (isHost)
-				{
-					NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
-				}
 				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);
-				UIManager.Lobby.OnAddPlayerToDictionary(pi);
+				UIManager.Main.LobbyPage.OnAddPlayerToDictionary(clientId, pi);
 			}
 		}
 
@@ -267,8 +274,8 @@ namespace Garage.Manager
 			if (key != 100)
 			{
 				playerInfo.Remove(key);
-			}
-			UIManager.Lobby.OnRemovePlayerFromDictionary(value);
+                UIManager.Main.LobbyPage.OnRemovePlayerFromDictionary(key);
+            }
 		}
 
 		public void UpdatePlayerIsReady(bool isReady, ulong clientId)
@@ -278,7 +285,7 @@ namespace Garage.Manager
 				if (player.Key == clientId)
 				{
 					player.Value.isReady = isReady;
-					UIManager.Lobby.OnUpdatePlayerReady(isReady, player.Value.steamId);
+					UIManager.Main.LobbyPage.OnUpdatePlayerReady(isReady, player.Value.steamId);
 				}
 			}
 		}

@@ -17,8 +17,6 @@ MonoBehaviour:
     Direction: 2
   - SpawnPointX: 2
     Direction: 1
-  - SpawnPointX: 14
-    Direction: 2
   laneLength: 40
   laneWidth: 8
   removeLength: 40

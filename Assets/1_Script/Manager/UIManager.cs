@@ -31,7 +31,7 @@ namespace Garage.Manager
 			}
 
 			transitionUI.SetActive(true);
-			OnSceneChanged(SceneEnum.Main);
+			OnSceneChangeStarted(SceneEnum.Main);
 		}
 		#endregion
 
@@ -47,7 +47,7 @@ namespace Garage.Manager
 
 		// HACK - UI를 다 메모리에 올려놓는 방식임.
 		// 메모리 부족하면 실시간으로 Instantiate 하는 방식으로 바꿔야됨
-		public void OnSceneChanged(SceneEnum scene)
+		public void OnSceneChangeStarted(SceneEnum scene)
 		{
 			mainUI.SetActive(false);
 			lobbyUI.SetActive(false);

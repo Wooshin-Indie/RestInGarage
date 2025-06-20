@@ -18,8 +18,6 @@ namespace Garage.UI.LobbyScene
 
         [Header("Buttons")]
         [SerializeField] private Button disconnectButton;
-        [SerializeField] private Button readyButton;
-        [SerializeField] private Button notreadyButton;
         [SerializeField] private Button startButton;
 
         [Space(20)]
@@ -29,14 +27,7 @@ namespace Garage.UI.LobbyScene
         //[SerializeField] private TMP_InputField chatInputField;
         [SerializeField] private GameObject chatPrefab;
 
-        [Space(20)]
-        [Header("Player Cards")]
-        [SerializeField] private Transform playerFieldBox;
-        [SerializeField] private GameObject playerCardPrefab;
-
-
 		private List<Message> messageList = new List<Message>();
-		private List<PlayerCard> cardList = new List<PlayerCard>();
 
 		public class Message
 		{
@@ -51,7 +42,6 @@ namespace Garage.UI.LobbyScene
 
 		private void Start()
 		{
-
 			disconnectButton.onClick.AddListener(() =>
 			{
 				UIManager.Transition.StartTransition(.5f);
@@ -60,21 +50,14 @@ namespace Garage.UI.LobbyScene
 					GameNetworkManager.Instance.Disconnected();
 				});
 			});
-			readyButton.onClick.AddListener(() => {
-				NetworkTransmission.instance.IsTheClientReadyServerRPC(true, GameManagerEx.Instance.MyClientId);
-			}); 
-			notreadyButton.onClick.AddListener(() => {
-                NetworkTransmission.instance.IsTheClientReadyServerRPC(false, GameManagerEx.Instance.MyClientId);
-            });
             startButton.onClick.AddListener(() => {
                 NetworkTransmission.instance.StartGameServerRPC();
-                //GameManagerEx.Instance.GameStarted();
             });
         }
 
 		private void OnEnable()
 		{
-			startButton.gameObject.SetActive(false);
+			startButton.gameObject.SetActive(true);
 		}
 
 		private void OnDestroy()
@@ -145,68 +128,13 @@ namespace Garage.UI.LobbyScene
 			}
 		}
 
-		public void OnAddPlayerToDictionary(PlayerInfo pi)
-		{
-			PlayerCard pc = Instantiate(playerCardPrefab, playerFieldBox).GetComponent<PlayerCard>();
-			pc.SetPlayerCard(pi);
-			cardList.Add(pc);
-		}
-
-		public void OnRemovePlayerFromDictionary(PlayerInfo pi)
-		{
-			for(int i=cardList.Count-1; i>=0; i--)
-			{
-				if (cardList[i].steamId == pi.steamId)
-				{
-					Destroy(cardList[i].gameObject);
-					cardList.RemoveAt(i);
-				}
-			}
-		}
-
-		public void OnUpdatePlayerReady(bool isReady, ulong steamId)
-		{
-			bool isAllReady = true;
-			foreach (PlayerCard card in cardList)
-			{
-				if (card.steamId == steamId)
-				{
-					card.readyImage.SetActive(isReady);
-				}
-
-				if (!card.readyImage.activeSelf) isAllReady = false;
-			}
-
-			if (SteamClient.SteamId == steamId)
-			{
-				readyButton.gameObject.SetActive(!isReady);
-				notreadyButton.gameObject.SetActive(isReady);
-			}
-
-			// Host면 게임시작버튼 띄워야됨
-			if (NetworkManager.Singleton.IsHost)				
-			{
-				startButton.gameObject.SetActive(isAllReady);
-			}
-		}
-
 		public void OnDisconnected()
 		{
-			for (int i = 0; i < cardList.Count; i++)
-			{
-				Destroy(cardList[i].gameObject);
-			}
-			cardList.Clear();
-
 			for (int i = 0; i < messageList.Count; i++)
 			{
 				Destroy(messageList[i].textObject);
 			}
 			messageList.Clear();
-
-			startButton.gameObject.SetActive(false);
-			notreadyButton.gameObject.SetActive(false);
-			readyButton.gameObject.SetActive(true);
 		}
 	}
 }

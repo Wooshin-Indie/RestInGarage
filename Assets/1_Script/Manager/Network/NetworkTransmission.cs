@@ -177,10 +177,9 @@ namespace Garage.Manager
 		[ServerRpc]
 		public void StartGameServerRPC()
 		{
-			if (!isInGame && GameManagerEx.Instance.IsAllPlayerReady())
+			if (!isInGame)
 			{
 				isInGame = true;
-				GameNetworkManager.Instance.LockLobby();
 				StartGameClientRPC();
 			}
 		}

@@ -23,17 +23,15 @@ namespace Garage.Manager
 		{
 			UnloadCurrentSceneServer();
 			LoadSceneServer(sceneEnum);
-			UIManager.Instance.OnSceneChanged(sceneEnum);
-			SunManager.Instance.OnSceneChanged(sceneEnum);
-		}
 
+			GameNetworkManager.Instance.OnSceneChangeStartedServerRPC(sceneEnum);
+        }
 		public void ChangeScene(SceneEnum sceneEnum)
 		{
 			UnloadCurrentSceneServer();
 
-			UIManager.Instance.OnSceneChanged(sceneEnum);
-			SunManager.Instance.OnSceneChanged(sceneEnum);
-		}
+            OnSceneChangeStarted(sceneEnum);
+        }
 		public void LoadSceneServer(SceneEnum sceneEnum)
 		{
 			CurrentScene?.Clear();
@@ -46,6 +44,11 @@ namespace Garage.Manager
 				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
             }
 		}
+		public void OnSceneChangeStarted(SceneEnum sceneEnum)
+		{
+            UIManager.Instance.OnSceneChangeStarted(sceneEnum);
+            SunManager.Instance.OnSceneChangeStarted(sceneEnum);
+        }
 
 		public void UnloadCurrentSceneServer()
 		{
