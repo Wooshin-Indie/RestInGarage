@@ -173,10 +173,9 @@ namespace Garage.Manager
 			transport.targetSteamId = steamId;
 			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
-			UIManager.Transition.StartTransition(0f);
+			//UIManager.Transition.StartTransition(0f);
 			if (NetworkManager.Singleton.StartClient())
 			{
-				UIManager.Instance.OnSceneChangeStarted(SceneEnum.Lobby);
 			}
 		}
 		public void StartGameInLobby()
@@ -350,7 +349,8 @@ namespace Garage.Manager
 
 			if (NetworkManager.Singleton.IsHost) return;
 
-			UIManager.Main.LobbyPage.InitLobbyDatas_Client(clientId);
+            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
+            UIManager.Main.LobbyPage.InitLobbyDatas_Client(clientId);
         }
 		private void Singleton_OnServerStarted()
 		{
