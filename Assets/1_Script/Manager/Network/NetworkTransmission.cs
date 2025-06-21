@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
+using Steamworks;
 
 namespace Garage.Manager
 {
@@ -13,8 +14,8 @@ namespace Garage.Manager
 		[SerializeField] GameObject playerPrefab;
 		Dictionary<ulong, PlayerController> playerDict = new();
 
-        #region Singleton
-        public static NetworkTransmission instance;
+		#region Singleton
+		public static NetworkTransmission instance;
 
 		private void Awake()
 		{
@@ -28,15 +29,15 @@ namespace Garage.Manager
 				DontDestroyOnLoad(gameObject);
 			}
 		}
-        #endregion
+		#endregion
 
-        #region Heartbeat
-        public float pingInterval = 2.0f;
+		#region Heartbeat
+		public float pingInterval = 2.0f;
 		public float timeoutThreshold = 5.0f;
 
-		private float lastPongTime;		// 가장 최근 받은 pong응답 시간
-		private float pingTimer;		// ping 보내기 까지 남은 시간
-		private float pingSentTime;		// 가장 최근 ping 보낸 시간
+		private float lastPongTime;     // 가장 최근 받은 pong응답 시간
+		private float pingTimer;        // ping 보내기 까지 남은 시간
+		private float pingSentTime;     // 가장 최근 ping 보낸 시간
 		private bool isDisconnected = true;
 
 		private bool isHeartbeating = false;
@@ -146,6 +147,8 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		public void RemoveMeFromDictionaryServerRPC(ulong steamId)
 		{
+			ulong clientId = GameManagerEx.Instance.GetClientIDBySteamID(steamId);
+			DespawnPlayer(clientId);
 			RemovePlayerFromDictionaryClientRPC(steamId);
 		}
 
@@ -191,7 +194,6 @@ namespace Garage.Manager
 				StartGameClientRPC();
 			}
 		}
-
 		[ClientRpc]
 		public void StartGameClientRPC()
 		{
@@ -216,75 +218,82 @@ namespace Garage.Manager
 			GameManagerEx.Instance.GameEnded();
 		}
 
-        #region LobbyPageUI Sync
-        [ServerRpc(RequireOwnership = false)]
-        public void UpdateLobbyTypeServerRPC(LobbyType lobbyType)
-        {
+		#region LobbyPageUI Sync
+		[ServerRpc(RequireOwnership = false)]
+		public void UpdateLobbyTypeServerRPC(LobbyType lobbyType)
+		{
 			Lobby? curLobby = GameNetworkManager.Instance.currentLobby;
-            switch (lobbyType)
-            {
-                case LobbyType.Public:
-                    curLobby.Value.SetPublic();
-                    break;
-                case LobbyType.Private:
-                    curLobby.Value.SetPrivate();
-                    break;
-                case LobbyType.FriendsOnly:
-                    curLobby.Value.SetFriendsOnly();
-                    break;
-            }
-            UpdateLobbyTypeClientRPC(lobbyType);
-        }
-        [ClientRpc]
-        private void UpdateLobbyTypeClientRPC(LobbyType lobbyType)
-        {
-            UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
-        }
+			switch (lobbyType)
+			{
+				case LobbyType.Public:
+					curLobby.Value.SetPublic();
+					break;
+				case LobbyType.Private:
+					curLobby.Value.SetPrivate();
+					break;
+				case LobbyType.FriendsOnly:
+					curLobby.Value.SetFriendsOnly();
+					break;
+			}
+			UpdateLobbyTypeClientRPC(lobbyType);
+		}
+		[ClientRpc]
+		private void UpdateLobbyTypeClientRPC(LobbyType lobbyType)
+		{
+			UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
+		}
 
-        [ServerRpc(RequireOwnership = false)]
-        public void SyncLobbyTypeServerRPC(ulong clientId)
-        {
-            SyncLobbyTypeClientRPC(clientId, UIManager.Main.LobbyPage.CurLobbyType);
-        }
-        [ClientRpc]
-        private void SyncLobbyTypeClientRPC(ulong clientId, LobbyType lobbyType)
-        {
-            if (!(clientId == GameManagerEx.Instance.MyClientId)) return;
+		[ServerRpc(RequireOwnership = false)]
+		public void SyncLobbyTypeServerRPC(ulong clientId)
+		{
+			SyncLobbyTypeClientRPC(clientId, UIManager.Main.LobbyPage.CurLobbyType);
+		}
+		[ClientRpc]
+		private void SyncLobbyTypeClientRPC(ulong clientId, LobbyType lobbyType)
+		{
+			if (!(clientId == GameManagerEx.Instance.MyClientId)) return;
 
-            UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
-        }
+			UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
+		}
 		#endregion
 
 		public void SpawnPlayer(ulong clientId, Vector3 position)
 		{
 			if (!IsHost) return;
 
-            GameObject playerOb = Instantiate(playerPrefab, position, Quaternion.identity);
+			GameObject playerOb = Instantiate(playerPrefab, position, Quaternion.identity);
 			playerDict.Add(clientId, playerOb.GetComponent<PlayerController>());
-            NetworkObject networkOb = playerOb.GetComponent<NetworkObject>();
+			NetworkObject networkOb = playerOb.GetComponent<NetworkObject>();
 
-            networkOb.SpawnAsPlayerObject(clientId, true);
-        }
+			networkOb.SpawnAsPlayerObject(clientId, true);
+		}
 		public void DespawnPlayer(ulong clientId)
 		{
-            if (!IsHost) return;
+			if (!IsHost) return;
 
-            NetworkObject networkOb = playerDict[clientId].GetComponent<NetworkObject>();
+			NetworkObject networkOb = playerDict[clientId].GetComponent<NetworkObject>();
 			networkOb.Despawn();
 			Destroy(networkOb);
 			playerDict.Remove(clientId);
-        }
+		}
 
 
-        [ServerRpc(RequireOwnership = false)]
-        public void OnSceneChangeStartedServerRPC(SceneEnum sceneEnum)
-        {
-            OnSceneChangeStartedClientRPC(sceneEnum);
+		[ServerRpc(RequireOwnership = false)]
+		public void OnSceneChangeStartedServerRPC(SceneEnum sceneEnum)
+		{
+			OnSceneChangeStartedClientRPC(sceneEnum);
+		}
+		[ClientRpc]
+		private void OnSceneChangeStartedClientRPC(SceneEnum sceneEnum)
+		{
+			Managers.Scene.OnSceneChangeStarted(sceneEnum);
+		}
+
+		[ClientRpc]
+		public void UnloadCurrentSceneClientRPC()
+		{
+			Managers.Scene.UnloadCurrentScene();
         }
-        [ClientRpc]
-        private void OnSceneChangeStartedClientRPC(SceneEnum sceneEnum)
-        {
-            Managers.Scene.OnSceneChangeStarted(sceneEnum);
-        }
+
     }
 }

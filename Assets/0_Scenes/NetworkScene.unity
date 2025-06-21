@@ -3641,6 +3641,7 @@ MonoBehaviour:
   readyButton: {fileID: 1041856162}
   convertLobbyTypeLeftButton: {fileID: 1378746068}
   convertLobbyTypeRightButton: {fileID: 795731644}
+  page10BackButton: {fileID: 25445857}
   lobbyTypeText: {fileID: 484453369}
   CurLobbyType: -1
 --- !u!114 &429838270
@@ -5581,7 +5582,6 @@ MonoBehaviour:
   browsePage: {fileID: 0}
   page9BackButton: {fileID: 1171663885}
   lobbyPage: {fileID: 429838269}
-  page10BackButton: {fileID: 25445857}
 --- !u!1 &650256482
 GameObject:
   m_ObjectHideFlags: 0

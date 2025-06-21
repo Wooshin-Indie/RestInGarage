@@ -72,8 +72,7 @@ namespace Garage.UI.MainScene
 
         [FoldoutGroup("Page10 - Lobby")]
         [SerializeField] private LobbyPageUI lobbyPage;
-        [SerializeField] private Button page10BackButton;
-		// 나머지 버튼은 LobbyPageUI에서 관리
+		// 버튼은 LobbyPageUI에서 관리
 
 		public LobbyPageUI LobbyPage => lobbyPage;
 
@@ -169,13 +168,6 @@ namespace Garage.UI.MainScene
 
             /** Page 9 **/
             page9BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Host); });
-
-            /** Page 10 **/
-            page10BackButton.onClick.AddListener(() => 
-			{ 
-				// TODO - 로비 파괴
-				GoToPage(PageEnum.Host);
-			});
 		}
 
         private void UpdateSettings(PageEnum page)

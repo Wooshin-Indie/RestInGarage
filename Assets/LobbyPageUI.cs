@@ -2,6 +2,7 @@ using DG.Tweening;
 using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.LobbyScene.Items;
+using Garage.UI.MainScene;
 using Garage.Utils;
 using Netcode.Transports.Facepunch;
 using NUnit.Framework;
@@ -26,6 +27,7 @@ namespace Garage.UI.Item
         [SerializeField] private Button readyButton;
         [SerializeField] private Button convertLobbyTypeLeftButton;
         [SerializeField] private Button convertLobbyTypeRightButton;
+        [SerializeField] private Button page10BackButton;
         [SerializeField] private TextMeshProUGUI lobbyTypeText;
 
         private Dictionary<ulong, PlayerCard> playerCardDict = new();
@@ -66,6 +68,11 @@ namespace Garage.UI.Item
             convertLobbyTypeRightButton.onClick.AddListener(() =>
             {
                 RightRotateLobbyType();
+            });
+            page10BackButton.onClick.AddListener(() =>
+            {
+                // TODO - 로비 파괴
+                GameNetworkManager.Instance.Disconnected();
             });
         }
 

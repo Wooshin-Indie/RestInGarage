@@ -2,6 +2,7 @@ using DG.Tweening;
 using Garage.Controller;
 using Garage.Environment;
 using Garage.Structs;
+using Garage.UI.MainScene;
 using Garage.Utils;
 using IUtil;
 using Steamworks;
@@ -174,7 +175,7 @@ namespace Garage.Manager
 
 		public void GameEnded()
 		{
-			Managers.Scene.ChangeSceneServer(Utils.SceneEnum.Lobby);
+			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 		}
 
 		public void HostCreated()
@@ -190,8 +191,8 @@ namespace Garage.Manager
 
             foreach (ulong clientId in playerInfo.Keys)
             {
-                NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value =
-                    playerInfo[clientId].playerId;
+                NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().
+					PlayerID.Value = playerInfo[clientId].playerId;
             }
 
             GameSynchronizer.Instance.CurrentStage.Value = 0;
@@ -211,15 +212,25 @@ namespace Garage.Manager
 		public void Disconnected()
 		{
 			playerInfo.Clear();
-			GameObject[] playercards = GameObject.FindGameObjectsWithTag(Constants.TAG_PCARD);
-			foreach(GameObject card in playercards)
-			{
-				Destroy(card);
-			}
 
 			OnDisconnected.Invoke();
 
-			Managers.Scene.ChangeSceneServer(SceneEnum.Main);
+			SceneEnum curScene = Managers.Scene.CurrentScene.SceneEnum;
+
+			switch (curScene)
+            {
+                case SceneEnum.Main:
+                    GameObject[] playercards = GameObject.FindGameObjectsWithTag(Constants.TAG_PCARD);
+                    foreach (GameObject card in playercards)
+                    {
+                        Destroy(card);
+                    }
+                    UIManager.Main.GoToPage(PageEnum.Main);
+					break;
+                case SceneEnum.Lobby:
+                    Managers.Scene.ChangeSceneServer(SceneEnum.Main);
+                    break;
+			}
 			isHost = false;
 			isConnected = false;
 		}

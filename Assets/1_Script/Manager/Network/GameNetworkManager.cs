@@ -46,8 +46,7 @@ namespace Garage.Manager
 			SteamMatchmaking.OnLobbyInvite += SteamMatchMaking_OnLobbyInvite;
 			SteamMatchmaking.OnLobbyGameCreated += SteamMatchmaking_OnLobbyGameCreated;
 			SteamFriends.OnGameLobbyJoinRequested += SteamFriends_OnGameLobbyJoinRequested;
-
-		}
+        }
 		private void OnDestroy()
 		{
 			SteamMatchmaking.OnLobbyCreated -= SteamMatchmaking_OnLobbyCreated;
@@ -123,9 +122,6 @@ namespace Garage.Manager
 			}
 			GameManagerEx.Instance.SendMessageToChat($"{friend.Name} has left", friend.Id, true);
 			NetworkTransmission.instance.RemoveMeFromDictionaryServerRPC(friend.Id);
-
-			ulong clientId = GameManagerEx.Instance.GetClientIDBySteamID(friend.Id);
-            NetworkTransmission.instance.DespawnPlayer(clientId);
         }
 		private void SteamMatchMaking_OnLobbyInvite(Friend friend, Lobby lobby)
 		{
@@ -187,9 +183,12 @@ namespace Garage.Manager
 			if (!NetworkManager.Singleton.IsHost) return;
 			if (!GameManagerEx.Instance.IsAllPlayerReady()) return;
 
+            NetworkManager.Singleton.SceneManager.OnUnloadEventCompleted += OnSceneUnloaded;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneloaded;
             currentLobby.Value.SetGameServer(currentLobby.Value.Owner.Id);
             Debug.Log("Start Game in lobby...");
             LockLobby();
+
             Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
@@ -209,6 +208,8 @@ namespace Garage.Manager
 
             GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
 
+			NetworkTransmission.instance.StartGameServerRPC();
+
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
         }
 
@@ -220,6 +221,7 @@ namespace Garage.Manager
 
 			return spawnPos;
 		}
+		// TODO - 나중에 인게임 메뉴 버튼에 할당해야됨
 		public async void Disconnected()
 		{
 
@@ -288,8 +290,8 @@ namespace Garage.Manager
 			}
 		}
 		private void Singleton_OnClientConnectedCallback(ulong clientId)
-		{
-			NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, clientId); 
+        {
+            NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, clientId); 
 			GameManagerEx.Instance.MyClientId = clientId;
 
 			NetworkTransmission.instance.IsTheClientReadyServerRPC(false, clientId);
@@ -310,5 +312,14 @@ namespace Garage.Manager
 			GameManagerEx.Instance.HostCreated();
 		}
 
-	}
+        private void OnSceneUnloaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+		{
+			Debug.Log("Unload Complete! Curscene: " + Managers.Scene.CurrentScene);
+		}
+		private void OnSceneloaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+		{
+			Debug.Log("Load Complete! Curscene: " + Managers.Scene.CurrentScene);
+		}
+
+    }
 }
