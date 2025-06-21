@@ -11,6 +11,7 @@ using Unity.Netcode;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Garage.Manager
 {
@@ -278,7 +279,21 @@ namespace Garage.Manager
             }
 		}
 
-		public void UpdatePlayerIsReady(bool isReady, ulong clientId)
+        public ulong GetClientIDBySteamID(ulong steamId)
+		{
+            ulong clientId = ulong.MaxValue;
+            foreach (KeyValuePair<ulong, PlayerInfo> player in playerInfo)
+            {
+                if (player.Value.steamId == steamId)
+                {
+                    clientId = player.Key;
+                }
+            }
+
+			return clientId;
+        }
+
+        public void UpdatePlayerIsReady(bool isReady, ulong clientId)
 		{
 			foreach (KeyValuePair<ulong, PlayerInfo> player in playerInfo)
 			{

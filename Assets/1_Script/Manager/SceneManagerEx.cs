@@ -24,7 +24,7 @@ namespace Garage.Manager
 			UnloadCurrentSceneServer();
 			LoadSceneServer(sceneEnum);
 
-			GameNetworkManager.Instance.OnSceneChangeStartedServerRPC(sceneEnum);
+			NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
         }
 		public void ChangeScene(SceneEnum sceneEnum)
 		{

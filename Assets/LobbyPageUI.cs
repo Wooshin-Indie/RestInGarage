@@ -138,7 +138,7 @@ namespace Garage.UI.Item
                     CurLobbyType = LobbyType.Private;
                     break;
             }
-            GameNetworkManager.Instance.UpdateLobbyTypeServerRPC(CurLobbyType);
+            NetworkTransmission.instance.UpdateLobbyTypeServerRPC(CurLobbyType);
         }
         private void RightRotateLobbyType()
         {
@@ -156,7 +156,7 @@ namespace Garage.UI.Item
                     CurLobbyType = LobbyType.Public;
                     break;
             }
-            GameNetworkManager.Instance.UpdateLobbyTypeServerRPC(CurLobbyType);
+            NetworkTransmission.instance.UpdateLobbyTypeServerRPC(CurLobbyType);
         }
         public void UpdateLobbyType(LobbyType lobbyType)
         {

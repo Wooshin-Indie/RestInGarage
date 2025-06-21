@@ -11,10 +11,8 @@ using Garage.UI.Item;
 
 namespace Garage.Manager
 {
-	public class GameNetworkManager : NetworkBehaviour
+	public class GameNetworkManager : MonoBehaviour
 	{
-		[SerializeField] private GameObject playerPrefab;
-
 		private FacepunchTransport transport = null;
 
 		public Lobby? currentLobby { get; private set; } = null;
@@ -125,7 +123,10 @@ namespace Garage.Manager
 			}
 			GameManagerEx.Instance.SendMessageToChat($"{friend.Name} has left", friend.Id, true);
 			NetworkTransmission.instance.RemoveMeFromDictionaryServerRPC(friend.Id);
-		}
+
+			ulong clientId = GameManagerEx.Instance.GetClientIDBySteamID(friend.Id);
+            NetworkTransmission.instance.DespawnPlayer(clientId);
+        }
 		private void SteamMatchMaking_OnLobbyInvite(Friend friend, Lobby lobby)
 		{
 			Debug.Log($"Invite from {friend.Name}");
@@ -170,12 +171,15 @@ namespace Garage.Manager
             Debug.Log("Start client...");
             NetworkManager.Singleton.OnClientConnectedCallback += Singleton_OnClientConnectedCallback;
 			NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
-			transport.targetSteamId = steamId;
-			GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+			Debug.Log("before targetSteamId update");
+			transport.targetSteamId = steamId.Value;
+            Debug.Log("after targetSteamId update");
+            GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
 			//UIManager.Transition.StartTransition(0f);
 			if (NetworkManager.Singleton.StartClient())
 			{
+				Debug.Log("StartClient...");
 			}
 		}
 		public void StartGameInLobby()
@@ -193,18 +197,14 @@ namespace Garage.Manager
 		private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
 			if (sceneName != "LobbyScene") return;
-            
-            if (!NetworkManager.Singleton.IsHost) return;
+
+			if (!NetworkManager.Singleton.IsHost) return;
 
             Debug.Log("Game Scene loaded on all clients. Spawning players...");
 
             foreach (ulong clientId in GameManagerEx.Instance.playerInfo.Keys)
             {
-                GameObject playerOb = Instantiate(playerPrefab, GetRandomSpawnPosition(), Quaternion.identity);
-
-                NetworkObject networkObject = playerOb.GetComponent<NetworkObject>();
-
-                networkObject.SpawnAsPlayerObject(clientId, true);
+                NetworkTransmission.instance.SpawnPlayer(clientId, GetRandomSpawnPosition());
             }
 
             GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
@@ -212,16 +212,6 @@ namespace Garage.Manager
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
         }
 
-		[ServerRpc(RequireOwnership = false)]
-        public void OnSceneChangeStartedServerRPC(SceneEnum sceneEnum)
-        {
-			OnSceneChangeStartedClientRPC(sceneEnum);
-        }
-		[ClientRpc]
-        public void OnSceneChangeStartedClientRPC(SceneEnum sceneEnum)
-        {
-			Managers.Scene.OnSceneChangeStarted(sceneEnum);
-        }
         private Vector3 GetRandomSpawnPosition()
 		{
 			Vector3 spawnPos = Vector3.zero;
@@ -289,44 +279,6 @@ namespace Garage.Manager
         }
 		#endregion
 
-		#region LobbyPageUI Sync
-		[ServerRpc(RequireOwnership = false)]
-		public void UpdateLobbyTypeServerRPC(LobbyType lobbyType)
-		{
-            switch (lobbyType)
-            {
-                case LobbyType.Public:
-                    currentLobby.Value.SetPublic();
-                    break;
-                case LobbyType.Private:
-                    currentLobby.Value.SetPrivate();
-                    break;
-                case LobbyType.FriendsOnly:
-                    currentLobby.Value.SetFriendsOnly();
-                    break;
-            }
-            UpdateLobbyTypeClientRPC(lobbyType);
-        }
-		[ClientRpc]
-		private void UpdateLobbyTypeClientRPC(LobbyType lobbyType)
-        {
-            UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void SyncLobbyTypeServerRPC(ulong clientId)
-		{
-			SyncLobbyTypeClientRPC(clientId, UIManager.Main.LobbyPage.CurLobbyType);
-        }
-        [ClientRpc]
-        private void SyncLobbyTypeClientRPC(ulong clientId, LobbyType lobbyType)
-        {
-			if (!(clientId == GameManagerEx.Instance.MyClientId)) return;
-
-            UIManager.Main.LobbyPage.UpdateLobbyType(lobbyType);
-        }
-        #endregion
-
         private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
 			NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
@@ -341,7 +293,7 @@ namespace Garage.Manager
 			GameManagerEx.Instance.MyClientId = clientId;
 
 			NetworkTransmission.instance.IsTheClientReadyServerRPC(false, clientId);
-			SyncLobbyTypeServerRPC(clientId);
+			NetworkTransmission.instance.SyncLobbyTypeServerRPC(clientId);
             Debug.Log($"Client has connected : {clientId}");
 
 			NetworkTransmission.instance.StartHeartbeat();
