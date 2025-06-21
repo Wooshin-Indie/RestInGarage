@@ -265,7 +265,6 @@ namespace Garage.Manager
 
             networkOb.SpawnAsPlayerObject(clientId, true);
         }
-        [ServerRpc(RequireOwnership = false)]
 		public void DespawnPlayer(ulong clientId)
 		{
             if (!IsHost) return;
