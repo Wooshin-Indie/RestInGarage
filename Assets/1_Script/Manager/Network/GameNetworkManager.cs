@@ -167,9 +167,7 @@ namespace Garage.Manager
             Debug.Log("Start client...");
             NetworkManager.Singleton.OnClientConnectedCallback += Singleton_OnClientConnectedCallback;
 			NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
-			Debug.Log("before targetSteamId update");
 			transport.targetSteamId = steamId.Value;
-            Debug.Log("after targetSteamId update");
             GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
 			//UIManager.Transition.StartTransition(0f);
@@ -245,8 +243,10 @@ namespace Garage.Manager
 				NetworkManager.Singleton.OnClientConnectedCallback -= Singleton_OnClientConnectedCallback;
 			}
 			NetworkManager.Singleton.Shutdown(true);
-			GameManagerEx.Instance.Disconnected();
-		}
+            Debug.Log("Shutdown.");
+            GameManagerEx.Instance.Disconnected();
+            Debug.Log("Disconnected.");
+        }
 		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
 		{
 			var query = SteamMatchmaking.LobbyList
@@ -284,6 +284,7 @@ namespace Garage.Manager
         private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
 			NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
+			Debug.Log("Client Disconnected");
 			if (clientId == 0)
 			{
 				Disconnected();
@@ -291,6 +292,8 @@ namespace Garage.Manager
 		}
 		private void Singleton_OnClientConnectedCallback(ulong clientId)
         {
+			Managers.Scene.UnloadCurrentScene();
+
             NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, clientId); 
 			GameManagerEx.Instance.MyClientId = clientId;
 

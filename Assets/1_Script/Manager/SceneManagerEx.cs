@@ -82,8 +82,9 @@ namespace Garage.Manager
 		{
             if (CurrentScene.SceneEnum == SceneEnum.None) return;
 
-			Debug.Log("Unload Current Scene: " + CurrentScene);
-			SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+			Debug.Log("Unload Current Scene1: " + CurrentScene);
+			SceneManager.UnloadSceneAsync(CurrentScene.SceneEnum.ToString() + "Scene");
+            Debug.Log("Unload Current Scene2: " + CurrentScene);
         }
 	}
 }

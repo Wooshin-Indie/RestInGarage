@@ -121,14 +121,7 @@ namespace Garage.UI.Item
 
             SyncReadyCheckBoxes();
         }
-        public void SyncLobbyDatas()
-        {
-            if(curLobby == null)
-            {
-                Debug.Log("CurLobby doesn't exist");
-            }
 
-        }
         private void LeftRotateLobbyType()
         {
             if (!NetworkManager.Singleton.IsHost) return;

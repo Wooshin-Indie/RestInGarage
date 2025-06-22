@@ -270,6 +270,7 @@ namespace Garage.Manager
 		public void DespawnPlayer(ulong clientId)
 		{
 			if (!IsHost) return;
+			if (!playerDict.ContainsKey(clientId)) return;
 
 			NetworkObject networkOb = playerDict[clientId].GetComponent<NetworkObject>();
 			networkOb.Despawn();
