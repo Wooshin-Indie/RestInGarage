@@ -37,7 +37,7 @@ namespace Garage.UI
 		{
 			if (!backgroundImage.gameObject.activeSelf)
 				return;
-
+			Debug.Log("EndTransition");
             backgroundImage.material.
 				DOFloat(1f, "_Cutoff", fadeDuration)
 				.OnStart(() =>

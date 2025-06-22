@@ -55,7 +55,7 @@ namespace Garage.Manager
 			Managers.Sound.BgmVolume = settingData.bgmVolume;
 			Managers.Sound.SfxVolume = settingData.sfxVolume;
 			Managers.Sound.AmbientVolume = settingData.ambientVolume;
-			LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[settingData.languageIndex];
+			// LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[settingData.languageIndex];
 
 			Screen.SetResolution(settingData.resolutionWidth, settingData.resolutionHeight, settingData.isFullScreen);
 		}

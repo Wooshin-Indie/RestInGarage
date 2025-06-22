@@ -1,6 +1,7 @@
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace Garage.Manager
 {
@@ -60,7 +61,8 @@ namespace Garage.Manager
 			RemainedTime.OnValueChanged += UIManager.Game.OnTimerChanged;
 			RemainedTime.OnValueChanged -= OnRemainedTimeChanged;
 			RemainedTime.OnValueChanged += OnRemainedTimeChanged;
-		}
+            Debug.Log("OnNetworkSpawn");
+        }
 
 		[ClientRpc]
 		public void OnStageStartClientRPC(int idx)
@@ -75,6 +77,7 @@ namespace Garage.Manager
 		{
 			if (!IsHost) return;
 
+			Debug.Log("OnRemainedTimeChanged");
 			if (current <= nextLogTime)
 			{
 				TrafficManager.Instance.SpawnCar();

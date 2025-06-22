@@ -55,6 +55,8 @@ namespace Garage.Manager
 		[SerializeField] private Material previewEnableMaterial;
 		[SerializeField] private Material previewDisableMaterial;
 
+		[SerializeField] private GameObject sellBoundPrefab;
+
 		/** 게임 시작 시 Init **/
 		private List<GridTile[,]> gridTiles;
 		public List<GridTile[,]> GridTiles => gridTiles;
@@ -92,6 +94,7 @@ namespace Garage.Manager
 		}
 
 		private List<Vector3> shopPositions = new();
+		private GameObject sellBoundGameObject = null;
 		public void BuildBasicBuildings(int mapIdx)
 		{
 			shopPositions = Managers.Resource.GetData<MapData>(mapIdx).ItemPositions;
@@ -109,7 +112,7 @@ namespace Garage.Manager
 					new Vector2Int(3, 6),
 					new Vector2Int(3, 7),
 					new Vector2Int(3, 8),
-					new Vector2Int(3, 9) 
+					new Vector2Int(3, 9)
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
@@ -141,13 +144,16 @@ namespace Garage.Manager
 			go = Instantiate(prefabList[1]);
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
-				1, 0, new Vector2Int[1]
+				0, 0, new Vector2Int[1]
 				{
-					new Vector2Int(4, 8)
+					new Vector2Int(1, 8)
 				},
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
+			Vector2Int sellPos = gridOrigin[^1] + gridSize[^1] / 2;
+			sellBoundGameObject = Instantiate(sellBoundPrefab, new Vector3(sellPos.x - 0.5f, 0f, sellPos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
+			sellBoundGameObject.GetComponent<NetworkObject>().Spawn();
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -221,6 +227,7 @@ namespace Garage.Manager
 			NightDecoPropDictionary.Clear();
 			TurnOffLights();
 			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
+			sellBoundGameObject.SetActive(false);
 		}
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
@@ -243,11 +250,12 @@ namespace Garage.Manager
 				lightDictionary[tmpGo.GetComponent<NetworkObject>().NetworkObjectId].GetComponent<NetworkObject>().Spawn();
 			}
 
-
 			foreach (var item in ItemDictionary)
 			{
 				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.BuyPrice);
 			}
+
+			sellBoundGameObject.SetActive(true);
 		}
 
 		private void SpawnNightDecoProps()

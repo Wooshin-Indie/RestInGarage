@@ -179,6 +179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: 518d1b938140cc7418e72e8749e1317f, type: 2}
+  renderer: {fileID: 4307560395867504670}
+  targetColor: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
   isCarry: 0
   previewPrefab: {fileID: 4307560395867504668, guid: 484a110c27281bc4ab6b59745916ded4, type: 3}
   height: 1

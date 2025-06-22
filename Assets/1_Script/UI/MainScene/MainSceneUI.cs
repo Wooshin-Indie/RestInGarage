@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
+using Steamworks.Data;
+using static Unity.VisualScripting.Icons;
 
 namespace Garage.UI.MainScene
 {
@@ -14,12 +16,13 @@ namespace Garage.UI.MainScene
         None = 0,
         Main, Multi, Host, Settings,		// == 4
         Audio, Video, Control, Language,	// == 8
-		Lobby, 
+		Browse, Lobby 
     }
 
     public class MainSceneUI : MonoBehaviour
 	{
 		[SerializeField] private List<GameObject> pages = new List<GameObject>();
+		[SerializeField] private GameObject title;
 
 		[FoldoutGroup("Page1")]
         [SerializeField] private Button playButton;
@@ -63,12 +66,17 @@ namespace Garage.UI.MainScene
 		[SerializeField] private List<Button> languageButtons = new();
 		[SerializeField] private Button page8BackButton;
 
-		[FoldoutGroup("Page9 - Lobby")]
-		[SerializeField] private LobbyPage lobbyPage;
+		[FoldoutGroup("Page9 - Browse")]
+		[SerializeField] private BrowsePageUI browsePage;
 		[SerializeField] private Button page9BackButton;
 
+        [FoldoutGroup("Page10 - Lobby")]
+        [SerializeField] private LobbyPageUI lobbyPage;
+		// 버튼은 LobbyPageUI에서 관리
 
-		private void Start()
+		public LobbyPageUI LobbyPage => lobbyPage;
+
+        private void Start()
 		{
             /** Page 1 **/
             playButton.onClick.AddListener(() => { GoToPage(PageEnum.Multi); });
@@ -80,22 +88,19 @@ namespace Garage.UI.MainScene
 			Page2BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Main); });
 
 			/** Page 3 **/
-			hostButton.onClick.AddListener(() =>
+			hostButton.onClick.AddListener(() => // 로비 생성
 			{
-				UIManager.Transition.StartTransition(.5f);
-                DOVirtual.DelayedCall(.5f, () =>
-                {
-					// HACK - 임시로 0 이라고 해둠
-                    GameNetworkManager.Instance.StartHost(0);
-                });
+				// 로비 정보 셋업
+				GameNetworkManager.Instance.StartHost();
+				// TODO - MainUI 초기화 코드 필요
 			});
 			guestButton.onClick.AddListener(() =>
 			{
-				GoToPage(PageEnum.Lobby);
-				lobbyPage.StartLoading();
+				GoToPage(PageEnum.Browse);
+				browsePage.StartLoading();
 				GameNetworkManager.Instance.FindLobbiesWithCallback((lobbies) =>
 				{
-					lobbyPage.OnRevealLobbyData(lobbies);
+					browsePage.RevealLobbies(lobbies);
 				});
 			});
 
@@ -161,7 +166,8 @@ namespace Garage.UI.MainScene
 			}
 			page8BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Settings); });
 
-			page9BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Host); });
+            /** Page 9 **/
+            page9BackButton.onClick.AddListener(() => { GoToPage(PageEnum.Host); });
 		}
 
         private void UpdateSettings(PageEnum page)
@@ -195,11 +201,12 @@ namespace Garage.UI.MainScene
 
 		}
 
-		private void GoToPage(PageEnum page)
+		public void GoToPage(PageEnum page)
 		{
             InactiveAllPages();
             SetActivePage((int)page);
-			UpdateSettings(page);
+			WhetherSetActiveTitle(page);
+            UpdateSettings(page);
 		}
 
         private void InactiveAllPages()
@@ -215,5 +222,25 @@ namespace Garage.UI.MainScene
             pages[n - 1].SetActive(true);
         }
 
+		private void WhetherSetActiveTitle(PageEnum page)
+		{
+            switch (page)
+            {
+                case PageEnum.Main:
+                case PageEnum.Multi:
+                case PageEnum.Host:
+                case PageEnum.Settings:
+                    title.SetActive(true);
+                    break;
+                case PageEnum.Audio:
+                case PageEnum.Video:
+                case PageEnum.Control:
+                case PageEnum.Language:
+                case PageEnum.Browse:
+                case PageEnum.Lobby:
+					title.SetActive(false);
+                    break;
+            }
+        }
     }
 }

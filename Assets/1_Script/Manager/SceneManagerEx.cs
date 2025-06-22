@@ -2,6 +2,7 @@ using DG.Tweening;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,26 +15,32 @@ namespace Garage.Manager
 		public void Init()
 		{
 			SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
-			SceneManager.sceneLoaded += ((scene, sceneMode) => {
-				UIManager.Transition.EndTransition(1f, .5f);
-				});
-		}
+			SceneManager.sceneLoaded += OnSceneLoaded;
+        }
 
 		public void ChangeSceneServer(SceneEnum sceneEnum)
 		{
-			UnloadCurrentSceneServer();
-			LoadSceneServer(sceneEnum);
-			UIManager.Instance.OnSceneChanged(sceneEnum);
-			SunManager.Instance.OnSceneChanged(sceneEnum);
-		}
+			if (CurrentScene.SceneEnum == SceneEnum.Main)
+			{
+                /*NetworkManager.Singleton.SceneManager.UnloadScene() 메소드가
+				* NetworkManager.Singleton.SceneManager.LoadScene() 를 통해서 로드된것만 Unload 할 수 있어서
+				* UnloadCurrentSceneClientRPC()로 MainScene 각자 Unload해줌*/
+                NetworkTransmission.instance.UnloadCurrentSceneClientRPC();
+            }
+			else
+            {
+                UnloadCurrentSceneServer();
+            }
+            LoadSceneServer(sceneEnum);
 
+            NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
+        }
 		public void ChangeScene(SceneEnum sceneEnum)
 		{
 			UnloadCurrentSceneServer();
 
-			UIManager.Instance.OnSceneChanged(sceneEnum);
-			SunManager.Instance.OnSceneChanged(sceneEnum);
-		}
+            OnSceneChangeStarted(sceneEnum);
+        }
 		public void LoadSceneServer(SceneEnum sceneEnum)
 		{
 			CurrentScene?.Clear();
@@ -46,23 +53,41 @@ namespace Garage.Manager
 				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
             }
 		}
+		public void OnSceneChangeStarted(SceneEnum sceneEnum)
+		{
+            UIManager.Instance.OnSceneChangeStarted(sceneEnum);
+            SunManager.Instance.OnSceneChangeStarted(sceneEnum);
+        }
 
 		public void UnloadCurrentSceneServer()
 		{
 			if (CurrentScene.SceneEnum == SceneEnum.None) return;
 
-			if(CurrentScene.SceneEnum == SceneEnum.Main)
+			if(CurrentScene.SceneEnum == SceneEnum.Lobby)
 			{
-				SceneManager.UnloadSceneAsync("MainScene");
+				SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
 			}
 			else {
 				if (NetworkManager.Singleton.IsHost)
-					NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+                {
+                    NetworkManager.Singleton.SceneManager.UnloadScene(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
+                }
 				else
 					SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
 			}
 		}
+		public void UnloadCurrentScene()
+		{
+            if (CurrentScene.SceneEnum == SceneEnum.None) return;
 
-		
+			Debug.Log("Unload Current Scene1: " + CurrentScene);
+			SceneManager.UnloadSceneAsync(CurrentScene.SceneEnum.ToString() + "Scene");
+            Debug.Log("Unload Current Scene2: " + CurrentScene);
+        }
+
+		private void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
+		{
+            UIManager.Transition.EndTransition(1f, .5f);
+        }
 	}
 }

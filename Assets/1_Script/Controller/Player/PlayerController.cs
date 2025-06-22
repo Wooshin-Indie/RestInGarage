@@ -7,9 +7,11 @@ using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -119,16 +121,28 @@ namespace Garage.Controller
 
 			//cameraTransform.gameObject.SetActive(IsOwner);
 			if (IsOwner)
-            {
+			{
 				Debug.Log("NetworkSpawned");
-                // OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
-                CameraManager.Instance.SetTargetPlayer(this.transform);
-            }
+				// OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
+				CameraManager.Instance.SetTargetPlayer(this.transform);
+			}
 
             PlayerID.OnValueChanged += OnPlayerIDChanged;
 		}
 
-		private void Start()
+		public override void OnNetworkDespawn()
+		{
+			base.OnNetworkDespawn();
+			
+			Debug.Log("Character On NetworkDeSpawn , " + System.Environment.StackTrace);
+        }
+
+
+        private void OnDestroy()
+        {
+			Debug.Log("Character On Destroy , " + System.Environment.StackTrace);
+        }
+        private void Start()
 		{
 			GameManagerEx.Instance.OnStartGameAction += SetMapInfo;
 		}
@@ -139,11 +153,17 @@ namespace Garage.Controller
 
 			if (!isInputLocked)
 			{
-                stateMachine.CurState.HandleInput();
-                stateMachine.CurState.LogicUpdate();
-            }
+				stateMachine.CurState.HandleInput();
+				stateMachine.CurState.LogicUpdate();
+			}
 
 			OnUpdateSynchronization();
+
+			// HACK
+			if (Input.GetKeyDown(KeyCode.T))
+			{
+				GameNetworkManager.Instance.OpenInviteWindow();
+			}
 		}
 
 		private Vector3 moveDir = Vector3.zero;

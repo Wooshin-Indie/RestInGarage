@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using Steamworks.Data;
 using TMPro;
-using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Garage.UI.Item
 {
-	public class LobbyPage : PageUI
+	public class BrowsePageUI : PageUI
 	{
 		[SerializeField] private Transform itemParent;
 		[SerializeField] private GameObject listItemPrefab;
@@ -26,7 +25,7 @@ namespace Garage.UI.Item
 			Debug.Log("Start Loading");
 		}
 
-		public void OnRevealLobbyData(Lobby[] lobbies)
+		public void RevealLobbies(Lobby[] lobbies)
 		{
 			for (int i = 0; i < lobbies.Length; i++)
 			{
