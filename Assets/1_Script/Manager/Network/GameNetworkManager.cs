@@ -102,9 +102,7 @@ namespace Garage.Manager
         private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
 			Debug.Log("Lobby entered");
-			if (NetworkManager.Singleton.IsHost) return;
-            // 이거 Host방어 가끔 뚫리는데 IsHost가 True로 되기 전에 입장이 돼서 그런 것 같음
-            // IsHost = true 되는 시점은 NetworkManager.Singleton.StartHost() 호출 시.
+			if (lobby.Owner.Id == SteamClient.SteamId) return;
 
             currentLobby = lobby;
 			GameManagerEx.Instance.ConnectedAsClient();
@@ -174,7 +172,6 @@ namespace Garage.Manager
 			transport.targetSteamId = steamId.Value;
             GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
-			//UIManager.Transition.StartTransition(0f);
 			if (NetworkManager.Singleton.StartClient())
 			{
 				Debug.Log("StartClient...");
@@ -286,6 +283,7 @@ namespace Garage.Manager
         #endregion
 
         // Both Server and Client
+		// 근데 이거 Client에서는 실행이 안되네
         private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
 			Debug.Log("Client Disconnected, ClientID: " + clientId);
@@ -324,11 +322,12 @@ namespace Garage.Manager
         private void OnSceneUnloaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
 			Debug.Log("Unload Complete! Curscene: " + Managers.Scene.CurrentScene);
-		}
+        }
 		private void OnSceneloaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
 			Debug.Log("Load Complete! Curscene: " + Managers.Scene.CurrentScene);
-		}
+            UIManager.Transition.EndTransition(1f, .5f);
+        }
 
     }
 }

@@ -296,5 +296,10 @@ namespace Garage.Manager
 			Managers.Scene.UnloadCurrentScene();
         }
 
+		[ClientRpc]
+		public void StartTransitionClientRPC(float duration)
+		{
+            UIManager.Transition.StartTransition(duration);
+        }
     }
 }

@@ -15,10 +15,8 @@ namespace Garage.Manager
 		public void Init()
 		{
 			SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
-			SceneManager.sceneLoaded += ((scene, sceneMode) => {
-				UIManager.Transition.EndTransition(1f, .5f);
-				});
-		}
+			SceneManager.sceneLoaded += OnSceneLoaded;
+        }
 
 		public void ChangeSceneServer(SceneEnum sceneEnum)
 		{
@@ -85,6 +83,11 @@ namespace Garage.Manager
 			Debug.Log("Unload Current Scene1: " + CurrentScene);
 			SceneManager.UnloadSceneAsync(CurrentScene.SceneEnum.ToString() + "Scene");
             Debug.Log("Unload Current Scene2: " + CurrentScene);
+        }
+
+		private void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
+		{
+            UIManager.Transition.EndTransition(1f, .5f);
         }
 	}
 }

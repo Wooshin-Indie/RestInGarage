@@ -14,12 +14,6 @@ namespace Garage.UI.LobbyScene
 {
     public class LobbySceneUI : MonoBehaviour
     {
-		[SerializeField] private Transform onlyUIParent;
-
-        [Header("Buttons")]
-        [SerializeField] private Button disconnectButton;
-        [SerializeField] private Button startButton;
-
         [Space(20)]
         [Header("Chating System")]
 		[SerializeField] private int maxMessages = 20;
@@ -40,26 +34,6 @@ namespace Garage.UI.LobbyScene
 			GameManagerEx.Instance.OnDisconnected += OnDisconnected;	
 		}
 
-		private void Start()
-		{
-			disconnectButton.onClick.AddListener(() =>
-			{
-				UIManager.Transition.StartTransition(.5f);
-				DOVirtual.DelayedCall(.5f, () =>
-				{
-					GameNetworkManager.Instance.Disconnected();
-				});
-			});
-            startButton.onClick.AddListener(() => {
-                NetworkTransmission.instance.StartGameServerRPC();
-            });
-        }
-
-		private void OnEnable()
-		{
-			startButton.gameObject.SetActive(true);
-		}
-
 		private void OnDestroy()
 		{
 
@@ -67,12 +41,12 @@ namespace Garage.UI.LobbyScene
 
 		public void OnGameStart()
 		{
-			onlyUIParent.gameObject.SetActive(false);
+			
 		}
 
 		public void OnGameEnd()
 		{
-			onlyUIParent.gameObject.SetActive(true);
+			
 		}
 
 		//private void Update()
