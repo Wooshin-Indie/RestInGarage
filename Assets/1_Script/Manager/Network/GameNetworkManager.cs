@@ -89,6 +89,7 @@ namespace Garage.Manager
             Debug.Log("START HOST");
             NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
             NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
             GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
 
 			// 로비UI 띄우고 초기화
@@ -113,6 +114,8 @@ namespace Garage.Manager
 		{
 			Debug.Log("member join");
 		}
+
+		// Only Lobby Owner
 		private void SteamMatchmaking_OnLobbyLeaved(Lobby lobby, Friend friend)
 		{
 			Debug.Log("member leave");
@@ -154,6 +157,7 @@ namespace Garage.Manager
 		{
 			Debug.Log("Start host...");
 			CreateLobby();
+			// 이거 순서 바꾸자. 버튼으로 CreateLobby를 호출 한 다음에 StartHost에서 네트워크매니저StartHost하고 쭉 콜백넣고 해서 정리
         }
 		public async void CreateLobby()
         {
@@ -279,20 +283,25 @@ namespace Garage.Manager
         {
             currentLobby.Value.SetJoinable(true);
         }
-		#endregion
+        #endregion
 
+        // Both Server and Client
         private void Singleton_OnClientDisconnectedCallback(ulong clientId)
 		{
-			NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
-			Debug.Log("Client Disconnected");
-			if (clientId == 0)
+			Debug.Log("Client Disconnected, ClientID: " + clientId);
+			if (clientId == NetworkManager.Singleton.LocalClientId)
 			{
 				Disconnected();
-			}
+                NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
+            }
 		}
+
+		// Both Server and Client
 		private void Singleton_OnClientConnectedCallback(ulong clientId)
         {
-			Managers.Scene.UnloadCurrentScene();
+            if (NetworkManager.Singleton.IsHost) return;
+
+            Managers.Scene.UnloadCurrentScene();
 
             NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, clientId); 
 			GameManagerEx.Instance.MyClientId = clientId;
@@ -302,9 +311,6 @@ namespace Garage.Manager
             Debug.Log($"Client has connected : {clientId}");
 
 			NetworkTransmission.instance.StartHeartbeat();
-
-
-			if (NetworkManager.Singleton.IsHost) return;
 
             UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
             UIManager.Main.LobbyPage.InitLobbyDatas_Client(clientId);
