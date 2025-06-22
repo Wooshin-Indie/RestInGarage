@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Garage.Utils;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using Garage.UI.Item;
 
 namespace Garage.Manager
 {
@@ -223,7 +222,7 @@ namespace Garage.Manager
 		// TODO - 나중에 인게임 메뉴 버튼에 할당해야됨
 		public async void Disconnected()
 		{
-
+			Debug.Log("DISCONNECTED");
 			NetworkTransmission.instance.EndHeartbeat();
 			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 			if (NetworkManager.Singleton.IsHost)
@@ -293,6 +292,11 @@ namespace Garage.Manager
                 NetworkManager.Singleton.OnClientDisconnectCallback -= Singleton_OnClientDisconnectedCallback;
             }
 		}
+		
+		public void OpenInviteWindow()
+		{
+			SteamFriends.OpenGameInviteOverlay(currentLobby.Value.Id);
+		}
 
 		// Both Server and Client
 		private void Singleton_OnClientConnectedCallback(ulong clientId)
@@ -315,7 +319,6 @@ namespace Garage.Manager
         }
 		private void Singleton_OnServerStarted()
 		{
-			Debug.Log("Host started");
 			GameManagerEx.Instance.HostCreated();
 		}
 
@@ -330,4 +333,5 @@ namespace Garage.Manager
         }
 
     }
+
 }

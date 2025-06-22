@@ -7,19 +7,25 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
-
 		protected PlayerController controller;
-
 		protected NetworkVariable<Vector3> gridPosition = new();
+
+		[SerializeField] private MeshRenderer renderer;
+		[SerializeField] private Color targetColor;
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
 		public bool IsCarry => isCarry;
 
+		private bool isTargetted = false;
+
+		private Material material;
+
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
 			ownerClientId.OnValueChanged += OnClientIDChanged;
+			material = renderer.material;
 		}
 
 		private void OnClientIDChanged(ulong prev, ulong clientId)
@@ -39,12 +45,6 @@ namespace Garage.Props
 		public void TryInteract(ulong clientId)
 		{
 			RequestOwnershipServerRpc(clientId);
-		}
-
-		[ServerRpc(RequireOwnership = false)]
-		private void RequestRemoveOwnershipServerRPC()
-		{
-			ownerClientId.Value = ulong.MaxValue;
 		}
 
 		[ServerRpc(RequireOwnership = false)]
@@ -82,6 +82,26 @@ namespace Garage.Props
 		public virtual void OnEndInteraction(Transform transform)
 		{
 			RemoveOwnershipServerRpc();
+		}
+
+		public bool IsOwned()
+		{
+			return ownerClientId.Value != ulong.MaxValue;
+		}
+		public virtual void OnTargetted()
+		{
+			if (material == null || isTargetted) return;
+
+			isTargetted = true;
+			material.SetColor("_Emissive_Color", targetColor);
+		}
+
+		public virtual void OnUntargetted()
+		{
+			if (material == null || !isTargetted) return;
+
+			isTargetted = false;
+			material.SetColor("_Emissive_Color", Color.black);
 		}
 
 		public void SetGridPosition(Vector3 pos)

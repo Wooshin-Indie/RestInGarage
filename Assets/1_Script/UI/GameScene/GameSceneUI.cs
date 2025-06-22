@@ -37,7 +37,12 @@ namespace Garage.UI.GameScene
             isAnyEnlargedPart = false;
         }
 
-        private void LateUpdate()
+		private void Start()
+		{
+            GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
+		}
+
+		private void LateUpdate()
         {
             foreach(var i in carStatusInfo)
             {

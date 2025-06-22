@@ -47,10 +47,8 @@ namespace Garage
 		private float waitForCountSec = 7f;
 		private float waitForOverSec = 5f;
 
-
 		private HashSet<CarController> currentlyInside = new HashSet<CarController>();
 		private HashSet<CarController> previouslyInside = new HashSet<CarController>();
-
 
 		private float elapsedTime = 0f;
 		private void FixedUpdate()
@@ -68,7 +66,7 @@ namespace Garage
 			currentlyInside.Clear();
 
 			HashSet<CarController> processedCars = new HashSet<CarController>();
-			gameoverCounts = Physics.OverlapBoxNonAlloc(transform.position, Vector3.one * gameoverBoxRadius, colliders, Quaternion.identity, targetLayer);
+			gameoverCounts = Physics.OverlapBoxNonAlloc(transform.position, Vector3.forward * gameoverBoxRadius + (Vector3.right + Vector3.up) * safeBoxRadius, colliders, Quaternion.identity, targetLayer);
 
 			for (int i = 0; i < gameoverCounts; i++)
 			{
@@ -94,8 +92,8 @@ namespace Garage
 
 			foreach (var car in previouslyInside)
 			{
-				if (!currentlyInside.Contains(car))
-				{
+				if (!currentlyInside.Contains(car) && car != null)
+				{ 
 					car.GameoverTime = 0f;
 					car.HideCountdownUIClientRPC();
 				}
@@ -108,8 +106,7 @@ namespace Garage
 			Gizmos.matrix = Matrix4x4.TRS(transform.position, Quaternion.identity, Vector3.one);
 			Gizmos.DrawWireCube(Vector3.zero, Vector3.one * safeBoxRadius * 2);
 
-			Gizmos.DrawWireCube(Vector3.zero, Vector3.one * gameoverBoxRadius * 2);
+			Gizmos.DrawWireCube(Vector3.zero, (Vector3.forward * gameoverBoxRadius + (Vector3.right + Vector3.up) * safeBoxRadius) * 2);
 		}
-
 	}
 }

@@ -2,18 +2,12 @@ using DG.Tweening;
 using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.LobbyScene.Items;
-using Garage.UI.MainScene;
 using Garage.Utils;
-using Netcode.Transports.Facepunch;
-using NUnit.Framework;
-using Steamworks;
 using Steamworks.Data;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Garage.UI.Item
@@ -36,7 +30,7 @@ namespace Garage.UI.Item
 
         private void Awake()
         {
-            GameManagerEx.Instance.OnDisconnected += OnDisconnected;
+            GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
         }
 
         private void Start()

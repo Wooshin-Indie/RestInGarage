@@ -7485,9 +7485,6 @@ MonoBehaviour:
   - {fileID: 3526656333118620634, guid: cacb113296c6b574f9ee6f490eaee098, type: 3}
   spawnPointPrefab: {fileID: 7829846047073531153, guid: bc69de93681bf5549a3465eeedabd7c5, type: 3}
   lanePrefab: {fileID: 0}
-  stageData:
-  - {fileID: 11400000, guid: 9d0edf5c3882922478a3b9e00873bc01, type: 2}
-  - {fileID: 11400000, guid: f07a031222bd28447b7d60f9b364d462, type: 2}
 --- !u!4 &864579740
 Transform:
   m_ObjectHideFlags: 0
@@ -12962,16 +12959,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridOrigin:
-  - {x: -3, y: -5}
-  - {x: -20, y: -5}
-  - {x: -30, y: -5}
+  - {x: -5, y: -3}
+  - {x: 9, y: 10}
   gridSize:
-  - {x: 5, y: 20}
-  - {x: 5, y: 20}
+  - {x: 4, y: 15}
   - {x: 5, y: 5}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}
+  sellBoundPrefab: {fileID: 6401124710559395942, guid: 65341fb52d583d644a1e97f729da26fc, type: 3}
   prefabList:
   - {fileID: 3544855763098417, guid: 469c525377c04764d9e99b90d608fe9a, type: 3}
   - {fileID: 1125104945815731866, guid: 120ee973cc3e36d418d7eac8e0134b34, type: 3}
@@ -12980,11 +12976,6 @@ MonoBehaviour:
   nightDecoPrefabList:
   - {fileID: 5002811844654477903, guid: 2a70cbf25ad7aeb44b7c405f4f832bee, type: 3}
   lightPrefab: {fileID: 1088789332951765597, guid: 19201ba5f45fb5540ba9e68173741c5f, type: 3}
-  shopPositions:
-  - {x: 0, y: 0, z: 0}
-  - {x: -5, y: 0, z: 0}
-  - {x: -10, y: 0, z: 0}
-  - {x: -15, y: 0, z: 0}
 --- !u!1 &1419189502
 GameObject:
   m_ObjectHideFlags: 0

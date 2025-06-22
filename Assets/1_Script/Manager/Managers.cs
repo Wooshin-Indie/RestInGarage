@@ -29,6 +29,12 @@ namespace Garage.Manager
 			_sound.Init();
 			_input.Init();
 			_data.Init();
+			_spawn.Init();
+		}
+
+		private void Start()
+		{
+			_spawn.Start();
 		}
 
 		private static ResourceManager _resource = new ResourceManager();

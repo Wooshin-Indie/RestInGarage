@@ -4,20 +4,16 @@ using Garage.Environment;
 using Garage.Structs;
 using Garage.UI.MainScene;
 using Garage.Utils;
-using IUtil;
-using Steamworks;
+using Steamworks.Data;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace Garage.Manager
 {
-    public class GameManagerEx : MonoBehaviour
-    {
+	public class GameManagerEx : MonoBehaviour
+	{
 		#region Singleton
 		private static GameManagerEx instance;
 		public static GameManagerEx Instance { get => instance; }
@@ -46,71 +42,89 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
+		public MapData CurStageData
+		{
+			get
+			{
+				int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
+				return (mapIdx < 0) ? null :
+					Managers.Resource.GetData<MapData>(mapIdx);
+			}
+		}
+
 		public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
 		public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
-		public Action OnDisconnected { get; set; }
+
+		public Action OnDisconnectedAction { get; set; }
+		public Action OnBeforeStageStartAction { get; set; }
+		public Action OnAfterStageStartAction { get; set; }
+		public Action OnTimeoutAction { get; set; }
+		public Action OnBeforeStageEndAction { get; set; }
+		public Action<int> OnAfterStageEndAction { get; set; }
+		public Action<Lobby> OnLobbyEnteredAction { get; set; }
+
+		public Action<int> OnStartGameAction { get; set; }
 
 		[SerializeField] private GameObject meetingPointPrefab;
 		[SerializeField] private float stageTimer;
 
 		private MeetingPoint meetingPoint;
 
-		public void OnHostCreated()
-		{
-			GameSynchronizer.Instance.IsDay.Value = false;
-			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
-		}
 
+		private float startStageDuration = 3f;
+		private float timeoutDuration = 3f;
+		private float endStageDuration = 2f;
+
+		/// <summary>
+		/// Stage를 시작할 때 호출하는 함수
+		/// </summary>
 		public void StartNextStage()
 		{
 			if (!isHost) return;
 
-			if (meetingPoint != null)
-			{
-				meetingPoint.EndMeetClientRPC();
-			}
+			SunManager.Instance.SetTimePhase(TimePhase.Morning, startStageDuration);
+			Invoke(nameof(OnStageStart), startStageDuration);
 
-			SunManager.Instance.SetTimePhase(TimePhase.Morning, 3f);
-
-			Invoke(nameof(OnStageStart), 3f);
-
-			GameSynchronizer.Instance.IsDay.Value = true;
-			GameSynchronizer.Instance.CurrentStage.Value++;
-			GameSynchronizer.Instance.OnStageStartClientRPC(GameSynchronizer.Instance.CurrentStage.Value);
-
-			BuildingManager.Instance.OnStageStart();
+			OnBeforeStageStartAction?.Invoke();
 		}
 
-		public void OnStageStart()
+		/// <summary>
+		/// startStageDuration 후에 호출되는 함수
+		/// ex. 타이머 시작, BuildingManager Init
+		/// </summary>
+		private void OnStageStart()
 		{
 			GameSynchronizer.Instance.SetGameTimer(stageTimer);
 			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
-            TrafficManager.Instance.OnStageStart();
+            TrafficManager.Instance.OnStageStart(0);	// TODO - StageIdx 고쳐야됨
             BuildingManager.Instance.OnStageStart();
+
 		}
 
 		public void EndStage()
 		{
-			GameSynchronizer.Instance.IsDay.Value = false;
-			SunManager.Instance.SetTimePhase(TimePhase.Night, 5f);
+			SunManager.Instance.SetTimePhase(TimePhase.Night, endStageDuration);
 			AllPlayersAwayFromLanesOnStageEnd();
+
+			OnBeforeStageEndAction?.Invoke();
+
 			DOVirtual.DelayedCall(awayMoveTime, () =>
 			{
                 TrafficManager.Instance.OnStageEnd();
             });
+
             if (GameSynchronizer.Instance.CurrentStage.Value != 0)
-				Invoke(nameof(OnStageEnd), 2f);
+				Invoke(nameof(OnStageEnd), endStageDuration);
 			else OnStageEnd();
 
 			foreach (var player in NetworkManager.Singleton.ConnectedClients)
 			{
 				player.Value.PlayerObject.GetComponent<PlayerController>().EndAllInteraction();
 			}
-			Managers.Spawn.OnStageEnd();
 		}
-
-		public void OnStageEnd()
+		
+		private void OnStageEnd()
 		{
 			if (!isHost) return;
 
@@ -120,8 +134,8 @@ namespace Garage.Manager
 				go.GetComponent<NetworkObject>().Spawn();
 				meetingPoint = go.GetComponent<MeetingPoint>();
 				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
+				meetingPoint.StartMeetClientRPC(1);
 			}
-			meetingPoint.StartMeetClientRPC(GameSynchronizer.Instance.CurrentStage.Value + 1);
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
 			if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
@@ -130,9 +144,9 @@ namespace Garage.Manager
 			{
 				Managers.Sound.PlaySfx(SFXType.ShopPop);
                 BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
             });
 		}
-
 
 		private void OnUpdateTimer()
 		{
@@ -141,11 +155,11 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
-			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value < 0f)
+			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
 			{
-				UIManager.Game.OnTimeout();
+				OnTimeoutAction?.Invoke();
 				InputLockToAllPlayers();
-                Invoke(nameof(EndStage), 3f);
+                Invoke(nameof(EndStage), timeoutDuration);
 			}
 		}
 
@@ -168,9 +182,10 @@ namespace Garage.Manager
 
 		public void GameStarted()
 		{
-			UIManager.Instance.OnGameStart();
+			int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
 			OnStageEnd();
-			if (isHost) BuildingManager.Instance.BuildBasicBuildings();
+			OnStartGameAction.Invoke(mapIdx);
+			if (isHost) BuildingManager.Instance.BuildBasicBuildings(mapIdx);
 		}
 
 		public void GameEnded()
@@ -203,6 +218,12 @@ namespace Garage.Manager
             OnHostCreated();
         }
 
+		public void OnHostCreated()
+		{
+			GameSynchronizer.Instance.IsDay.Value = false;
+			SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
+		}
+
 		public void ConnectedAsClient()
 		{
 			isHost = false;
@@ -211,9 +232,10 @@ namespace Garage.Manager
 
 		public void Disconnected()
 		{
+			GameSynchronizer.Instance.MapIdx.Value = -1;
 			playerInfo.Clear();
 
-			OnDisconnected.Invoke();
+			OnDisconnectedAction.Invoke();
 
 			SceneEnum curScene = Managers.Scene.CurrentScene.SceneEnum;
 
@@ -253,6 +275,10 @@ namespace Garage.Manager
 					}
 				}
 
+				if (isHost)
+				{
+					// NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().PlayerID.Value = idx;
+				}
 				PlayerInfo pi = new PlayerInfo(steamName, steamId, idx);
 				playerInfo.Add(clientId, pi);
 				UIManager.Main.LobbyPage.OnAddPlayerToDictionary(clientId, pi);
@@ -315,7 +341,6 @@ namespace Garage.Manager
 				}
 			}
 		}
-
 		public bool IsAllPlayerReady()
 		{
 			foreach (KeyValuePair<ulong, PlayerInfo> player in playerInfo)
@@ -340,7 +365,6 @@ namespace Garage.Manager
                     GetComponent<PlayerController>().AwayFromLanesOnStageEnd_HostOnly(awayMoveTime);
             }
         }
-
 		private void InputLockToAllPlayers()
 		{
             List<ulong> clientIds = NetworkManager.Singleton.SpawnManager.GetConnectedPlayers();
