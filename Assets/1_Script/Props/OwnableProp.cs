@@ -88,6 +88,10 @@ namespace Garage.Props
 		{
 			return ownerClientId.Value != ulong.MaxValue;
 		}
+		public ulong OwnerClientID()
+		{
+			return ownerClientId.Value;
+        }
 		public virtual void OnTargetted()
 		{
 			if (material == null || isTargetted) return;
