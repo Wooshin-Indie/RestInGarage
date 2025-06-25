@@ -92,7 +92,7 @@ namespace Garage.Props
 				//if (hitObj == oilgun.gameObject) continue;
 				if (hitObj.CompareTag(Constants.TAG_PLAYER) && hitObj.GetComponent<NetworkObject>().IsLocalPlayer) continue;
 
-				Debug.Log("막힘!");
+				Debug.Log("막힘!: " + hitObj.name);
 				isThereObstacle = true;
                 return;
 			}
