@@ -8,6 +8,7 @@ using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
 using JetBrains.Annotations;
+using Manager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,10 +59,15 @@ namespace Garage.Controller
 		private bool isAbleToMove = true;
 		private bool isBeingForced = false;
         private bool isInputLocked = false;
+        private float originWalkSpeed;
+        private float originRunSpeed;
+        private float originCarrySpeed;
+		private float wrenchRepairSpeed = 1f;
         public bool IsBeingForced => isBeingForced;
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
+		public float WrenchRepairSpeed => wrenchRepairSpeed;
 
 		private Collider[] interactableHits = null;
 		
@@ -113,7 +119,11 @@ namespace Garage.Controller
 			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
-		}
+
+			originWalkSpeed = walkSpeed;
+			originCarrySpeed = carrySpeed;
+			originRunSpeed = runSpeed;
+        }
 
 		public override void OnNetworkSpawn()
 		{
@@ -401,5 +411,33 @@ namespace Garage.Controller
             rigid.linearVelocity = Vector3.zero;
             SetAnimParam((int)AnimationType.Speed, 0);
         }
+
+        [ClientRpc]
+        public void ApplyStatsClientRPC(StatEnum[] statEnums, float[] values)
+        {
+            for (int i = 0; i < statEnums.Length; i++)
+			{
+				ApplyStat(statEnums[i], values[i]);
+			}
+			Debug.Log("Apply Stats: " + statEnums + values );
+        }
+
+		private void ApplyStat(StatEnum statEnum, float value)
+		{
+			switch (statEnum)
+			{
+				case StatEnum.PlayerSpeed:
+					// TODO - 스탯 적용
+					walkSpeed = originWalkSpeed * value;
+					runSpeed = originRunSpeed * value;
+					break;
+				case StatEnum.CarrySpeed:
+					carrySpeed = originCarrySpeed * value;
+					break;
+				case StatEnum.WrenchRepairSpeed:
+					wrenchRepairSpeed = value;
+                    break;
+			}
+		}
     }
 }

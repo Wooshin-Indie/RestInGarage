@@ -85,18 +85,13 @@ namespace Garage.Manager
             Debug.Log($"Lobby created : {lobby.Owner.Name}");
 
             // Host 시작
-            Debug.Log("START HOST");
-            NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
-            NetworkManager.Singleton.StartHost();
-            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
-            GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+            StartHost();
 
 			// 로비UI 띄우고 초기화
 			UIManager.Main.LobbyPage.InitLobbyDatas_Host();
 			UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
 
             NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, NetworkManager.Singleton.LocalClientId);
-			// PlayerSpawner.Instance.SpawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 		}
         private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
@@ -151,10 +146,13 @@ namespace Garage.Manager
 
         #region FromLobbyToGame Sequences
         public void StartHost()
-		{
-			Debug.Log("Start host...");
-			CreateLobby();
-			// 이거 순서 바꾸자. 버튼으로 CreateLobby를 호출 한 다음에 StartHost에서 네트워크매니저StartHost하고 쭉 콜백넣고 해서 정리
+        {
+            Debug.Log("START HOST...");
+            NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
+            NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
+            GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+            // 이거 순서 바꾸자. 버튼으로 CreateLobby를 호출 한 다음에 StartHost에서 네트워크매니저StartHost하고 쭉 콜백넣고 해서 정리
         }
 		public async void CreateLobby()
         {
@@ -314,8 +312,8 @@ namespace Garage.Manager
 
 			NetworkTransmission.instance.StartHeartbeat();
 
-            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
             UIManager.Main.LobbyPage.InitLobbyDatas_Client(clientId);
+            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
         }
 		private void Singleton_OnServerStarted()
 		{

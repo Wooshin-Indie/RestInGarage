@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
 using Garage.Manager;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Manager {
     public enum StatEnum {
         None = -1,
         PlayerSpeed = 0,
-
+        CarrySpeed,
+        WrenchRepairSpeed,
     }
 
     public class StatManager : MonoBehaviour
@@ -36,23 +39,46 @@ namespace Manager {
         #endregion
 
         private Dictionary<StatEnum, float> statDict = new();
-        private KeyValuePair<StatEnum, float> currentPerk;
+        private KeyValuePair<StatEnum, float> nonePerk = new(StatEnum.None, 0f);
+        private KeyValuePair<StatEnum, float> currentPerk = new(StatEnum.None, 0f);
+        public  KeyValuePair<StatEnum, float> CurrentPerk => currentPerk;
         // TODO - Perk이 여러개 설정 가능하다면 List로 바꿔야됨
 
-        void Start()
+        private void Start()
         {
+            statDict.Add(StatEnum.PlayerSpeed, 1f);
+            statDict.Add(StatEnum.CarrySpeed, 1f);
+            statDict.Add(StatEnum.WrenchRepairSpeed, 1f);
             GameManagerEx.Instance.OnStartGameAction += OnGameStart;
         }
 
         private void OnGameStart(int mapIdx)
         {
             // TODO - 맵에 관련된 스탯을 추가할 수도 있음
-            statDict.Clear();
-            statDict.Add(currentPerk.Key, currentPerk.Value);
+            //StatEnum[] statEnums = (StatEnum[])Enum.GetValues(typeof(StatEnum));
+            StatEnum[] statEnums = {
+                StatEnum.PlayerSpeed,
+                StatEnum.CarrySpeed,
+                StatEnum.WrenchRepairSpeed
+            };
+            if (statEnums.Length != Enum.GetValues(typeof(StatEnum)).Length - 1)
+                Debug.LogError("Update local \"StatEnum[] statEnums\"");
+
+            float[] values = new float[statEnums.Length];
+            for (int i = 0; i < statEnums.Length; i++)
+            {
+                values[i] = GetStat(statEnums[i]);
+            }
+
+            NetworkTransmission.instance.ApplyStatsServerRPC(GameManagerEx.Instance.MyClientId, statEnums, values);
         }
 
         public void SetCurrentPerk(KeyValuePair<StatEnum, float> perk)
         {
+            if (currentPerk.Key != StatEnum.None)
+                SetStat(currentPerk.Key, 1f); // 이전에 선택된 perk은 원래대로
+
+            SetStat(perk.Key, perk.Value);
             currentPerk = perk;
         }
 
@@ -66,6 +92,11 @@ namespace Manager {
             {
                 statDict[statEnum] += amount;
             }
+        }
+
+        public void SetStat(StatEnum statEnum, float value)
+        {
+            statDict[statEnum] = value;
         }
 
         public void RemoveStat(StatEnum statEnum, float amount)

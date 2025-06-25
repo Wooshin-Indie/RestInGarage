@@ -14,16 +14,23 @@ namespace Garage.Props
 		[SerializeField] private Transform rope;
 		[SerializeField] private Transform oilgun;
 
+		[SerializeField] private LayerMask hitLayers;
+		[SerializeField] private Color cuttingColor;
+		private Color originColor;
+
 		[SerializeField] private GameObject previewPrefab;
 
 		private Rigidbody gunRigid;
 		private RaycastHit[] hits;
+		private Material ropeMaterial;
 
 		public override void Awake()
 		{
 			gunRigid = oilgun.GetComponent<Rigidbody>();
 			hits = new RaycastHit[5];
-		}
+            ropeMaterial = rope.GetComponent<MeshRenderer>().material;
+			originColor = ropeMaterial.GetColor("_Emissive_Color");
+        }
 
 		protected override void StartInteraction(ulong newOwnerClientId)
 		{
@@ -56,7 +63,8 @@ namespace Garage.Props
 				}
 
 				CheckObstacle();
-			}
+				UpdateFuelHoseStatus();
+            }
 			else
 			{
 				oilgun.localPosition = (initPos);
@@ -64,27 +72,51 @@ namespace Garage.Props
 			}
 		}
 
+		bool isThereObstacle = false;
+		float hoseCuttingProgress = 0f; // 0~1
+		float hoseCuttingTime = 2f;
 		private void CheckObstacle()
 		{
 			Vector3 start = rope.position;
 			Vector3 end = oilgun.position;
 
 			Ray ray = new Ray(start, (end - start).normalized);
-			int count = Physics.RaycastNonAlloc(ray, hits, Vector3.Distance(start, end));
+			int count = Physics.RaycastNonAlloc(ray, hits, Vector3.Distance(start, end), hitLayers);
+			isThereObstacle = false;
 
 			for(int i=0; i<count; i++)
 			{
 				GameObject hitObj = hits[i].collider.gameObject;
 
-				if (hitObj == gameObject) continue;
-				if (hitObj == oilgun.gameObject) continue;
+				//if (hitObj == gameObject) continue;
+				//if (hitObj == oilgun.gameObject) continue;
 				if (hitObj.CompareTag(Constants.TAG_PLAYER) && hitObj.GetComponent<NetworkObject>().IsLocalPlayer) continue;
 
 				Debug.Log("막힘!");
-				return;
+				isThereObstacle = true;
+                return;
 			}
 
 		}
+		private void UpdateFuelHoseStatus()
+		{
+			if (hoseCuttingProgress > 1f)
+			{
+				OnEndInteraction(transform);
+				hoseCuttingProgress = 0f;
+            }
+
+			if (isThereObstacle)
+			{
+                hoseCuttingProgress += Time.deltaTime / hoseCuttingTime;
+            }
+			else
+			{
+				hoseCuttingProgress = hoseCuttingProgress >= 0f ?
+                    (hoseCuttingProgress - Time.deltaTime / hoseCuttingTime) : 0f;
+            }
+            ropeMaterial.SetColor("_Emissive_Color", Color.Lerp(originColor, cuttingColor, hoseCuttingProgress));
+        }
 
 		Vector2Int IPlaceable.GetSize()
 		{

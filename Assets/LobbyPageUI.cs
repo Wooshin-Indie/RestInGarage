@@ -3,8 +3,12 @@ using Garage.Manager;
 using Garage.Structs;
 using Garage.UI.LobbyScene.Items;
 using Garage.Utils;
+using IUtil;
+using Manager;
 using Steamworks.Data;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
@@ -14,15 +18,18 @@ namespace Garage.UI.Item
 {
     public class LobbyPageUI : PageUI
     {
-        [SerializeField] private Transform itemParent;
+        [SerializeField] private Transform playerCardContent;
         [SerializeField] private GameObject playerCardPrefab;
+        [FoldoutGroup("Buttons")]
         [SerializeField] private Button startButton;
         [SerializeField] private Button inviteFriendsButton;
         [SerializeField] private Button readyButton;
         [SerializeField] private Button convertLobbyTypeLeftButton;
         [SerializeField] private Button convertLobbyTypeRightButton;
         [SerializeField] private Button page10BackButton;
+        [FoldoutGroup("Others")]
         [SerializeField] private TextMeshProUGUI lobbyTypeText;
+        [SerializeField] private List<PerkUI> perkUIList = new();
 
         private Dictionary<ulong, PlayerCard> playerCardDict = new();
         private Lobby? curLobby;
@@ -31,6 +38,7 @@ namespace Garage.UI.Item
         private void Awake()
         {
             GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
+            InitPerkSetting();
         }
 
         private void Start()
@@ -63,6 +71,7 @@ namespace Garage.UI.Item
             {
                 RightRotateLobbyType();
             });
+
             page10BackButton.onClick.AddListener(() =>
             {
                 // TODO - 로비 파괴
@@ -92,10 +101,6 @@ namespace Garage.UI.Item
             startButton.gameObject.SetActive(true);
             convertLobbyTypeLeftButton.gameObject.SetActive(true);
             convertLobbyTypeRightButton.gameObject.SetActive(true);
-
-            // friends only인지 public인지 private인지
-
-
         }
         public void InitLobbyDatas_Client(ulong clientId)
         {
@@ -113,8 +118,53 @@ namespace Garage.UI.Item
             convertLobbyTypeLeftButton.gameObject.SetActive(false);
             convertLobbyTypeRightButton.gameObject.SetActive(false);
 
-            SyncReadyCheckBoxes();
+            SyncReadyCheckboxes();
         }
+
+        #region Perk Settings
+        private Dictionary<StatEnum, PerkUI> perkDict = new();
+        private KeyValuePair<StatEnum, float> nonePerk = new(StatEnum.None, 0f);
+        private KeyValuePair<StatEnum, float> currentPerk = new(StatEnum.None, 0f);
+        private void InitPerkSetting()
+        {
+            foreach (PerkUI perkUI in perkUIList)
+            {
+                perkDict.Add(perkUI.Stat, perkUI);
+            }
+        }
+
+        public void SetCurrentPerk(KeyValuePair<StatEnum, float> perk)
+        {
+            if (Equals(perk, currentPerk))
+            {
+                // 이미 활성화된 perk 누르면 비활성화
+                InactivatePerk(currentPerk);
+                currentPerk = nonePerk;
+
+                return;
+            }
+
+            if (!Equals(nonePerk, currentPerk))
+            {
+                InactivatePerk(currentPerk);
+            }
+            ActivatePerk(perk);
+            currentPerk = perk;
+        }
+
+        private void ActivatePerk(KeyValuePair<StatEnum, float> perk)
+        {
+            StatManager.Instance.SetStat(perk.Key, perk.Value);
+
+            perkDict[perk.Key].GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.white;
+        }
+        private void InactivatePerk(KeyValuePair<StatEnum, float> perk)
+        {
+            StatManager.Instance.SetStat(perk.Key, 1f);
+            perkDict[perk.Key].GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.black;
+        }
+
+        #endregion
 
         private void LeftRotateLobbyType()
         {
@@ -175,7 +225,7 @@ namespace Garage.UI.Item
 
         public void OnAddPlayerToDictionary(ulong clientId, PlayerInfo pi)
         {
-            PlayerCard pc = Instantiate(playerCardPrefab, itemParent).GetComponent<PlayerCard>();
+            PlayerCard pc = Instantiate(playerCardPrefab, playerCardContent).GetComponent<PlayerCard>();
             pc.SetPlayerCard(pi);
             playerCardDict.Add(clientId, pc);
         }
@@ -207,7 +257,7 @@ namespace Garage.UI.Item
             CheckCanStartGame();
         }
 
-        private void SyncReadyCheckBoxes()
+        private void SyncReadyCheckboxes()
         {
             foreach (KeyValuePair<ulong, PlayerInfo> pi in GameManagerEx.Instance.playerInfo)
             {
