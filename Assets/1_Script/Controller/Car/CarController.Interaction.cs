@@ -60,12 +60,12 @@ namespace Garage.Controller
 					}
 					else if (!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+						ProgressFixGageServerRPC(part, prop.ProgressMult * Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
 				case CarParts.Oil:
 				case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					ProgressFixGageServerRPC(part, prop.ProgressMult * Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					break;
 				case CarParts.Fire:
 					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);

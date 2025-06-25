@@ -570,6 +570,8 @@ MonoBehaviour:
   renderer: {fileID: 8084718555020574602}
   targetColor: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
   isCarry: 0
+  carrySpeed: 0
+  progressMult: 1
   initPos: {x: -0.948, y: 1.045, z: 0.223}
   initRot: {x: -37.267, y: -94.248, z: 2.575}
   rope: {fileID: 3681204652177645260}

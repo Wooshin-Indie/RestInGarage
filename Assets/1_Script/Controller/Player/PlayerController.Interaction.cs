@@ -234,9 +234,11 @@ namespace Garage.Controller
 
 		public void ExtinguishFire(Vector3 position)
 		{
-			Vector3 sprayEndPosition = position + transform.forward * fireExLength;
+			if (currentOwningProp == null || currentOwningProp.GetComponent<Extinguisher>() == null) return;
 
-			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, fireExRadius, interactableHits, fireExLayer);
+			Vector3 sprayEndPosition = position + transform.forward * currentOwningProp.GetComponent<Extinguisher>().ExDistance;
+
+			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, currentOwningProp.GetComponent<Extinguisher>().ExRadius, interactableHits, fireExLayer);
 
 			for (int i = 0; i < counts; i++)
 			{

@@ -29,7 +29,7 @@ namespace Garage.Controller.StateMachine
 
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
-			bool isRun = Managers.Input.Control.Player.Run.IsPressed();
+			bool isRun = controller.IsRun;
 			controller.MovePosition(move, isRun ? controller.RunSpeed : controller.WalkSpeed, controller.RunSpeed);
 
 			// Interact

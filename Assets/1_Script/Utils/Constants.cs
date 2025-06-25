@@ -30,9 +30,10 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_CROUCH = "IsCrouch";
         public static readonly string ANIM_PARAM_KICK = "IsKick";
         public static readonly string ANIM_PARAM_KNOCKBACK = "IsKnockBack";
+        public static readonly string ANIM_PARAM_CARRY_MULT = "CarryMult";
 
-      /** Localization Tables **/
-        public static readonly string TABLE_MAINUI = "MainUI";
+	  /** Localization Tables **/
+		public static readonly string TABLE_MAINUI = "MainUI";
 
         /** NETWORK SETTINGS **/
         public static readonly int MAX_PLAYERS = 4;
