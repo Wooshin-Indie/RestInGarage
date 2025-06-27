@@ -232,7 +232,8 @@ namespace Garage.Manager
 
 		public void Disconnected()
 		{
-			GameSynchronizer.Instance.MapIdx.Value = -1;
+			if (isHost)
+				GameSynchronizer.Instance.MapIdx.Value = -1;
 			playerInfo.Clear();
 
 			OnDisconnectedAction.Invoke();
@@ -251,6 +252,7 @@ namespace Garage.Manager
 					break;
                 case SceneEnum.Lobby:
                     Managers.Scene.ChangeSceneServer(SceneEnum.Main);
+                    UIManager.Main.GoToPage(PageEnum.Main);
                     break;
 			}
 			isHost = false;

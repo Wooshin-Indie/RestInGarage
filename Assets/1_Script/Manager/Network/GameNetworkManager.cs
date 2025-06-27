@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Garage.Utils;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Garage.UI.MainScene;
 
 namespace Garage.Manager
 {
@@ -191,22 +192,24 @@ namespace Garage.Manager
         }
 		private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
-			if (sceneName != "LobbyScene") return;
+			if (sceneName == "LobbyScene")
+			{
 
-			if (!NetworkManager.Singleton.IsHost) return;
+                if (!NetworkManager.Singleton.IsHost) return;
 
-            Debug.Log("Game Scene loaded on all clients. Spawning players...");
+                Debug.Log("Game Scene loaded on all clients. Spawning players...");
 
-            foreach (ulong clientId in GameManagerEx.Instance.playerInfo.Keys)
-            {
-                NetworkTransmission.instance.SpawnPlayer(clientId, GetRandomSpawnPosition());
+                foreach (ulong clientId in GameManagerEx.Instance.playerInfo.Keys)
+                {
+                    NetworkTransmission.instance.SpawnPlayer(clientId, GetRandomSpawnPosition());
+                }
+
+                GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
+
+                NetworkTransmission.instance.StartGameServerRPC();
             }
-
-            GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
-
-			NetworkTransmission.instance.StartGameServerRPC();
-
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+			else if (sceneName == "MainScene")
+                UIManager.Main.GoToPage(PageEnum.Main);
         }
 
         private Vector3 GetRandomSpawnPosition()
@@ -238,11 +241,11 @@ namespace Garage.Manager
 			else
 			{
 				NetworkManager.Singleton.OnClientConnectedCallback -= Singleton_OnClientConnectedCallback;
-			}
-			NetworkManager.Singleton.Shutdown(true);
-            Debug.Log("Shutdown.");
+            }
             GameManagerEx.Instance.Disconnected();
             Debug.Log("Disconnected.");
+            NetworkManager.Singleton.Shutdown(true);
+            Debug.Log("Shutdown.");
         }
 		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
 		{
