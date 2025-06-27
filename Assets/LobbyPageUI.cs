@@ -161,7 +161,16 @@ namespace Garage.UI.Item
         private void InactivatePerk(KeyValuePair<StatEnum, float> perk)
         {
             StatManager.Instance.SetStat(perk.Key, 1f);
-            perkDict[perk.Key].GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.black;
+            perkDict[perk.Key].GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.grey;
+        }
+
+        private void LockPerk(KeyValuePair<StatEnum, float> perk)
+        {
+            perkDict[perk.Key].LockPerk();
+        }
+        private void UnlockPerk(KeyValuePair<StatEnum, float> perk)
+        {
+            perkDict[perk.Key].UnlockPerk();
         }
 
         #endregion

@@ -7,8 +7,10 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
-		protected PlayerController controller;
-		protected NetworkVariable<Vector3> gridPosition = new();
+		public ulong OwnerClientId => ownerClientId.Value;
+        protected PlayerController controller;
+		public PlayerController Controller => controller;
+        protected NetworkVariable<Vector3> gridPosition = new();
 
 		[SerializeField] private MeshRenderer renderer;
 		[SerializeField] private Color targetColor;

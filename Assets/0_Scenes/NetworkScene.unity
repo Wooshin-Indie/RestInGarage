@@ -1658,6 +1658,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Stat: 2
   Value: 2
+  isLocked: 1
 --- !u!222 &179392350
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6805,7 +6806,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7157,6 +7158,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Stat: 1
   Value: 3
+  isLocked: 1
 --- !u!222 &779502928
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -15056,6 +15058,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Stat: 0
   Value: 2
+  isLocked: 0
 --- !u!222 &1578005237
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -17530,7 +17533,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -19720,7 +19723,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

@@ -9,6 +9,7 @@ public class PerkUI : MonoBehaviour
 {
     [SerializeField] public StatEnum Stat;
     [SerializeField] public float Value;
+    [SerializeField] private bool isLocked;
     private KeyValuePair<StatEnum, float> perk;
     private Button button;
 
@@ -21,5 +22,25 @@ public class PerkUI : MonoBehaviour
         {
             UIManager.Main.LobbyPage.SetCurrentPerk(perk);
         });
+
+        if (isLocked)
+        {
+            LockPerk();
+        }
+        else
+        {
+            UnlockPerk();
+        }
+    }
+
+    public void LockPerk()
+    {
+        button.enabled = false;
+        GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.black;
+    }
+    public void UnlockPerk()
+    {
+        button.enabled = true;
+        GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.grey;
     }
 }

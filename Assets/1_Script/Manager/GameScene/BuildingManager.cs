@@ -37,8 +37,8 @@ namespace Garage.Manager
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
 			}
 
-			GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
-		}
+            GameManagerEx.Instance.OnDisconnectedAction -= OnDisconnected;
+        }
 		#endregion
 
 		private void Start()
@@ -95,7 +95,7 @@ namespace Garage.Manager
 
 		private List<Vector3> shopPositions = new();
 		private GameObject sellBoundGameObject = null;
-		public void BuildBasicBuildings(int mapIdx)
+		public void SpawnBasicBuildings_HostOnly(int mapIdx)
 		{
 			shopPositions = Managers.Resource.GetData<MapData>(mapIdx).ItemPositions;
 
@@ -507,6 +507,13 @@ namespace Garage.Manager
 				}
 			}
 			gridTiles.Clear();
+		}
+		public void OnGameStarted()
+		{
+            GameManagerEx.Instance.OnDisconnectedAction += OnDisconnected;
+
+            int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
+            if (NetworkManager.Singleton.IsHost) SpawnBasicBuildings_HostOnly(mapIdx);
 		}
 	}
 }

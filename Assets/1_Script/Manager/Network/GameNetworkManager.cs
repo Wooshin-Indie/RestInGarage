@@ -226,7 +226,6 @@ namespace Garage.Manager
 			if (NetworkManager.Singleton.IsHost)
 			{
 				NetworkTransmission.instance.DisconnectAllClientRPC();
-				await Task.Delay(500);
 			}
 
 			currentLobby?.Leave();

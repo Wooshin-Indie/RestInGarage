@@ -185,8 +185,8 @@ namespace Garage.Manager
 			int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
 			OnStageEnd();
 			OnStartGameAction.Invoke(mapIdx);
-			if (isHost) BuildingManager.Instance.BuildBasicBuildings(mapIdx);
-		}
+			BuildingManager.Instance.OnGameStarted();
+        }
 
 		public void GameEnded()
 		{

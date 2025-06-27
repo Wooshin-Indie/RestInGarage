@@ -62,6 +62,7 @@ namespace Garage.Props
 					oilgun.localRotation = (Quaternion.Euler(initRot));
 				}
 
+				if (!IsHost) return;
 				CheckObstacle();
 				UpdateFuelHoseStatus();
             }
@@ -90,8 +91,7 @@ namespace Garage.Props
 
 				//if (hitObj == gameObject) continue;
 				//if (hitObj == oilgun.gameObject) continue;
-				if (hitObj.CompareTag(Constants.TAG_PLAYER) && OwnerClientID() == NetworkManager.Singleton.LocalClientId) continue;
-
+				if (hitObj.CompareTag(Constants.TAG_PLAYER) && OwnerClientId == Controller.OwnerClientId) continue;
 				Debug.Log("막힘!: " + hitObj.name);
 				isThereObstacle = true;
                 return;
@@ -104,21 +104,28 @@ namespace Garage.Props
 			{
 				OnEndInteraction(transform);
 				hoseCuttingProgress = 0f;
-            }
+			}
 
 			if (isThereObstacle)
 			{
-                hoseCuttingProgress += Time.deltaTime / hoseCuttingTime;
-            }
+				hoseCuttingProgress += Time.deltaTime / hoseCuttingTime;
+			}
 			else
 			{
 				hoseCuttingProgress = hoseCuttingProgress >= 0f ?
-                    (hoseCuttingProgress - Time.deltaTime / hoseCuttingTime) : 0f;
-            }
-            ropeMaterial.SetColor("_Emissive_Color", Color.Lerp(originColor, cuttingColor, hoseCuttingProgress));
+					(hoseCuttingProgress - Time.deltaTime / hoseCuttingTime) : 0f;
+			}
+			ropeMaterial.SetColor("_Emissive_Color", Color.Lerp(originColor, cuttingColor, hoseCuttingProgress));
+			UpdateFuelHoseColorClientRPC(hoseCuttingProgress);
+        }
+        [ClientRpc]
+        private void UpdateFuelHoseColorClientRPC(float lerpTime)
+		{
+            ropeMaterial.SetColor("_Emissive_Color", Color.Lerp(originColor, cuttingColor, lerpTime));
         }
 
-		Vector2Int IPlaceable.GetSize()
+
+        Vector2Int IPlaceable.GetSize()
 		{
 			return new Vector2Int(2, 2);
 		}
