@@ -576,6 +576,10 @@ MonoBehaviour:
   initRot: {x: -37.267, y: -94.248, z: 2.575}
   rope: {fileID: 3681204652177645260}
   oilgun: {fileID: 978388452849320846}
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 2560
+  cuttingColor: {r: 0.4716981, g: 0, b: 0, a: 0}
   previewPrefab: {fileID: 8084718555022500170, guid: 36a3bae8b49379f4fb90fac7a5b491c1, type: 3}
 --- !u!4 &8084718555022998890 stripped
 Transform:

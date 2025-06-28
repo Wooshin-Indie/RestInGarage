@@ -31,7 +31,7 @@ namespace Garage.Manager
             {
                 UnloadCurrentSceneServer();
             }
-            LoadSceneServer(sceneEnum);
+            LoadSceneServer(sceneEnum, LoadSceneMode.Additive);
 
             NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
         }
@@ -41,16 +41,16 @@ namespace Garage.Manager
 
             OnSceneChangeStarted(sceneEnum);
         }
-		public void LoadSceneServer(SceneEnum sceneEnum)
+		public void LoadSceneServer(SceneEnum sceneEnum, LoadSceneMode mode)
 		{
 			CurrentScene?.Clear();
-			if (sceneEnum == SceneEnum.Main)
-			{
-				SceneManager.LoadScene("MainScene", LoadSceneMode.Additive);
-			}
+            if (NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", mode);
+            }
 			else
-			{
-				NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
+            {
+                SceneManager.LoadScene(sceneEnum.ToString() + "Scene", mode);
             }
 		}
 		public void OnSceneChangeStarted(SceneEnum sceneEnum)

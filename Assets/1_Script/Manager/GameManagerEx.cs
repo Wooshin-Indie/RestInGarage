@@ -185,8 +185,8 @@ namespace Garage.Manager
 			int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
 			OnStageEnd();
 			OnStartGameAction.Invoke(mapIdx);
-			if (isHost) BuildingManager.Instance.BuildBasicBuildings(mapIdx);
-		}
+			BuildingManager.Instance.OnGameStarted();
+        }
 
 		public void GameEnded()
 		{
@@ -206,8 +206,8 @@ namespace Garage.Manager
 
             foreach (ulong clientId in playerInfo.Keys)
             {
-                NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>().
-					PlayerID.Value = playerInfo[clientId].playerId;
+				PlayerController pc = NetworkManager.Singleton.ConnectedClients[clientId].PlayerObject.GetComponent<PlayerController>();
+				pc.PlayerID.Value = playerInfo[clientId].playerId; // 호스트 로컬에 있는 PlayController들에 clientId 할당
             }
 
             GameSynchronizer.Instance.CurrentStage.Value = 0;
@@ -232,7 +232,8 @@ namespace Garage.Manager
 
 		public void Disconnected()
 		{
-			GameSynchronizer.Instance.MapIdx.Value = -1;
+			if (isHost)
+				GameSynchronizer.Instance.MapIdx.Value = -1;
 			playerInfo.Clear();
 
 			OnDisconnectedAction.Invoke();
@@ -257,7 +258,7 @@ namespace Garage.Manager
 			isConnected = false;
 		}
 
-		public void AddPlayerToDictionary(ulong clientId, string steamName, ulong steamId)
+		public void AddPlayerToDictionary(ulong clientId, string steamName, ulong steamId, bool isReady = false)
 		{
 			if (!playerInfo.ContainsKey(clientId))
 			{
@@ -292,8 +293,9 @@ namespace Garage.Manager
 				ulong steamId = player.Value.steamId;
 				string steamName = player.Value.steamName;
 				ulong clientId = player.Key;
+				bool isReady = player.Value.isReady;
 
-				NetworkTransmission.instance.UpdateClientsPlayerInfoClientRPC(steamId, steamName, clientId);
+				NetworkTransmission.instance.UpdateClientsPlayerInfoClientRPC(steamId, steamName, clientId, isReady);
 			}
 		}
 
