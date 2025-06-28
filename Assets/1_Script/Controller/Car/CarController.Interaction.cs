@@ -65,6 +65,7 @@ namespace Garage.Controller
 						ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
+                // TODO - 여기 prop.Mult 랑 합연산으로 처리해야됨
 				case CarParts.Oil:
                     ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
 					break;

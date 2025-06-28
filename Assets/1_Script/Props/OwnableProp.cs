@@ -1,4 +1,5 @@
 using Garage.Controller;
+using IUtil;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -17,7 +18,13 @@ namespace Garage.Props
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
+
+		[SerializeField] private float carrySpeed;
+		[SerializeField] private float progressMult;
+
 		public bool IsCarry => isCarry;
+		public float CarrySpeed => carrySpeed;
+		public float ProgressMult => progressMult;
 
 		private bool isTargetted = false;
 

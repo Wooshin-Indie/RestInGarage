@@ -12,7 +12,14 @@ namespace Garage.Props
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] protected float height;
 
+		[Header("Extinguish Params")]
 		[SerializeField] private ParticleSystem fireExPS;
+		[SerializeField] private float extinguishDistance;
+		[SerializeField] private float extinguishRadius;
+
+
+		public float ExDistance => extinguishDistance;
+		public float ExRadius => extinguishRadius;
 
 		private NetworkVariable<bool> IsAction = new(
 			false,
@@ -38,6 +45,8 @@ namespace Garage.Props
 				rigid.isKinematic = true;
 				transform.GetComponent<Collider>().isTrigger = true;
 				SyncStateServerRPC(true);
+
+				fireExPS.startSpeed = extinguishDistance;
 			}
 		}
 
