@@ -98,21 +98,5 @@ namespace Garage.Controller.StateMachine
 
         }
 
-		private bool isFireUIsEnlarged = false;
-		public void UpdateSizeOfFireUIs()
-		{
-			if (controller.CurrentOwningProp is not Extinguisher)
-			{
-				if (isFireUIsEnlarged)
-				{
-					isFireUIsEnlarged = false;
-					UIManager.Game.ReduceAllFireUIs();
-				}
-				return;
-			}
-
-			isFireUIsEnlarged = true;
-			UIManager.Game.EnlargeAllFireUIs();
-		}
 	}
 }

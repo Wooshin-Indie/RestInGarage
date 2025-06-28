@@ -6,7 +6,6 @@ using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
-using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -155,6 +154,7 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
+			UpdateSizeOfFireUIs();
 			if (!isInputLocked)
 			{
 				stateMachine.CurState.HandleInput();
@@ -225,7 +225,25 @@ namespace Garage.Controller
             SetAnimParam((int)AnimationType.Kick);
         }
 
-        void OnCollisionEnter(Collision collision)
+
+		private bool isFireUIsEnlarged = false;
+		public void UpdateSizeOfFireUIs()
+		{
+			if (currentOwningProp is not Extinguisher)
+			{
+				if (isFireUIsEnlarged)
+				{
+					isFireUIsEnlarged = false;
+					UIManager.Game.ReduceAllFireUIs();
+				}
+				return;
+			}
+
+			isFireUIsEnlarged = true;
+			UIManager.Game.EnlargeAllFireUIs();
+		}
+
+		void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
 
