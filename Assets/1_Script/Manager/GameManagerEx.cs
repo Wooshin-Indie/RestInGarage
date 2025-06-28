@@ -252,7 +252,6 @@ namespace Garage.Manager
 					break;
                 case SceneEnum.Lobby:
                     Managers.Scene.ChangeSceneServer(SceneEnum.Main);
-                    UIManager.Main.GoToPage(PageEnum.Main);
                     break;
 			}
 			isHost = false;

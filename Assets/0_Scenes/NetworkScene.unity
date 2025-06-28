@@ -5685,7 +5685,7 @@ MonoBehaviour:
   - {fileID: 1574769424}
   - {fileID: 165939452}
   page8BackButton: {fileID: 1975931509}
-  browsePage: {fileID: 0}
+  browsePage: {fileID: 2050211352}
   page9BackButton: {fileID: 1171663885}
   lobbyPage: {fileID: 429838269}
 --- !u!1 &650256482
@@ -6806,7 +6806,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -17533,7 +17533,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -19317,7 +19317,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowUI: {fileID: 908499186}
-  buttons: []
+  buttons:
+  - {fileID: 1171663885}
   itemParent: {fileID: 98520705}
   listItemPrefab: {fileID: 5493181013430830838, guid: cc163876866309c409acf4c646ce35a4, type: 3}
   backButton: {fileID: 1171663885}
@@ -19723,7 +19724,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

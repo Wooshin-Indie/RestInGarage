@@ -8,6 +8,7 @@ using Garage.Utils;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Garage.UI.MainScene;
+using Garage.Structs;
 
 namespace Garage.Manager
 {
@@ -56,7 +57,7 @@ namespace Garage.Manager
 			SteamMatchmaking.OnLobbyInvite -= SteamMatchMaking_OnLobbyInvite;
 			SteamMatchmaking.OnLobbyGameCreated -= SteamMatchmaking_OnLobbyGameCreated;
 			SteamFriends.OnGameLobbyJoinRequested -= SteamFriends_OnGameLobbyJoinRequested;
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnSceneLoadedInNetwork;
 
             if (NetworkManager.Singleton == null) return;
 
@@ -188,11 +189,12 @@ namespace Garage.Manager
 
             Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoadedInNetwork;
         }
-		private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+		private void OnSceneLoadedInNetwork(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
-			if (sceneName == "LobbyScene")
+            Debug.Log("Scene loaded by Server");
+            if (sceneName == "LobbyScene")
 			{
 
                 if (!NetworkManager.Singleton.IsHost) return;
@@ -208,7 +210,10 @@ namespace Garage.Manager
 
                 NetworkTransmission.instance.StartGameServerRPC();
             }
-			else if (sceneName == "MainScene")
+        }
+		private void OnSceneLoadedInLocal()
+        {
+            //if (sceneName == "MainScene")
                 UIManager.Main.GoToPage(PageEnum.Main);
         }
 
