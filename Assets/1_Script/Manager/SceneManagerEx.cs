@@ -63,7 +63,7 @@ namespace Garage.Manager
 		{
 			if (CurrentScene.SceneEnum == SceneEnum.None) return;
 
-			if(CurrentScene.SceneEnum == SceneEnum.Lobby)
+			if(CurrentScene.SceneEnum == SceneEnum.Game)
 			{
 				SceneManager.UnloadSceneAsync(SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"));
 			}

@@ -61,7 +61,7 @@ namespace Garage.Manager
         {
             OnUpdateLightSetting();
 
-			if (curScene == SceneEnum.Lobby)
+			if (curScene == SceneEnum.Game)
 			{
 				if (Mathf.Abs(currentTime - targetTime) > 0.001f)
 				{
@@ -111,7 +111,7 @@ namespace Garage.Manager
                     transform.localEulerAngles = mainStartRot; // 처음 각도
                     transform.DORotate(mainEndRot, 600f);
                     break;
-                case SceneEnum.Lobby:
+                case SceneEnum.Game:
                     transform.DOKill();
                     break;
             }

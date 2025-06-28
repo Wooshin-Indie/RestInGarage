@@ -187,14 +187,14 @@ namespace Garage.Manager
             Debug.Log("Start Game in lobby...");
             LockLobby();
 
-            Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
+            Managers.Scene.ChangeSceneServer(SceneEnum.Game);
 
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoadedInNetwork;
         }
 		private void OnSceneLoadedInNetwork(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
             Debug.Log("Scene loaded by Server");
-            if (sceneName == "LobbyScene")
+            if (sceneName == "GameScene")
 			{
 
                 if (!NetworkManager.Singleton.IsHost) return;

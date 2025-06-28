@@ -8,7 +8,7 @@ namespace Garage.Utils
     {
         None = -1,
         Main,
-        Lobby
+        Game
     }
 
     public enum PropType

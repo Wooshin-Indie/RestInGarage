@@ -190,7 +190,7 @@ namespace Garage.Manager
 
 		public void GameEnded()
 		{
-			Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
+			Managers.Scene.ChangeSceneServer(SceneEnum.Game);
 		}
 
 		public void HostCreated()
@@ -250,7 +250,7 @@ namespace Garage.Manager
                     }
                     UIManager.Main.GoToPage(PageEnum.Main);
 					break;
-                case SceneEnum.Lobby:
+                case SceneEnum.Game:
                     Managers.Scene.ChangeSceneServer(SceneEnum.Main);
                     break;
 			}
