@@ -56,7 +56,7 @@ namespace Garage.Controller
 		private bool isAbleToMove = true;
 		private bool isAbleToRun = true;
 		private bool isBeingForced = false;
-        private bool isInputLocked = false
+		private bool isInputLocked = false;
         
         
 		public bool IsBeingForced => isBeingForced;
