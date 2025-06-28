@@ -36,7 +36,7 @@ namespace Garage.Manager
 		public float pingInterval = 2.0f;
 		public float timeoutThreshold = 5.0f;
 
-		private float lastPongTime;     // 가장 최근 받은 pong응답 시간
+		private float lastPingTime;     // 가장 최근 받은 ping응답 시간
 		private float pingTimer;        // ping 보내기 까지 남은 시간
 		private float pingSentTime;     // 가장 최근 ping 보낸 시간
 		private bool isDisconnected = true;
@@ -62,7 +62,7 @@ namespace Garage.Manager
 				pingTimer = pingInterval;
 			}
 
-			if (!isDisconnected && (Time.time - lastPongTime) > timeoutThreshold)
+			if (!isDisconnected && (Time.time - lastPingTime) > timeoutThreshold)
 			{
 				isDisconnected = true;
 				Debug.LogWarning("[HeartbeatChecker] : Host Disconnected");
@@ -79,7 +79,7 @@ namespace Garage.Manager
 		{
 			if (IsClient && !IsHost)
 			{
-				lastPongTime = Time.time;
+				lastPingTime = Time.time;
 				pingTimer = pingInterval;
 				isHeartbeating = true;
 			}
@@ -96,15 +96,15 @@ namespace Garage.Manager
 			if (!NetworkManager.Singleton.IsHost)
 				return;
 
-			ReceivePongClientRpc(rpcParams.Receive.SenderClientId);
+			ReceivePingClientRpc(rpcParams.Receive.SenderClientId);
 		}
 		[ClientRpc]
-		private void ReceivePongClientRpc(ulong clientId)
+		private void ReceivePingClientRpc(ulong clientId)
 		{
 			if (clientId != NetworkManager.Singleton.LocalClientId)
 				return;
 
-			lastPongTime = Time.time;
+			lastPingTime = Time.time;
 			if (isDisconnected)
 			{
 				Debug.Log("[HeartbeatChecker] 서버 응답 복구됨!");
