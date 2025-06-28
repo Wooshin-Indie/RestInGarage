@@ -48,7 +48,9 @@ namespace Garage.Controller
 		/// </summary>
 		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
 		{
-			switch (part)
+			float wrenchSpeed = player.WrenchRepairSpeed;
+
+            switch (part)
 			{
 				case CarParts.FLT:
 				case CarParts.FRT:
@@ -60,12 +62,15 @@ namespace Garage.Controller
 					}
 					else if (!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+						ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
+                // TODO - 여기 prop.Mult 랑 합연산으로 처리해야됨
 				case CarParts.Oil:
-				case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+                    ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					break;
+                case CarParts.Engine:
+					ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
 				case CarParts.Fire:
 					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);

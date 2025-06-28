@@ -1,4 +1,5 @@
 using Garage.Controller;
+using IUtil;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,15 +8,23 @@ namespace Garage.Props
 	public class OwnableProp : PropBase
 	{
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
-		protected PlayerController controller;
-		protected NetworkVariable<Vector3> gridPosition = new();
+		public ulong OwnerClientId => ownerClientId.Value;
+        protected PlayerController controller;
+		public PlayerController Controller => controller;
+        protected NetworkVariable<Vector3> gridPosition = new();
 
 		[SerializeField] private MeshRenderer renderer;
 		[SerializeField] private Color targetColor;
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
+
+		[SerializeField] private float carrySpeed;
+		[SerializeField] private float progressMult;
+
 		public bool IsCarry => isCarry;
+		public float CarrySpeed => carrySpeed;
+		public float ProgressMult => progressMult;
 
 		private bool isTargetted = false;
 
@@ -88,6 +97,10 @@ namespace Garage.Props
 		{
 			return ownerClientId.Value != ulong.MaxValue;
 		}
+		public ulong OwnerClientID()
+		{
+			return ownerClientId.Value;
+        }
 		public virtual void OnTargetted()
 		{
 			if (material == null || isTargetted) return;

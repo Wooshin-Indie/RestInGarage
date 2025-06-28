@@ -6,6 +6,7 @@ using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
 using Steamworks;
+using Manager;
 
 namespace Garage.Manager
 {
@@ -139,9 +140,9 @@ namespace Garage.Manager
 		}
 
 		[ClientRpc]
-		public void UpdateClientsPlayerInfoClientRPC(ulong steamId, string steamName, ulong clientId)
+		public void UpdateClientsPlayerInfoClientRPC(ulong steamId, string steamName, ulong clientId, bool isReady)
 		{
-			GameManagerEx.Instance.AddPlayerToDictionary(clientId, steamName, steamId);
+			GameManagerEx.Instance.AddPlayerToDictionary(clientId, steamName, steamId, isReady);
 		}
 
 		[ServerRpc(RequireOwnership = false)]
@@ -278,8 +279,13 @@ namespace Garage.Manager
 			playerDict.Remove(clientId);
 		}
 
-
 		[ServerRpc(RequireOwnership = false)]
+		public void ApplyStatsServerRPC(ulong clientId, StatEnum[] statEnums, float[] values)
+		{
+			playerDict[clientId].ApplyStatsClientRPC(statEnums, values);
+		}
+
+        [ServerRpc(RequireOwnership = false)]
 		public void OnSceneChangeStartedServerRPC(SceneEnum sceneEnum)
 		{
 			OnSceneChangeStartedClientRPC(sceneEnum);

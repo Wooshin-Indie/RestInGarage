@@ -1,17 +1,15 @@
 using DG.Tweening;
 using Garage.Controller.StateMachine;
-using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
 using IUtil;
-using JetBrains.Annotations;
+using Manager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -52,16 +50,30 @@ namespace Garage.Controller
 		[SerializeField] private List<Material> playerMaterial = new();
 
 
-		private int[] animIDs = new int[9];
+		private int[] animIDs = new int[10];
 
 		
 		private bool isAbleToMove = true;
+		private bool isAbleToRun = true;
 		private bool isBeingForced = false;
-        private bool isInputLocked = false;
-        public bool IsBeingForced => isBeingForced;
+        private bool isInputLocked = false
+        
+        
+		public bool IsBeingForced => isBeingForced;
+		public bool IsAbleToRun { get => isAbleToRun; set => isAbleToRun = value; }
+		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
+
+
+        private float originWalkSpeed;
+        private float originRunSpeed;
+        private float originCarrySpeed;
+		private float wrenchRepairSpeed = 1f;
+    
+        
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
+		public float WrenchRepairSpeed => wrenchRepairSpeed;
 
 		private Collider[] interactableHits = null;
 		
@@ -113,7 +125,13 @@ namespace Garage.Controller
 			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
-		}
+			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT);
+      
+
+			originWalkSpeed = walkSpeed;
+			originCarrySpeed = carrySpeed;
+			originRunSpeed = runSpeed;
+        }
 
 		public override void OnNetworkSpawn()
 		{
@@ -151,6 +169,7 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
+			UpdateSizeOfFireUIs();
 			if (!isInputLocked)
 			{
 				stateMachine.CurState.HandleInput();
@@ -221,7 +240,25 @@ namespace Garage.Controller
             SetAnimParam((int)AnimationType.Kick);
         }
 
-        void OnCollisionEnter(Collision collision)
+
+		private bool isFireUIsEnlarged = false;
+		public void UpdateSizeOfFireUIs()
+		{
+			if (currentOwningProp is not Extinguisher)
+			{
+				if (isFireUIsEnlarged)
+				{
+					isFireUIsEnlarged = false;
+					UIManager.Game.ReduceAllFireUIs();
+				}
+				return;
+			}
+
+			isFireUIsEnlarged = true;
+			UIManager.Game.EnlargeAllFireUIs();
+		}
+
+		void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
 
@@ -401,5 +438,33 @@ namespace Garage.Controller
             rigid.linearVelocity = Vector3.zero;
             SetAnimParam((int)AnimationType.Speed, 0);
         }
+
+        [ClientRpc]
+        public void ApplyStatsClientRPC(StatEnum[] statEnums, float[] values)
+        {
+            for (int i = 0; i < statEnums.Length; i++)
+			{
+				ApplyStat(statEnums[i], values[i]);
+			}
+			Debug.Log("Apply Stats: " + statEnums + values );
+        }
+
+		private void ApplyStat(StatEnum statEnum, float value)
+		{
+			switch (statEnum)
+			{
+				case StatEnum.PlayerSpeed:
+					// TODO - 스탯 적용
+					walkSpeed = originWalkSpeed * value;
+					runSpeed = originRunSpeed * value;
+					break;
+				case StatEnum.CarrySpeed:
+					carrySpeed = originCarrySpeed * value;
+					break;
+				case StatEnum.WrenchRepairSpeed:
+					wrenchRepairSpeed = value;
+                    break;
+			}
+		}
     }
 }

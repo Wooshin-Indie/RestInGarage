@@ -44,7 +44,7 @@ namespace Garage
 		}
 
 		// HACK - 임시로 저장한 기준
-		private float waitForCountSec = 7f;
+		private float waitForCountSec = 10f;
 		private float waitForOverSec = 5f;
 
 		private HashSet<CarController> currentlyInside = new HashSet<CarController>();
@@ -80,7 +80,7 @@ namespace Garage
 
 				currentlyInside.Add(car);
 
-				if (elapsedTime >= waitForCountSec && elapsedTime < waitForCountSec + waitForOverSec)
+				if (elapsedTime >= waitForCountSec && elapsedTime < waitForCountSec + waitForOverSec && car.IsStopped)
 				{
 					car.ShowCountdownUIClientRPC(elapsedTime - waitForCountSec, waitForOverSec);
 				}

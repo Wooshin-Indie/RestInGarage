@@ -1,3 +1,4 @@
+using Manager;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -30,7 +31,7 @@ namespace Garage.Manager
 			_input.Init();
 			_data.Init();
 			_spawn.Init();
-		}
+        }
 
 		private void Start()
 		{

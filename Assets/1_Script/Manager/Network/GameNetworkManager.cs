@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Garage.Utils;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Garage.UI.MainScene;
+using Garage.Structs;
 
 namespace Garage.Manager
 {
@@ -55,7 +57,7 @@ namespace Garage.Manager
 			SteamMatchmaking.OnLobbyInvite -= SteamMatchMaking_OnLobbyInvite;
 			SteamMatchmaking.OnLobbyGameCreated -= SteamMatchmaking_OnLobbyGameCreated;
 			SteamFriends.OnGameLobbyJoinRequested -= SteamFriends_OnGameLobbyJoinRequested;
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnSceneLoadedInNetwork;
 
             if (NetworkManager.Singleton == null) return;
 
@@ -85,18 +87,13 @@ namespace Garage.Manager
             Debug.Log($"Lobby created : {lobby.Owner.Name}");
 
             // Host 시작
-            Debug.Log("START HOST");
-            NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
-            NetworkManager.Singleton.StartHost();
-            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
-            GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+            StartHost();
 
 			// 로비UI 띄우고 초기화
 			UIManager.Main.LobbyPage.InitLobbyDatas_Host();
 			UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
 
             NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, NetworkManager.Singleton.LocalClientId);
-			// PlayerSpawner.Instance.SpawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
 		}
         private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
@@ -151,10 +148,13 @@ namespace Garage.Manager
 
         #region FromLobbyToGame Sequences
         public void StartHost()
-		{
-			Debug.Log("Start host...");
-			CreateLobby();
-			// 이거 순서 바꾸자. 버튼으로 CreateLobby를 호출 한 다음에 StartHost에서 네트워크매니저StartHost하고 쭉 콜백넣고 해서 정리
+        {
+            Debug.Log("START HOST...");
+            NetworkManager.Singleton.OnServerStarted += Singleton_OnServerStarted;
+            NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.OnClientDisconnectCallback += Singleton_OnClientDisconnectedCallback;
+            GameManagerEx.Instance.MyClientId = NetworkManager.Singleton.LocalClientId;
+            // 이거 순서 바꾸자. 버튼으로 CreateLobby를 호출 한 다음에 StartHost에서 네트워크매니저StartHost하고 쭉 콜백넣고 해서 정리
         }
 		public async void CreateLobby()
         {
@@ -189,26 +189,32 @@ namespace Garage.Manager
 
             Managers.Scene.ChangeSceneServer(SceneEnum.Lobby);
 
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnGameSceneLoaded;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoadedInNetwork;
         }
-		private void OnGameSceneLoaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
+		private void OnSceneLoadedInNetwork(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
-			if (sceneName != "LobbyScene") return;
+            Debug.Log("Scene loaded by Server");
+            if (sceneName == "LobbyScene")
+			{
 
-			if (!NetworkManager.Singleton.IsHost) return;
+                if (!NetworkManager.Singleton.IsHost) return;
 
-            Debug.Log("Game Scene loaded on all clients. Spawning players...");
+                Debug.Log("Game Scene loaded on all clients. Spawning players...");
 
-            foreach (ulong clientId in GameManagerEx.Instance.playerInfo.Keys)
-            {
-                NetworkTransmission.instance.SpawnPlayer(clientId, GetRandomSpawnPosition());
+                foreach (ulong clientId in GameManagerEx.Instance.playerInfo.Keys)
+                {
+                    NetworkTransmission.instance.SpawnPlayer(clientId, GetRandomSpawnPosition());
+                }
+
+                GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
+
+                NetworkTransmission.instance.StartGameServerRPC();
             }
-
-            GameManagerEx.Instance.OnGameStartInLobby_HostOnly();
-
-			NetworkTransmission.instance.StartGameServerRPC();
-
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnGameSceneLoaded;
+        }
+		private void OnSceneLoadedInLocal()
+        {
+            //if (sceneName == "MainScene")
+                UIManager.Main.GoToPage(PageEnum.Main);
         }
 
         private Vector3 GetRandomSpawnPosition()
@@ -228,7 +234,6 @@ namespace Garage.Manager
 			if (NetworkManager.Singleton.IsHost)
 			{
 				NetworkTransmission.instance.DisconnectAllClientRPC();
-				await Task.Delay(500);
 			}
 
 			currentLobby?.Leave();
@@ -241,11 +246,11 @@ namespace Garage.Manager
 			else
 			{
 				NetworkManager.Singleton.OnClientConnectedCallback -= Singleton_OnClientConnectedCallback;
-			}
-			NetworkManager.Singleton.Shutdown(true);
-            Debug.Log("Shutdown.");
+            }
             GameManagerEx.Instance.Disconnected();
             Debug.Log("Disconnected.");
+            NetworkManager.Singleton.Shutdown(true);
+            Debug.Log("Shutdown.");
         }
 		public async void FindLobbiesWithCallback(System.Action<Lobby[]> callback)
 		{
@@ -314,8 +319,8 @@ namespace Garage.Manager
 
 			NetworkTransmission.instance.StartHeartbeat();
 
-            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
             UIManager.Main.LobbyPage.InitLobbyDatas_Client(clientId);
+            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
         }
 		private void Singleton_OnServerStarted()
 		{

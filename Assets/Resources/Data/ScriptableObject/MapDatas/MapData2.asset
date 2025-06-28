@@ -13,13 +13,21 @@ MonoBehaviour:
   m_Name: MapData2
   m_EditorClassIdentifier: 
   spawningPoints: []
-  laneLength: 0
-  laneWidth: 0
-  removeLength: 0
-  camRotation: {x: 0, y: 0, z: 0}
-  maxStage: 0
-  laneCounts: 
-  spawnInterval: []
-  earnMoney: {x: 0, y: 0}
-  eraseMoney: {x: 0, y: 0}
-  itemPositions: []
+  laneLength: 40
+  laneWidth: 8
+  removeLength: 40
+  camRotation: {x: 48, y: 82, z: 0}
+  maxStage: 5
+  laneCounts: 000000000000000000000000
+  spawnInterval:
+  - {x: 6, y: 6}
+  - {x: 5, y: 5}
+  - {x: 5, y: 5}
+  - {x: 5, y: 5}
+  - {x: 4, y: 4}
+  earnMoney: {x: 40, y: 50}
+  eraseMoney: {x: 100, y: 200}
+  itemPositions:
+  - {x: 10, y: 0, z: 0}
+  - {x: 10, y: 0, z: 5}
+  - {x: 10, y: 0, z: -5}

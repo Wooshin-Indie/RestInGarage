@@ -91,7 +91,7 @@ namespace Garage.UI.MainScene
 			hostButton.onClick.AddListener(() => // 로비 생성
 			{
 				// 로비 정보 셋업
-				GameNetworkManager.Instance.StartHost();
+				GameNetworkManager.Instance.CreateLobby();
 				// TODO - MainUI 초기화 코드 필요
 			});
 			guestButton.onClick.AddListener(() =>

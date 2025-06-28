@@ -77,6 +77,8 @@ namespace Garage.Controller
 		private float gameoverTime = 0f;
 		public float GameoverTime { get => gameoverTime; set => gameoverTime = value; }
 
+		public bool IsStopped { get => rigid.linearVelocity.sqrMagnitude < 0.01; }
+
 		private int[] animIDs = new int[2];
 
 		private void Awake()

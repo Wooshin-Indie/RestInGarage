@@ -23,6 +23,7 @@ namespace Garage.Controller.StateMachine
 
 			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
+				controller.SetAnimParam((int)AnimationType.CarryMult, controller.CurrentOwningProp.CarrySpeed / 3f);
 				controller.SetAnimParam((int)AnimationType.Carry, true);
 			}
 		}
@@ -48,8 +49,8 @@ namespace Garage.Controller.StateMachine
 
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
-			bool isRun = Managers.Input.Control.Player.Run.IsPressed();
-			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed :
+			bool isRun = controller.IsRun;
+			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CurrentOwningProp.CarrySpeed :
 				((isRun ? controller.RunSpeed : controller.WalkSpeed));
 			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed : 
 				controller.RunSpeed;
@@ -97,21 +98,5 @@ namespace Garage.Controller.StateMachine
 
         }
 
-		private bool isFireUIsEnlarged = false;
-		public void UpdateSizeOfFireUIs()
-		{
-			if (controller.CurrentOwningProp is not Extinguisher)
-			{
-				if (isFireUIsEnlarged)
-				{
-					isFireUIsEnlarged = false;
-					UIManager.Game.ReduceAllFireUIs();
-				}
-				return;
-			}
-
-			isFireUIsEnlarged = true;
-			UIManager.Game.EnlargeAllFireUIs();
-		}
 	}
 }
