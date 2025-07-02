@@ -77,7 +77,6 @@ namespace Garage.Manager
 		{
 			if (!IsHost) return;
 
-			Debug.Log("OnRemainedTimeChanged");
 			if (current <= nextLogTime)
 			{
 				TrafficManager.Instance.SpawnCar();

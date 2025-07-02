@@ -251,9 +251,9 @@ namespace Garage.UI.GameScene
         }
         public void OnTimerChanged(float prevTime, float curTime)
         {
+            timerText.SetTime(prevTime, curTime);
             if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
             {
-                timerText.SetTime(prevTime, curTime);
             }
 		}
         public void OnStartStage(int idx)

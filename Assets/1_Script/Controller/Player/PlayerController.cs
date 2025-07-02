@@ -326,7 +326,6 @@ namespace Garage.Controller
 
 			if (curTransparentCar == tmpRaycastedCar)
 			{
-                Debug.Log("똑같으므로 리턴");
                 return;
             }
 
