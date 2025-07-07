@@ -242,7 +242,7 @@ namespace Garage.Controller
 
 
 		private bool isFireUIsEnlarged = false;
-		public void UpdateSizeOfFireUIs()
+		private void UpdateSizeOfFireUIs()
 		{
 			if (currentOwningProp is not Extinguisher)
 			{
@@ -466,5 +466,51 @@ namespace Garage.Controller
                     break;
 			}
 		}
+
+		private float interactPropKeyInfoUITimer = 0f;
+		private float idlePropKeyInfoUITimer = 0f;
+		private float propKeyInfoUIDelay = 1.5f;
+        public void UpdatePropKeyInfoUIs()
+        {
+            // interactPropKeyInfoUI condition
+            if (currentFixablePart != null && currentFixablePart.IsAbleToInteract(currentOwningProp))
+            {
+                idlePropKeyInfoUITimer = 0f;
+
+                interactPropKeyInfoUITimer += Time.deltaTime;
+                if (interactPropKeyInfoUITimer > propKeyInfoUIDelay)
+                {
+					interactPropKeyInfoUITimer = 0f;
+                    UIManager.Game.PopPropKeyInfoUI(currentOwningProp, currentFixablePart.transform, PlayerState.Interact);
+                }
+                return;
+            }
+            // carryPropKeyInfoUI condition
+            else if (currentOwningProp != null)
+            {
+                interactPropKeyInfoUITimer = 0f;
+                idlePropKeyInfoUITimer = 0f;
+
+                UIManager.Game.PopPropKeyInfoUI(currentOwningProp, PlayerState.Carry);
+				return;
+            }
+            // idlePropKeyInfoUI condition
+            else if (recentlyDetectedProp != null && recentlyDetectedProp == prevDetectedProp)
+            {
+                interactPropKeyInfoUITimer = 0f;
+
+                idlePropKeyInfoUITimer += Time.deltaTime;
+                if (idlePropKeyInfoUITimer > propKeyInfoUIDelay)
+                {
+                    idlePropKeyInfoUITimer = 0f;
+                    UIManager.Game.PopPropKeyInfoUI(recentlyDetectedProp, PlayerState.Idle);
+                }
+				return;
+            }
+
+            UIManager.Game.ClosePropKeyInfoUI();
+            interactPropKeyInfoUITimer = 0f;
+            idlePropKeyInfoUITimer = 0f;
+        }
     }
 }

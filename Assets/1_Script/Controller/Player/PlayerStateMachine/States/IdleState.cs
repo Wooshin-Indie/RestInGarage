@@ -47,6 +47,12 @@ namespace Garage.Controller.StateMachine
 				}
 			}
 
+			if (Managers.Input.Control.Player.Info.WasPressedThisFrame())
+			{
+				controller.ActivateShopInfoUI();
+            }
+			controller.UpdateShopInfoUIStatus();
+
             if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
                 controller.KickCar();
         }

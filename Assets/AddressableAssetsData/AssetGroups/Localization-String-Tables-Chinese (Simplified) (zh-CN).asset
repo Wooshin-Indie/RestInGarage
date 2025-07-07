@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: Localization-String-Tables-Chinese (Simplified) (zh-CN)
   m_GUID: ff42582e2dc52c242867afe8a97d35f8
   m_SerializeEntries:
+  - m_GUID: 0d24d6ffbfe19d8469261141f44b3886
+    m_Address: GameUI_PropPrompt_zh-CN
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh-CN
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 81bf20a92a6bb8e4d85197c0b7d802ce
     m_Address: MainUI_zh-CN
     m_ReadOnly: 1

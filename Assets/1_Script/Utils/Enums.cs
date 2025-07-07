@@ -66,4 +66,11 @@ namespace Garage.Utils
         Invisible,
         PrivateUnique
     }
+
+    public enum PlayerState
+    {
+        Idle,
+        Carry,
+        Interact
+    }
 }

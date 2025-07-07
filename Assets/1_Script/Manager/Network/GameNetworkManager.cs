@@ -40,7 +40,7 @@ namespace Garage.Manager
 			if (NetworkManager.Singleton.IsClient && NetworkManager.Singleton.IsConnectedClient)
             {
                 ulong ping = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(NetworkManager.ServerClientId);
-				Debug.Log("PingRtt: " + ping + "ms");
+				//Debug.Log("PingRtt: " + ping + "ms");
             }
         }
 

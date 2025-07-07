@@ -20,6 +20,12 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e73b65b46cfb41645ade39ebf2b04ce2
+    m_Address: Assets/Resources/Localizations/UI/GameUI/GameUI_PropPrompt Shared
+      Data.asset
+    m_ReadOnly: 1
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 1
   m_Settings: {fileID: 11400000, guid: b38e7532ec8315c4d860ef617f219968, type: 2}
   m_SchemaSet:
