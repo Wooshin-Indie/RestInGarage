@@ -30,13 +30,18 @@ namespace Garage.Props
 		public override void Awake()
 		{
 			base.Awake();
+			Init();
 			fireExPS.Stop();
 
 			IsAction.OnValueChanged -= OnActionChanged;
 			IsAction.OnValueChanged += OnActionChanged;
 		}
+        public override void Init()
+        {
+            base.Init();
+        }
 
-		protected override void StartInteraction(ulong newOwnerClientId)
+        protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			base.StartInteraction(newOwnerClientId);
 			if (GameManagerEx.Instance.IsDay)

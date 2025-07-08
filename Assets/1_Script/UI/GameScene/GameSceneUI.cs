@@ -11,6 +11,9 @@ using DG.Tweening;
 using Garage.Manager;
 using UnityEngine.UI;
 using Garage.UI.Item;
+using Garage.Interfaces;
+using Garage.Props;
+using UnityEngine.Rendering;
 
 namespace Garage.UI.GameScene
 {
@@ -20,6 +23,11 @@ namespace Garage.UI.GameScene
         [SerializeField] private BalanceUI balanceText;
         [SerializeField] private TimerText timerText;
         [SerializeField] private StageStartEndUI stageStartEndUI;
+
+        [Header("PropInfoUIs")]
+        [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
+        [SerializeField] private PropKeyInfoUI carryPropKeyInfoUI;
+        [SerializeField] private PropKeyInfoUI interactPropKeyInfoUI;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
@@ -53,6 +61,8 @@ namespace Garage.UI.GameScene
                 }
             }
             // 여기서 carStatusInfo에 있는 CarStatusUI들 전부 Update
+
+            curPoppedPropKeyInfoUI?.OnUpdate();
         }
 
         public void UpdateCarFiringUI(CarController car, float progress)
@@ -251,9 +261,9 @@ namespace Garage.UI.GameScene
         }
         public void OnTimerChanged(float prevTime, float curTime)
         {
+            timerText.SetTime(prevTime, curTime);
             if (Mathf.FloorToInt(prevTime) != Mathf.FloorToInt(curTime))
             {
-                timerText.SetTime(prevTime, curTime);
             }
 		}
         public void OnStartStage(int idx)
@@ -270,5 +280,74 @@ namespace Garage.UI.GameScene
         {
 
         }
-	}
+
+
+        #region Prop Key Information UI
+
+        private Dictionary<Type, PropKeyInfoUI> idlePropKeyDataDict = new(); // IdleState에서 프랍에 작용가능한 키 정보들
+        private Dictionary<Type, PropKeyInfoUI> carryPropKeyDataDict = new();
+        private Dictionary<Type, PropKeyInfoUI> interactPropKeyDataDict = new();
+
+        private PlayerState curPropKeyInfoFor;
+        /* 어떤 상태에 대한 KeyInfo가 나와야할지 선택,
+         * PlayerState.Interact일 때는 interactState에 들어갔을 때의 KeyInfo가 아니라
+         * interactState에 들어갈 수 있을 때(ex. fix가능한 carPart 있을 때)에
+         * 대한 정보를 띄움 (-> interactPropKeyInfoUI)
+         */
+        private PropKeyInfoUI curPoppedPropKeyInfoUI;
+        private List<KeyData> curPropKeyDataList;
+
+        public void PopPropKeyInfoUI(PropBase prop, PlayerState propInfoFor)
+        {
+            PopPropKeyInfoUI(prop, prop.transform, propInfoFor);
+        }
+        public void PopPropKeyInfoUI(PropBase prop, Transform target, PlayerState propInfoFor)
+        {
+            if (prop == null)
+            {
+                Debug.Log("Popping Prop is null");
+                return;
+            }
+
+            // 원래 켜져있는거 있으면 끄기
+            if (curPoppedPropKeyInfoUI != null)
+                ClosePropKeyInfoUI();
+
+            switch (propInfoFor)
+            {
+                case PlayerState.Idle:
+                    curPoppedPropKeyInfoUI = idlePropKeyInfoUI;
+                    curPropKeyDataList = prop.ItemData.IdleKeyDataList;
+                    break;
+                case PlayerState.Carry:
+                    curPoppedPropKeyInfoUI = carryPropKeyInfoUI;
+                    if (GameManagerEx.Instance.IsDay)
+                        curPropKeyDataList = prop.ItemData.CarryKeyDataList;
+                    else
+                        curPropKeyDataList = prop.ItemData.CarryNightKeyDataList;
+                    break;
+                case PlayerState.Interact:
+                    curPoppedPropKeyInfoUI = interactPropKeyInfoUI;
+                    curPropKeyDataList = prop.ItemData.InteractKeyDataList;
+                    break;
+                default:
+                    Debug.LogError("Enum.PlayerState Invalid");
+                    break;
+            }
+            curPoppedPropKeyInfoUI.SetPropKeyInfoUI(target, curPropKeyDataList);
+            curPoppedPropKeyInfoUI.PopUI();
+        }
+        public void ClosePropKeyInfoUI()
+        {
+            if (curPoppedPropKeyInfoUI == null)
+            {
+                Debug.Log("Current Popped PropKeyInfoUI is null");
+                return;
+            }
+
+            curPoppedPropKeyInfoUI.CloseUI();
+            curPoppedPropKeyInfoUI = null;
+        }
+        #endregion
+    }
 }

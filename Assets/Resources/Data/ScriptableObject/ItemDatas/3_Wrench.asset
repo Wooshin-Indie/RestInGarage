@@ -19,3 +19,76 @@ MonoBehaviour:
   sellPrice: 5
   descriptionKey: Wrench prop description key.
   itemFeatures: []
+  idleKeyDataList:
+  - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 86304976281600
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: F
+  - Action: {fileID: -8797641998656535605, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 1477015026016256
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: I
+  carryKeyDataList:
+  - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 89365081759744
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: F
+  interactKeyDataList:
+  - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 1477806143053824
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: F
+  carryNightKeyDataList:
+  - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 89365081759744
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: 
+  - Action: {fileID: 4512394059213047069, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+    LocalizedDescription:
+      m_TableReference:
+        m_TableCollectionName: GUID:e73b65b46cfb41645ade39ebf2b04ce2
+      m_TableEntryReference:
+        m_KeyId: 1471582206959616
+        m_Key: 
+      m_FallbackState: 0
+      m_WaitForCompletion: 0
+      m_LocalVariables: []
+    KeyDisplayName: 
+  references:
+    version: 2
+    RefIds: []

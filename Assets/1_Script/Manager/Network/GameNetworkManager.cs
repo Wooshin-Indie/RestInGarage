@@ -35,6 +35,14 @@ namespace Garage.Manager
 			}
 		}
         #endregion
+        private void Update()
+        {
+			if (NetworkManager.Singleton.IsClient && NetworkManager.Singleton.IsConnectedClient)
+            {
+                ulong ping = NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetCurrentRtt(NetworkManager.ServerClientId);
+				//Debug.Log("PingRtt: " + ping + "ms");
+            }
+        }
 
         private void Start()
 		{
@@ -88,12 +96,6 @@ namespace Garage.Manager
 
             // Host 시작
             StartHost();
-
-			// 로비UI 띄우고 초기화
-			UIManager.Main.LobbyPage.InitLobbyDatas_Host();
-			UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
-
-            NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, NetworkManager.Singleton.LocalClientId);
 		}
         private void SteamMatchmaking_OnLobbyEntered(Lobby lobby)
 		{
@@ -101,7 +103,6 @@ namespace Garage.Manager
 			if (lobby.Owner.Id == SteamClient.SteamId) return;
 
             currentLobby = lobby;
-			GameManagerEx.Instance.ConnectedAsClient();
 			StartClient(lobby.Owner.Id);
 		}
 		private void SteamMatchmaking_OnLobbyJoined(Lobby lobby, Friend friend)
@@ -307,7 +308,8 @@ namespace Garage.Manager
 		private void Singleton_OnClientConnectedCallback(ulong clientId)
         {
             if (NetworkManager.Singleton.IsHost) return;
-
+			Debug.Log("Client Synchronization Mode: " + NetworkManager.Singleton.SceneManager.ClientSynchronizationMode);
+            GameManagerEx.Instance.ConnectedAsClient();
             Managers.Scene.UnloadCurrentScene();
 
             NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, clientId); 
@@ -324,8 +326,15 @@ namespace Garage.Manager
         }
 		private void Singleton_OnServerStarted()
 		{
+			Debug.Log("OnServerStarted Callback...");
 			GameManagerEx.Instance.HostCreated();
-		}
+
+            // 로비UI 띄우고 초기화
+            UIManager.Main.LobbyPage.InitLobbyDatas_Host();
+            UIManager.Main.GoToPage(UI.MainScene.PageEnum.Lobby);
+
+            NetworkTransmission.instance.AddMeToDictionayServerRPC(SteamClient.SteamId, SteamClient.Name, NetworkManager.Singleton.LocalClientId);
+        }
 
         private void OnSceneUnloaded(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{

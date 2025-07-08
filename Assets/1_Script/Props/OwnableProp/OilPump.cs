@@ -1,13 +1,14 @@
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
 	public class OilPump : OwnableProp, IPlaceable
-	{
+    {
 		[SerializeField] private Vector3 initPos;
 		[SerializeField] private Vector3 initRot;
 
@@ -26,13 +27,23 @@ namespace Garage.Props
 
 		public override void Awake()
 		{
-			gunRigid = oilgun.GetComponent<Rigidbody>();
+			base.Awake();
+			Init();
+            gunRigid = oilgun.GetComponent<Rigidbody>();
 			hits = new RaycastHit[5];
-            ropeMaterial = rope.GetComponent<MeshRenderer>().material;
-			originColor = ropeMaterial.GetColor("_Emissive_Color");
+
+			if (rope != null)
+			{
+				ropeMaterial = rope.GetComponent<MeshRenderer>().material;
+				originColor = ropeMaterial.GetColor("_Emissive_Color");
+			}
+        }
+        public override void Init()
+        {
+            base.Init();
         }
 
-		protected override void StartInteraction(ulong newOwnerClientId)
+        protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			base.StartInteraction(newOwnerClientId);
 		}
@@ -63,8 +74,12 @@ namespace Garage.Props
 				}
 
 				if (!IsHost) return;
-				CheckObstacle();
-				UpdateFuelHoseStatus();
+
+				if(rope != null)
+				{
+					CheckObstacle();
+					UpdateFuelHoseStatus();
+				}
             }
 			else
 			{
@@ -92,7 +107,6 @@ namespace Garage.Props
 				//if (hitObj == gameObject) continue;
 				//if (hitObj == oilgun.gameObject) continue;
 				if (hitObj.CompareTag(Constants.TAG_PLAYER) && OwnerClientId == Controller.OwnerClientId) continue;
-				Debug.Log("막힘!: " + hitObj.name);
 				isThereObstacle = true;
                 return;
 			}
@@ -134,5 +148,5 @@ namespace Garage.Props
 		{
 			return previewPrefab;
 		}
-	}
+    }
 }

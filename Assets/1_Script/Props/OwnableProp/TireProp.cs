@@ -10,7 +10,18 @@ namespace Garage.Props
 	{
 
 		[SerializeField] protected float height;
-		protected override void StartInteraction(ulong newOwnerClientId)
+
+        public override void Awake()
+        {
+            base.Awake();
+            Init();
+        }
+        public override void Init()
+        {
+            base.Init();
+        }
+
+        protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			base.StartInteraction(newOwnerClientId);
 			transform.GetComponent<Rigidbody>().useGravity = false;

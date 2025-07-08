@@ -1,22 +1,26 @@
 using DG.Tweening;
 using Garage.Manager;
+using Garage.Structs;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
 	public class TimerText : MonoBehaviour
 	{
-		private TextMeshProUGUI tmpText;
-
+		[SerializeField] private TextMeshProUGUI tmpText;
+		[SerializeField] private Image background;
 		private void Awake()
 		{
-			tmpText = GetComponent<TextMeshProUGUI>();
+
 		}
 
 		private void OnEnable()
 		{
 			tmpText.text = "";
+			background.fillAmount = 0f;
 		}
 
 		public void SetTime(float prev, float current)
@@ -39,6 +43,8 @@ namespace Garage.UI.GameScene
 			}
 
 			tmpText.text = (curTime < 0) ? "" : curTime.ToString();
+			// HACK - MaxTime은 나중에 SO에 넣어야됨 (MapData에)
+			background.fillAmount = current / 20f;
 		}
 	}
 }
