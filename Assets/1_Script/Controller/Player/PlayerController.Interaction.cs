@@ -3,6 +3,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
+using Steamworks;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -177,6 +178,7 @@ namespace Garage.Controller
 			int targetLayer = Constants.LAYER_INTERACTABLE;
 			int hitCount = Physics.OverlapBoxNonAlloc(boxCenter, boxSize * 0.5f, interactableHits, transform.rotation, targetLayer);
 
+			prevDetectedProp = recentlyDetectedProp;
 
 			recentlyDetectedProp = null;
 			currentFixablePart = null;
@@ -227,13 +229,29 @@ namespace Garage.Controller
 
 			recentlyDetectedProp?.OnTargetted();
 			if (prevDetectedProp != recentlyDetectedProp) prevDetectedProp?.OnUntargetted();
-			prevDetectedProp = recentlyDetectedProp;
-			UIManager.Game.PopupItemInfo(recentlyDetectedProp == null ? null : recentlyDetectedProp.ItemData);
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
 
-		public void ExtinguishFire(Vector3 position)
+		private bool shopInfoActivated = false;
+		public void ActivateShopInfoUI()
 		{
+			shopInfoActivated = true;
+        }
+        public void UpdateShopInfoUIStatus()
+        {
+			if (!shopInfoActivated) return;
+			if (recentlyDetectedProp == null)
+			{
+                UIManager.Game.PopupItemInfo(null);
+				shopInfoActivated = false;
+                return;
+			}
+
+            UIManager.Game.PopupItemInfo(recentlyDetectedProp.ItemData);
+        }
+
+        public void ExtinguishFire(Vector3 position)
+        {
 			if (currentOwningProp == null || currentOwningProp.GetComponent<Extinguisher>() == null) return;
 
 			Vector3 sprayEndPosition = position + transform.forward * currentOwningProp.GetComponent<Extinguisher>().ExDistance;

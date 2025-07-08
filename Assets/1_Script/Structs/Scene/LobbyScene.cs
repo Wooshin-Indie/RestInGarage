@@ -7,7 +7,7 @@ namespace Garage.Structs
 		protected override void Init()
 		{
 			base.Init();
-			SceneEnum = SceneEnum.Lobby;
+			SceneEnum = SceneEnum.Game;
 		}
 
 		public override void Clear()

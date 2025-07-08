@@ -31,7 +31,6 @@ namespace Garage.UI.GameScene.Items
         [SerializeField] private Sprite oilBlinkImage;
         [SerializeField] private Sprite fireBlinkImage;
 
-        private Camera mainCam;
         private CarController car;
         private Transform partTransform;
         private Vector3 bubbleUIScale = Vector3.one;
@@ -43,8 +42,6 @@ namespace Garage.UI.GameScene.Items
 
         private void Awake()
         {
-            mainCam = Camera.main;
-
             blinkingUIRect.localScale = Vector3.one;
             bubbleUIRect.localScale = Vector3.zero;
             blinkOriginColor = blinkingIconImage.color;
@@ -65,6 +62,7 @@ namespace Garage.UI.GameScene.Items
             }
 
             ApplyFill(0f); // 처음 mask가 비어있게 설정
+            transform.SetAsFirstSibling();
         }
 
         public void OnUpdate()
@@ -153,14 +151,14 @@ namespace Garage.UI.GameScene.Items
 
         private void OnUpdateScreenPos()
         {
-            Vector3 screenPos = mainCam.WorldToScreenPoint(partTransform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
             transform.position = screenPos;
         }
 
         private bool isFirstInBoundary = false;
         private void OnUpdateFireScreenPos()
         {
-            Vector3 screenPos = mainCam.WorldToScreenPoint(partTransform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
 
             if (car.IsInBoundary())
             {
@@ -169,9 +167,9 @@ namespace Garage.UI.GameScene.Items
                     screenPos.x = screenEdgeMargin;
                     EnlargeCarPartUI();
                 }
-                else if (screenPos.x >= mainCam.pixelWidth)
+                else if (screenPos.x >= Camera.main.pixelWidth)
                 {
-                    screenPos.x = mainCam.pixelWidth - screenEdgeMargin;
+                    screenPos.x = Camera.main.pixelWidth - screenEdgeMargin;
                     EnlargeCarPartUI();
                 }
                 else

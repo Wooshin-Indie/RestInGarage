@@ -11,7 +11,17 @@ namespace Garage.Props
 	{
 		[SerializeField] private GameObject previewPrefab;
 
-		protected override void StartInteraction(ulong newOwnerClientId)
+        public override void Awake()
+        {
+			base.Awake();
+            Init();
+        }
+        public override void Init()
+        {
+            base.Init();
+        }
+
+        protected override void StartInteraction(ulong newOwnerClientId)
 		{
 			base.StartInteraction(newOwnerClientId);
 
@@ -61,6 +71,7 @@ namespace Garage.Props
 			}
 			else
 			{
+				Debug.Log("MovePosition: " + gridPosition.Value);
 				rigid.MovePosition(gridPosition.Value);
 				rigid.MoveRotation(Quaternion.identity);
 				rigid.linearVelocity = Vector3.zero;

@@ -8,7 +8,7 @@ namespace Garage.Utils
     {
         None = -1,
         Main,
-        Lobby
+        Game
     }
 
     public enum PropType
@@ -65,5 +65,12 @@ namespace Garage.Utils
         Public,
         Invisible,
         PrivateUnique
+    }
+
+    public enum PlayerState
+    {
+        Idle,
+        Carry,
+        Interact
     }
 }

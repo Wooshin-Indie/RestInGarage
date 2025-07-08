@@ -1,5 +1,10 @@
+using Garage.Manager;
+using Garage.Utils;
+using IUtil;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Localization;
 
 namespace Garage.Structs
 {
@@ -13,9 +18,20 @@ namespace Garage.Structs
 		public bool IsPositiveFeature = false;
 	}
 
-	// 단순하게 만들어뒀고,
-	// 나중에 itemType, 설명 등 여러가지 추가가능
-	[CreateAssetMenu(fileName = "Item Data", menuName = "SO/Item Data")]
+    [System.Serializable]
+    public class KeyData
+    {
+        // 인스펙터에서 'Interact', 'Hold' 등의 InputAction을 직접 연결할 수 있습니다.
+        public InputActionReference Action;
+        public LocalizedString LocalizedDescription; // 키에 대한 설명 (예: "들기", "놓기")
+
+        // 런타임에 사용할 바인딩된 키 이름 (예: "E")
+        [HideInInspector] public string KeyDisplayName;
+    }
+
+    // 단순하게 만들어뒀고,
+    // 나중에 itemType, 설명 등 여러가지 추가가능
+    [CreateAssetMenu(fileName = "Item Data", menuName = "SO/Item Data")]
 	public class ItemData : ScriptableObject
 	{
 		[SerializeField] private bool isRevealData = true;
@@ -28,12 +44,64 @@ namespace Garage.Structs
 		[SerializeField] private string descriptionKey;
 		[SerializeField] private List<ItemFeature> itemFeatures = new();
 
-		public bool IsRevealData => isRevealData;
+        [SerializeField] private List<KeyData> idleKeyDataList;
+        [SerializeField] private List<KeyData> carryKeyDataList;
+        [SerializeField] private List<KeyData> interactKeyDataList;
+        [SerializeField] private List<KeyData> carryNightKeyDataList;
+        private Dictionary<string, KeyData> idleKeyDataMap;
+        private Dictionary<string, KeyData> carryKeyDataMap;
+        private Dictionary<string, KeyData> interactKeyDataMap;
+        private Dictionary<string, KeyData> carryNightKeyDataMap;
+        public void InitKeyDataMaps()
+        {
+            InitKeyDataMap(idleKeyDataList, idleKeyDataMap);
+            InitKeyDataMap(carryKeyDataList, carryKeyDataMap);
+            InitKeyDataMap(interactKeyDataList, interactKeyDataMap);
+            InitKeyDataMap(carryNightKeyDataList, carryNightKeyDataMap);
+        }
+        private void InitKeyDataMap(List<KeyData> keyList, Dictionary<string, KeyData> keyDataMap)
+        {
+            keyDataMap = new Dictionary<string, KeyData>();
+
+            foreach (var data in keyList)
+            {
+                if (data.Action == null) continue;
+
+                // InputAction의 이름을 Key로 사용하여 딕셔너리에 추가
+                // 예: "Interact", "Rotate"
+                string actionName = data.Action.action.name;
+                if (!keyDataMap.ContainsKey(actionName))
+                {
+                    // 바인딩된 키의 표시 이름을 가져와서 저장
+                    // GetBindingDisplayString()은 바인딩된 키를 "E", "LMB" 등으로 보기 좋게 반환합니다.
+                    data.KeyDisplayName = data.Action.action.GetBindingDisplayString();
+                    keyDataMap.Add(actionName, data);
+                }
+            }
+        }
+
+        public KeyData GetCarryKeyData(InputAction action)
+        {
+            if (action == null) return null;
+
+            return GetCarryKeyData(action.name);
+        }
+        public KeyData GetCarryKeyData(string actionName)
+        {
+            carryKeyDataMap.TryGetValue(actionName, out var data);
+            return data;
+        }
+
+        public bool IsRevealData => isRevealData;
 		public int ItemID => itemID;
 		public string ItemName => itemName;
 		public int BuyPrice => buyPrice;
 		public int SellPrice => sellPrice;
 		public string DescriptionKey => descriptionKey;
 		public List<ItemFeature> ItemFeatures => itemFeatures;
-	}
+        public List<KeyData> IdleKeyDataList => idleKeyDataList;
+        public List<KeyData> CarryKeyDataList => carryKeyDataList;
+        public List<KeyData> InteractKeyDataList => interactKeyDataList;
+        public List<KeyData> CarryNightKeyDataList => carryNightKeyDataList;
+    }
 }

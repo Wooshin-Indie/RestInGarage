@@ -235,7 +235,7 @@ namespace Garage.Manager
 
 					PlayAmbient(AMBType.Engine);
 					break;
-				case SceneEnum.Lobby:
+				case SceneEnum.Game:
 					StopAmbient(AMBType.Engine);
 					break;
 			}

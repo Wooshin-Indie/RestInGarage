@@ -1,12 +1,15 @@
 using Garage.Controller;
+using Garage.Interfaces;
+using Garage.Manager;
 using IUtil;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
-	public class OwnableProp : PropBase
-	{
+	public class OwnableProp : PropBase, IKeyCodeDescription
+    {
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 		public ulong OwnerClientId => ownerClientId.Value;
         protected PlayerController controller;
@@ -30,7 +33,12 @@ namespace Garage.Props
 
 		private Material material;
 
-		public override void OnNetworkSpawn()
+        public virtual void Init()
+        {
+			InitKeyDescriptions();
+        }
+
+        public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
 			ownerClientId.OnValueChanged += OnClientIDChanged;
@@ -122,5 +130,10 @@ namespace Garage.Props
 			transform.position = pos;
 			gridPosition.Value = pos;
 		}
-	}
+
+        public void InitKeyDescriptions()
+        {
+			ItemData.InitKeyDataMaps();
+        }
+    }
 }

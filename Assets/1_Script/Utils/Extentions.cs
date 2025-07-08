@@ -1,7 +1,9 @@
 using DG.Tweening;
+using System;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Localization.Components;
 
 namespace Garage.Utils
@@ -104,5 +106,30 @@ namespace Garage.Utils
 			else
 				return v.y;
         }
-	}
+
+        public static KeyCode? GetFirstKeyboardBinding(this InputAction action)
+        {
+            if (action == null) return null;
+
+            // action.bindings는 해당 액션에 연결된 모든 바인딩의 배열입니다.
+            foreach (var binding in action.bindings)
+            {
+                // binding.path는 "<Keyboard>/e", "<Gamepad>/buttonSouth"와 같은 문자열입니다.
+                // 키보드 바인딩인지 확인합니다.
+                if (binding.path != null && binding.path.StartsWith("<Keyboard>"))
+                {
+                    // "<Keyboard>/".Length 만큼 잘라내어 키 이름("e")만 추출합니다.
+                    string keyName = binding.path.Substring("<Keyboard>/".Length);
+
+                    // 키 이름을 KeyCode enum으로 변환합니다. (대소문자 무시)
+                    if (Enum.TryParse<KeyCode>(keyName, true, out var keyCode))
+                    {
+                        return keyCode;
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
 }
