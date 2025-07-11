@@ -252,7 +252,7 @@ namespace Garage.Manager
 
 			foreach (var item in ItemDictionary)
 			{
-				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.BuyPrice);
+				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.GetBuyPrice(item.Value.UpgradeLevel));
 			}
 
 			sellBoundGameObject.SetActive(true);

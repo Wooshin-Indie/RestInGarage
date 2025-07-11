@@ -15,14 +15,12 @@ MonoBehaviour:
   isRevealData: 1
   itemID: 2
   itemName: Fuel Pump
-  buyPrice: 100
-  sellPrice: 10
   descriptionKey: Fuel pump description key
-  itemFeatures:
-  - FeatureName: Fuel Pump Feat
-    FeatureValue: 15
-    IsPositiveValue: 1
-    IsPositiveFeature: 1
+  upgradeDatas:
+  - buyPrice: 0
+    sellPrice: 0
+    progressMult: 0
+    features: []
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:

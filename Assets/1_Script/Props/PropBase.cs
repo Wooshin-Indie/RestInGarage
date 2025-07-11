@@ -7,8 +7,10 @@ namespace Garage.Props
 	public class PropBase : NetworkBehaviour
 	{
 		public ItemData ItemData;
-
 		protected Rigidbody rigid;
+
+		[SerializeField] private int upgradeLevel = 0;
+		public int UpgradeLevel => upgradeLevel;
 
 		public virtual void Awake()
 		{

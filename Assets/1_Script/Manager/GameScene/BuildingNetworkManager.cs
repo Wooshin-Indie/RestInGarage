@@ -45,7 +45,7 @@ namespace Garage.Manager
 			// TODO - 위치에 따라서 살지 팔지 
 			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
 			{
-				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.BuyPrice))
+				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.GetBuyPrice(oProp.UpgradeLevel)))
 				{
 					FailToPlaceClientRPC(BuildFailType.NoMoney, clientId);
 					return;
@@ -88,7 +88,7 @@ namespace Garage.Manager
 
 			if (gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
 			{
-				EconomyManager.Instance.EarnMoney_HostOnly(prop.ItemData.SellPrice);
+				EconomyManager.Instance.EarnMoney_HostOnly(prop.ItemData.GetSellPrice(oProp.UpgradeLevel));
 				OwnableProp tmpProp = null;
 				if (BuildingManager.Instance.PlacedBuildings.TryGetValue(propNetId, out tmpProp))
 				{

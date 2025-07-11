@@ -15,10 +15,8 @@ MonoBehaviour:
   isRevealData: 0
   itemID: 0
   itemName: TireProp
-  buyPrice: 0
-  sellPrice: 0
   descriptionKey: Description Key
-  itemFeatures: []
+  upgradeDatas: []
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:

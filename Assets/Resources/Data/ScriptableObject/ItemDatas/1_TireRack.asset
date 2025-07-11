@@ -15,10 +15,28 @@ MonoBehaviour:
   isRevealData: 1
   itemID: 1
   itemName: Tire Rack
-  buyPrice: 250
-  sellPrice: 8
   descriptionKey: Tire rack description key.
-  itemFeatures: []
+  upgradeDatas:
+  - buyPrice: 10
+    sellPrice: 20
+    progressMult: 1
+    features:
+    - FeatureName: RackTmp1
+      FeatureValue: 20
+      IsPositiveValue: 1
+      IsPositiveFeature: 1
+  - buyPrice: 30
+    sellPrice: 40
+    progressMult: 2
+    features:
+    - FeatureName: RackTmp1
+      FeatureValue: 30
+      IsPositiveValue: 1
+      IsPositiveFeature: 1
+    - FeatureName: RackTmp2
+      FeatureValue: 45
+      IsPositiveValue: 1
+      IsPositiveFeature: 0
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:

@@ -1,6 +1,3 @@
-using Garage.Manager;
-using Garage.Utils;
-using IUtil;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,6 +14,15 @@ namespace Garage.Structs
 		public bool IsPositiveValue = false;
 		public bool IsPositiveFeature = false;
 	}
+
+    [System.Serializable]
+    public class UpgradeData
+    {
+		public int buyPrice;
+		public int sellPrice;
+        public float progressMult;
+		public List<ItemFeature> features = new();
+    }
 
     [System.Serializable]
     public class KeyData
@@ -38,11 +44,8 @@ namespace Garage.Structs
 
 		[SerializeField] private int itemID;
 		[SerializeField] private string itemName;
-		[SerializeField] private int buyPrice;
-		[SerializeField] private int sellPrice;
-
 		[SerializeField] private string descriptionKey;
-		[SerializeField] private List<ItemFeature> itemFeatures = new();
+		[SerializeField] private List<UpgradeData> upgradeDatas = new();
 
         [SerializeField] private List<KeyData> idleKeyDataList;
         [SerializeField] private List<KeyData> carryKeyDataList;
@@ -92,13 +95,35 @@ namespace Garage.Structs
             return data;
         }
 
-        public bool IsRevealData => isRevealData;
+        public int GetBuyPrice(int upgrade)
+        {
+            if (upgradeDatas.Count <= upgrade)
+            {
+                return 0;
+            }
+            return upgradeDatas[upgrade].buyPrice;
+		}
+		public int GetSellPrice(int upgrade)
+		{
+			if (upgradeDatas.Count <= upgrade)
+			{
+				return 0;
+			}
+			return upgradeDatas[upgrade].sellPrice;
+		}
+		public List<ItemFeature> GetItemFeatures(int upgrade)
+		{
+			if (upgradeDatas.Count <= upgrade)
+			{
+				return null;
+			}
+			return upgradeDatas[upgrade].features;
+		}
+
+		public bool IsRevealData => isRevealData;
 		public int ItemID => itemID;
 		public string ItemName => itemName;
-		public int BuyPrice => buyPrice;
-		public int SellPrice => sellPrice;
 		public string DescriptionKey => descriptionKey;
-		public List<ItemFeature> ItemFeatures => itemFeatures;
         public List<KeyData> IdleKeyDataList => idleKeyDataList;
         public List<KeyData> CarryKeyDataList => carryKeyDataList;
         public List<KeyData> InteractKeyDataList => interactKeyDataList;
