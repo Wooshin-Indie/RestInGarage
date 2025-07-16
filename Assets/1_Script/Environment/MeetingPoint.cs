@@ -27,11 +27,6 @@ namespace Garage.Environment
 
 		private Collider[] hits = new Collider[4];
 
-		private void Awake()
-		{
-
-		}
-
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();

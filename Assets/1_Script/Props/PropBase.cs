@@ -9,12 +9,26 @@ namespace Garage.Props
 		public ItemData ItemData;
 		protected Rigidbody rigid;
 
-		[SerializeField] private int upgradeLevel = 0;
-		public int UpgradeLevel => upgradeLevel;
+		[SerializeField] private NetworkVariable<int> upgradeLevel = new();
+		public int UpgradeLevel => upgradeLevel.Value;
 
 		public virtual void Awake()
 		{
 			rigid = GetComponent<Rigidbody>();
+		}
+
+		public void UpgradeItem_HostOnly()
+		{
+			if (!IsHost) return;
+			if (!IsAbleToUpgrade()) return;
+
+			// TODO - 업그레이드 돈 사용
+			upgradeLevel.Value += 1;
+		}
+
+		public bool IsAbleToUpgrade()
+		{
+			return upgradeLevel.Value < ItemData.UpgradeDatas.Count - 1;
 		}
 
 		#region Transform RPC

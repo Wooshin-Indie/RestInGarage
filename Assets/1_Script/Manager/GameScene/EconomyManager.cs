@@ -41,8 +41,8 @@ namespace Garage.Manager
 
         public bool HasEnoughMoney(int money)
         {
-            return Balance.Value <= money;
-        }
+            return money <= Balance.Value;
+		}
 
         public bool UseMoney_HostOnly(int pay)
         {

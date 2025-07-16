@@ -2,7 +2,6 @@ using DG.Tweening;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
-using Mono.Cecil.Cil;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -66,7 +65,7 @@ namespace Garage.UI.GameScene
 			ItemData data = prop.ItemData;
 			List<ItemFeature> features = prop.ItemData.GetItemFeatures(prop.UpgradeLevel);
 
-			nameText.text = data.ItemName;				// 이거도 나중에 Key로 바꿔야됨
+			nameText.text = data.ItemName + (prop.UpgradeLevel != 0 ? " +" + prop.UpgradeLevel.ToString() : "");				// 이거도 나중에 Key로 바꿔야됨
 			buyPrice.text = data.GetBuyPrice(prop.UpgradeLevel).ToString();
 			sellPrice.text = data.GetSellPrice(prop.UpgradeLevel).ToString();
 			descriptionText.text = data.DescriptionKey; // TODO - 이거 Localization Table 참조해야됨
@@ -98,9 +97,7 @@ namespace Garage.UI.GameScene
 		[SerializeField] private TextMeshProUGUI buyPrice;
 		[SerializeField] private TextMeshProUGUI sellText;
 		[SerializeField] private TextMeshProUGUI sellPrice;
-		[SerializeField] private TextMeshProUGUI descriptionTitle;
 		[SerializeField] private TextMeshProUGUI descriptionText;
-		[SerializeField] private TextMeshProUGUI featuresTitle;
 		[SerializeField] private List<TextMeshProUGUI> featureTexts = new();
 
 		[Header("Spacing")]
@@ -121,11 +118,7 @@ namespace Garage.UI.GameScene
 			SetAndMove(sellText.rectTransform, ref y, 0f, false);
 			SetAndMove(sellPrice.rectTransform, ref y, parSpacing);
 
-			SetAndMove(descriptionTitle.rectTransform, ref y, spacing);
 			SetAndMove(descriptionText.rectTransform, ref y, parSpacing);
-
-			SetAndMove(featuresTitle.rectTransform, ref y, parSpacing);
-
 
 			for (int i = 0; i<featureTexts.Count; i++)
 			{

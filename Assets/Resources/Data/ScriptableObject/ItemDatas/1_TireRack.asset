@@ -19,6 +19,7 @@ MonoBehaviour:
   upgradeDatas:
   - buyPrice: 10
     sellPrice: 20
+    upgradePrice: 20
     progressMult: 1
     features:
     - FeatureName: RackTmp1
@@ -27,6 +28,7 @@ MonoBehaviour:
       IsPositiveFeature: 1
   - buyPrice: 30
     sellPrice: 40
+    upgradePrice: 0
     progressMult: 2
     features:
     - FeatureName: RackTmp1
@@ -95,7 +97,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: F
   - Action: {fileID: 4512394059213047069, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
       m_TableReference:
@@ -106,7 +108,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: R
   references:
     version: 2
     RefIds: []

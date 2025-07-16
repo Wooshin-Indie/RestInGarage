@@ -20,6 +20,7 @@ namespace Garage.Structs
     {
 		public int buyPrice;
 		public int sellPrice;
+		public int upgradePrice;
         public float progressMult;
 		public List<ItemFeature> features = new();
     }
@@ -120,6 +121,7 @@ namespace Garage.Structs
 			return upgradeDatas[upgrade].features;
 		}
 
+        public List<UpgradeData> UpgradeDatas => upgradeDatas;
 		public bool IsRevealData => isRevealData;
 		public int ItemID => itemID;
 		public string ItemName => itemName;
