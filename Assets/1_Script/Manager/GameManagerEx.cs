@@ -155,6 +155,12 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
+			// HACH - 임시로 여기에서 보스 소환함
+			if (GameSynchronizer.Instance.RemainedTime.Value <= 15f && !BossManager.Instance.BossStarted)
+			{
+				StartBossFight();
+			}
+
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
 			{
 				OnTimeoutAction?.Invoke();
@@ -382,5 +388,14 @@ namespace Garage.Manager
 		{
 			Application.Quit();
 		}
-	}
+
+		#region Bosses
+		public void StartBossFight()
+		{
+			Debug.Log("Start BossFight, GameManagerEX");
+			BossManager.Instance.StartBossFight();
+        }
+
+        #endregion
+    }
 }

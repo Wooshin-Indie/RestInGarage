@@ -7,6 +7,7 @@ using Unity.Netcode;
 using Garage.Utils;
 using Garage.Structs;
 using System;
+using Garage.Vehicle;
 
 namespace Garage.Manager
 {
@@ -40,7 +41,8 @@ namespace Garage.Manager
             GameManagerEx.Instance.OnStartGameAction += OnStageStart;
 		}
 
-		[SerializeField] private List<GameObject> carPrefab = new();
+		[SerializeField] private List<GameObject> carPrefabList = new();
+		[SerializeField] private GameObject bikerGangPrefab;
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
         
@@ -88,7 +90,7 @@ namespace Garage.Manager
 			if (availableSpawnPoints.Count > 0)
 			{
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
-                CarController car = Instantiate(carPrefab[UnityEngine.Random.Range(0, carPrefab.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
+                CarController car = Instantiate(carPrefabList[UnityEngine.Random.Range(0, carPrefabList.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
                 car.GetComponent<NetworkObject>().Spawn();
                 car.InitCarController(spawnPoint);
@@ -108,5 +110,15 @@ namespace Garage.Manager
             Destroy(car.gameObject);
 		}
 
+
+        public BikerGang SpawnBikerGang(Vector3 spawnPoint)
+        {
+            // TrafficManager에서 물량 관리
+            // 나중에 필요하면 Despawn도 여기에서 하면 될 듯?
+            BikerGang bikerGang = Instantiate(bikerGangPrefab, spawnPoint, Quaternion.Euler(0f, 180f, 0f)).GetComponent<BikerGang>();
+            bikerGang.GetComponent<NetworkObject>().Spawn();
+
+            return bikerGang;
+        }
 	}
 }

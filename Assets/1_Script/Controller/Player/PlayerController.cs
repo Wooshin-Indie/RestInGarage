@@ -5,6 +5,7 @@ using Garage.Props;
 using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
+using Garage.Vehicle;
 using IUtil;
 using Manager;
 using System;
@@ -262,16 +263,21 @@ namespace Garage.Controller
         {
             if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
 
-            Rigidbody carRigid = collision.collider.GetComponentInParent<Rigidbody>();
-			if (carRigid == null)
+            Rigidbody vehicleRigid = collision.collider.GetComponentInParent<Rigidbody>();
+			if (vehicleRigid == null)
 			{
 				Debug.LogWarning("Car Rigidbody can't be found");
                 return;
             }
-			CarController car = carRigid.GetComponent<CarController>();
 
-			// 힘 안받고있으면 return
-			if (!car.IsBeingForced) return;
+			// TODO - CarController를 VehicleBase에 통합
+			VehicleBase vehicle = vehicleRigid.GetComponentInParent<VehicleBase>();
+			if (vehicle == null) return;
+
+			// 닿으면 튕겨나가는 차량인지 확인
+			if (!vehicle.IsKnockbackOnHumanCollision) return;
+
+			if (isBeingForced) return;
 
             // 튕겨나갈 방향 계산
             Vector3 knockbackDirection = Vector3.zero;
