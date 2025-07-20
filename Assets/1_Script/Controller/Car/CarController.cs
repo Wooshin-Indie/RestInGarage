@@ -7,16 +7,15 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using System.Collections;
 using DG.Tweening;
+using Garage.Vehicle;
 
 namespace Garage.Controller
 {
 	/// <summary>
 	/// CarController 의 움직임 및 생명주기 관련 코드를 포함합니다.
 	/// </summary>
-	public partial class CarController : NetworkBehaviour
+	public partial class CarController : VehicleBase
 	{
-		private Rigidbody rigid;
-
 		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
 		[SerializeField] private List<Transform> partTransforms = new();	// 넣을 때 CarParts enum 순서 맞춰서 넣기
@@ -62,9 +61,7 @@ namespace Garage.Controller
 		private bool isBeingControlled = false;
 		private bool isStageEnded = false;
 		private bool isAnyBroken = true;
-
-		private bool isBeingForced = false;
-		public bool IsBeingForced => isBeingForced;
+		public bool IsAnyBroken => isAnyBroken;
         
 		private Collider[] hitResults = new Collider[30];
 		private Material[] instanceMats;
@@ -369,7 +366,7 @@ namespace Garage.Controller
         }
         private IEnumerator MoveSideways(float distanceX, float time)
         {
-			isBeingForced = true;
+			IsKnockbackOnHumanCollision = true;
 			isBeingControlled = true;
             Vector3 startPos = new Vector3(rigid.position.x, rigid.position.y, rigid.position.z);
 			Vector3 targetPos = startPos;
@@ -387,7 +384,7 @@ namespace Garage.Controller
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            isBeingForced = false;
+            IsKnockbackOnHumanCollision = false;
             rigid.MovePosition(targetPos);
 
             targetLaneX += distanceX;

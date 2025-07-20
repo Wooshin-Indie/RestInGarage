@@ -15,7 +15,12 @@ namespace Garage.Utils
 			return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y) + Mathf.Abs(a.z - b.z);
 		}
 
-		public static Tweener DOFontSize(this TextMeshProUGUI tmp, float targetSize, float duration)
+        public static bool Approximately(this float a, float b, float tolerance)
+        {
+            return Mathf.Abs(a - b) <= tolerance;
+        }
+
+        public static Tweener DOFontSize(this TextMeshProUGUI tmp, float targetSize, float duration)
 		{
 			float startSize = tmp.fontSize;
 			return DOTween.To(() => tmp.fontSize, x => tmp.fontSize = x, targetSize, duration);

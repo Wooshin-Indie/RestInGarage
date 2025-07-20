@@ -18,14 +18,14 @@ MonoBehaviour:
   - SpawnPointX: 2
     Direction: 1
   laneLength: 40
-  laneWidth: 8
+  laneWidth: 7
   removeLength: 40
   camRotation: {x: 48, y: 82, z: 0}
   maxStage: 5
   laneCounts: 0000000000000000000000000000000000000000
   spawnInterval:
   - {x: 1000, y: 1000}
-  - {x: 10, y: 10}
+  - {x: 5, y: 5}
   - {x: 5, y: 5}
   - {x: 5, y: 5}
   - {x: 4, y: 4}

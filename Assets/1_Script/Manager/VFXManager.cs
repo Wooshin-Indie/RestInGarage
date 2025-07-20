@@ -23,7 +23,8 @@ namespace Garage.Manager
         FireExtingusher,
         RepairHammering,
         AllPartsRepaired,
-        PopEmoteGood
+        PopEmoteGood,
+        BombExplosion
     }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
