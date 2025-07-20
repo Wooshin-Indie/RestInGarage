@@ -1174,6 +1174,7 @@ MonoBehaviour:
   - {fileID: 8904382118372160319}
   - {fileID: 1498925718915739369}
   - {fileID: 4550578250525319074}
+  knockbackStrength: 20
   walkSpeed: 4
   runSpeed: 8
   carrySpeed: 3
@@ -1190,7 +1191,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 9d22253fc47352749a80fe79f559394b, type: 2}
   - {fileID: 2100000, guid: 62a818a2ffb9601459c492240bfb80b9, type: 2}
   - {fileID: 2100000, guid: 250de527d2ee10c4b862cd36479bb53d, type: 2}
-  knockbackStrength: 10
   transparentLayer:
     serializedVersion: 2
     m_Bits: 512

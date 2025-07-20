@@ -88,15 +88,26 @@ namespace Garage.Manager
             float eventCycleTime = bikerGangEventDuration;
             int curEventCount = 0;
             elapsedTime = 0f;
-
+            int curSpawnIdx = 0;
+            int preSpawnIdx = 0;
             while (elapsedTime < bikerGangEventDuration) // bikerGangEventCount만큼 폭주족 웨이브 왔었으면 종료
             {
                 float randomSpawnInterval = Random.Range(bikerGangSpawnInterval.x, bikerGangSpawnInterval.y);
 
-                TrafficManager.Instance.SpawnBikerGang(bossSpawnPoints[Random.Range(0, bossSpawnPoints.Length)]);
+                curSpawnIdx = Random.Range(0, bossSpawnPoints.Length);
+                if (preSpawnIdx == curSpawnIdx)
+                {
+                    if (curSpawnIdx == 0)
+                        curSpawnIdx++;
+                    else
+                        curSpawnIdx--;
+                }
+
+                TrafficManager.Instance.SpawnBikerGang(bossSpawnPoints[curSpawnIdx]);
+
+                preSpawnIdx = curSpawnIdx;
 
                 elapsedTime += Time.deltaTime;
-
                 yield return new WaitForSeconds(randomSpawnInterval);
             }
         }
