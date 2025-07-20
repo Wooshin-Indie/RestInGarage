@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.745283, g: 0.0768295, b: 0, a: 1}
+  m_Color: {r: 1, g: 0.9230539, b: 0.1273585, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -141,7 +141,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sell
+  m_text: Upgrade
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9b391b8f398bdf24e90d39242da49cd9, type: 2}
   m_sharedMaterial: {fileID: 3847725395673628258, guid: 9b391b8f398bdf24e90d39242da49cd9, type: 2}
@@ -150,8 +150,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190335
-  m_fontColor: {r: 1, g: 0, b: 0, a: 1}
+    rgba: 4278252031
+  m_fontColor: {r: 1, g: 0.9451673, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -168,8 +168,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 15.14
-  m_fontSizeBase: 15.14
+  m_fontSize: 13.4
+  m_fontSizeBase: 13.4
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -247,7 +247,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 53.28, y: 52.6}
+  m_SizeDelta: {x: 52.81, y: 53.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7037105653372696217
 CanvasRenderer:
@@ -298,9 +298,9 @@ GameObject:
   - component: {fileID: 5598369443618022753}
   - component: {fileID: 724949961058600449}
   - component: {fileID: 4874467675745264701}
-  - component: {fileID: 7259642909658904446}
+  - component: {fileID: 5698273050754677846}
   m_Layer: 0
-  m_Name: SellPoint
+  m_Name: UpgradePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -334,7 +334,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2029606812
+  GlobalObjectIdHash: 1043911543
   InScenePlacedSourceGlobalObjectIdHash: 2257902457
   DeferredDespawnTick: 0
   Ownership: 1
@@ -393,7 +393,7 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 0
   SlerpPosition: 0
---- !u!114 &7259642909658904446
+--- !u!114 &5698273050754677846
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -402,12 +402,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 6401124710559395942}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a074b12d0ddb8c41bbd2088f45a7421, type: 3}
+  m_Script: {fileID: 11500000, guid: a9db84d7ececaa24592a4dc451390c51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   boxCenter: {x: 0, y: 0, z: 0}
-  boxSize: {x: 5, y: 5, z: 4.75}
+  boxSize: {x: 5, y: 2, z: 5}
   maxTime: 5
   stageIdxTmp: {fileID: 2802719463853253382}
   progress: {fileID: 5610202699645275521}

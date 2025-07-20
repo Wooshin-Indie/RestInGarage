@@ -247,9 +247,9 @@ namespace Garage.UI.GameScene
             carStatusInfo[carID][tire].ChangeTireImage();
 		}
         // 화면에 Shop Item 정보를 띄움
-        public void PopupItemInfo(ItemData data)
+        public void PopupItemInfo(OwnableProp prop)
         {
-            shopInfo.SetInfo(data);
+            shopInfo.SetInfo(prop);
             shopInfo.gameObject.SetActive(true);
         }
         public void OnTimerChanged(float prevTime, float curTime)

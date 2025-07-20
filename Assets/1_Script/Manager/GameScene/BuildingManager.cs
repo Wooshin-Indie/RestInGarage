@@ -8,6 +8,13 @@ using UnityEngine;
 
 namespace Garage.Manager
 {
+	public enum GridIndexType
+	{
+		Place,
+		Sell,
+		Upgrade
+	}
+
 	public class BuildingManager : MonoBehaviour
 	{
 		#region Singleton
@@ -56,6 +63,7 @@ namespace Garage.Manager
 		[SerializeField] private Material previewDisableMaterial;
 
 		[SerializeField] private GameObject sellBoundPrefab;
+		[SerializeField] private GameObject upgradeBoundPrefab;
 
 		/** 게임 시작 시 Init **/
 		private List<GridTile[,]> gridTiles;
@@ -95,6 +103,7 @@ namespace Garage.Manager
 
 		private List<Vector3> shopPositions = new();
 		private GameObject sellBoundGameObject = null;
+		private GameObject upgradeBoundGameObject = null;
 		public void SpawnBasicBuildings_HostOnly(int mapIdx)
 		{
 			shopPositions = Managers.Resource.GetData<MapData>(mapIdx).ItemPositions;
@@ -151,9 +160,13 @@ namespace Garage.Manager
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
-			Vector2Int sellPos = gridOrigin[^1] + gridSize[^1] / 2;
+			Vector2Int sellPos = gridOrigin[(int)GridIndexType.Sell] + gridSize[(int)GridIndexType.Sell] / 2;
 			sellBoundGameObject = Instantiate(sellBoundPrefab, new Vector3(sellPos.x - 0.5f, 0f, sellPos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
 			sellBoundGameObject.GetComponent<NetworkObject>().Spawn();
+
+			Vector2Int upgradePos = gridOrigin[(int)GridIndexType.Upgrade] + gridSize[(int)GridIndexType.Upgrade] / 2;
+			upgradeBoundGameObject = Instantiate(upgradeBoundPrefab, new Vector3(upgradePos.x - 0.5f, 0f, upgradePos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
+			upgradeBoundGameObject.GetComponent<NetworkObject>().Spawn();
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -252,7 +265,7 @@ namespace Garage.Manager
 
 			foreach (var item in ItemDictionary)
 			{
-				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.BuyPrice);
+				BuildingNetworkManager.Instance.OnShopItemRevealedClientRPC(item.Value.transform.position - new Vector3(1.5f, 0, 0), item.Key, item.Value.ItemData.GetBuyPrice(item.Value.UpgradeLevel));
 			}
 
 			sellBoundGameObject.SetActive(true);
@@ -459,25 +472,22 @@ namespace Garage.Manager
 			);
 		}
 
+		/// 메모리 문제로 props가 리턴값 대신 쓰입니다.
+		public void GetPropsInGrid(GridIndexType type, HashSet<OwnableProp> props)
+		{
+			props.Clear();
+			for (int i = 0; i < gridSize[(int)type].x; i++) {
+				for (int j = 0; j < gridSize[(int)type].y; j++)
+				{
+					if (gridTiles[(int)type][i, j].prop != null)
+						props.Add(gridTiles[(int)type][i, j].prop);
+				}
+			}
+		}
+
 		public bool IsInBounds(int gridIndex, Vector2Int pos)
 		{
 			return pos.x >= 0 && pos.y >= 0 && pos.x < gridSize[gridIndex].x && pos.y < gridSize[gridIndex].y;
-		}
-
-		private Vector3 GetMouseWorldPosOnY0()
-		{
-			Camera cam = Camera.main;
-			Vector3 mousePos = Input.mousePosition;
-
-			Vector3 near = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane));
-			Vector3 far = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.farClipPlane));
-
-			Vector3 dir = (far - near).normalized;
-
-			float t = -near.y / dir.y;
-			Vector3 hit = near + dir * t;
-
-			return hit;
 		}
 
 		private void ChangePreviewMaterial(GameObject go, Material material)

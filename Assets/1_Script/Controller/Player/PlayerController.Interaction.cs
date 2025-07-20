@@ -247,7 +247,7 @@ namespace Garage.Controller
                 return;
 			}
 
-            UIManager.Game.PopupItemInfo(recentlyDetectedProp.ItemData);
+            UIManager.Game.PopupItemInfo(recentlyDetectedProp);
         }
 
         public void ExtinguishFire(Vector3 position)

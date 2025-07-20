@@ -156,7 +156,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: 3f55df8fe5169d84c90338cf4791c0ee, type: 2}
-  renderer: {fileID: 501110816465581116}
+  meshRenderer: {fileID: 501110816465581116}
   targetColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
   isCarry: 1
   carrySpeed: 10
