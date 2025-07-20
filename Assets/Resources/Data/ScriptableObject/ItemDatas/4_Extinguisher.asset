@@ -15,20 +15,20 @@ MonoBehaviour:
   isRevealData: 1
   itemID: 4
   itemName: Extinguisher
-  buyPrice: 50
-  sellPrice: 5
   descriptionKey: A fire extinguisher is a safety device used to put out small fires,
     including those on vehicles. It sprays a chemical that cools the flames and helps
     stop the fire from spreading.
-  itemFeatures:
-  - FeatureName: Extinguish time
-    FeatureValue: 25
-    IsPositiveValue: 0
-    IsPositiveFeature: 1
-  - FeatureName: Player Speed
-    FeatureValue: 20
-    IsPositiveValue: 0
-    IsPositiveFeature: 0
+  upgradeDatas:
+  - buyPrice: 0
+    sellPrice: 0
+    upgradePrice: 0
+    progressMult: 0
+    features: []
+  - buyPrice: 0
+    sellPrice: 0
+    upgradePrice: 0
+    progressMult: 0
+    features: []
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
@@ -87,7 +87,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: F
   - Action: {fileID: 4512394059213047069, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
       m_TableReference:
@@ -98,7 +98,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: R
   references:
     version: 2
     RefIds: []

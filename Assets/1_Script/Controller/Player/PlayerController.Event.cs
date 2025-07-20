@@ -105,6 +105,7 @@ namespace Garage.Controller
 
 		private void OnGettingUp()
 		{
+			Debug.Log("OnGettingUp");
 			isBeingForced = false;
 		}
 

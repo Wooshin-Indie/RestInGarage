@@ -9,11 +9,8 @@ using Unity.Netcode;
 using UnityEngine;
 using DG.Tweening;
 using Garage.Manager;
-using UnityEngine.UI;
 using Garage.UI.Item;
-using Garage.Interfaces;
 using Garage.Props;
-using UnityEngine.Rendering;
 
 namespace Garage.UI.GameScene
 {
@@ -23,6 +20,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private BalanceUI balanceText;
         [SerializeField] private TimerText timerText;
         [SerializeField] private StageStartEndUI stageStartEndUI;
+        [SerializeField] private BossWarningUI bossWarningUI;
 
         [Header("PropInfoUIs")]
         [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
@@ -33,17 +31,12 @@ namespace Garage.UI.GameScene
         [SerializeField] private GameObject carStatusUIPrefab;
         [SerializeField] private GameObject carCountdownUIPrefab;
         [SerializeField] private ShopInfo shopInfo;
+        [SerializeField] private GameObject bombAlertUIPrefab;
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
         // fitstKey -> NetworkObjectId
         // secondKey -> (Enum)CarParts
-        private bool isAnyEnlargedPart;
-
-        private void Awake()
-        {
-            isAnyEnlargedPart = false;
-        }
 
 		private void Start()
 		{
@@ -254,9 +247,9 @@ namespace Garage.UI.GameScene
             carStatusInfo[carID][tire].ChangeTireImage();
 		}
         // 화면에 Shop Item 정보를 띄움
-        public void PopupItemInfo(ItemData data)
+        public void PopupItemInfo(OwnableProp prop)
         {
-            shopInfo.SetInfo(data);
+            shopInfo.SetInfo(prop);
             shopInfo.gameObject.SetActive(true);
         }
         public void OnTimerChanged(float prevTime, float curTime)
@@ -349,5 +342,10 @@ namespace Garage.UI.GameScene
             curPoppedPropKeyInfoUI = null;
         }
         #endregion
+
+        public void StartBossWarning()
+        {
+            bossWarningUI.StartBossWarningVFX();
+        }
     }
 }

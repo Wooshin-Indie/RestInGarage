@@ -1,8 +1,5 @@
 using Garage.Controller;
 using Garage.Interfaces;
-using Garage.Manager;
-using IUtil;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,28 +7,27 @@ namespace Garage.Props
 {
 	public class OwnableProp : PropBase, IKeyCodeDescription
     {
-		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
-		public ulong OwnerClientId => ownerClientId.Value;
-        protected PlayerController controller;
-		public PlayerController Controller => controller;
-        protected NetworkVariable<Vector3> gridPosition = new();
+		private Material material;
 
-		[SerializeField] private MeshRenderer renderer;
+		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private Color targetColor;
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
-
 		[SerializeField] private float carrySpeed;
-		[SerializeField] private float progressMult;
+
+		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
+		protected PlayerController controller;
+		public ulong OwnClientId => ownerClientId.Value;
+		public PlayerController Controller => controller;
+
+        protected NetworkVariable<Vector3> gridPosition = new();
 
 		public bool IsCarry => isCarry;
 		public float CarrySpeed => carrySpeed;
-		public float ProgressMult => progressMult;
 
 		private bool isTargetted = false;
 
-		private Material material;
 
         public virtual void Init()
         {
@@ -42,7 +38,7 @@ namespace Garage.Props
 		{
 			base.OnNetworkSpawn();
 			ownerClientId.OnValueChanged += OnClientIDChanged;
-			material = renderer.material;
+			material = meshRenderer.material;
 		}
 
 		private void OnClientIDChanged(ulong prev, ulong clientId)

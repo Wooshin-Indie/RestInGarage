@@ -307,5 +307,12 @@ namespace Garage.Manager
 		{
             UIManager.Transition.StartTransition(duration);
         }
+
+		[ClientRpc]
+		public void StartBossWarningFXClientRPC()
+		{
+			UIManager.Game.StartBossWarning();
+			Managers.Sound.PlaySfx(SFXType.BossWarning);
+        }
     }
 }

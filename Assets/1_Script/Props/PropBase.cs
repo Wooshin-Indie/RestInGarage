@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Garage.Structs;
 using Unity.Netcode;
 using UnityEngine;
@@ -7,12 +8,28 @@ namespace Garage.Props
 	public class PropBase : NetworkBehaviour
 	{
 		public ItemData ItemData;
-
 		protected Rigidbody rigid;
+
+		[SerializeField] private NetworkVariable<int> upgradeLevel = new();
+		public int UpgradeLevel => upgradeLevel.Value;
 
 		public virtual void Awake()
 		{
 			rigid = GetComponent<Rigidbody>();
+		}
+
+		public void UpgradeItem_HostOnly()
+		{
+			if (!IsHost) return;
+			if (!IsAbleToUpgrade()) return;
+
+			EconomyManager.Instance.UseMoney_HostOnly(ItemData.UpgradeDatas[upgradeLevel.Value].upgradePrice);
+			upgradeLevel.Value += 1;
+		}
+
+		public bool IsAbleToUpgrade()
+		{
+			return upgradeLevel.Value < ItemData.UpgradeDatas.Count - 1;
 		}
 
 		#region Transform RPC

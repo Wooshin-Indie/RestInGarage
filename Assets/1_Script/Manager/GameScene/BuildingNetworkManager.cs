@@ -1,20 +1,21 @@
 using Garage.Props;
 using Garage.UI.Item;
 using Garage.Utils;
+using IUtil;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Garage.Manager
 {
-
 	public enum BuildFailType
 	{
 		WrongPlace,
 		NoMoney,
 	}
 
-	public class BuildingNetworkManager : NetworkBehaviour	
+	public class BuildingNetworkManager : NetworkBehaviour
 	{
 		#region Singleton
 		private static BuildingNetworkManager instance;
@@ -42,10 +43,10 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices, ulong clientId)
 		{
-			// TODO - 위치에 따라서 살지 팔지 
+			// TODO - 위치에 따라서 살지 팔지
 			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
 			{
-				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.BuyPrice))
+				if (!EconomyManager.Instance.UseMoney_HostOnly(oProp.ItemData.GetBuyPrice(oProp.UpgradeLevel)))
 				{
 					FailToPlaceClientRPC(BuildFailType.NoMoney, clientId);
 					return;
@@ -86,41 +87,78 @@ namespace Garage.Manager
 			BuildingManager.Instance.OnBuyItem(propNetId);
 			OnShopItemBuyedClientRPC(propNetId);
 
-			if (gridIdx == BuildingManager.Instance.GridTiles.Count - 1)
+			foreach (var index in tileIndices)
 			{
-				EconomyManager.Instance.EarnMoney_HostOnly(prop.ItemData.SellPrice);
+				BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
+			}
+
+			Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
+			int rotation = wheelRotate;
+
+			prop.SetGridPosition(position);
+			prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
+
+			TryPlaceResultClientRpc(propNetId, position, rotation);
+
+			return;
+		}
+
+		private HashSet<OwnableProp> sellProps = new();
+		private HashSet<OwnableProp> upgradeProps = new();
+
+		[ServerRpc(RequireOwnership = false)]
+		public void SellPropsServerRPC()
+		{
+			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Sell, sellProps);
+			
+			foreach(var prop in sellProps)
+			{
+				ulong propNetId = prop.NetworkObjectId;
+				EconomyManager.Instance.EarnMoney_HostOnly(prop.ItemData.GetSellPrice(prop.UpgradeLevel));
 				OwnableProp tmpProp = null;
+
 				if (BuildingManager.Instance.PlacedBuildings.TryGetValue(propNetId, out tmpProp))
 				{
 					BuildingManager.Instance.PlacedBuildings.Remove(propNetId);
-
-					tmpProp.GetComponent<NetworkObject>().Despawn();
-					Destroy(tmpProp.gameObject);
-				}
-
-				if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out tmpProp))
-				{
-					BuildingManager.Instance.ItemDictionary.Remove(propNetId);
-
 					tmpProp.GetComponent<NetworkObject>().Despawn();
 					Destroy(tmpProp.gameObject);
 				}
 			}
-			else
+		}
+
+		public bool IsAbleToSell()
+		{
+			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Sell, sellProps);
+
+			return sellProps.Count > 0;
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		public void UpgradePropsServerRPC()
+		{
+			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Upgrade, upgradeProps);
+
+			foreach (var prop in upgradeProps)
 			{
-				foreach (var index in tileIndices)
-				{
-					BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
-				}
-
-				Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
-				int rotation = wheelRotate;
-
-				prop.SetGridPosition(position);
-				prop.GetComponent<Rigidbody>().SetRotation(Quaternion.Euler(0f, rotation * 90f, 0f));
-
-				TryPlaceResultClientRpc(propNetId, position, rotation);
+				prop.UpgradeItem_HostOnly();
 			}
+		}
+
+		public bool IsAbleToUpgrade()
+		{
+			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Upgrade, upgradeProps);
+
+			if (upgradeProps.Count == 0) return false;
+
+			bool isAbleToUpgrade = true;
+			int upgradeCost = 0;
+			foreach (var prop in upgradeProps)
+			{
+				isAbleToUpgrade = isAbleToUpgrade && prop.IsAbleToUpgrade();
+				upgradeCost += prop.ItemData.UpgradeDatas[prop.UpgradeLevel].upgradePrice;
+			}
+
+			return isAbleToUpgrade && EconomyManager.Instance.HasEnoughMoney(upgradeCost);
 		}
 
 

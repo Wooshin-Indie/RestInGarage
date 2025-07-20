@@ -15,10 +15,18 @@ MonoBehaviour:
   isRevealData: 1
   itemID: 3
   itemName: Wrench
-  buyPrice: 50
-  sellPrice: 5
   descriptionKey: Wrench prop description key.
-  itemFeatures: []
+  upgradeDatas:
+  - buyPrice: 0
+    sellPrice: 0
+    upgradePrice: 40
+    progressMult: 0
+    features: []
+  - buyPrice: 0
+    sellPrice: 0
+    upgradePrice: 0
+    progressMult: 0
+    features: []
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
@@ -77,7 +85,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: F
   - Action: {fileID: 4512394059213047069, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
       m_TableReference:
@@ -88,7 +96,7 @@ MonoBehaviour:
       m_FallbackState: 0
       m_WaitForCompletion: 0
       m_LocalVariables: []
-    KeyDisplayName: 
+    KeyDisplayName: R
   references:
     version: 2
     RefIds: []

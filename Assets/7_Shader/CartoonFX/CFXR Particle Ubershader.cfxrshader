@@ -174,8 +174,7 @@ Shader "Cartoon FX/Remaster/Particle Ubershader"
 		}
 
 		Blend [_SrcBlend] [_DstBlend], One One
-		ZWrite On
-        ZTest Always
+		ZWrite [_ZWrite]
 		Cull  Off
 
 /*** URP ***/
@@ -188,8 +187,6 @@ Shader "Cartoon FX/Remaster/Particle Ubershader"
 			{
 				Name "BASE_URP"
 				Tags { "LightMode"="UniversalForward" }
-				
-				ZWrite On
 
 				CGPROGRAM
 
@@ -235,8 +232,6 @@ Shader "Cartoon FX/Remaster/Particle Ubershader"
 			{
 				Name "BASE_URP"
 				Tags { "LightMode"="Universal2D" }
-				
-				ZWrite On
 
 				CGPROGRAM
 

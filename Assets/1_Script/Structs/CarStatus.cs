@@ -36,8 +36,8 @@ namespace Garage.Structs
         private int hasTire;
         private float[] progress; // 0 ~ 1
         private float fireProgress = -1f;
-
-		public float FireProgress { get => fireProgress; set => fireProgress = value > 1.1f ? 1.1f : value; }
+        // FireProgress는 host에서만 만짐
+        public float FireProgress { get => fireProgress; set => fireProgress = value > 1.1f ? 1.1f : value; }
         public int HasTire { get => hasTire; set => hasTire = value; }
         public float[] Progress { get => progress; set => progress = value; }
 

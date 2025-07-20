@@ -5,11 +5,13 @@ using Garage.Props;
 using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
+using Garage.Vehicle;
 using IUtil;
 using Manager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -262,22 +264,28 @@ namespace Garage.Controller
         {
             if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
 
-            Rigidbody carRigid = collision.collider.GetComponentInParent<Rigidbody>();
-			if (carRigid == null)
+            Rigidbody vehicleRigid = collision.collider.GetComponentInParent<Rigidbody>();
+			if (vehicleRigid == null)
 			{
 				Debug.LogWarning("Car Rigidbody can't be found");
                 return;
             }
-			CarController car = carRigid.GetComponent<CarController>();
 
-			// 힘 안받고있으면 return
-			if (!car.IsBeingForced) return;
+			// TODO - CarController를 VehicleBase에 통합
+			VehicleBase vehicle = vehicleRigid.GetComponentInParent<VehicleBase>();
+			if (vehicle == null) return;
+
+			// 닿으면 튕겨나가는 차량인지 확인
+			if (!vehicle.IsKnockbackOnHumanCollision) return;
+
+			if (isBeingForced) return;
 
             // 튕겨나갈 방향 계산
             Vector3 knockbackDirection = Vector3.zero;
             if (collision.contactCount > 0)
             {
                 knockbackDirection = collision.contacts[0].normal; // 충돌지점에서 플레이어쪽 방향
+				knockbackDirection.y = 0f;
                 knockbackDirection = knockbackDirection.normalized;
 
                 // 아니면 차량에서 플레이어 방향으로
@@ -293,6 +301,34 @@ namespace Garage.Controller
 
 			// 애니메이션 실행
 			SetAnimParam((int)AnimationType.KnockBack);
+        }
+		private IEnumerator OnKnockbackCoroutine()
+		{
+            AnimationClip clip = animator.runtimeAnimatorController.animationClips[(int)AnimationType.KnockBack];
+			float clipLength = clip.length;
+            Vector3 startPosition = transform.position; // 현재 시작 위치
+            float elapsedTime = 0f; // 경과 시간
+
+            while (elapsedTime < clipLength)
+            {
+                // 1. 시간에 따른 진행도(t) 계산 (0.0에서 1.0까지)
+                float t = elapsedTime / clipLength;
+
+                // 2. 이징 함수를 적용하여 진행도를 변환합니다.
+                //    원하는 Ease 함수로 바꿔보세요!
+                //    float easedT = t; // 선형(Linear) 이동
+                //    float easedT = EasingUtils.EaseInQuad(t);
+                float easedT = t * (2 - t); ; // 부드럽게 감속
+                                                           //    float easedT = EasingUtils.EaseInOutSine(t); // 더 부드럽게 가감속
+
+                // 3. Vector3.Lerp를 사용하여 변환된 진행도(easedT)에 따라 위치를 계산
+                //    Lerp(시작, 끝, 진행도)
+                //transform.position = Vector3.Lerp(startPosition, targetPosition.position, easedT);
+
+                // 4. 경과 시간을 증가시키고 다음 프레임까지 대기
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
         }
 		void OnDrawGizmos()
 		{
