@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Garage.Structs;
 using Unity.Netcode;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace Garage.Props
 			if (!IsHost) return;
 			if (!IsAbleToUpgrade()) return;
 
-			// TODO - 업그레이드 돈 사용
+			EconomyManager.Instance.UseMoney_HostOnly(ItemData.UpgradeDatas[upgradeLevel.Value].upgradePrice);
 			upgradeLevel.Value += 1;
 		}
 
