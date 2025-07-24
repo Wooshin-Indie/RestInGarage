@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRevealData: 1
   itemID: 2
+  itemType: 2
   itemName: Fuel Pump
   descriptionKey: Fuel pump description key
   upgradeDatas:

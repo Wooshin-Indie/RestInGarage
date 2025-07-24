@@ -241,6 +241,7 @@ namespace Garage.Manager
 			TurnOffLights();
 			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
 			sellBoundGameObject.SetActive(false);
+			upgradeBoundGameObject.SetActive(false);
 		}
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
@@ -250,10 +251,10 @@ namespace Garage.Manager
 
 			if (stageId <= 0) return;
 
-			// HACK - 랜덤으로 바꾸기
+			var randPrefabs = GetRandomPrefabs(3);
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
-				GameObject tmpGo = Instantiate(prefabList[i], shopPositions[i], Quaternion.identity);
+				GameObject tmpGo = Instantiate(randPrefabs[i], shopPositions[i], Quaternion.identity);
 				tmpGo.GetComponent<NetworkObject>().Spawn();
 				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
 				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());
@@ -269,6 +270,7 @@ namespace Garage.Manager
 			}
 
 			sellBoundGameObject.SetActive(true);
+			upgradeBoundGameObject.SetActive(true);
 		}
 
 		private void SpawnNightDecoProps()
@@ -511,6 +513,7 @@ namespace Garage.Manager
 				{
 					for (int j = 0; j < gridSize[t].y; j++)
 					{
+						if (gridTiles[t][i, j] == null) continue;
 						gridTiles[t][i, j].GetComponent<NetworkObject>().Despawn();
 						Destroy(gridTiles[t][i, j].gameObject);
 					}
@@ -524,6 +527,39 @@ namespace Garage.Manager
 
             int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
             if (NetworkManager.Singleton.IsHost) SpawnBasicBuildings_HostOnly(mapIdx);
+		}
+		public List<GameObject> GetRandomPrefabs(int counts)
+		{
+			var result = new List<GameObject>();
+			var usedTypes = new HashSet<ItemType>();
+
+			int maxTries = 1000; // 무한루프 방지용
+			int tries = 0;
+
+			while (result.Count < 3 && tries < maxTries)
+			{
+				tries++;
+
+				GameObject randomPrefab = prefabList[Random.Range(0, prefabList.Count)];
+				var prop = randomPrefab.GetComponent<OwnableProp>();
+				if (prop == null || prop.ItemData == null)
+					continue;
+
+				var type = prop.ItemData.ItemType;
+
+				if (usedTypes.Contains(type))
+					continue;
+
+				usedTypes.Add(type);
+				result.Add(randomPrefab);
+			}
+
+			if (result.Count < counts)
+			{
+				Debug.LogWarning("서로 다른 ItemType을 가진 프리팹이 3개 미만입니다.");
+			}
+
+			return result;
 		}
 	}
 }

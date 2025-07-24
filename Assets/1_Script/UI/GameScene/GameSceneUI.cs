@@ -21,6 +21,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private TimerText timerText;
         [SerializeField] private StageStartEndUI stageStartEndUI;
         [SerializeField] private BossWarningUI bossWarningUI;
+        [SerializeField] private IngameSettingUI ingameSettingUI;
 
         [Header("PropInfoUIs")]
         [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
@@ -43,6 +44,7 @@ namespace Garage.UI.GameScene
             GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
 		}
 
+
 		private void LateUpdate()
         {
             foreach(var i in carStatusInfo)
@@ -58,7 +60,12 @@ namespace Garage.UI.GameScene
             curPoppedPropKeyInfoUI?.OnUpdate();
         }
 
-        public void UpdateCarFiringUI(CarController car, float progress)
+		private void OnEnable()
+		{
+            ingameSettingUI.Init();
+		}
+
+		public void UpdateCarFiringUI(CarController car, float progress)
         {
             if(!carStatusInfo.TryGetValue(car.GetComponent<NetworkObject>().NetworkObjectId, out Dictionary<CarParts, CarStatusUI> dict))
             {
