@@ -46,7 +46,7 @@ namespace Garage.Manager
 			CurrentScene?.Clear();
             if (NetworkManager.Singleton.IsServer)
             {
-                NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", mode);
+                NetworkManager.Singleton.SceneManager?.LoadScene(sceneEnum.ToString() + "Scene", mode);
             }
 			else
             {
