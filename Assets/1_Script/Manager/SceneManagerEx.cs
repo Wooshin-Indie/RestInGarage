@@ -2,7 +2,6 @@ using DG.Tweening;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -46,7 +45,7 @@ namespace Garage.Manager
 			CurrentScene?.Clear();
             if (NetworkManager.Singleton.IsServer)
             {
-                NetworkManager.Singleton.SceneManager?.LoadScene(sceneEnum.ToString() + "Scene", mode);
+                NetworkManager.Singleton.SceneManager.LoadScene(sceneEnum.ToString() + "Scene", mode);
             }
 			else
             {

@@ -506,6 +506,8 @@ namespace Garage.Manager
 		{
 			if (!NetworkManager.Singleton.IsHost) return;
 
+			NightDecoPropDictionary.Clear();
+
 			for (int t = 0; t < gridOrigin.Count; t++)
 			{
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);

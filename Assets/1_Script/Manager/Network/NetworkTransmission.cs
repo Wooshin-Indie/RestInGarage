@@ -5,8 +5,8 @@ using Unity.Netcode;
 using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
-using Steamworks;
 using Manager;
+using Steamworks;
 
 namespace Garage.Manager
 {
@@ -77,6 +77,10 @@ namespace Garage.Manager
 
 		public void StartHeartbeat()
 		{
+			SteamServer.AutomaticHeartbeats = true;
+			SteamServer.AutomaticHeartbeatRate = 10;
+			return;
+
 			if (IsClient && !IsHost)
 			{
 				lastPingTime = Time.time;
@@ -87,6 +91,9 @@ namespace Garage.Manager
 
 		public void EndHeartbeat()
 		{
+			SteamServer.AutomaticHeartbeats = false;
+			return;
+
 			isHeartbeating = false;
 		}
 
@@ -175,14 +182,13 @@ namespace Garage.Manager
 		[ClientRpc]
 		public void DisconnectAllClientRPC()
 		{
-			if (IsHost)
+			if (!IsHost)
 			{
 				return;
 			}
-			GameNetworkManager.Instance.Disconnected();
+			Debug.LogWarning("PlayerDict Clear");
+			playerDict.Clear();
 		}
-
-
 
 		public bool isInGame = false;
 
@@ -263,6 +269,7 @@ namespace Garage.Manager
 			if (!IsHost) return;
 
 			GameObject playerOb = Instantiate(playerPrefab, position, Quaternion.identity);
+			Debug.LogWarning("Plyaer Dict Aded : " + clientId);
 			playerDict.Add(clientId, playerOb.GetComponent<PlayerController>());
 			NetworkObject networkOb = playerOb.GetComponent<NetworkObject>();
 
@@ -277,6 +284,7 @@ namespace Garage.Manager
 			networkOb.Despawn();
 			Destroy(networkOb);
 			playerDict.Remove(clientId);
+			Debug.LogWarning("Plyaer Dict remvd : " + clientId);
 		}
 
 		[ServerRpc(RequireOwnership = false)]

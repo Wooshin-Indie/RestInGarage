@@ -239,7 +239,7 @@ namespace Garage.Manager
 		public void Disconnected()
 		{
 			if (isHost)
-				GameSynchronizer.Instance.MapIdx.Value = -1;
+				GameSynchronizer.Instance.MapIdx.Value = 0;
 			playerInfo.Clear();
 
 			OnDisconnectedAction.Invoke();
