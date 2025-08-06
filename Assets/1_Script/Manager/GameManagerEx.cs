@@ -194,11 +194,6 @@ namespace Garage.Manager
 			BuildingManager.Instance.OnGameStarted();
         }
 
-		public void GameEnded()
-		{
-			Managers.Scene.ChangeSceneServer(SceneEnum.Game);
-		}
-
 		public void HostCreated()
 		{
 			isHost = true;
@@ -257,7 +252,7 @@ namespace Garage.Manager
                     UIManager.Main.GoToPage(PageEnum.Main);
 					break;
                 case SceneEnum.Game:
-                    Managers.Scene.ChangeSceneServer(SceneEnum.Main);
+                    Managers.Scene.ChangeScene(SceneEnum.Main);
                     break;
 			}
 			isHost = false;

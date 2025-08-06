@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using DG.Tweening;
 using Unity.VisualScripting;
+using Garage.Manager;
 
 namespace Garage.UI.GameScene
 {
@@ -16,6 +17,11 @@ namespace Garage.UI.GameScene
 		[SerializeField] private float offset;
 
 		private bool isOpened = false;
+
+		public void Shut()
+		{
+			GameNetworkManager.Instance.Disconnected();
+		}
 
 		public void Init()
 		{

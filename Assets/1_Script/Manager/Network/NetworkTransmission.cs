@@ -6,7 +6,6 @@ using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
 using Manager;
-using Steamworks;
 
 namespace Garage.Manager
 {
@@ -77,8 +76,6 @@ namespace Garage.Manager
 
 		public void StartHeartbeat()
 		{
-			SteamServer.AutomaticHeartbeats = true;
-			SteamServer.AutomaticHeartbeatRate = 10;
 			return;
 
 			if (IsClient && !IsHost)
@@ -91,7 +88,6 @@ namespace Garage.Manager
 
 		public void EndHeartbeat()
 		{
-			SteamServer.AutomaticHeartbeats = false;
 			return;
 
 			isHeartbeating = false;
@@ -208,21 +204,13 @@ namespace Garage.Manager
 			GameManagerEx.Instance.GameStarted();
 		}
 
-		[ServerRpc(RequireOwnership = false)]
-		public void EndGameServerRPC()
+		public void OnEndGame()
 		{
 			if (isInGame)
 			{
 				GameNetworkManager.Instance.UnlockLobby();
-				EndGameClientRPC();
+				isInGame = false;
 			}
-		}
-
-		[ClientRpc]
-		public void EndGameClientRPC()
-		{
-			isInGame = false;
-			GameManagerEx.Instance.GameEnded();
 		}
 
 		#region LobbyPageUI Sync

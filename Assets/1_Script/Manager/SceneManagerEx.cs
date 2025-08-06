@@ -32,11 +32,13 @@ namespace Garage.Manager
             }
             LoadSceneServer(sceneEnum, LoadSceneMode.Additive);
 
-            NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
+			NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
         }
 		public void ChangeScene(SceneEnum sceneEnum)
 		{
 			UnloadCurrentSceneServer();
+
+			SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
 
             OnSceneChangeStarted(sceneEnum);
         }
