@@ -66,6 +66,7 @@ namespace Garage.Manager
                 point.z = (sp.Direction == VehicleDirection.Up ? -curStageData.LaneLength : curStageData.LaneLength);
                 VehicleSpawnPoint vsp = Instantiate(spawnPointPrefab, point, Quaternion.identity)
 									.GetComponent<VehicleSpawnPoint>();
+                Managers.Scene.MoveGameObjectToCurrentScene(vsp.gameObject);
 				vsp.SetSpawnDir(sp.Direction);
                 spawnPoints.Add(vsp);
             }

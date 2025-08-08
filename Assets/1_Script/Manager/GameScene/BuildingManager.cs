@@ -4,7 +4,9 @@ using Garage.Structs;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
+using UnityEditor.Analytics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Garage.Manager
 {
@@ -91,6 +93,8 @@ namespace Garage.Manager
 					for (int j = 0; j < gridSize[t].y; j++)
 					{
 						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
+						Managers.Scene.MoveGameObjectToCurrentScene(tile.gameObject);
+
 						tile.GetComponent<NetworkObject>().Spawn();
 						tile.SetGridPosition(t, i, j);
 					}
@@ -110,6 +114,8 @@ namespace Garage.Manager
 
 			// TODO - Map마다 지을 빌딩이 다를수도 있음 - mapIdx로 SO 받아와서 처리
 			GameObject go = Instantiate(prefabList[0]);
+			Managers.Scene.MoveGameObjectToCurrentScene(go);
+
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[8]
@@ -127,6 +133,8 @@ namespace Garage.Manager
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
 			go = Instantiate(prefabList[2]);
+			Managers.Scene.MoveGameObjectToCurrentScene(go);
+
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 2, new Vector2Int[4]
@@ -140,6 +148,8 @@ namespace Garage.Manager
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
 			go = Instantiate(prefabList[3]);
+			Managers.Scene.MoveGameObjectToCurrentScene(go);
+
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[1]
@@ -151,6 +161,8 @@ namespace Garage.Manager
 
 
 			go = Instantiate(prefabList[1]);
+			Managers.Scene.MoveGameObjectToCurrentScene(go);
+
 			go.GetComponent<NetworkObject>().Spawn();
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[1]
@@ -162,10 +174,12 @@ namespace Garage.Manager
 
 			Vector2Int sellPos = gridOrigin[(int)GridIndexType.Sell] + gridSize[(int)GridIndexType.Sell] / 2;
 			sellBoundGameObject = Instantiate(sellBoundPrefab, new Vector3(sellPos.x - 0.5f, 0f, sellPos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
+			Managers.Scene.MoveGameObjectToCurrentScene(sellBoundGameObject);
 			sellBoundGameObject.GetComponent<NetworkObject>().Spawn();
 
 			Vector2Int upgradePos = gridOrigin[(int)GridIndexType.Upgrade] + gridSize[(int)GridIndexType.Upgrade] / 2;
 			upgradeBoundGameObject = Instantiate(upgradeBoundPrefab, new Vector3(upgradePos.x - 0.5f, 0f, upgradePos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
+			Managers.Scene.MoveGameObjectToCurrentScene(upgradeBoundGameObject);
 			upgradeBoundGameObject.GetComponent<NetworkObject>().Spawn();
 		}
 
@@ -255,12 +269,14 @@ namespace Garage.Manager
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
 				GameObject tmpGo = Instantiate(randPrefabs[i], shopPositions[i], Quaternion.identity);
+				Managers.Scene.MoveGameObjectToCurrentScene(tmpGo);
 				tmpGo.GetComponent<NetworkObject>().Spawn();
 				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
 				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());
 
-				lightDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
-					Instantiate(lightPrefab, new Vector3(shopPositions[i].x, 10f, shopPositions[i].z), Quaternion.Euler(90f, 0f, 0f)).GetComponent<Light>());
+				Light lightGo = Instantiate(lightPrefab, new Vector3(shopPositions[i].x, 10f, shopPositions[i].z), Quaternion.Euler(90f, 0f, 0f)).GetComponent<Light>();
+				Managers.Scene.MoveGameObjectToCurrentScene(lightGo.gameObject);
+				lightDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, lightGo);
 				lightDictionary[tmpGo.GetComponent<NetworkObject>().NetworkObjectId].GetComponent<NetworkObject>().Spawn();
 			}
 
@@ -276,6 +292,7 @@ namespace Garage.Manager
 		private void SpawnNightDecoProps()
 		{
             GameObject tmpGo = Instantiate(nightDecoPrefabList[0], new Vector3(16, 0 ,4), Quaternion.Euler(0f, 173f, 0f));
+			Managers.Scene.MoveGameObjectToCurrentScene(tmpGo);
 			tmpGo.GetComponent<NetworkObject>().Spawn();
             NightDecoPropDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo);
         }
@@ -374,6 +391,7 @@ namespace Garage.Manager
 			{
 				SetActiveGrids(true);
 				tmpPreview = Instantiate(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
+				Managers.Scene.MoveGameObjectToCurrentScene(tmpPreview);
 				wheelRotate = 0;
 			}
 

@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
@@ -10,6 +9,7 @@ namespace Garage.Manager
 	public class SceneManagerEx
 	{
 		public SceneBase CurrentScene { get { return GameObject.FindFirstObjectByType<SceneBase>(); } }
+		public Scene CurrentSceneObject { get { return SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"); } }
 
 		public void Init()
 		{
@@ -90,5 +90,10 @@ namespace Garage.Manager
 		{
             UIManager.Transition.EndTransition(1f, .5f);
         }
+
+		public void MoveGameObjectToCurrentScene(GameObject go)
+		{
+			SceneManager.MoveGameObjectToScene(go, CurrentSceneObject);
+		}
 	}
 }
