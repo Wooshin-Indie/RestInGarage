@@ -3643,6 +3643,7 @@ MonoBehaviour:
   carCountdownUIPrefab: {fileID: 6385409884066586337, guid: 5536f68162c573b418de6e71dea2a660, type: 3}
   shopInfo: {fileID: 5301772727738478027}
   bombAlertUIPrefab: {fileID: 1682618347305131411, guid: d6390d6199066c74ab86637e8e7c3e78, type: 3}
+  emoteGoodUIPrefab: {fileID: 5245735188687116467, guid: e6d34ab9fb90edb43b51c5df37247e72, type: 3}
 --- !u!114 &404230441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9985,7 +9986,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1097396703
 RectTransform:
   m_ObjectHideFlags: 0

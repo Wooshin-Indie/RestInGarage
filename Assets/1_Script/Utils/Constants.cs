@@ -7,6 +7,7 @@ namespace Garage.Utils
         /** PATHS **/
         public static readonly string PATH_SFX = "Sounds/SFX/";
         public static readonly string PATH_AMB = "Sounds/Ambient/";
+        public static readonly string PATH_BGM = "Sounds/BGM/";
 
         /** TAGS **/
 		public static readonly string TAG_CHAT = "Chat";
@@ -15,6 +16,7 @@ namespace Garage.Utils
 
         /** LAYERS **/
         public static readonly int INT_VEHICLE = 9;
+        public static readonly int INT_PLAYER = 11;
           
         public static readonly int LAYER_VEHICLE = 1 << 9;
         public static readonly int LAYER_INTERACTABLE = 1 << 10;

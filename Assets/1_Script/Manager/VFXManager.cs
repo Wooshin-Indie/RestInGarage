@@ -23,8 +23,16 @@ namespace Garage.Manager
         FireExtingusher,
         RepairHammering,
         AllPartsRepaired,
-        PopEmoteGood,
+        CarImpulseDust,
         BombExplosion
+    }
+    public enum VFXEmittingDirection
+    {
+        // VFX의 파티클이 뿜어져나올 y축 회전값을 차량기준으로 보정하는 용도
+        Front,   // +0도 (y축각도)
+        Right,     // +90도
+        Rear,  // +180도
+        Left    // +270도
     }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
@@ -175,7 +183,8 @@ namespace Garage.Manager
             return id;
         }
 
-        // --- 편의 오버로드 (기본 회전 사용) ---
+        #region Overloads
+        // 기본 회전 사용
         public ParticleSystem PlayVFX(VFXType type, Vector3 position, Transform parent = null)
         {
             Quaternion rotation = vfxDataMap.ContainsKey(type) ? vfxDataMap[type].prefab.transform.rotation : Quaternion.identity;
@@ -187,6 +196,8 @@ namespace Garage.Manager
             Quaternion rotation = vfxDataMap.ContainsKey(type) ? vfxDataMap[type].prefab.transform.rotation : Quaternion.identity;
             return PlayLoopingVFX(type, position, rotation, parent);
         }
+
+        #endregion
 
         #endregion
 
@@ -293,7 +304,9 @@ namespace Garage.Manager
             instanceGO.transform.rotation = rotation;
             if (parent != null)
             {
-                instanceGO.transform.SetParent(parent, worldPositionStays); // worldPositionStays = true
+                instanceGO.transform.SetParent(parent, worldPositionStays); 
+                // worldPositionStays == true 면 현재 위치 유지하면서 자식으로 이동
+                // worldPositionStays == false 면 자식으로 이동하면서 현재 위치를 부모의 위치로 바꿈
             }
             else
             {
@@ -362,6 +375,13 @@ namespace Garage.Manager
             {
                 instance = null;
             }
+        }
+
+        public Vector3 GetVFXRotation(VFXType type)
+        {
+            Vector3 rotation = vfxDataMap[type].prefab.transform.eulerAngles;
+
+            return rotation;
         }
     }
 

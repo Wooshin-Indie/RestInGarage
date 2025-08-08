@@ -3,6 +3,7 @@ using DG.Tweening;
 using Garage.Manager;
 using Garage.Structs;
 using Garage.Utils;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -93,9 +94,18 @@ namespace Garage.Controller
 				isAnyBroken = false;
 
 			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
-			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
-			allRepairedVFX.Play();
+			StartCoroutine(FxsOnAllPartsRepaired());
 		}
+		private IEnumerator FxsOnAllPartsRepaired()
+		{
+            Managers.Sound.PlaySfx(SFXType.Complete, .6f, .9f);
+            allRepairedVFX.Play();
+
+			yield return new WaitForSeconds(0.5f);
+
+            Managers.Sound.PlaySfx(SFXType.Voice_ThankYou, .8f);
+            UIManager.Game.PopEmoteGoodUIOnCar(this);
+        }
 
 		#endregion
 
@@ -228,6 +238,49 @@ namespace Garage.Controller
 			UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
 		}
 
-		#endregion
-	}
+        #endregion
+
+        #region Vfx, Sfx
+        [ClientRpc]
+        private void PlayCarDustVfxClientRPC(VFXEmittingDirection direction)
+        {
+			Vector3 rotation = VFXManager.Instance.GetVFXRotation(VFXType.CarImpulseDust);
+			Vector3 position = Vector3.zero;
+			Transform parent = null;
+
+            switch (direction)
+            {
+                case VFXEmittingDirection.Front:
+                    rotation.y = 0f;
+					position = frontMiddlePos;
+                    break;
+                case VFXEmittingDirection.Right:
+                    rotation.y = 90f;
+					// TODO - 포지션 세팅 필요
+                    break;
+                case VFXEmittingDirection.Rear:
+                    rotation.y = 180f;
+                    position = rearMiddlePos;
+                    break;
+                case VFXEmittingDirection.Left:
+                    rotation.y = 270f;
+                    // 포지션 세팅 필요
+                    break;
+            }
+
+			rotation.y += transform.eulerAngles.y;
+            VFXManager.Instance.PlayVFX(VFXType.CarImpulseDust, position, Quaternion.Euler(rotation));
+        }
+        [ClientRpc]
+        private void PlayCarDrivingSfxClientRPC()
+		{
+            Managers.Sound.PlayCarDrivingSfx(this, 2f, 1f);
+        }
+		[ClientRpc]
+		private void StopCarDrivingSfxClientRPC()
+		{
+            Managers.Sound.StopCarDrivingSfx(this);
+        }
+        #endregion
+    }
 }

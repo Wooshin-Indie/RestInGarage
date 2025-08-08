@@ -98,16 +98,18 @@ namespace Garage.Controller
 		}
 
 		private void OnKickEnd()
-		{
-			isBeingForced = false;
-
+        {
+            Debug.Log("OnKickEnd");
+            Managers.Input.EnablePlayerActions();
 		}
 
 		private void OnGettingUp()
 		{
 			Debug.Log("OnGettingUp");
-			isBeingForced = false;
-		}
+            rigid.constraints = originalConstraints;
+            Managers.Input.EnablePlayerActions();
+            isKnockedBack = false;
+        }
 
 		#endregion
 	}

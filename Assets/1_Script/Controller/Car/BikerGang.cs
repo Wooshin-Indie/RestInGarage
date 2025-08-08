@@ -27,7 +27,7 @@ namespace Garage.Vehicle
 
         public void Init(bool hasBomb)
         {
-            IsKnockbackOnHumanCollision = true;
+            IsKnockbackPlayerOnCollision = true;
 
             this.hasBomb = hasBomb;
             if (hasBomb)
@@ -60,12 +60,15 @@ namespace Garage.Vehicle
                 }
 
                 ThrowBomb(randomTargetCar);
+                OnThrowBombClientRPC();
                 bombThrew = true;
             }
         }
 
+        [SerializeField] private float knockbackForce = 20f;
         private void OnCollisionEnter(Collision collision)
         {
+            OnCollisionWithPlayer(collision, knockbackForce);
             // 플레이어하고 충돌할 때만 
             if (collision.gameObject.CompareTag("Player"))
             {
@@ -113,14 +116,13 @@ namespace Garage.Vehicle
             foundCars.Clear();
 
             int hitCount = Physics.OverlapSphereNonAlloc(transform.position, range, hitCars, carLayer);
-            Debug.Log("HitCar Count: " + hitCount);
             for (int i = 0; i < hitCount; i++)
             {
                 // CarController 있는지 확인, 아직 안고쳐진 차량인지 확인
                 CarController car = hitCars[i].GetComponentInParent<CarController>();
                 if (car != null && car.IsAnyBroken)
                 {
-                    Debug.Log("Checked Car");
+                    Debug.Log("Detected Car to throw bomb");
                     if (!foundCars.Contains(car))
                     {
                         foundCars.Add(car);
@@ -158,6 +160,13 @@ namespace Garage.Vehicle
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, carDetectingRange);
+        }
+
+        [ClientRpc]
+        private void OnThrowBombClientRPC()
+        {
+            Managers.Sound.PlaySfx(SFXType.Voice_ThrowBomb, 0.9f);
+            Managers.Sound.PlaySfx(SFXType.SwingArm, 0.8f);
         }
     }
 }

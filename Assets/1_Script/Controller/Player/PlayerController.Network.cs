@@ -107,6 +107,8 @@ namespace Garage.Controller
 
 		public void SetAnimParam(int id)
 		{
+			if (id == 8)
+				Debug.Log("knockback!!!!!!!!!!!");
 			animator.SetTrigger(animIDs[id]);
 			if (IsHost)
 			{

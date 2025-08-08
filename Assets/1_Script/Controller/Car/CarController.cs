@@ -78,9 +78,14 @@ namespace Garage.Controller
 
 		private int[] animIDs = new int[2];
 
-		private void Awake()
+		private Vector3 frontMiddlePos;
+		private Vector3 rearMiddlePos;
+		private Vector3 rightMiddlePos;
+		private Vector3 leftMiddlePos;
+
+		public override void Awake()
 		{
-            rigid = GetComponent<Rigidbody>();
+			base.Awake();
 			carStatus = new CarStatus();
 
 			animIDs[0] = Animator.StringToHash("IsKickedToLeft");
@@ -101,6 +106,13 @@ namespace Garage.Controller
 				instanceMats[i] = Instantiate(mats[i]);
             }
 			meshRenderer.materials = instanceMats;
+
+			Managers.Sound.InitCarDrivingSfx(this);
+
+			frontMiddlePos = (partTransforms[0].position + partTransforms[1].position) / 2f;
+            rearMiddlePos = (partTransforms[2].position + partTransforms[3].position) / 2f;
+            rightMiddlePos = (partTransforms[0].position + partTransforms[2].position) / 2f;
+            leftMiddlePos = (partTransforms[1].position + partTransforms[3].position) / 2f;
         }
 
 		private void FixedUpdate()
@@ -159,8 +171,12 @@ namespace Garage.Controller
 				TrafficManager.Instance.DespawnCar(this);
 		}
 
+        private void OnCollisionEnter(Collision collision)
+        {
+			OnCollisionWithPlayer(collision, 10f);
+        }
 
-		private float currentSpeedVelocityRef = 0f;		// smooth damp용
+        private float currentSpeedVelocityRef = 0f;		// smooth damp용
         private float accelerationTime = 1f;            // 목표 속도까지 도달하는 데 걸리는 대략적인 시간
 		private float stopThreshold = 0.05f;
 		[SerializeField] private float decelerationRate = 1f;
@@ -168,6 +184,7 @@ namespace Garage.Controller
 		private VehicleDirection direction = VehicleDirection.None;
 		public VehicleDirection Direction { get => direction; }
 		private Quaternion originRot;
+		private bool isDrivingSfxPlaying = false;
 
 		/// <summary>
 		/// Lane을 따라 움직이는 함수
@@ -217,8 +234,21 @@ namespace Garage.Controller
             Vector3 forwardDirection = direction == VehicleDirection.Up ? Vector3.forward : -Vector3.forward;
 
 			rigid.linearVelocity = forwardDirection * newSpeedMagnitude;
+
+			if (isBraked)
+            {
+                PlayCarDustVfxClientRPC(VFXEmittingDirection.Rear);
+                isBraked = false;
+            }
+
+			if (!isDrivingSfxPlaying)
+            {
+				PlayCarDrivingSfxClientRPC();
+				isDrivingSfxPlaying = true;
+            }
         }
 
+		private bool isBraked = false;
 		/// <summary>
 		/// 앞에 장애물이 있을 경우, 자연스럽게 멈추는 함수
 		/// </summary>
@@ -233,7 +263,19 @@ namespace Garage.Controller
 				rigid.linearVelocity = Vector3.zero;
 				rigid.angularVelocity = Vector3.zero;
 			}
-		}
+
+			if (!isBraked)
+			{
+				PlayCarDustVfxClientRPC(VFXEmittingDirection.Front);
+                isBraked = true;
+			}
+
+            if (isDrivingSfxPlaying)
+            {
+				StopCarDrivingSfxClientRPC();
+                isDrivingSfxPlaying = false;
+            }
+        }
 
 		/// <summary>
 		/// 앞에 장애물이 있는지 판단하는 함수
@@ -366,7 +408,7 @@ namespace Garage.Controller
         }
         private IEnumerator MoveSideways(float distanceX, float time)
         {
-			IsKnockbackOnHumanCollision = true;
+			IsKnockbackPlayerOnCollision = true;
 			isBeingControlled = true;
             Vector3 startPos = new Vector3(rigid.position.x, rigid.position.y, rigid.position.z);
 			Vector3 targetPos = startPos;
@@ -384,7 +426,7 @@ namespace Garage.Controller
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            IsKnockbackOnHumanCollision = false;
+            IsKnockbackPlayerOnCollision = false;
             rigid.MovePosition(targetPos);
 
             targetLaneX += distanceX;
@@ -475,5 +517,10 @@ namespace Garage.Controller
 			Gizmos.matrix = Matrix4x4.TRS(boxCenter, orientation, Vector3.one);
 			Gizmos.DrawWireCube(Vector3.zero, halfExtents * 2);
 		}
-	}
+
+        private void OnDestroy()
+        {
+			Managers.Sound.RemoveCarDrivingSfxInDict(this);
+        }
+    }
 }

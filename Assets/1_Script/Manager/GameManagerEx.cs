@@ -100,7 +100,8 @@ namespace Garage.Manager
             TrafficManager.Instance.OnStageStart(0);	// TODO - StageIdx 고쳐야됨
             BuildingManager.Instance.OnStageStart();
 
-		}
+			NetworkTransmission.instance.PlayStageBGMClientRPC();
+        }
 
 		public void EndStage()
 		{

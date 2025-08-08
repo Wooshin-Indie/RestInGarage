@@ -32,6 +32,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private GameObject carCountdownUIPrefab;
         [SerializeField] private ShopInfo shopInfo;
         [SerializeField] private GameObject bombAlertUIPrefab;
+        [SerializeField] private GameObject emoteGoodUIPrefab;
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -334,7 +335,6 @@ namespace Garage.UI.GameScene
         {
             if (curPoppedPropKeyInfoUI == null)
             {
-                Debug.Log("Current Popped PropKeyInfoUI is null");
                 return;
             }
 
@@ -346,6 +346,12 @@ namespace Garage.UI.GameScene
         public void StartBossWarning()
         {
             bossWarningUI.StartBossWarningVFX();
+        }
+
+        public void PopEmoteGoodUIOnCar(CarController car)
+        {
+            EmotePopupUI emoteGoodUI = Instantiate(emoteGoodUIPrefab, transform).GetComponent<EmotePopupUI>();
+            emoteGoodUI.PopEmoteUI(car.transform);
         }
     }
 }

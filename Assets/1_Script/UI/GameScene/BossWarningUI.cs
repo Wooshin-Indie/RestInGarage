@@ -15,24 +15,19 @@ public class BossWarningUI : MonoBehaviour
     public void StartBossWarningVFX()
     {
         gameObject.SetActive(true);
-        StartCoroutine(BlinkingCoroutine());
+        StartBlinking();
     }
 
-    private IEnumerator BlinkingCoroutine()
+    private void StartBlinking()
     {
-        UIgroup.DOFade(1f, 0.4f);
-        yield return new WaitForSeconds(0.4f);
-        UIgroup.DOFade(0.5f, 0.8f);
-        yield return new WaitForSeconds(0.8f);
-        UIgroup.DOFade(1f, 0.4f);
-        yield return new WaitForSeconds(0.4f);
-        UIgroup.DOFade(0.5f, 0.8f);
-        yield return new WaitForSeconds(0.8f);
-        UIgroup.DOFade(1f, 0.4f);
-        yield return new WaitForSeconds(0.4f);
-        UIgroup.DOFade(0.5f, 0.8f);
-        yield return new WaitForSeconds(0.8f);
+        Sequence seq = DOTween.Sequence();
 
-        gameObject.SetActive(false);
+        for (int i = 0; i < 3; i++)
+        {
+            seq.Append(UIgroup.DOFade(1f, 0.4f))
+               .Append(UIgroup.DOFade(0.5f, 0.8f));
+        }
+
+        seq.OnComplete(() => gameObject.SetActive(false));
     }
 }

@@ -1,17 +1,21 @@
 using DG.Tweening;
+using Garage.Controller;
 using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Audio;
+using UnityEngine.Rendering;
 
 namespace Garage.Manager
 {
 	public enum AMBType { Wind, Engine }
-	public enum BGMType { None }
+	public enum BGMType { None, Main1, Main2, Stage1 }
 	public enum SFXType { None, Walk, Wrench, Hammer, FireEx, Put, Whoosh, Glug, Tape, Pop,
 		EarnMoney, UseMoney, Alarm, StartUp, Complete, Horn1, Horn2, Wrong, SlideUp, SlideDown,
-		Tick, Boom, ShopCar, ShopPop, BossWarning}
+		Tick, Boom, ShopCar, ShopPop, BossWarning, Voice_ThankYou, Voice_ThrowBomb, SwingArm, 
+		PropHold, PropPutdown, CarDriving }
 	public enum SoundType { Bgm, Sfx }
 	/// <summary>
 	/// 소리를 내는 매니저입니다.
@@ -22,8 +26,9 @@ namespace Garage.Manager
 	{
 		private AudioSource[] audioSources = new AudioSource[(int)Enum.GetNames(typeof(SoundType)).Length];
 		private AudioSource[] ambientSources = new AudioSource[(int)Enum.GetNames(typeof(AMBType)).Length];
+        private AudioSource[] bgmSources = new AudioSource[(int)Enum.GetNames(typeof(BGMType)).Length];
 
-		private float masterVolume = 1f;
+        private float masterVolume = 1f;
 		private float ambientVolume = 1f;
 		private float sfxVolume = 1f;
 		private float bgmVolume = 1f;
@@ -57,7 +62,10 @@ namespace Garage.Manager
 			set
 			{
 				bgmVolume = value;
-				audioSources[(int)SoundType.Bgm].volume = masterVolume * bgmVolume;
+                for (int i = 0; i < bgmSources.Length; i++)
+                {
+                    bgmSources[i].volume = masterVolume * ambientVolume;
+                }
 			}
 		}
 		public float SfxVolume
@@ -77,6 +85,7 @@ namespace Garage.Manager
 
 			string[] soundTypeNames = Enum.GetNames(typeof(SoundType));
 			string[] ambientTypeNames = Enum.GetNames(typeof(AMBType));
+			string[] bgmTypeNames = Enum.GetNames(typeof(BGMType));
 
 			for (int i = 0; i < soundTypeNames.Length; i++)
 			{
@@ -94,12 +103,22 @@ namespace Garage.Manager
 				ambientSources[i].clip = GetAudioClip((AMBType)i);
 			}
 
-			audioSources[(int)SoundType.Bgm].loop = true;
+            for (int i = 0; i < bgmTypeNames.Length; i++)
+            {
+                GameObject go = new GameObject { name = bgmTypeNames[i] };
+                bgmSources[i] = go.AddComponent<AudioSource>();
+                go.transform.parent = root;
+                bgmSources[i].loop = true;
+                bgmSources[i].clip = GetAudioClip((BGMType)i);
+            }
+
+            audioSources[(int)SoundType.Bgm].loop = true;
 			InitPool();
 
 			PlayAmbient(AMBType.Engine);
 			PlayAmbient(AMBType.Wind);
-		}
+            PlayBGM(BGMType.Main2, 0.7f);
+        }
 
 		#region Object Pooling
 
@@ -208,9 +227,13 @@ namespace Garage.Manager
 		{
 			return Resources.Load<AudioClip>(Constants.PATH_AMB + type.ToString());	
 		}
+        private AudioClip GetAudioClip(BGMType type)
+        {
+            return Resources.Load<AudioClip>(Constants.PATH_BGM + type.ToString());
+        }
 
 
-		public void PlayAmbient(AMBType type)
+        public void PlayAmbient(AMBType type)
 		{
 			ambientSources[(int)type].Play();
 		}
@@ -219,6 +242,20 @@ namespace Garage.Manager
 			ambientSources[(int)type].Stop();
 		}
 
+		public void PlayBGM(BGMType type, float volume)
+		{
+			bgmSources[(int)type].volume = volume * masterVolume * bgmVolume;
+            bgmSources[(int)type].Play();
+        }
+        public void StopBGM(BGMType type)
+        {
+			bgmSources[(int)type].Stop();
+        }
+        public void StopBGM(BGMType type, float fadeDuration)
+		{
+			bgmSources[(int)type].DOFade(0f, fadeDuration)
+				.OnComplete(() => bgmSources[(int)type].Stop());
+        }
 		public void BlockBGM(float duration)
 		{
 			for(int i=0; i<ambientSources.Length; i++)
@@ -234,10 +271,12 @@ namespace Garage.Manager
 				case SceneEnum.Main:
 
 					PlayAmbient(AMBType.Engine);
+					PlayBGM(BGMType.Main2, 0.7f);
 					break;
 				case SceneEnum.Game:
 					StopAmbient(AMBType.Engine);
-					break;
+                    StopBGM(BGMType.Main2);
+                    break;
 			}
 			for (int i = 0; i < ambientSources.Length; i++)
 			{
@@ -246,5 +285,46 @@ namespace Garage.Manager
 			audioSources[(int)SoundType.Bgm].DOFade(1f, duration);
 		}
 
-	}
+        #region CarSfx
+        private Dictionary<CarController, AudioSource> carDrivingDict = new Dictionary<CarController, AudioSource>();
+		/// <summary>
+		/// 차량 생성될 때 개별 Sfx 할당해줌
+		/// </summary>
+		public void InitCarDrivingSfx(CarController car)
+		{
+            AudioSource audioSource = Pop();
+            audioSource.clip = GetAudioClip(SFXType.CarDriving);
+            carDrivingDict.Add(car, audioSource);
+        }
+        public void PlayCarDrivingSfx(CarController car, float volume, float pitch)
+        {
+			if (carDrivingDict.ContainsKey(car)) return;
+
+            AudioSource audioSource = carDrivingDict[car];
+
+            audioSource.pitch = pitch;
+            audioSource.volume = volume * masterVolume * sfxVolume;
+            audioSource.Play();
+        }
+		public void StopCarDrivingSfx(CarController car)
+        {
+            if (carDrivingDict.ContainsKey(car)) return;
+
+            AudioSource audioSource = carDrivingDict[car];
+
+            audioSource.DOFade(0f, 0.1f).
+				OnComplete(() => audioSource.Stop());
+            carDrivingDict.Add(car, audioSource);
+        }
+		/// <summary>
+		/// 차량 삭제될 때 호출해서 딕셔너리에서 없애주기
+		/// </summary>
+		public void RemoveCarDrivingSfxInDict(CarController car)
+		{
+            if (carDrivingDict.ContainsKey(car)) return;
+
+			carDrivingDict.Remove(car);
+        }
+        #endregion
+    }
 }

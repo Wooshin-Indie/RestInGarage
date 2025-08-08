@@ -26,11 +26,14 @@ namespace Garage.Controller.StateMachine
 				controller.SetAnimParam((int)AnimationType.CarryMult, controller.CurrentOwningProp.CarrySpeed / 3f);
 				controller.SetAnimParam((int)AnimationType.Carry, true);
 			}
-		}
+
+            Managers.Sound.PlaySfx(SFXType.PropHold);
+        }
 
 		public override void Exit()
 		{
 			base.Exit();
+			Managers.Sound.PlaySfx(SFXType.PropPutdown);
 		}
 
 		public override void HandleInput()

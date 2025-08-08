@@ -314,5 +314,11 @@ namespace Garage.Manager
 			UIManager.Game.StartBossWarning();
 			Managers.Sound.PlaySfx(SFXType.BossWarning);
         }
+
+		[ClientRpc]
+		public void PlayStageBGMClientRPC()
+		{
+            Managers.Sound.PlayBGM(BGMType.Stage1, 0.2f);
+        }
     }
 }
