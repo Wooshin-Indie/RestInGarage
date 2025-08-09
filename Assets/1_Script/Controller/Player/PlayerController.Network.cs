@@ -42,7 +42,7 @@ namespace Garage.Controller
 		[ServerRpc(RequireOwnership = false)]
 		private void DespawnPropServerRPC(ulong networkId)
 		{
-			Managers.Spawn.Despawn(networkId);
+			Managers.Spawn.DespawnObject(networkId);
 		}
 
 		#region Transform RPC
