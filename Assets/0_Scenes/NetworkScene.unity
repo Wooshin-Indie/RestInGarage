@@ -6603,6 +6603,11 @@ MonoBehaviour:
     poolSize: 5
     allowPoolExpansion: 1
     estimatedDuration: 2
+  - type: 6
+    prefab: {fileID: 3503204133499837250, guid: 1c4feaf0795fc14449996569554c3a26, type: 3}
+    poolSize: 5
+    allowPoolExpansion: 1
+    estimatedDuration: 10
 --- !u!1 &691527296
 GameObject:
   m_ObjectHideFlags: 0

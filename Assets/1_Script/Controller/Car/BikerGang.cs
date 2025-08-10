@@ -160,8 +160,7 @@ namespace Garage.Vehicle
         }
         private void Despawn()
         {
-            GetComponent<NetworkObject>().Despawn();
-            Destroy(gameObject);
+            GetComponent<NetworkObject>().Despawn(true);
             StopSmokeVFXClientRPC();
         }
 
