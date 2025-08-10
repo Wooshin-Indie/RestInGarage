@@ -26,14 +26,6 @@ namespace Garage.Manager
         CarImpulseDust,
         BombExplosion
     }
-    public enum VFXEmittingDirection
-    {
-        // VFX의 파티클이 뿜어져나올 y축 회전값을 차량기준으로 보정하는 용도
-        Front,   // +0도 (y축각도)
-        Right,     // +90도
-        Rear,  // +180도
-        Left    // +270도
-    }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
     {
@@ -300,17 +292,19 @@ namespace Garage.Manager
         private void SetupAndActivate(GameObject instanceGO, Vector3 position, Quaternion rotation,
                             Transform parent, bool worldPositionStays = true)
         {
-            instanceGO.transform.position = position;
-            instanceGO.transform.rotation = rotation;
             if (parent != null)
             {
-                instanceGO.transform.SetParent(parent, worldPositionStays); 
+                instanceGO.transform.SetParent(parent, worldPositionStays);
                 // worldPositionStays == true 면 현재 위치 유지하면서 자식으로 이동
                 // worldPositionStays == false 면 자식으로 이동하면서 현재 위치를 부모의 위치로 바꿈
+                instanceGO.transform.localPosition = position;
+                instanceGO.transform.localRotation = rotation;
             }
             else
             {
                 // instanceGO.transform.SetParent(transform); // Manager를 기본 부모로
+                instanceGO.transform.position = position;
+                instanceGO.transform.rotation = rotation;
             }
             instanceGO.gameObject.SetActive(true);
         }

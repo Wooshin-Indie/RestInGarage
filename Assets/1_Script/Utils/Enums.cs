@@ -73,4 +73,13 @@ namespace Garage.Utils
         Carry,
         Interact
     }
+
+    public enum LocalFourDirection
+    {
+        // VFX의 파티클이 뿜어져나올 y축 회전값을 정하는 용도로 만듬
+        Front,
+        Right,
+        Rear,
+        Left
+    }
 }

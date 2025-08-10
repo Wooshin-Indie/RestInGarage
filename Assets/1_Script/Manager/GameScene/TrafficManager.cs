@@ -41,11 +41,15 @@ namespace Garage.Manager
             GameManagerEx.Instance.OnStartGameAction += OnStageStart;
 		}
 
+        [SerializeField] private float carFireChance = 0f;
+        public float CarFireChance => carFireChance;
+
+        [FoldoutGroup("Prefabs")]
 		[SerializeField] private List<GameObject> carPrefabList = new();
 		[SerializeField] private GameObject bikerGangPrefab;
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
-        
+
         private MapData curStageData;
         public MapData CurStageData => curStageData;
 

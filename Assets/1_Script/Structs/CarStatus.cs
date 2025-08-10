@@ -1,4 +1,5 @@
 using Garage.Utils;
+using Garage.Manager;
 using System;
 using UnityEngine;
 
@@ -24,8 +25,8 @@ namespace Garage.Structs
                 }
             }
 
-            // HACK - 임시 테스트용
-			fireProgress = (tc++ % 2 == 0) ? .1f : -1f;
+			//fireProgress = (tc++ % 2 == 0) ? .1f : -1f;
+            fireProgress = Utility.Chance(TrafficManager.Instance.CarFireChance) ? .1f : -1f;
 
             progress = new float[values.Length];
         }

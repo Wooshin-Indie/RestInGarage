@@ -233,7 +233,7 @@ namespace Garage.Controller
         public void KickCar()
 		{
             if (currentKickableCar == null) return;
-			if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
+			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
             // 차는 애니메이션 실행
             Managers.Input.DisablePlayerActions();

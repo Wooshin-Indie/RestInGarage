@@ -78,10 +78,10 @@ namespace Garage.Controller
 
 		private int[] animIDs = new int[2];
 
-		private Vector3 frontMiddlePos;
-		private Vector3 rearMiddlePos;
-		private Vector3 rightMiddlePos;
-		private Vector3 leftMiddlePos;
+		private Transform frontMiddleTf;
+		private Transform rearMiddleTf;
+		private Transform rightMiddleTf;
+		private Transform leftMiddleTf;
 
 		public override void Awake()
 		{
@@ -109,10 +109,7 @@ namespace Garage.Controller
 
 			Managers.Sound.InitCarDrivingSfx(this);
 
-			frontMiddlePos = (partTransforms[0].position + partTransforms[1].position) / 2f;
-            rearMiddlePos = (partTransforms[2].position + partTransforms[3].position) / 2f;
-            rightMiddlePos = (partTransforms[0].position + partTransforms[2].position) / 2f;
-            leftMiddlePos = (partTransforms[1].position + partTransforms[3].position) / 2f;
+			SetFourDirections();
         }
 
 		private void FixedUpdate()
@@ -237,7 +234,7 @@ namespace Garage.Controller
 
 			if (isBraked)
             {
-                PlayCarDustVfxClientRPC(VFXEmittingDirection.Rear);
+                PlayCarDustVfxClientRPC(LocalFourDirection.Rear);
                 isBraked = false;
             }
 
@@ -266,7 +263,7 @@ namespace Garage.Controller
 
 			if (!isBraked)
 			{
-				PlayCarDustVfxClientRPC(VFXEmittingDirection.Front);
+				PlayCarDustVfxClientRPC(LocalFourDirection.Front);
                 isBraked = true;
 			}
 
@@ -504,6 +501,29 @@ namespace Garage.Controller
 				return true;
 			else
 				return false;
+        }
+
+		private void SetFourDirections()
+		{
+            frontMiddleTf = new GameObject("FrontMiddleTf").transform;
+            rearMiddleTf = new GameObject("RearMiddleTf").transform;
+            rightMiddleTf = new GameObject("RightMiddleTf").transform;
+            leftMiddleTf = new GameObject("LeftMiddleTf").transform;
+
+            frontMiddleTf.position = (partTransforms[0].position + partTransforms[1].position) / 2f;
+            rearMiddleTf.position = (partTransforms[2].position + partTransforms[3].position) / 2f;
+            rightMiddleTf.position = (partTransforms[0].position + partTransforms[2].position) / 2f;
+            leftMiddleTf.position = (partTransforms[1].position + partTransforms[3].position) / 2f;
+
+            frontMiddleTf.SetParent(transform);
+            rearMiddleTf.SetParent(transform);
+            rightMiddleTf.SetParent(transform);
+            leftMiddleTf.SetParent(transform);
+
+            frontMiddleTf.localRotation = Quaternion.identity;
+            rearMiddleTf.localRotation = Quaternion.identity;
+            rightMiddleTf.localRotation = Quaternion.identity;
+            leftMiddleTf.localRotation = Quaternion.identity;
         }
 
 

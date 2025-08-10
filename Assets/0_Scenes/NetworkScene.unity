@@ -6193,7 +6193,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   vfxList:
   - type: 4
-    prefab: {fileID: 77149800604523865, guid: f92de8bf54d1baf429f140678822e378, type: 3}
+    prefab: {fileID: 3527968371418005769, guid: 1dd0dc1c175283d41a6c0a12ea57bbc4, type: 3}
     poolSize: 10
     allowPoolExpansion: 1
     estimatedDuration: 2
@@ -7093,7 +7093,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -8045,6 +8045,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  carFireChance: 0
   carPrefabList:
   - {fileID: 3526656333118620634, guid: cacb113296c6b574f9ee6f490eaee098, type: 3}
   - {fileID: 8777919558186187492, guid: 8464b1459729d6e408192f516c2fdaba, type: 3}
@@ -13919,7 +13920,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
-  stageTimer: 20
+  stageTimer: 100
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
@@ -18393,7 +18394,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -20584,7 +20585,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

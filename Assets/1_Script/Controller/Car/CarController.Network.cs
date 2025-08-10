@@ -197,11 +197,13 @@ namespace Garage.Controller
 			if (kickDir == KickDirection.Right)
 			{
 				distanceX = -distance;
+				PlayCarDustVfxClientRPC(LocalFourDirection.Left);
 			}
 			else
 			{
 				distanceX = distance;
-			}
+                PlayCarDustVfxClientRPC(LocalFourDirection.Right);
+            }
 
 			ApplyKickClientRPC(distanceX);
 		}
@@ -242,34 +244,32 @@ namespace Garage.Controller
 
         #region Vfx, Sfx
         [ClientRpc]
-        private void PlayCarDustVfxClientRPC(VFXEmittingDirection direction)
+        private void PlayCarDustVfxClientRPC(LocalFourDirection direction)
         {
-			Vector3 rotation = VFXManager.Instance.GetVFXRotation(VFXType.CarImpulseDust);
-			Vector3 position = Vector3.zero;
+			Vector3 localRotation = VFXManager.Instance.GetVFXRotation(VFXType.CarImpulseDust);
 			Transform parent = null;
 
             switch (direction)
             {
-                case VFXEmittingDirection.Front:
-                    rotation.y = 0f;
-					position = frontMiddlePos;
+                case LocalFourDirection.Front:
+                    localRotation.y = 0f;
+                    parent = frontMiddleTf;
                     break;
-                case VFXEmittingDirection.Right:
-                    rotation.y = 90f;
-					// TODO - 포지션 세팅 필요
+                case LocalFourDirection.Right:
+                    localRotation.y = 90f;
+                    parent = rightMiddleTf;
                     break;
-                case VFXEmittingDirection.Rear:
-                    rotation.y = 180f;
-                    position = rearMiddlePos;
+                case LocalFourDirection.Rear:
+                    localRotation.y = 180f;
+                    parent = rearMiddleTf;
                     break;
-                case VFXEmittingDirection.Left:
-                    rotation.y = 270f;
-                    // 포지션 세팅 필요
+                case LocalFourDirection.Left:
+                    localRotation.y = 270f;
+                    parent = leftMiddleTf;
                     break;
             }
 
-			rotation.y += transform.eulerAngles.y;
-            VFXManager.Instance.PlayVFX(VFXType.CarImpulseDust, position, Quaternion.Euler(rotation));
+            VFXManager.Instance.PlayVFX(VFXType.CarImpulseDust, Vector3.zero, Quaternion.Euler(localRotation), parent);
         }
         [ClientRpc]
         private void PlayCarDrivingSfxClientRPC()
