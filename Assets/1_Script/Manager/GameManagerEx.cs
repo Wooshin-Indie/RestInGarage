@@ -130,8 +130,7 @@ namespace Garage.Manager
 
 			if (meetingPoint == null)
 			{
-				GameObject go = Instantiate(meetingPointPrefab);
-				go.GetComponent<NetworkObject>().Spawn();
+				GameObject go = Managers.Spawn.SpawnInCurrentScene(meetingPointPrefab);
 				meetingPoint = go.GetComponent<MeetingPoint>();
 				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
 				meetingPoint.StartMeetClientRPC(1);
