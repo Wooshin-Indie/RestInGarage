@@ -39,7 +39,8 @@ namespace Garage.Manager
 			if (soDatas == null || !soDatas.ContainsKey(typeof(T)) || soDatas[typeof(T)] == null)
 				throw new NotSupportedException("Resource Manager - Not Supported Type");
 
-			Debug.Log("GET DATA : " + typeof(T).ToString() + ", " + index);
+			if (index < 0 || index > soDatas[typeof(T)].Length) return default(T);
+
 			return (T)(object)soDatas[typeof(T)][index];
 		}
 	}

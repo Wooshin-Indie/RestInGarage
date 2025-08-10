@@ -4,7 +4,9 @@ using Garage.Structs;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
+using UnityEditor.Analytics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Garage.Manager
 {
@@ -90,8 +92,7 @@ namespace Garage.Manager
 				{
 					for (int j = 0; j < gridSize[t].y; j++)
 					{
-						GridTile tile = Instantiate(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
-						tile.GetComponent<NetworkObject>().Spawn();
+						GridTile tile = Managers.Spawn.SpawnInCurrentScene(gridPrefab, new Vector3(gridOrigin[t].x - .5f, .01f, gridOrigin[t].y - .5f) + new Vector3(i, 0, j), Quaternion.Euler(90f, 0f, 0f)).GetComponent<GridTile>();
 						tile.SetGridPosition(t, i, j);
 					}
 				}
@@ -109,8 +110,7 @@ namespace Garage.Manager
 			shopPositions = Managers.Resource.GetData<MapData>(mapIdx).ItemPositions;
 
 			// TODO - Map마다 지을 빌딩이 다를수도 있음 - mapIdx로 SO 받아와서 처리
-			GameObject go = Instantiate(prefabList[0]);
-			go.GetComponent<NetworkObject>().Spawn();
+			GameObject go = Managers.Spawn.SpawnInCurrentScene(prefabList[0]);
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[8]
 				{
@@ -126,8 +126,7 @@ namespace Garage.Manager
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
-			go = Instantiate(prefabList[2]);
-			go.GetComponent<NetworkObject>().Spawn();
+			go = Managers.Spawn.SpawnInCurrentScene(prefabList[2]);
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 2, new Vector2Int[4]
 				{
@@ -139,8 +138,7 @@ namespace Garage.Manager
 				NetworkManager.Singleton.LocalClientId);
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
-			go = Instantiate(prefabList[3]);
-			go.GetComponent<NetworkObject>().Spawn();
+			go = Managers.Spawn.SpawnInCurrentScene(prefabList[3]);
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[1]
 				{
@@ -150,8 +148,7 @@ namespace Garage.Manager
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
 
-			go = Instantiate(prefabList[1]);
-			go.GetComponent<NetworkObject>().Spawn();
+			go = Managers.Spawn.SpawnInCurrentScene(prefabList[1]);
 			BuildingNetworkManager.Instance.TryPlaceServerRpc(go.GetComponent<NetworkObject>().NetworkObjectId,
 				0, 0, new Vector2Int[1]
 				{
@@ -161,12 +158,10 @@ namespace Garage.Manager
 			PlacedBuildings.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go.GetComponent<OwnableProp>());
 
 			Vector2Int sellPos = gridOrigin[(int)GridIndexType.Sell] + gridSize[(int)GridIndexType.Sell] / 2;
-			sellBoundGameObject = Instantiate(sellBoundPrefab, new Vector3(sellPos.x - 0.5f, 0f, sellPos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
-			sellBoundGameObject.GetComponent<NetworkObject>().Spawn();
+			sellBoundGameObject = Managers.Spawn.SpawnInCurrentScene(sellBoundPrefab, new Vector3(sellPos.x - 0.5f, 0f, sellPos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
 
 			Vector2Int upgradePos = gridOrigin[(int)GridIndexType.Upgrade] + gridSize[(int)GridIndexType.Upgrade] / 2;
-			upgradeBoundGameObject = Instantiate(upgradeBoundPrefab, new Vector3(upgradePos.x - 0.5f, 0f, upgradePos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
-			upgradeBoundGameObject.GetComponent<NetworkObject>().Spawn();
+			upgradeBoundGameObject = Managers.Spawn.SpawnInCurrentScene(upgradeBoundPrefab, new Vector3(upgradePos.x - 0.5f, 0f, upgradePos.y - 0.5f), Quaternion.Euler(0, 90f, 0));
 		}
 
 		public void RegisterTile(GridTile tile)
@@ -241,6 +236,7 @@ namespace Garage.Manager
 			TurnOffLights();
 			BuildingNetworkManager.Instance.OnShopItemEraseAllClientRPC();
 			sellBoundGameObject.SetActive(false);
+			upgradeBoundGameObject.SetActive(false);
 		}
 
 		// 스테이지 종료 시 구매할 빌딩 스폰
@@ -250,17 +246,15 @@ namespace Garage.Manager
 
 			if (stageId <= 0) return;
 
-			// HACK - 랜덤으로 바꾸기
+			var randPrefabs = GetRandomPrefabs(3);
 			for (int i = 0; i < shopPositions.Count; i++)
 			{
-				GameObject tmpGo = Instantiate(prefabList[i], shopPositions[i], Quaternion.identity);
-				tmpGo.GetComponent<NetworkObject>().Spawn();
+				GameObject tmpGo = Managers.Spawn.SpawnInCurrentScene(randPrefabs[i], shopPositions[i], Quaternion.identity);
 				tmpGo.GetComponent<OwnableProp>().SetGridPosition(shopPositions[i]);
 				ItemDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo.GetComponent<OwnableProp>());
 
-				lightDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId,
-					Instantiate(lightPrefab, new Vector3(shopPositions[i].x, 10f, shopPositions[i].z), Quaternion.Euler(90f, 0f, 0f)).GetComponent<Light>());
-				lightDictionary[tmpGo.GetComponent<NetworkObject>().NetworkObjectId].GetComponent<NetworkObject>().Spawn();
+				Light lightGo = Managers.Spawn.SpawnInCurrentScene(lightPrefab, new Vector3(shopPositions[i].x, 10f, shopPositions[i].z), Quaternion.Euler(90f, 0f, 0f)).GetComponent<Light>();
+				lightDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, lightGo);
 			}
 
 			foreach (var item in ItemDictionary)
@@ -269,12 +263,12 @@ namespace Garage.Manager
 			}
 
 			sellBoundGameObject.SetActive(true);
+			upgradeBoundGameObject.SetActive(true);
 		}
 
 		private void SpawnNightDecoProps()
 		{
-            GameObject tmpGo = Instantiate(nightDecoPrefabList[0], new Vector3(16, 0 ,4), Quaternion.Euler(0f, 173f, 0f));
-			tmpGo.GetComponent<NetworkObject>().Spawn();
+            GameObject tmpGo = Managers.Spawn.SpawnInCurrentScene(nightDecoPrefabList[0], new Vector3(16, 0 ,4), Quaternion.Euler(0f, 173f, 0f));
             NightDecoPropDictionary.Add(tmpGo.GetComponent<NetworkObject>().NetworkObjectId, tmpGo);
         }
 
@@ -371,7 +365,7 @@ namespace Garage.Manager
 			if (!gridTiles[0][0, 0].gameObject.activeSelf)
 			{
 				SetActiveGrids(true);
-				tmpPreview = Instantiate(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
+				tmpPreview = Managers.Spawn.SpawnInCurrentScene(prop.GetComponent<IPlaceable>().GetPreviewPrefab());
 				wheelRotate = 0;
 			}
 
@@ -504,6 +498,8 @@ namespace Garage.Manager
 		{
 			if (!NetworkManager.Singleton.IsHost) return;
 
+			NightDecoPropDictionary.Clear();
+
 			for (int t = 0; t < gridOrigin.Count; t++)
 			{
 				gridTiles.Add(new GridTile[gridSize[t].x, gridSize[t].y]);
@@ -511,12 +507,15 @@ namespace Garage.Manager
 				{
 					for (int j = 0; j < gridSize[t].y; j++)
 					{
+						if (gridTiles[t][i, j] == null) continue;
 						gridTiles[t][i, j].GetComponent<NetworkObject>().Despawn();
 						Destroy(gridTiles[t][i, j].gameObject);
 					}
 				}
 			}
-			gridTiles.Clear();
+
+			// HACK - Client측에서 게임 다시시작 할때 다시 할당해주는 코드 없어서 임시로 주석처리함
+			// gridTiles.Clear();
 		}
 		public void OnGameStarted()
 		{
@@ -524,6 +523,39 @@ namespace Garage.Manager
 
             int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
             if (NetworkManager.Singleton.IsHost) SpawnBasicBuildings_HostOnly(mapIdx);
+		}
+		public List<GameObject> GetRandomPrefabs(int counts)
+		{
+			var result = new List<GameObject>();
+			var usedTypes = new HashSet<ItemType>();
+
+			int maxTries = 1000; // 무한루프 방지용
+			int tries = 0;
+
+			while (result.Count < 3 && tries < maxTries)
+			{
+				tries++;
+
+				GameObject randomPrefab = prefabList[Random.Range(0, prefabList.Count)];
+				var prop = randomPrefab.GetComponent<OwnableProp>();
+				if (prop == null || prop.ItemData == null)
+					continue;
+
+				var type = prop.ItemData.ItemType;
+
+				if (usedTypes.Contains(type))
+					continue;
+
+				usedTypes.Add(type);
+				result.Add(randomPrefab);
+			}
+
+			if (result.Count < counts)
+			{
+				Debug.LogWarning("서로 다른 ItemType을 가진 프리팹이 3개 미만입니다.");
+			}
+
+			return result;
 		}
 	}
 }

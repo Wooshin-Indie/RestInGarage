@@ -194,10 +194,9 @@ namespace Garage.Manager
         }
 		private void OnSceneLoadedInNetwork(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut)
 		{
-            Debug.Log("Scene loaded by Server");
+            Debug.Log($"Scene loaded by Server {sceneName}");
             if (sceneName == "GameScene")
 			{
-
                 if (!NetworkManager.Singleton.IsHost) return;
 
                 Debug.Log("Game Scene loaded on all clients. Spawning players...");
@@ -230,16 +229,18 @@ namespace Garage.Manager
 		public async void Disconnected()
 		{
 			Debug.Log("DISCONNECTED");
-			NetworkTransmission.instance.EndHeartbeat();
-			// PlayerSpawner.Instance.DespawnPlayerServerRPC(NetworkManager.Singleton.LocalClientId);
+
+			NetworkTransmission.instance.OnEndGame();
 			if (NetworkManager.Singleton.IsHost)
 			{
 				NetworkTransmission.instance.DisconnectAllClientRPC();
 			}
 
+			if (currentLobby == null) return;
 			currentLobby?.Leave();
-			if (NetworkManager.Singleton == null) return;
+			currentLobby = null;
 
+			if (NetworkManager.Singleton == null) return;
 			if (NetworkManager.Singleton.IsHost)
 			{
 				NetworkManager.Singleton.OnServerStarted -= Singleton_OnServerStarted;
@@ -248,6 +249,7 @@ namespace Garage.Manager
 			{
 				NetworkManager.Singleton.OnClientConnectedCallback -= Singleton_OnClientConnectedCallback;
             }
+
             GameManagerEx.Instance.Disconnected();
             Debug.Log("Disconnected.");
             NetworkManager.Singleton.Shutdown(true);

@@ -7,9 +7,6 @@ namespace Garage.Manager
 {
 	public class SpawnManager
 	{
-
-		private Dictionary<ulong, GameObject> propDict = new();		// stage마다 초기화할 Prop들
-
 		public void Init()
 		{
 
@@ -17,43 +14,38 @@ namespace Garage.Manager
 
 		public void Start()
 		{
-			GameManagerEx.Instance.OnBeforeStageEndAction += OnStageEnd;
+
 		}
 
-		public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
+		public GameObject SpawnInCurrentScene(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
 		{
 			GameObject go = Object.Instantiate(prefab, position, rotation, parent);
-			if (go.GetComponent<NetworkObject>() == null)
-			{
-				Object.Destroy(go);
-				Debug.LogError("SpawnManager - There is no NetworkObect on prefab");
-				return null;
-			}
+			Managers.Scene.MoveGameObjectToCurrentScene(go);
 
-			go.GetComponent<NetworkObject>().Spawn();
-			propDict.Add(go.GetComponent<NetworkObject>().NetworkObjectId, go);
+			if (go.GetComponent<NetworkObject>() == null)
+				Debug.LogWarning("There is no NetworkObject on prefab");
+			else if (!NetworkManager.Singleton.IsHost)
+				Debug.LogWarning("Only host can Spawn Objects.");
+
+			go.GetComponent<NetworkObject>()?.Spawn();
 			return go;
 		}
 
-		public void Despawn(ulong netId)
+		public GameObject SpawnInCurrentScene(GameObject prefab, Transform parent = null)
 		{
-			if(propDict.TryGetValue(netId, out GameObject obj))
-			{
-				obj.GetComponent<NetworkObject>().Despawn(true);
-				propDict.Remove(netId);
-			}
+			return SpawnInCurrentScene(prefab, Vector3.zero, Quaternion.identity, parent);
 		}
 
-		public void OnStageEnd()
+
+		public void DespawnObject(ulong networkId)
 		{
-			foreach (var entry in propDict)
-			{
-				if (entry.Value != null)
-				{
-					entry.Value.GetComponent<NetworkObject>().Despawn(true);
-				}
-			}
-			propDict.Clear();
+			if (!NetworkManager.Singleton.IsHost)
+				Debug.LogWarning("Only host can Despawn Objects.");
+
+			if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkId, out var netObj))
+				Debug.LogWarning($"Can't Find : NetworkObject ID {networkId}.");
+
+			netObj.Despawn(true);
 		}
 	}
 }

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRevealData: 1
   itemID: 1
+  itemType: 1
   itemName: Tire Rack
   descriptionKey: Tire rack description key.
   upgradeDatas:
