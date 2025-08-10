@@ -23,11 +23,17 @@ namespace Garage.Vehicle
         public override void Awake()
         {
             base.Awake();
+        }
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
             Init(Utils.Utility.Chance(1f));
         }
 
         public void Init(bool hasBomb)
         {
+            if (!IsHost) return;
+
             IsKnockbackablePlayerOnCollision = true;
 
             this.hasBomb = hasBomb;
@@ -35,13 +41,14 @@ namespace Garage.Vehicle
             {
                 throwingBombPosZ = Random.Range(-zPosRangeToThrowBomb, zPosRangeToThrowBomb);
             }
-
+            PlaySmokeVFXClientRPC();
         }
 
         private void FixedUpdate()
         {
             if (!IsHost) return;
 
+            Debug.Log("Bikergang IsHost");
             if (IsOutOfBoundary())
             {
                 Despawn();
@@ -155,6 +162,7 @@ namespace Garage.Vehicle
         {
             GetComponent<NetworkObject>().Despawn();
             Destroy(gameObject);
+            StopSmokeVFXClientRPC();
         }
 
 
@@ -171,10 +179,18 @@ namespace Garage.Vehicle
             Managers.Sound.PlaySfx(SFXType.SwingArm, 0.8f);
         }
 
+        private int vfxId = int.MaxValue;
         [ClientRpc]
         private void PlaySmokeVFXClientRPC()
         {
-
+            Vector3 localRotation = Vector3.zero;
+            localRotation.y = 180f;
+            vfxId = VFXManager.Instance.PlayLoopingVFX(VFXType.BikerGangSmoke, Vector3.zero, Quaternion.Euler(localRotation), smokeSpotTf);
+        }
+        [ClientRpc]
+        private void StopSmokeVFXClientRPC()
+        {
+            VFXManager.Instance.StopLoopingVFX(vfxId);
         }
     }
 }

@@ -267,12 +267,14 @@ namespace Garage.Controller
 			if (isKnockedBack) return;
             // 튕겨나갈 방향 계산
             knockbackDirection = knockbackDirection.normalized;
+            Debug.Log("Collision to Player2");
 
             Vector3 targetRotVector3 = -knockbackDirection;
             targetRotVector3.y = 0;
             Quaternion targetRot = Quaternion.LookRotation(targetRotVector3);
             rigid.rotation = targetRot;
 
+			// 플레이어 움직임 Lock걸기
             Managers.Input.DisablePlayerActions();
             rigid.constraints = RigidbodyConstraints.FreezeRotation | originalConstraints;
             EndAllInteraction();

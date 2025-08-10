@@ -512,8 +512,8 @@ namespace Garage.Controller
 
             frontMiddleTf.position = (partTransforms[0].position + partTransforms[1].position) / 2f;
             rearMiddleTf.position = (partTransforms[2].position + partTransforms[3].position) / 2f;
-            rightMiddleTf.position = (partTransforms[0].position + partTransforms[2].position) / 2f;
             leftMiddleTf.position = (partTransforms[1].position + partTransforms[3].position) / 2f;
+            rightMiddleTf.position = (partTransforms[0].position + partTransforms[2].position) / 2f;
 
             frontMiddleTf.SetParent(transform);
             rearMiddleTf.SetParent(transform);
