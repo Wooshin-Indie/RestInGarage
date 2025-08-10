@@ -28,7 +28,7 @@ namespace Garage.Vehicle
 
         public void Init(bool hasBomb)
         {
-            IsKnockbackPlayerOnCollision = true;
+            IsKnockbackablePlayerOnCollision = true;
 
             this.hasBomb = hasBomb;
             if (hasBomb)

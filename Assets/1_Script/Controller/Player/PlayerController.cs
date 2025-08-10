@@ -260,8 +260,10 @@ namespace Garage.Controller
         
         private RigidbodyConstraints originalConstraints;
 		private bool isKnockedBack = false;
-        public void KnockBack(Vector3 knockbackDirection, float force)
+		[ClientRpc]
+        public void KnockBackClientRPC(Vector3 knockbackDirection, float force)
 		{
+			if (!IsOwner) return;
 			if (isKnockedBack) return;
             // 튕겨나갈 방향 계산
             knockbackDirection = knockbackDirection.normalized;

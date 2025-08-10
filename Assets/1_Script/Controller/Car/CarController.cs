@@ -170,7 +170,7 @@ namespace Garage.Controller
 
         private void OnCollisionEnter(Collision collision)
         {
-			OnCollisionWithPlayer(collision, 10f);
+			OnCollisionWithPlayer(collision, 20f);
         }
 
         private float currentSpeedVelocityRef = 0f;		// smooth damp용
@@ -405,7 +405,7 @@ namespace Garage.Controller
         }
         private IEnumerator MoveSideways(float distanceX, float time)
         {
-			IsKnockbackPlayerOnCollision = true;
+			IsKnockbackablePlayerOnCollision = true;
 			isBeingControlled = true;
             Vector3 startPos = new Vector3(rigid.position.x, rigid.position.y, rigid.position.z);
 			Vector3 targetPos = startPos;
@@ -423,7 +423,7 @@ namespace Garage.Controller
                 elapsedTime += Time.deltaTime;
                 yield return null;
             }
-            IsKnockbackPlayerOnCollision = false;
+            IsKnockbackablePlayerOnCollision = false;
             rigid.MovePosition(targetPos);
 
             targetLaneX += distanceX;

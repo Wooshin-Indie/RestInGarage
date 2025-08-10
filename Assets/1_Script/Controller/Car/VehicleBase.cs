@@ -17,7 +17,7 @@ namespace Garage.Vehicle
         public Rigidbody rigid;
 
         // 닿으면 플레이어를 넉백시키는 상태인지 확인
-        public bool IsKnockbackPlayerOnCollision = false;
+        public bool IsKnockbackablePlayerOnCollision = false;
 
         public virtual void Awake()
         {
@@ -25,7 +25,8 @@ namespace Garage.Vehicle
         }
         public void OnCollisionWithPlayer(Collision collision, float force)
         {
-            if (!IsKnockbackPlayerOnCollision) return;
+            if (!IsHost) return;
+            if (!IsKnockbackablePlayerOnCollision) return;
 
             if (collision.gameObject.layer != Constants.INT_PLAYER) return;
 
@@ -35,7 +36,7 @@ namespace Garage.Vehicle
             knockbackDirection = (knockbackDirection.x >= 0) ? Vector3.right : Vector3.left;
             //위나 아래쪽으로만 넉백되게
 
-            player.KnockBack(knockbackDirection, force);
+            player.KnockBackClientRPC(knockbackDirection, force);
         }
 
         public virtual void Move(Vector3 direction, float velocity) { }
