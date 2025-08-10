@@ -16,6 +16,7 @@ namespace Garage.Vehicle
         [SerializeField] private float carDetectingRange; // 폭탄 던지기 전 랜덤차량 받아올 때 차량탐색 범위
         [SerializeField] private LayerMask carLayer;
         [SerializeField] private GameObject bombPrefab;
+        [SerializeField] private Transform smokeSpotTf;
         private bool hasBomb;
         private bool bombThrew;
         private float throwingBombPosZ;
@@ -34,6 +35,7 @@ namespace Garage.Vehicle
             {
                 throwingBombPosZ = Random.Range(-zPosRangeToThrowBomb, zPosRangeToThrowBomb);
             }
+
         }
 
         private void FixedUpdate()
@@ -167,6 +169,12 @@ namespace Garage.Vehicle
         {
             Managers.Sound.PlaySfx(SFXType.Voice_ThrowBomb, 0.9f);
             Managers.Sound.PlaySfx(SFXType.SwingArm, 0.8f);
+        }
+
+        [ClientRpc]
+        private void PlaySmokeVFXClientRPC()
+        {
+
         }
     }
 }
