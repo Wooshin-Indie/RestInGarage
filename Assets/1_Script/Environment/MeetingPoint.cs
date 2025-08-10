@@ -31,19 +31,22 @@ namespace Garage.Environment
 		{
 			base.OnNetworkSpawn();
 
-			GameManagerEx.Instance.OnBeforeStageStartAction += (() =>
-			{
-				EndMeetClientRPC();
-			});
-			GameManagerEx.Instance.OnAfterStageEndAction += ((curStage) =>
-			{
-				StartMeetClientRPC(curStage + 1);
-			});
+			GameManagerEx.Instance.OnBeforeStageStartAction += EndMeetClientRPC;
+			GameManagerEx.Instance.OnAfterStageEndAction += StartMeetClientRPC;
+		}
+
+		public override void OnNetworkDespawn()
+		{
+			base.OnNetworkDespawn();
+
+			GameManagerEx.Instance.OnBeforeStageStartAction -= EndMeetClientRPC;
+			GameManagerEx.Instance.OnAfterStageEndAction -= StartMeetClientRPC;
 		}
 
 		[ClientRpc]
 		public void StartMeetClientRPC(int idx)
 		{
+			idx++;
 			if (IsHost)
 				elapsedTime.Value = 0f;
 

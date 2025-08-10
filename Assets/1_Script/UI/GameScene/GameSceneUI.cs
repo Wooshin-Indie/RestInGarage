@@ -21,6 +21,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private TimerText timerText;
         [SerializeField] private StageStartEndUI stageStartEndUI;
         [SerializeField] private BossWarningUI bossWarningUI;
+        [SerializeField] private IngameSettingUI ingameSettingUI;
 
         [Header("PropInfoUIs")]
         [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
@@ -32,6 +33,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private GameObject carCountdownUIPrefab;
         [SerializeField] private ShopInfo shopInfo;
         [SerializeField] private GameObject bombAlertUIPrefab;
+        [SerializeField] private GameObject emoteGoodUIPrefab;
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -42,6 +44,7 @@ namespace Garage.UI.GameScene
 		{
             GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
 		}
+
 
 		private void LateUpdate()
         {
@@ -58,7 +61,12 @@ namespace Garage.UI.GameScene
             curPoppedPropKeyInfoUI?.OnUpdate();
         }
 
-        public void UpdateCarFiringUI(CarController car, float progress)
+		private void OnEnable()
+		{
+            ingameSettingUI.Init();
+		}
+
+		public void UpdateCarFiringUI(CarController car, float progress)
         {
             if(!carStatusInfo.TryGetValue(car.GetComponent<NetworkObject>().NetworkObjectId, out Dictionary<CarParts, CarStatusUI> dict))
             {
@@ -334,7 +342,6 @@ namespace Garage.UI.GameScene
         {
             if (curPoppedPropKeyInfoUI == null)
             {
-                Debug.Log("Current Popped PropKeyInfoUI is null");
                 return;
             }
 
@@ -346,6 +353,12 @@ namespace Garage.UI.GameScene
         public void StartBossWarning()
         {
             bossWarningUI.StartBossWarningVFX();
+        }
+
+        public void PopEmoteGoodUIOnCar(CarController car)
+        {
+            EmotePopupUI emoteGoodUI = Instantiate(emoteGoodUIPrefab, transform).GetComponent<EmotePopupUI>();
+            emoteGoodUI.PopEmoteUI(car.transform);
         }
     }
 }

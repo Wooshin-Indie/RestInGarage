@@ -16,30 +16,39 @@ namespace Garage.Vehicle
         [SerializeField] private float carDetectingRange; // 폭탄 던지기 전 랜덤차량 받아올 때 차량탐색 범위
         [SerializeField] private LayerMask carLayer;
         [SerializeField] private GameObject bombPrefab;
+        [SerializeField] private Transform smokeSpotTf;
         private bool hasBomb;
         private bool bombThrew;
         private float throwingBombPosZ;
         public override void Awake()
         {
             base.Awake();
+        }
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
             Init(Utils.Utility.Chance(1f));
         }
 
         public void Init(bool hasBomb)
         {
-            IsKnockbackOnHumanCollision = true;
+            if (!IsHost) return;
+
+            IsKnockbackablePlayerOnCollision = true;
 
             this.hasBomb = hasBomb;
             if (hasBomb)
             {
                 throwingBombPosZ = Random.Range(-zPosRangeToThrowBomb, zPosRangeToThrowBomb);
             }
+            PlaySmokeVFXClientRPC();
         }
 
         private void FixedUpdate()
         {
             if (!IsHost) return;
 
+            Debug.Log("Bikergang IsHost");
             if (IsOutOfBoundary())
             {
                 Despawn();
@@ -60,12 +69,15 @@ namespace Garage.Vehicle
                 }
 
                 ThrowBomb(randomTargetCar);
+                OnThrowBombClientRPC();
                 bombThrew = true;
             }
         }
 
+        [SerializeField] private float knockbackForce = 20f;
         private void OnCollisionEnter(Collision collision)
         {
+            OnCollisionWithPlayer(collision, knockbackForce);
             // 플레이어하고 충돌할 때만 
             if (collision.gameObject.CompareTag("Player"))
             {
@@ -113,14 +125,13 @@ namespace Garage.Vehicle
             foundCars.Clear();
 
             int hitCount = Physics.OverlapSphereNonAlloc(transform.position, range, hitCars, carLayer);
-            Debug.Log("HitCar Count: " + hitCount);
             for (int i = 0; i < hitCount; i++)
             {
                 // CarController 있는지 확인, 아직 안고쳐진 차량인지 확인
                 CarController car = hitCars[i].GetComponentInParent<CarController>();
                 if (car != null && car.IsAnyBroken)
                 {
-                    Debug.Log("Checked Car");
+                    Debug.Log("Detected Car to throw bomb");
                     if (!foundCars.Contains(car))
                     {
                         foundCars.Add(car);
@@ -151,6 +162,7 @@ namespace Garage.Vehicle
         {
             GetComponent<NetworkObject>().Despawn();
             Destroy(gameObject);
+            StopSmokeVFXClientRPC();
         }
 
 
@@ -158,6 +170,27 @@ namespace Garage.Vehicle
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, carDetectingRange);
+        }
+
+        [ClientRpc]
+        private void OnThrowBombClientRPC()
+        {
+            Managers.Sound.PlaySfx(SFXType.Voice_ThrowBomb, 0.9f);
+            Managers.Sound.PlaySfx(SFXType.SwingArm, 0.8f);
+        }
+
+        private int vfxId = int.MaxValue;
+        [ClientRpc]
+        private void PlaySmokeVFXClientRPC()
+        {
+            Vector3 localRotation = Vector3.zero;
+            localRotation.y = 180f;
+            vfxId = VFXManager.Instance.PlayLoopingVFX(VFXType.BikerGangSmoke, Vector3.zero, Quaternion.Euler(localRotation), smokeSpotTf);
+        }
+        [ClientRpc]
+        private void StopSmokeVFXClientRPC()
+        {
+            VFXManager.Instance.StopLoopingVFX(vfxId);
         }
     }
 }

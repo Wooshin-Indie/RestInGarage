@@ -5,6 +5,15 @@ using UnityEngine.Localization;
 
 namespace Garage.Structs
 {
+    public enum ItemType
+    {
+        None = 0,   // Tire같은 설치되지 않는 Prop들
+        Rack,
+        OilPump,
+        Wrench,
+        Extinguisher
+    }
+
 	[System.Serializable]
 	public class ItemFeature
 	{
@@ -44,6 +53,7 @@ namespace Garage.Structs
 		[SerializeField] private bool isRevealData = true;
 
 		[SerializeField] private int itemID;
+        [SerializeField] private ItemType itemType;
 		[SerializeField] private string itemName;
 		[SerializeField] private string descriptionKey;
 		[SerializeField] private List<UpgradeData> upgradeDatas = new();
@@ -124,6 +134,7 @@ namespace Garage.Structs
         public List<UpgradeData> UpgradeDatas => upgradeDatas;
 		public bool IsRevealData => isRevealData;
 		public int ItemID => itemID;
+        public ItemType ItemType => itemType;
 		public string ItemName => itemName;
 		public string DescriptionKey => descriptionKey;
         public List<KeyData> IdleKeyDataList => idleKeyDataList;

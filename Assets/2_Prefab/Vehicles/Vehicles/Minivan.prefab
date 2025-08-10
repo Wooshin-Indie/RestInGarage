@@ -1303,13 +1303,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  rigid: {fileID: 0}
+  IsKnockbackOnHumanCollision: 0
   meshRenderer: {fileID: 887303938605825394}
   wheelRenderers:
   - {fileID: 5665638846310536103}
   - {fileID: 7215588707187440136}
   - {fileID: 2187639937170403820}
   - {fileID: 5370637977126698524}
-  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   partTransforms:
   - {fileID: 8041272041018744069}
   - {fileID: 3781791651026239495}
@@ -1318,6 +1319,7 @@ MonoBehaviour:
   - {fileID: 2699854035467288266}
   - {fileID: 1737208953049834002}
   - {fileID: 158817233349960750}
+  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   smokePS: {fileID: 5948674790323583871}
   allRepairedVFX: {fileID: 1194757143094643351}
   firePS: {fileID: 2795864106373277652}
@@ -1329,7 +1331,6 @@ MonoBehaviour:
   steeringStrength: 100
   maxSteerAngle: 60
   laneSnapThreshold: 0.1
-  isAnyBroken: 1
   boxLength: 6
   boxWidth: 1
   boxHeight: 1
@@ -1337,7 +1338,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 3895
   decelerationRate: 1
-  kickDistance: 3
 --- !u!114 &6328996501251874881
 MonoBehaviour:
   m_ObjectHideFlags: 0

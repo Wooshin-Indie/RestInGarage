@@ -100,7 +100,8 @@ namespace Garage.Manager
             TrafficManager.Instance.OnStageStart(0);	// TODO - StageIdx 고쳐야됨
             BuildingManager.Instance.OnStageStart();
 
-		}
+			NetworkTransmission.instance.PlayStageBGMClientRPC();
+        }
 
 		public void EndStage()
 		{
@@ -130,8 +131,7 @@ namespace Garage.Manager
 
 			if (meetingPoint == null)
 			{
-				GameObject go = Instantiate(meetingPointPrefab);
-				go.GetComponent<NetworkObject>().Spawn();
+				GameObject go = Managers.Spawn.SpawnInCurrentScene(meetingPointPrefab);
 				meetingPoint = go.GetComponent<MeetingPoint>();
 				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
 				meetingPoint.StartMeetClientRPC(1);
@@ -194,11 +194,6 @@ namespace Garage.Manager
 			BuildingManager.Instance.OnGameStarted();
         }
 
-		public void GameEnded()
-		{
-			Managers.Scene.ChangeSceneServer(SceneEnum.Game);
-		}
-
 		public void HostCreated()
 		{
 			isHost = true;
@@ -239,7 +234,7 @@ namespace Garage.Manager
 		public void Disconnected()
 		{
 			if (isHost)
-				GameSynchronizer.Instance.MapIdx.Value = -1;
+				GameSynchronizer.Instance.MapIdx.Value = 0;
 			playerInfo.Clear();
 
 			OnDisconnectedAction.Invoke();
@@ -257,7 +252,7 @@ namespace Garage.Manager
                     UIManager.Main.GoToPage(PageEnum.Main);
 					break;
                 case SceneEnum.Game:
-                    Managers.Scene.ChangeSceneServer(SceneEnum.Main);
+                    Managers.Scene.ChangeScene(SceneEnum.Main);
                     break;
 			}
 			isHost = false;

@@ -41,11 +41,15 @@ namespace Garage.Manager
             GameManagerEx.Instance.OnStartGameAction += OnStageStart;
 		}
 
+        [SerializeField] private float carFireChance = 0f;
+        public float CarFireChance => carFireChance;
+
+        [FoldoutGroup("Prefabs")]
 		[SerializeField] private List<GameObject> carPrefabList = new();
 		[SerializeField] private GameObject bikerGangPrefab;
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
-        
+
         private MapData curStageData;
         public MapData CurStageData => curStageData;
 
@@ -64,8 +68,10 @@ namespace Garage.Manager
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);
                 point.z = (sp.Direction == VehicleDirection.Up ? -curStageData.LaneLength : curStageData.LaneLength);
-                VehicleSpawnPoint vsp = Instantiate(spawnPointPrefab, point, Quaternion.identity)
+                
+                VehicleSpawnPoint vsp = Managers.Spawn.SpawnInCurrentScene(spawnPointPrefab, point, Quaternion.identity)
 									.GetComponent<VehicleSpawnPoint>();
+
 				vsp.SetSpawnDir(sp.Direction);
                 spawnPoints.Add(vsp);
             }
@@ -90,9 +96,8 @@ namespace Garage.Manager
 			if (availableSpawnPoints.Count > 0)
 			{
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
-                CarController car = Instantiate(carPrefabList[UnityEngine.Random.Range(0, carPrefabList.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
+                CarController car = Managers.Spawn.SpawnInCurrentScene(carPrefabList[UnityEngine.Random.Range(0, carPrefabList.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
-                car.GetComponent<NetworkObject>().Spawn();
                 car.InitCarController(spawnPoint);
 
                 curStageCars.Add(car.GetComponent<NetworkObject>().NetworkObjectId, car);

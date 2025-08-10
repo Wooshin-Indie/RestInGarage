@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isRevealData: 1
   itemID: 4
+  itemType: 4
   itemName: Extinguisher
   descriptionKey: A fire extinguisher is a safety device used to put out small fires,
     including those on vehicles. It sprays a chemical that cools the flames and helps

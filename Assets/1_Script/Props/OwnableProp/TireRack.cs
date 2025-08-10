@@ -35,7 +35,7 @@ namespace Garage.Props
 		[ServerRpc(RequireOwnership = false)]
 		private void SpawnTireServerRpc(ulong newOwnerClientId)
 		{
-			GameObject go = Managers.Spawn.Spawn(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
+			GameObject go = Managers.Spawn.SpawnInCurrentScene(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
 			go.GetComponent<TireProp>().TryInteract(newOwnerClientId);
 		}
 

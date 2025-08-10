@@ -5,7 +5,6 @@ using Unity.Netcode;
 using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
-using Steamworks;
 using Manager;
 
 namespace Garage.Manager
@@ -77,6 +76,8 @@ namespace Garage.Manager
 
 		public void StartHeartbeat()
 		{
+			return;
+
 			if (IsClient && !IsHost)
 			{
 				lastPingTime = Time.time;
@@ -87,6 +88,8 @@ namespace Garage.Manager
 
 		public void EndHeartbeat()
 		{
+			return;
+
 			isHeartbeating = false;
 		}
 
@@ -175,14 +178,13 @@ namespace Garage.Manager
 		[ClientRpc]
 		public void DisconnectAllClientRPC()
 		{
-			if (IsHost)
+			if (!IsHost)
 			{
 				return;
 			}
-			GameNetworkManager.Instance.Disconnected();
+			Debug.LogWarning("PlayerDict Clear");
+			playerDict.Clear();
 		}
-
-
 
 		public bool isInGame = false;
 
@@ -202,21 +204,13 @@ namespace Garage.Manager
 			GameManagerEx.Instance.GameStarted();
 		}
 
-		[ServerRpc(RequireOwnership = false)]
-		public void EndGameServerRPC()
+		public void OnEndGame()
 		{
 			if (isInGame)
 			{
 				GameNetworkManager.Instance.UnlockLobby();
-				EndGameClientRPC();
+				isInGame = false;
 			}
-		}
-
-		[ClientRpc]
-		public void EndGameClientRPC()
-		{
-			isInGame = false;
-			GameManagerEx.Instance.GameEnded();
 		}
 
 		#region LobbyPageUI Sync
@@ -263,6 +257,7 @@ namespace Garage.Manager
 			if (!IsHost) return;
 
 			GameObject playerOb = Instantiate(playerPrefab, position, Quaternion.identity);
+			Debug.LogWarning("Plyaer Dict Aded : " + clientId);
 			playerDict.Add(clientId, playerOb.GetComponent<PlayerController>());
 			NetworkObject networkOb = playerOb.GetComponent<NetworkObject>();
 
@@ -277,6 +272,7 @@ namespace Garage.Manager
 			networkOb.Despawn();
 			Destroy(networkOb);
 			playerDict.Remove(clientId);
+			Debug.LogWarning("Plyaer Dict remvd : " + clientId);
 		}
 
 		[ServerRpc(RequireOwnership = false)]
@@ -313,6 +309,12 @@ namespace Garage.Manager
 		{
 			UIManager.Game.StartBossWarning();
 			Managers.Sound.PlaySfx(SFXType.BossWarning);
+        }
+
+		[ClientRpc]
+		public void PlayStageBGMClientRPC()
+		{
+            Managers.Sound.PlayBGM(BGMType.Stage1, 0.2f);
         }
     }
 }

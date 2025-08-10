@@ -71,7 +71,6 @@ namespace Garage.Props
 			}
 			else
 			{
-				Debug.Log("MovePosition: " + gridPosition.Value);
 				rigid.MovePosition(gridPosition.Value);
 				rigid.MoveRotation(Quaternion.identity);
 				rigid.linearVelocity = Vector3.zero;

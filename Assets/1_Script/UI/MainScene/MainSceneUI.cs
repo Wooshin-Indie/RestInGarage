@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
-using Steamworks.Data;
-using static Unity.VisualScripting.Icons;
 
 namespace Garage.UI.MainScene
 {
@@ -116,7 +114,12 @@ namespace Garage.UI.MainScene
             AddListenersToSetting();
 		}
 
-        private void AddListenersToSetting()
+		private void OnEnable()
+		{
+			GoToPage(PageEnum.Main);
+		}
+
+		private void AddListenersToSetting()
 		{
 			/** Page 5 **/
 			masterSlider.onValueChanged.AddListener((value) =>

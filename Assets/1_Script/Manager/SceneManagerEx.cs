@@ -1,8 +1,6 @@
-using DG.Tweening;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,6 +9,7 @@ namespace Garage.Manager
 	public class SceneManagerEx
 	{
 		public SceneBase CurrentScene { get { return GameObject.FindFirstObjectByType<SceneBase>(); } }
+		public Scene CurrentSceneObject { get { return SceneManager.GetSceneByName(CurrentScene.SceneEnum.ToString() + "Scene"); } }
 
 		public void Init()
 		{
@@ -33,11 +32,13 @@ namespace Garage.Manager
             }
             LoadSceneServer(sceneEnum, LoadSceneMode.Additive);
 
-            NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
+			NetworkTransmission.instance.OnSceneChangeStartedServerRPC(sceneEnum);
         }
 		public void ChangeScene(SceneEnum sceneEnum)
 		{
 			UnloadCurrentSceneServer();
+
+			SceneManager.LoadScene(sceneEnum.ToString() + "Scene", LoadSceneMode.Additive);
 
             OnSceneChangeStarted(sceneEnum);
         }
@@ -89,5 +90,10 @@ namespace Garage.Manager
 		{
             UIManager.Transition.EndTransition(1f, .5f);
         }
+
+		public void MoveGameObjectToCurrentScene(GameObject go)
+		{
+			SceneManager.MoveGameObjectToScene(go, CurrentSceneObject);
+		}
 	}
 }

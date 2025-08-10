@@ -3,6 +3,7 @@ using DG.Tweening;
 using Garage.Manager;
 using Garage.Structs;
 using Garage.Utils;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -93,9 +94,18 @@ namespace Garage.Controller
 				isAnyBroken = false;
 
 			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
-			Managers.Sound.PlaySfx(SFXType.Complete, .8f, .9f);
-			allRepairedVFX.Play();
+			StartCoroutine(FxsOnAllPartsRepaired());
 		}
+		private IEnumerator FxsOnAllPartsRepaired()
+		{
+            Managers.Sound.PlaySfx(SFXType.Complete, .6f, .9f);
+            allRepairedVFX.Play();
+
+			yield return new WaitForSeconds(0.5f);
+
+            Managers.Sound.PlaySfx(SFXType.Voice_ThankYou, .8f);
+            UIManager.Game.PopEmoteGoodUIOnCar(this);
+        }
 
 		#endregion
 
@@ -187,11 +197,13 @@ namespace Garage.Controller
 			if (kickDir == KickDirection.Right)
 			{
 				distanceX = -distance;
+				PlayCarDustVfxClientRPC(LocalFourDirection.Left);
 			}
 			else
 			{
 				distanceX = distance;
-			}
+                PlayCarDustVfxClientRPC(LocalFourDirection.Right);
+            }
 
 			ApplyKickClientRPC(distanceX);
 		}
@@ -228,6 +240,47 @@ namespace Garage.Controller
 			UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
 		}
 
-		#endregion
-	}
+        #endregion
+
+        #region Vfx, Sfx
+        [ClientRpc]
+        private void PlayCarDustVfxClientRPC(LocalFourDirection direction)
+        {
+			Vector3 localRotation = VFXManager.Instance.GetVFXRotation(VFXType.CarImpulseDust);
+			Transform parent = null;
+
+            switch (direction)
+            {
+                case LocalFourDirection.Front:
+                    localRotation.y = 0f;
+                    parent = frontMiddleTf;
+                    break;
+                case LocalFourDirection.Right:
+                    localRotation.y = 90f;
+                    parent = rightMiddleTf;
+                    break;
+                case LocalFourDirection.Rear:
+                    localRotation.y = 180f;
+                    parent = rearMiddleTf;
+                    break;
+                case LocalFourDirection.Left:
+                    localRotation.y = 270f;
+                    parent = leftMiddleTf;
+                    break;
+            }
+
+            VFXManager.Instance.PlayVFX(VFXType.CarImpulseDust, Vector3.zero, Quaternion.Euler(localRotation), parent);
+        }
+        [ClientRpc]
+        private void PlayCarDrivingSfxClientRPC()
+		{
+            Managers.Sound.PlayCarDrivingSfx(this, 2f, 1f);
+        }
+		[ClientRpc]
+		private void StopCarDrivingSfxClientRPC()
+		{
+            Managers.Sound.StopCarDrivingSfx(this);
+        }
+        #endregion
+    }
 }

@@ -42,7 +42,7 @@ namespace Garage.Controller
 		[ServerRpc(RequireOwnership = false)]
 		private void DespawnPropServerRPC(ulong networkId)
 		{
-			Managers.Spawn.Despawn(networkId);
+			Managers.Spawn.DespawnObject(networkId);
 		}
 
 		#region Transform RPC
@@ -107,6 +107,8 @@ namespace Garage.Controller
 
 		public void SetAnimParam(int id)
 		{
+			if (id == 8)
+				Debug.Log("knockback!!!!!!!!!!!");
 			animator.SetTrigger(animIDs[id]);
 			if (IsHost)
 			{

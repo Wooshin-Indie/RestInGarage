@@ -571,13 +571,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  rigid: {fileID: 0}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IsKnockbackPlayerOnCollision: 0
   meshRenderer: {fileID: 2922282680127950429}
   wheelRenderers:
   - {fileID: 7730443128118933059}
   - {fileID: 6639571117274871207}
   - {fileID: 8141197157340203072}
   - {fileID: 2442422826885556121}
-  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   partTransforms:
   - {fileID: 4037601657640589746}
   - {fileID: 2032234686956621317}
@@ -586,6 +590,7 @@ MonoBehaviour:
   - {fileID: 1686599342188754571}
   - {fileID: 5969985148491062723}
   - {fileID: 5913171544049419250}
+  brokenCarMat: {fileID: 2100000, guid: 2699e001b616f1348b15cd09c8613b5c, type: 2}
   smokePS: {fileID: 7055741390079933020}
   allRepairedVFX: {fileID: 5653580892634365450}
   firePS: {fileID: 8572341072329408520}
@@ -597,7 +602,6 @@ MonoBehaviour:
   steeringStrength: 100
   maxSteerAngle: 60
   laneSnapThreshold: 0.1
-  isAnyBroken: 1
   boxLength: 6
   boxWidth: 1
   boxHeight: 1
@@ -605,7 +609,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 3895
   decelerationRate: 1
-  kickDistance: 3
 --- !u!1 &3715176043198427016
 GameObject:
   m_ObjectHideFlags: 0

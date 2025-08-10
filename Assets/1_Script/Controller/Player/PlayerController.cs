@@ -57,11 +57,8 @@ namespace Garage.Controller
 		
 		private bool isAbleToMove = true;
 		private bool isAbleToRun = true;
-		private bool isBeingForced = false;
 		private bool isInputLocked = false;
         
-        
-		public bool IsBeingForced => isBeingForced;
 		public bool IsAbleToRun { get => isAbleToRun; set => isAbleToRun = value; }
 		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
@@ -133,6 +130,7 @@ namespace Garage.Controller
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
 			originRunSpeed = runSpeed;
+			originalConstraints = rigid.constraints;
         }
 
 		public override void OnNetworkSpawn()
@@ -202,7 +200,7 @@ namespace Garage.Controller
 				return;
 			}
 
-			if (isBeingForced) return;
+			if (isKnockedBack) return;
 
 			if(Mathf.Approximately(Mathf.Abs(move.x) + Mathf.Abs(move.y), 0f)) 
 				speed = 0;
@@ -235,10 +233,10 @@ namespace Garage.Controller
         public void KickCar()
 		{
             if (currentKickableCar == null) return;
-			if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
+			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
-			// 차는 애니메이션 실행
-			isBeingForced = true;
+            // 차는 애니메이션 실행
+            Managers.Input.DisablePlayerActions();
             SetAnimParam((int)AnimationType.Kick);
         }
 
@@ -259,48 +257,33 @@ namespace Garage.Controller
 			isFireUIsEnlarged = true;
 			UIManager.Game.EnlargeAllFireUIs();
 		}
-
-		void OnCollisionEnter(Collision collision)
-        {
-            if (collision.gameObject.layer != Constants.INT_VEHICLE) return;
-
-            Rigidbody vehicleRigid = collision.collider.GetComponentInParent<Rigidbody>();
-			if (vehicleRigid == null)
-			{
-				Debug.LogWarning("Car Rigidbody can't be found");
-                return;
-            }
-
-			// TODO - CarController를 VehicleBase에 통합
-			VehicleBase vehicle = vehicleRigid.GetComponentInParent<VehicleBase>();
-			if (vehicle == null) return;
-
-			// 닿으면 튕겨나가는 차량인지 확인
-			if (!vehicle.IsKnockbackOnHumanCollision) return;
-
-			if (isBeingForced) return;
-
+        
+        private RigidbodyConstraints originalConstraints;
+		private bool isKnockedBack = false;
+		[ClientRpc]
+        public void KnockBackClientRPC(Vector3 knockbackDirection, float force)
+		{
+			if (!IsOwner) return;
+			if (isKnockedBack) return;
             // 튕겨나갈 방향 계산
-            Vector3 knockbackDirection = Vector3.zero;
-            if (collision.contactCount > 0)
-            {
-                knockbackDirection = collision.contacts[0].normal; // 충돌지점에서 플레이어쪽 방향
-				knockbackDirection.y = 0f;
-                knockbackDirection = knockbackDirection.normalized;
+            knockbackDirection = knockbackDirection.normalized;
+            Debug.Log("Collision to Player2");
 
-                // 아니면 차량에서 플레이어 방향으로
-                //knockbackDirection = (transform.position - collision.transform.position).normalized;
-            }
-
-			Vector3 targetRotVector3 = -knockbackDirection;
-			targetRotVector3.y = 0;
+            Vector3 targetRotVector3 = -knockbackDirection;
+            targetRotVector3.y = 0;
             Quaternion targetRot = Quaternion.LookRotation(targetRotVector3);
-			rigid.rotation = targetRot;
-			isBeingForced = true;
-            rigid.AddForce(knockbackDirection * knockbackStrength, ForceMode.Impulse);
+            rigid.rotation = targetRot;
 
-			// 애니메이션 실행
-			SetAnimParam((int)AnimationType.KnockBack);
+			// 플레이어 움직임 Lock걸기
+            Managers.Input.DisablePlayerActions();
+            rigid.constraints = RigidbodyConstraints.FreezeRotation | originalConstraints;
+            EndAllInteraction();
+
+            rigid.AddForce(knockbackDirection * force, ForceMode.Impulse);
+			isKnockedBack = true;
+
+            // 애니메이션 실행
+            SetAnimParam((int)AnimationType.KnockBack);
         }
 		private IEnumerator OnKnockbackCoroutine()
 		{

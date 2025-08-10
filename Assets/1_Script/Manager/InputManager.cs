@@ -12,5 +12,14 @@ namespace Garage.Manager
 			control = new();
 			control.Enable();
 		}
+
+		public void EnablePlayerActions()
+		{
+			control.Player.Enable();
+        }
+		public void DisablePlayerActions()
+		{
+			control.Player.Disable();
+        }
 	}
 }

@@ -23,8 +23,9 @@ namespace Garage.Manager
         FireExtingusher,
         RepairHammering,
         AllPartsRepaired,
-        PopEmoteGood,
-        BombExplosion
+        CarImpulseDust,
+        BombExplosion,
+        BikerGangSmoke
     }
     // 활성 루핑 VFX 추적용 내부 클래스
     internal class ActiveLoopingVFX
@@ -130,7 +131,8 @@ namespace Garage.Manager
         /// One-shot (Looping 비활성화) VFX를 재생합니다. 재생 완료 후 자동으로 풀에 반환됩니다.
         /// </summary>
         /// <returns>재생된 ParticleSystem 인스턴스 (제어 필요시 사용, null일 수 있음)</returns>
-        public ParticleSystem PlayVFX(VFXType type, Vector3 position, Quaternion rotation, Transform parent = null)
+        public ParticleSystem PlayVFX(VFXType type, Vector3 position, Quaternion rotation, 
+            Transform parent = null, bool worldPositionStays = false)
         {
             ParticleSystem instancePS = GetPooledInstance(type);
             if (instancePS == null) return null;
@@ -156,13 +158,14 @@ namespace Garage.Manager
         /// Looping VFX를 재생 시작하고 고유 ID를 반환합니다. StopLoopingVFX로 중지해야 합니다.
         /// </summary>
         /// <returns>활성화된 루핑 VFX의 고유 ID (오류 시 -1)</returns>
-        public int PlayLoopingVFX(VFXType type, Vector3 position, Quaternion rotation, Transform parent = null)
+        public int PlayLoopingVFX(VFXType type, Vector3 position, Quaternion rotation, 
+            Transform parent = null, bool worldPositionStays = false)
         {
             ParticleSystem instancePS = GetPooledInstance(type);
             if (instancePS == null) return -1;
 
             // --- 위치, 회전, 부모 설정 및 활성화 ---
-            SetupAndActivate(instancePS.gameObject, position, rotation, parent, false);
+            SetupAndActivate(instancePS.gameObject, position, rotation, parent, worldPositionStays);
 
             // --- 재생 및 활성 목록에 추가 ---
             instancePS.Play();
@@ -175,7 +178,8 @@ namespace Garage.Manager
             return id;
         }
 
-        // --- 편의 오버로드 (기본 회전 사용) ---
+        #region Overloads
+        // 기본 회전 사용
         public ParticleSystem PlayVFX(VFXType type, Vector3 position, Transform parent = null)
         {
             Quaternion rotation = vfxDataMap.ContainsKey(type) ? vfxDataMap[type].prefab.transform.rotation : Quaternion.identity;
@@ -187,6 +191,8 @@ namespace Garage.Manager
             Quaternion rotation = vfxDataMap.ContainsKey(type) ? vfxDataMap[type].prefab.transform.rotation : Quaternion.identity;
             return PlayLoopingVFX(type, position, rotation, parent);
         }
+
+        #endregion
 
         #endregion
 
@@ -287,17 +293,21 @@ namespace Garage.Manager
 
         // 인스턴스 활성화 및 설정 공통 로직
         private void SetupAndActivate(GameObject instanceGO, Vector3 position, Quaternion rotation,
-                            Transform parent, bool worldPositionStays = true)
+                            Transform parent, bool worldPositionStays)
         {
-            instanceGO.transform.position = position;
-            instanceGO.transform.rotation = rotation;
             if (parent != null)
             {
-                instanceGO.transform.SetParent(parent, worldPositionStays); // worldPositionStays = true
+                instanceGO.transform.SetParent(parent, worldPositionStays);
+                // worldPositionStays == true 면 현재 위치 유지하면서 자식으로 이동
+                // worldPositionStays == false 면 자식으로 이동하면서 현재 위치를 부모의 위치로 바꿈
+                instanceGO.transform.localPosition = position;
+                instanceGO.transform.localRotation = rotation;
             }
             else
             {
                 // instanceGO.transform.SetParent(transform); // Manager를 기본 부모로
+                instanceGO.transform.position = position;
+                instanceGO.transform.rotation = rotation;
             }
             instanceGO.gameObject.SetActive(true);
         }
@@ -362,6 +372,13 @@ namespace Garage.Manager
             {
                 instance = null;
             }
+        }
+
+        public Vector3 GetVFXRotation(VFXType type)
+        {
+            Vector3 rotation = vfxDataMap[type].prefab.transform.eulerAngles;
+
+            return rotation;
         }
     }
 
