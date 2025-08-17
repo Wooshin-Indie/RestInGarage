@@ -245,7 +245,7 @@ namespace Garage.UI.GameScene.Items
         
         private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 스케일(좌우반전) 및 피봇 조정
         {
-            if (car.Direction == VehicleDirection.Up)
+            if (car.Direction == VehicleDirection.Left)
             {
                 switch (carPart)
                 {

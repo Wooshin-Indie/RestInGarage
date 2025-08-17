@@ -23,8 +23,8 @@ namespace Garage.Utils
     public enum VehicleDirection
     {
         None,
-        Up,
-        Down
+        Left,
+        Right
     }
 
     public enum PartStatus
@@ -49,13 +49,6 @@ namespace Garage.Utils
          * */
     }
 
-    public enum KickDirection
-    {
-        // 치이는 차 기준
-        Left,
-        Right
-    }
-
     // Steamworks.LobbyType 에서 가져옴
     public enum LobbyType
     {
@@ -77,6 +70,7 @@ namespace Garage.Utils
     public enum LocalFourDirection
     {
         // VFX의 파티클이 뿜어져나올 y축 회전값을 정하는 용도로 만듬
+        // 차량오브젝트의 로컬기준 4방향을 나타내는 용도로도 사용
         Front,
         Right,
         Rear,

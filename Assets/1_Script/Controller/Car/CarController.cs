@@ -133,8 +133,8 @@ namespace Garage.Controller
 			}
 			else if (isAnyBroken)
 			{
-				if ((direction == VehicleDirection.Up && transform.position.z > 0) ||
-					(direction == VehicleDirection.Down && transform.position.z < 0))
+				if ((direction == VehicleDirection.Left && transform.position.z > 0) ||
+					(direction == VehicleDirection.Right && transform.position.z < 0))
 				{
 					BrakeVehicle();
 					return false;
@@ -162,9 +162,9 @@ namespace Garage.Controller
 		/// </summary>
 		private void CheckIfOutofBounds()
 		{
-			if (direction == VehicleDirection.Up && transform.position.z > removeLaneLength)
+			if (direction == VehicleDirection.Left && transform.position.z > removeLaneLength)
 				TrafficManager.Instance.DespawnCar(this);
-			else if (direction == VehicleDirection.Down && transform.position.z < -removeLaneLength)
+			else if (direction == VehicleDirection.Right && transform.position.z < -removeLaneLength)
 				TrafficManager.Instance.DespawnCar(this);
 		}
 
@@ -197,7 +197,7 @@ namespace Garage.Controller
 			{
 				float steerAmount = Mathf.Clamp(xOffset * steeringStrength, -maxSteerAngle, maxSteerAngle);
 
-				if (direction == VehicleDirection.Up)
+				if (direction == VehicleDirection.Left)
 				{
 					targetRot = Quaternion.Euler(0f, steerAmount, 0f);
 				}
@@ -208,7 +208,7 @@ namespace Garage.Controller
 			}
 			else
 			{
-				targetRot = Quaternion.Euler(0f, direction == VehicleDirection.Up ? 0f : 180f, 0f);
+				targetRot = Quaternion.Euler(0f, direction == VehicleDirection.Left ? 0f : 180f, 0f);
 
 				pos.x = targetLaneX;
 				rigid.position = pos;
@@ -228,7 +228,7 @@ namespace Garage.Controller
                 Time.fixedDeltaTime				// FixedUpdate 시간 간격
             );
 
-            Vector3 forwardDirection = direction == VehicleDirection.Up ? Vector3.forward : -Vector3.forward;
+            Vector3 forwardDirection = direction == VehicleDirection.Left ? Vector3.forward : -Vector3.forward;
 
 			rigid.linearVelocity = forwardDirection * newSpeedMagnitude;
 
@@ -332,10 +332,10 @@ namespace Garage.Controller
 			direction = dir;
 			switch (direction)
 			{
-				case VehicleDirection.Up:
+				case VehicleDirection.Left:
 					originRot = Quaternion.Euler(0f, 0f, 0f);
 					break;
-				case VehicleDirection.Down:
+				case VehicleDirection.Right:
 					originRot = Quaternion.Euler(0f, -180f, 0f);
 					break;
 			}

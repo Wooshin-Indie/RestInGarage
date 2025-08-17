@@ -1,16 +1,18 @@
+using DG.Tweening;
 using Garage.Controller;
+using Garage.Controller.StateMachine;
+using Garage.Manager;
+using Garage.Props;
 using Garage.Structs;
-using Garage.UI.GameScene.Items;
-using Garage.Utils;
 using Garage.Structs.CarPart;
+using Garage.UI.GameScene.Items;
+using Garage.UI.Item;
+using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
-using DG.Tweening;
-using Garage.Manager;
-using Garage.UI.Item;
-using Garage.Props;
 
 namespace Garage.UI.GameScene
 {
@@ -43,7 +45,9 @@ namespace Garage.UI.GameScene
 		private void Start()
 		{
             GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
-		}
+
+            bossWarningUI.gameObject.SetActive(false);
+        }
 
 
 		private void LateUpdate()
@@ -285,23 +289,21 @@ namespace Garage.UI.GameScene
 
         #region Prop Key Information UI
 
-        private Dictionary<Type, PropKeyInfoUI> idlePropKeyDataDict = new(); // IdleState에서 프랍에 작용가능한 키 정보들
-        private Dictionary<Type, PropKeyInfoUI> carryPropKeyDataDict = new();
-        private Dictionary<Type, PropKeyInfoUI> interactPropKeyDataDict = new();
-
-        private PlayerState curPropKeyInfoFor;
-        /* 어떤 상태에 대한 KeyInfo가 나와야할지 선택,
-         * PlayerState.Interact일 때는 interactState에 들어갔을 때의 KeyInfo가 아니라
-         * interactState에 들어갈 수 있을 때(ex. fix가능한 carPart 있을 때)에
-         * 대한 정보를 띄움 (-> interactPropKeyInfoUI)
-         */
         private PropKeyInfoUI curPoppedPropKeyInfoUI;
         private List<KeyData> curPropKeyDataList;
 
+
+        /// <summary>
+        /// propInfoFor은 어떤 상태에 대한 KeyInfo가 나와야할지에 대한 인자임
+        /// PlayerState.Interact일 때는 interactState에 들어갔을 때의 KeyInfo가 아니라
+        /// interactState에 들어갈 수 있을 때(ex.fix가능한 carPart 있을 때)에
+        /// 대한 정보를 띄움(-> interactPropKeyInfoUI)
+        /// </summary>
         public void PopPropKeyInfoUI(PropBase prop, PlayerState propInfoFor)
         {
             PopPropKeyInfoUI(prop, prop.transform, propInfoFor);
         }
+
         public void PopPropKeyInfoUI(PropBase prop, Transform target, PlayerState propInfoFor)
         {
             if (prop == null)

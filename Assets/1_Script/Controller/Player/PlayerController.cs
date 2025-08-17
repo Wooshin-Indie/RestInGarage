@@ -490,6 +490,15 @@ namespace Garage.Controller
 		private float propKeyInfoUIDelay = 1.5f;
         public void UpdatePropKeyInfoUIs()
         {
+			if (stateMachine.CurState == interactState)
+			{
+                UIManager.Game.ClosePropKeyInfoUI();
+                interactPropKeyInfoUITimer = 0f;
+                idlePropKeyInfoUITimer = 0f;
+
+				return;
+            }
+
             // interactPropKeyInfoUI condition
             if (currentFixablePart != null && currentFixablePart.IsAbleToInteract(currentOwningProp))
             {

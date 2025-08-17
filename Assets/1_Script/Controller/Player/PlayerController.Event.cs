@@ -87,12 +87,12 @@ namespace Garage.Controller
 
 			if (fromMeToCar.x < 0) // <-
 			{
-				currentKickableCar.ApplyKickServerRPC(KickDirection.Right);
+				currentKickableCar.ApplyKickServerRPC(false);
 				transform.rotation = Quaternion.Euler(new Vector3(0f, -90f, 0f));
 			}
 			else if (fromMeToCar.x > 0) // ->
 			{
-				currentKickableCar.ApplyKickServerRPC(KickDirection.Left);
+				currentKickableCar.ApplyKickServerRPC(true);
 				transform.rotation = Quaternion.Euler(new Vector3(0f, 90f, 0f));
 			}
 		}
