@@ -67,7 +67,7 @@ namespace Garage.Controller
 
 			if (!IsOwner) return;
 			Vector3 VFXpos = currentOwningProp.transform.position;
-			//VFXManager.Instance.PlayVFX(VFXType.RepairHammering, VFXpos);
+			VFXManager.Instance.PlayVFX(VFXType.Spark, VFXpos + transform.forward);
 		}
 
 		private void OnOiling()

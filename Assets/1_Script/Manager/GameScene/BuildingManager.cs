@@ -4,9 +4,7 @@ using Garage.Structs;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
-using UnityEditor.Analytics;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Garage.Manager
 {

@@ -134,7 +134,7 @@ namespace Garage.Manager
 				GameObject go = Managers.Spawn.SpawnInCurrentScene(meetingPointPrefab);
 				meetingPoint = go.GetComponent<MeetingPoint>();
 				meetingPoint.transform.position = new Vector3(-4f, 0f, -10f);
-				meetingPoint.StartMeetClientRPC(1);
+				meetingPoint.StartMeetClientRPC(0);
 			}
 
 			if (GameSynchronizer.Instance.IsDay.Value) return;
@@ -145,7 +145,7 @@ namespace Garage.Manager
 				Managers.Sound.PlaySfx(SFXType.ShopPop);
                 BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
 				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
-            });
+			});
 		}
 
 		private void OnUpdateTimer()

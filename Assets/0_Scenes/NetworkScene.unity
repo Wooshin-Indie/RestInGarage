@@ -6608,6 +6608,11 @@ MonoBehaviour:
     poolSize: 5
     allowPoolExpansion: 1
     estimatedDuration: 10
+  - type: 7
+    prefab: {fileID: 1292277278813009055, guid: 6f7d78326cf8d3d4f81263fa602a0a43, type: 3}
+    poolSize: 5
+    allowPoolExpansion: 1
+    estimatedDuration: 10
 --- !u!1 &691527296
 GameObject:
   m_ObjectHideFlags: 0
@@ -14532,7 +14537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
-  stageTimer: 17
+  stageTimer: 30
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
@@ -14563,7 +14568,7 @@ MonoBehaviour:
   gridOrigin:
   - {x: -5, y: -3}
   - {x: 9, y: 10}
-  - {x: 9, y: -10}
+  - {x: 9, y: -13}
   gridSize:
   - {x: 4, y: 15}
   - {x: 5, y: 5}
