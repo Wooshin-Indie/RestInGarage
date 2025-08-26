@@ -1304,7 +1304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   rigid: {fileID: 0}
-  IsKnockbackOnHumanCollision: 0
+  IsKnockbackablePlayerOnCollision: 0
   meshRenderer: {fileID: 887303938605825394}
   wheelRenderers:
   - {fileID: 5665638846310536103}

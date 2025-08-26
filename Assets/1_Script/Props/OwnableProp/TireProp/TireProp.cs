@@ -44,7 +44,7 @@ namespace Garage.Props
 			base.OnEndInteraction(controller);
 		}
 
-		private void Update()
+		public virtual void Update()
 		{
 			if (controller != null)
 			{
