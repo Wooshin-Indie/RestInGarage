@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Garage.Manager;
-using Unity.VisualScripting;
+using Garage.Utils;
 using UnityEngine;
 
 namespace Manager {
@@ -10,6 +10,8 @@ namespace Manager {
         PlayerSpeed = 0,
         CarrySpeed,
         WrenchRepairSpeed,
+        OilRepairSpeed,
+        FireExtinguishSpeed,
     }
 
     public class StatManager : MonoBehaviour
@@ -49,6 +51,8 @@ namespace Manager {
             statDict.Add(StatEnum.PlayerSpeed, 1f);
             statDict.Add(StatEnum.CarrySpeed, 1f);
             statDict.Add(StatEnum.WrenchRepairSpeed, 1f);
+            statDict.Add(StatEnum.OilRepairSpeed, 1f);
+            statDict.Add(StatEnum.FireExtinguishSpeed, 1f);
             GameManagerEx.Instance.OnStartGameAction += OnGameStart;
         }
 
@@ -59,8 +63,10 @@ namespace Manager {
             StatEnum[] statEnums = {
                 StatEnum.PlayerSpeed,
                 StatEnum.CarrySpeed,
-                StatEnum.WrenchRepairSpeed
-            };
+                StatEnum.WrenchRepairSpeed,
+				StatEnum.OilRepairSpeed,
+				StatEnum.FireExtinguishSpeed
+			};
             if (statEnums.Length != Enum.GetValues(typeof(StatEnum)).Length - 1)
                 Debug.LogError("Update local \"StatEnum[] statEnums\"");
 
@@ -94,7 +100,29 @@ namespace Manager {
             }
         }
 
-        public void SetStat(StatEnum statEnum, float value)
+        public float GetProgressSpeed(CarParts part)
+        {
+            StatEnum statEnum = StatEnum.None;
+            switch (part) {
+                case CarParts.FLT:
+                case CarParts.FRT:
+                case CarParts.RLT:
+                case CarParts.RRT:
+                case CarParts.Engine:
+                    statEnum = StatEnum.WrenchRepairSpeed;
+                    break;
+                case CarParts.Oil:
+					statEnum = StatEnum.OilRepairSpeed;
+					break;
+				case CarParts.Fire:
+                    statEnum = StatEnum.FireExtinguishSpeed;
+                    break;
+            }
+			return statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
+		}
+
+
+		public void SetStat(StatEnum statEnum, float value)
         {
             statDict[statEnum] = value;
         }

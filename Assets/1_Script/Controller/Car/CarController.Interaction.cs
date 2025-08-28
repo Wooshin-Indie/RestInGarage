@@ -2,6 +2,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
 using Garage.Utils;
+using Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -48,7 +49,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
 		{
-			float wrenchSpeed = player.WrenchRepairSpeed;
+			float progressSpeed = StatManager.Instance.GetProgressSpeed(part);
 
             switch (part)
 			{
@@ -62,18 +63,18 @@ namespace Garage.Controller
 					}
 					else if (!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
+						ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
                 // TODO - 여기 prop.Mult 랑 합연산으로 처리해야됨
 				case CarParts.Oil:
-                    ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+                    ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
                 case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
+					ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
 				case CarParts.Fire:
-					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					ExtinguishFireServerRPC(Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
 
 			}
