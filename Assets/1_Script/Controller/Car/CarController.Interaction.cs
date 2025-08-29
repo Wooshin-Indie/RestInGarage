@@ -91,6 +91,10 @@ namespace Garage.Controller
 		{
 			Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
 			MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
+
+			VFXManager.Instance.PlayVFX(VFXType.TireInsert, partTransforms[(int)part].position);
+			Managers.Sound.PlaySfx(SFXType.Pop);
+
 			rend.enabled = true;
 			collid.isTrigger = false;
 			RestoreOriginRot(1f);
