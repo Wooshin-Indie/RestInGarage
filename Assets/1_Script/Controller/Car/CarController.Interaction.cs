@@ -18,7 +18,10 @@ namespace Garage.Controller
 		public bool IsExploded => isExploded;
 
 		private float prevFireProgress = -1f;
-		private float maxFireHeight = 1.5f;
+		private float minFireHeight = 1f;
+		private float maxFireHeight = 2.5f;
+		private Vector3 originFireScale;
+		private Vector3 maxFireScale;
 
 		/// <summary>
 		/// 현재 Player가 들고있는 prop과 part를 토대로 상호작용 가능한지 판단
@@ -143,9 +146,8 @@ namespace Garage.Controller
 				if (!firePS.isPlaying)
 					firePS.Play();
 
-				var main = firePS.main;
-				main.startSizeY = maxFireHeight * Mathf.Clamp(carStatus.FireProgress, 0, 1);
-			}
+                firePS.transform.localScale = Vector3.Lerp(originFireScale, maxFireScale, carStatus.FireProgress);
+            }
 			else
 			{
 				if (isFired)

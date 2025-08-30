@@ -3921,7 +3921,7 @@ MonoBehaviour:
   idlePropKeyInfoUI: {fileID: 394512871}
   carryPropKeyInfoUI: {fileID: 1444334770}
   interactPropKeyInfoUI: {fileID: 572339452}
-  carStatusUIPrefab: {fileID: 5610953079502897029, guid: 04ab8def65fa474428575f6bce85258d, type: 3}
+  carStatusUIPrefab: {fileID: 6575311125326770678, guid: fd9ce09d59d8c234796f85187abb57c6, type: 3}
   carCountdownUIPrefab: {fileID: 6385409884066586337, guid: 5536f68162c573b418de6e71dea2a660, type: 3}
   shopInfo: {fileID: 5301772727738478027}
   bombAlertUIPrefab: {fileID: 1682618347305131411, guid: d6390d6199066c74ab86637e8e7c3e78, type: 3}
@@ -7499,7 +7499,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -19007,7 +19007,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -21404,7 +21404,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 57
+  m_fontSize: 81
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

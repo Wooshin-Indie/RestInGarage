@@ -31,6 +31,7 @@ namespace Garage.Controller
 
 		[TabGroup("Main", "Movements")]
 		[SerializeField] private List<Transform> sockets = new();
+		[SerializeField] private Transform hipTf;
 		[SerializeField] private float knockbackStrength = 5f;
 		//[SerializeField] private Transform cameraTransform;
 
@@ -51,6 +52,7 @@ namespace Garage.Controller
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
+		public Transform HipTf => hipTf;
 
 		private int[] animIDs = new int[10];
 

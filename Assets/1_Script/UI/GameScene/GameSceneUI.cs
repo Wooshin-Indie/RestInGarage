@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
@@ -85,7 +86,7 @@ namespace Garage.UI.GameScene
             {
 			    CarStatusUI tmpUI = Instantiate(carStatusUIPrefab, transform).GetComponent<CarStatusUI>();
                 dict.Add(CarParts.Fire, tmpUI);
-			    tmpUI.InitCarStatusUI(car, CarParts.Fire);
+			    tmpUI.InitCarStatusUI(car, CarParts.Fire, this);
                 tmpUI.ApplyFill(progress);
             }
 		}
@@ -104,7 +105,7 @@ namespace Garage.UI.GameScene
                 {
                     CarStatusUI tmpUI = Instantiate(carStatusUIPrefab, transform).GetComponent<CarStatusUI>();
                     carStatusInfo[carID].Add(v, tmpUI);
-                    tmpUI.InitCarStatusUI(car, v);
+                    tmpUI.InitCarStatusUI(car, v, this);
                 }
 			}
 		}

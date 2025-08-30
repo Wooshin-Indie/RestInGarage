@@ -91,7 +91,9 @@ namespace Garage.Controller
 			animIDs[0] = Animator.StringToHash("IsKickedToLeft");
 			animIDs[1] = Animator.StringToHash("IsKickedToRight");
 
-			smokePS.Stop();
+			originFireScale = firePS.transform.localScale;
+			maxFireScale = new Vector3(originFireScale.x, maxFireHeight, originFireScale.z);
+            smokePS.Stop();
 			firePS.Stop();
 			extinguishPS.Stop();
 			explosionPS.Stop();
@@ -337,7 +339,7 @@ namespace Garage.Controller
 					break;
 				case VehicleDirection.Right:
 					originRot = Quaternion.Euler(0f, -180f, 0f);
-					break;
+                    break;
 			}
 		}
 

@@ -317,5 +317,10 @@ namespace Garage.Manager
 		{
             Managers.Sound.PlayBGM(BGMType.Stage1, 0.2f);
         }
+
+		public PlayerController GetLocalPlayerController()
+		{
+			return playerDict[GameManagerEx.Instance.MyClientId];
+		}
     }
 }
