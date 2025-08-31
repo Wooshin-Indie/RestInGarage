@@ -290,40 +290,55 @@ namespace Garage.Manager
 		/// <summary>
 		/// 차량 생성될 때 개별 Sfx 할당해줌
 		/// </summary>
+		private float originMinDistance = 0f;
+		private float originMaxDistance = 0f;
 		public void InitCarDrivingSfx(CarController car)
 		{
             AudioSource audioSource = Pop();
             audioSource.clip = GetAudioClip(SFXType.CarDriving);
+			audioSource.spatialBlend = 0.7f;
+			audioSource.minDistance = 10f;
+			audioSource.maxDistance = 30f;
+
+			audioSource.transform.SetParent(car.transform, false);
+
             carDrivingDict.Add(car, audioSource);
         }
         public void PlayCarDrivingSfx(CarController car, float volume, float pitch)
         {
-			if (carDrivingDict.ContainsKey(car)) return;
+            if (!carDrivingDict.ContainsKey(car)) return;
 
             AudioSource audioSource = carDrivingDict[car];
 
+			audioSource.DOKill();
             audioSource.pitch = pitch;
             audioSource.volume = volume * masterVolume * sfxVolume;
             audioSource.Play();
+			Debug.Log("SFX Play: CarDriving");
         }
 		public void StopCarDrivingSfx(CarController car)
         {
-            if (carDrivingDict.ContainsKey(car)) return;
+            if (!carDrivingDict.ContainsKey(car)) return;
 
             AudioSource audioSource = carDrivingDict[car];
 
             audioSource.DOFade(0f, 0.1f).
 				OnComplete(() => audioSource.Stop());
-            carDrivingDict.Add(car, audioSource);
         }
 		/// <summary>
 		/// 차량 삭제될 때 호출해서 딕셔너리에서 없애주기
 		/// </summary>
 		public void RemoveCarDrivingSfxInDict(CarController car)
 		{
-            if (carDrivingDict.ContainsKey(car)) return;
+            if (!carDrivingDict.ContainsKey(car)) return;
 
-			carDrivingDict.Remove(car);
+            AudioSource audioSource = carDrivingDict[car];
+
+            audioSource.spatialBlend = 0f;
+
+            audioSource.transform.SetParent(poolRoot);
+            Push(audioSource);
+            carDrivingDict.Remove(car);
         }
         #endregion
     }

@@ -26,10 +26,10 @@ namespace Garage
 		{
 			switch (dir)
 			{
-				case VehicleDirection.Up:
+				case VehicleDirection.Left:
 					transform.rotation = Quaternion.identity;
 					break;
-				case VehicleDirection.Down:
+				case VehicleDirection.Right:
 					transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 					break;
 			}

@@ -26,9 +26,7 @@ namespace Garage.Vehicle
         public void OnCollisionWithPlayer(Collision collision, float force)
         {
             if (!IsHost) return;
-            Debug.Log("Collision to Player12");
             if (!IsKnockbackablePlayerOnCollision) return;
-            Debug.Log("Collision to Player13");
 
             if (collision.gameObject.layer != Constants.INT_PLAYER) return;
 

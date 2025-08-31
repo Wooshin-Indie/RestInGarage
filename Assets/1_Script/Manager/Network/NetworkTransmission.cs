@@ -307,6 +307,7 @@ namespace Garage.Manager
 		[ClientRpc]
 		public void StartBossWarningFXClientRPC()
 		{
+			Debug.Log("ClientRPC: StartBossWarningFX");
 			UIManager.Game.StartBossWarning();
 			Managers.Sound.PlaySfx(SFXType.BossWarning);
         }
@@ -316,5 +317,10 @@ namespace Garage.Manager
 		{
             Managers.Sound.PlayBGM(BGMType.Stage1, 0.2f);
         }
+
+		public PlayerController GetLocalPlayerController()
+		{
+			return playerDict[GameManagerEx.Instance.MyClientId];
+		}
     }
 }

@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 1178809210040168974}
   serializedVersion: 2
   m_LocalRotation: {x: -0.016161615, y: -0.56981474, z: -0.011209619, w: 0.8215378}
-  m_LocalPosition: {x: -15.61, y: 0.77, z: 3.91}
+  m_LocalPosition: {x: 0, y: 0.77, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -156,6 +156,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: 3f55df8fe5169d84c90338cf4791c0ee, type: 2}
+  upgradeLevel:
+    m_InternalValue: 0
   meshRenderer: {fileID: 501110816465581116}
   targetColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
   isCarry: 1

@@ -48,7 +48,6 @@ namespace Garage.Vehicle
         {
             if (!IsHost) return;
 
-            Debug.Log("Bikergang IsHost");
             if (IsOutOfBoundary())
             {
                 Despawn();

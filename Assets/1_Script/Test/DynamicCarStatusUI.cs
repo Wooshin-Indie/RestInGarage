@@ -1,0 +1,382 @@
+using DG.Tweening;
+using Garage.Controller;
+using Garage.Utils;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Garage.UI.GameScene.Items
+{
+    public class DynamicCarStatusUI : MonoBehaviour
+    {
+        [Header("Bubble UI")]
+        [SerializeField] private RectTransform bubbleUIRect;
+        [SerializeField] private RectTransform maskToFill;
+        [SerializeField] private Image iconImageInBubble;
+        [SerializeField] private Transform bubbleTailTf;
+        [SerializeField] private Transform tailPivotTf;
+
+        [Header("Blinking UI")]
+        [SerializeField] private RectTransform blinkingUIRect;
+        [SerializeField] private Image blinkingIconImage;
+
+        [Header("Car Part Images")]
+        [SerializeField] private Sprite tireEmptyImage;
+        [SerializeField] private Sprite tireImage;
+        [SerializeField] private Sprite engineImage;
+        [SerializeField] private Sprite oilImage;
+
+        [Header("Blinking Images")]
+        [SerializeField] private Sprite wranchBlinkImage;
+        [SerializeField] private Sprite tireBlinkImage;
+        [SerializeField] private Sprite oilBlinkImage;
+        [SerializeField] private Sprite fireBlinkImage;
+
+        private CarController car;
+        private Transform partTransform;
+        private Vector3 bubbleUIScale = Vector3.one;
+        private bool isEnlarged = false;
+        private Color blinkOriginColor;
+        private Color fireBlinkColor1;
+        private Color fireBlinkColor2;
+        private CarParts curPart = CarParts.FLT;
+
+        private void Awake()
+        {
+            blinkingUIRect.localScale = Vector3.one;
+            bubbleUIRect.localScale = Vector3.zero;
+            blinkOriginColor = blinkingIconImage.color;
+            fireBlinkColor1 = new Color(224f / 255f, 37f / 255f, 37f / 255f, 0.9f);
+            fireBlinkColor2 = new Color(255f / 255f, 238f / 255f, 124f / 255f, 0.9f);
+
+            // Pivot Y 를 0으로 강제설정 (아래에서부터 채우기 위해)
+            if (!Mathf.Approximately(maskToFill.pivot.y, 0f))
+            {
+                maskToFill.pivot = new Vector2(maskToFill.pivot.x, 0f);
+            }
+
+            // AnchorMin.y를 0으로 강제설정
+            Vector2 currentAnchorMin = maskToFill.anchorMin;
+            if (!Mathf.Approximately(currentAnchorMin.y, 0f))
+            {
+                maskToFill.anchorMin = new Vector2(currentAnchorMin.x, 0f);
+            }
+
+            ApplyFill(0f); // 처음 mask가 비어있게 설정
+            transform.SetAsFirstSibling();
+        }
+
+        public void OnUpdate()
+        {
+            if (partTransform == null) return;
+
+            if (!isEnlarged)
+            {
+                if (curPart != CarParts.Fire)
+                {
+                    OnUpdateBlinking();
+                    OnUpdateScreenPos();
+                }
+                else
+                {
+                    OnUpdateFireBlinking();
+                    OnUpdateFireScreenPos();
+                }
+                return;
+            }
+
+            if (curPart != CarParts.Fire)
+                OnUpdateScreenPos();
+            else
+                OnUpdateFireScreenPos();
+        }
+
+        private float elapsedTime = 0f;
+        private float blinkDuration = 0.7f;
+        private void OnUpdateBlinking()
+        {
+            if (elapsedTime < blinkDuration)
+            {
+                blinkOriginColor.a = Mathf.Lerp(0.3f, 0.8f, elapsedTime/ blinkDuration);
+            }
+            else if (elapsedTime < 2 * blinkDuration)
+            {
+                blinkOriginColor.a = Mathf.Lerp(0.8f, 0.3f, (elapsedTime / blinkDuration) - 1);
+            }
+            else elapsedTime = 0f;
+
+            blinkingIconImage.color = blinkOriginColor;
+            elapsedTime += Time.deltaTime;
+        }
+
+        private Color tmpColor = Color.white;
+        private float screenEdgeMargin = 80f;
+        private void OnUpdateFireBlinking()
+        {
+            blinkDuration = Mathf.Lerp(1f, 0.05f, maskToFill.anchorMax.y);
+
+            if (maskToFill.anchorMax.y < 0.7f)
+            {
+                if (elapsedTime < blinkDuration)
+                {
+                    blinkOriginColor.a = Mathf.Lerp(0.4f, 0.9f, elapsedTime / blinkDuration);
+                }
+                else if (elapsedTime < 2 * blinkDuration)
+                {
+                    blinkOriginColor.a = Mathf.Lerp(0.9f, 0.4f, (elapsedTime / blinkDuration) - 1);
+                }
+                else elapsedTime = 0f;
+
+                blinkingIconImage.color = blinkOriginColor;
+                elapsedTime += Time.deltaTime;
+            }
+            else // 터지기 직전에는 색바뀌면서 점멸
+            {
+                if (elapsedTime < blinkDuration)
+                {
+                    tmpColor = Color.Lerp(fireBlinkColor1, fireBlinkColor2, elapsedTime / blinkDuration);
+                    tmpColor.a = Mathf.Lerp(0.5f, 0.95f, elapsedTime / blinkDuration);
+                    blinkingIconImage.color = tmpColor;
+                }
+                else if (elapsedTime < 2 * blinkDuration)
+                {
+                    tmpColor = Color.Lerp(fireBlinkColor2, fireBlinkColor1, elapsedTime / blinkDuration - 1);
+                    tmpColor.a = Mathf.Lerp(0.95f, 0.5f, (elapsedTime / blinkDuration) - 1);
+                    blinkingIconImage.color = tmpColor;
+                }
+                else elapsedTime = 0f;
+
+                elapsedTime += Time.deltaTime;
+            }
+        }
+
+        private void OnUpdateScreenPos()
+        {
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
+            transform.position = screenPos;
+        }
+
+        private bool isFirstInBoundary = false;
+        private void OnUpdateFireScreenPos()
+        {
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
+
+            if (car.IsInBoundary())
+            {
+                if (screenPos.x <= 0)
+                {
+                    screenPos.x = screenEdgeMargin;
+                    EnlargeCarPartUI();
+                }
+                else if (screenPos.x >= Camera.main.pixelWidth)
+                {
+                    screenPos.x = Camera.main.pixelWidth - screenEdgeMargin;
+                    EnlargeCarPartUI();
+                }
+                else
+                {
+                    if (!isFirstInBoundary)
+                    {
+                        isFirstInBoundary = true;
+                        ReduceCarPartUI();
+                    }
+                }
+            }
+
+            transform.position = screenPos;
+        }
+
+        public void InitCarStatusUI(CarController carCtr, CarParts carPart)
+        {
+            car = carCtr;
+            curPart = carPart;
+            SetUI(carPart);
+        }
+
+        private void SetUIPos(CarParts carPart)
+        {
+            
+        }
+
+        private void SetUI(CarParts carPart)
+        {
+            switch (carPart)
+            {
+                // 이미지, 사이즈, 좌우반전, 위치 초기화
+                case CarParts.FLT:
+                    iconImageInBubble.sprite = tireEmptyImage;
+                    blinkingIconImage.sprite = tireBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+                case CarParts.FRT:
+                    iconImageInBubble.sprite = tireEmptyImage;
+                    blinkingIconImage.sprite = tireBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+                case CarParts.RLT:
+                    iconImageInBubble.sprite = tireEmptyImage;
+                    blinkingIconImage.sprite = tireBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+                case CarParts.RRT:
+                    iconImageInBubble.sprite = tireEmptyImage;
+                    blinkingIconImage.sprite = tireBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+                case CarParts.Engine:
+                    iconImageInBubble.sprite = engineImage;
+                    blinkingIconImage.sprite = wranchBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+                case CarParts.Oil:
+                    iconImageInBubble.sprite = oilImage;
+                    blinkingIconImage.sprite = oilBlinkImage;
+                    SetUIScale(carPart);
+                    break;
+				case CarParts.Fire:
+					iconImageInBubble.sprite = oilImage;
+                    blinkingIconImage.sprite = fireBlinkImage;
+                    maskToFill.GetComponent<Image>().color = Color.red;
+					SetUIScale(carPart);
+					break;
+			}
+
+            partTransform = car.PartTransforms[(int)carPart];
+        }
+        
+        private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 스케일(좌우반전) 및 피봇 조정
+        {
+            if (car.Direction == VehicleDirection.Left)
+            {
+                switch (carPart)
+                {
+                    case CarParts.FLT:
+                        bubbleUIScale = new Vector3(1f, -1f, 1f);
+                        break;
+                    case CarParts.FRT:
+                        bubbleUIScale = new Vector3(1f, 1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        bubbleUIScale = new Vector3(1f, -1f, 1f);
+                        break;
+                    case CarParts.Engine:
+                        bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.RLT:
+                        bubbleUIScale = new Vector3(-1f, -1f, 1f);
+                        break;
+                    case CarParts.RRT:
+                        bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.Fire:
+                        bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                }
+            }
+            else // 아래쪽
+            {
+                switch (carPart)
+                {
+                    case CarParts.FLT:
+                        bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.FRT:
+                        bubbleUIScale = new Vector3(-1f, -1f, 1f);
+                        break;
+                    case CarParts.Oil:
+                        bubbleUIScale = new Vector3(-1f, 1f, 1f);
+                        break;
+                    case CarParts.Engine:
+                        bubbleUIScale = new Vector3(1f, 1f, 1f);
+                        break;
+                    case CarParts.RLT:
+                        bubbleUIScale = new Vector3(1f, 1f, 1f);
+                        break;
+                    case CarParts.RRT:
+                        bubbleUIScale = new Vector3(1f, -1f, 1f);
+                        break;
+                    case CarParts.Fire:
+                        bubbleUIScale = new Vector3(1f, 1f, 1f);
+                        break;
+                }
+            }
+        }
+
+        public void ApplyFill(float progress)
+        {
+            maskToFill.anchorMax = new Vector2(maskToFill.anchorMax.x, progress);
+        }
+
+        private float uiExpandDuration = 0.2f;
+        public void EnlargeCarPartUI()
+        {
+            if (isEnlarged == true) return;
+
+            isEnlarged = true;
+            bubbleUIRect.DOScale(1.5f * bubbleUIScale, uiExpandDuration).SetEase(Ease.OutCubic);
+            blinkingUIRect.DOScale(Vector2.zero, uiExpandDuration).SetEase(Ease.OutCubic);
+        }
+        public void ReduceCarPartUI()
+        {
+            if (isEnlarged == false) return;
+
+            isEnlarged = false;
+            bubbleUIRect.DOScale(Vector2.zero, uiExpandDuration).SetEase(Ease.OutCubic);
+            blinkingUIRect.DOScale(Vector2.one, uiExpandDuration).SetEase(Ease.OutCubic);
+        }
+
+        public void ChangeTireImage(bool inserted = true)
+        {
+            if(inserted)
+            {
+                iconImageInBubble.sprite = tireImage;
+                blinkingIconImage.sprite = wranchBlinkImage;
+            }
+            else
+            {
+                iconImageInBubble.sprite = tireEmptyImage;
+                blinkingIconImage.sprite = tireBlinkImage;
+            }
+        }
+
+        private void ChangeBubbleImage()
+        {
+
+        }
+
+        private Vector3 maxTailPivotPos = new Vector3(0f, 10f, 0f);
+        private void SetBubbleRotation(float rotationZ)
+        {
+            if (rotationZ >= 0f)
+                rotationZ = rotationZ % 360f;
+            else
+                rotationZ = rotationZ % 360f + 360f;
+
+            float angularDistance = rotationZ;
+
+            bubbleTailTf.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+            if ((rotationZ > 60f && rotationZ < 120f) || (rotationZ > 240f && rotationZ < 300f))
+            {
+                tailPivotTf.localPosition = maxTailPivotPos;
+
+                return;
+            }
+            
+            if (rotationZ >= 120f && rotationZ <= 240f)
+            {
+                angularDistance = Mathf.Abs(rotationZ - 180f);
+            }
+            else if (rotationZ <= 60f)
+            {
+                angularDistance = rotationZ;
+            }
+            else
+            {
+                angularDistance = Mathf.Abs(rotationZ - 360f);
+            }
+            tailPivotTf.localPosition = Vector3.Lerp(Vector3.zero, maxTailPivotPos, angularDistance / 60f);
+
+            return;
+        }
+	}
+}
