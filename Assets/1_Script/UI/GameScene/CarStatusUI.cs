@@ -1,8 +1,11 @@
-using Garage.Controller;
-using Garage.Utils;
-using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
+using Garage.Controller;
+using Garage.Manager;
+using Garage.Utils;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Garage.UI.GameScene.Items
 {
@@ -10,10 +13,10 @@ namespace Garage.UI.GameScene.Items
     {
         [Header("Bubble UI")]
         [SerializeField] private RectTransform bubbleUIRect;
-        [SerializeField] private RectTransform bubbleImageRect;
         [SerializeField] private RectTransform maskToFill;
-        [SerializeField] private RectTransform iconRectInBubble;
         [SerializeField] private Image iconImageInBubble;
+        [SerializeField] private RectTransform bubbleTailRect;
+        [SerializeField] private RectTransform tailPivotRect;
 
         [Header("Blinking UI")]
         [SerializeField] private RectTransform blinkingUIRect;
@@ -40,6 +43,10 @@ namespace Garage.UI.GameScene.Items
         private Color fireBlinkColor2;
         private CarParts curPart = CarParts.FLT;
 
+        private Transform localPlayerHipTf;
+        private GraphicRaycaster uiRaycaster;
+        private PointerEventData clickData;
+        private List<RaycastResult> clickResults;
         private void Awake()
         {
             blinkingUIRect.localScale = Vector3.one;
@@ -54,15 +61,20 @@ namespace Garage.UI.GameScene.Items
                 maskToFill.pivot = new Vector2(maskToFill.pivot.x, 0f);
             }
 
-            // AnchorMin.y를 0으로 강제설정
-            Vector2 currentAnchorMin = maskToFill.anchorMin;
-            if (!Mathf.Approximately(currentAnchorMin.y, 0f))
-            {
-                maskToFill.anchorMin = new Vector2(currentAnchorMin.x, 0f);
-            }
-
             ApplyFill(0f); // 처음 mask가 비어있게 설정
             transform.SetAsFirstSibling();
+
+
+            // 씬에 있는 Canvas를 찾아 GraphicRaycaster 컴포넌트를 가져옵니다.
+            uiRaycaster = FindFirstObjectByType<GraphicRaycaster>();
+            if (uiRaycaster == null)
+            {
+                Debug.LogError("씬에 GraphicRaycaster 컴포넌트를 가진 Canvas가 없습니다!");
+            }
+
+            // 레이캐스트에 필요한 이벤트 데이터를 초기화합니다.
+            clickData = new PointerEventData(EventSystem.current);
+            clickResults = new List<RaycastResult>();
         }
 
         public void OnUpdate()
@@ -153,6 +165,8 @@ namespace Garage.UI.GameScene.Items
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
             transform.position = screenPos;
+
+            CheckAndAdjustBubbleRotation();
         }
 
         private bool isFirstInBoundary = false;
@@ -185,16 +199,13 @@ namespace Garage.UI.GameScene.Items
             transform.position = screenPos;
         }
 
-        public void InitCarStatusUI(CarController carCtr, CarParts carPart)
+        public void InitCarStatusUI(CarController carCtr, CarParts carPart, GameSceneUI gameScene)
         {
             car = carCtr;
             curPart = carPart;
+            uiRaycaster = gameScene.GetComponent<GraphicRaycaster>();
             SetUI(carPart);
-        }
-
-        private void SetUIPos(CarParts carPart)
-        {
-            
+            localPlayerHipTf = NetworkTransmission.instance.GetLocalPlayerController().HipTf;
         }
 
         private void SetUI(CarParts carPart)
@@ -205,47 +216,41 @@ namespace Garage.UI.GameScene.Items
                 case CarParts.FLT:
                     iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
-                    SetUIScale(carPart);
+                    //SetUIScale(carPart);
                     break;
                 case CarParts.FRT:
                     iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
-                    SetUIScale(carPart);
                     break;
                 case CarParts.RLT:
                     iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
-                    SetUIScale(carPart);
                     break;
                 case CarParts.RRT:
                     iconImageInBubble.sprite = tireEmptyImage;
                     blinkingIconImage.sprite = tireBlinkImage;
-                    SetUIScale(carPart);
                     break;
                 case CarParts.Engine:
                     iconImageInBubble.sprite = engineImage;
                     blinkingIconImage.sprite = wranchBlinkImage;
-                    SetUIScale(carPart);
                     break;
                 case CarParts.Oil:
                     iconImageInBubble.sprite = oilImage;
                     blinkingIconImage.sprite = oilBlinkImage;
-                    SetUIScale(carPart);
                     break;
 				case CarParts.Fire:
 					iconImageInBubble.sprite = oilImage;
                     blinkingIconImage.sprite = fireBlinkImage;
                     maskToFill.GetComponent<Image>().color = Color.red;
-					SetUIScale(carPart);
 					break;
 			}
 
             partTransform = car.PartTransforms[(int)carPart];
         }
-        
+
         private void SetUIScale(CarParts carPart) // 차량의 방향과 부품위치에 따라 스케일(좌우반전) 및 피봇 조정
         {
-            if (car.Direction == VehicleDirection.Up)
+            if (car.Direction == VehicleDirection.Left)
             {
                 switch (carPart)
                 {
@@ -254,26 +259,21 @@ namespace Garage.UI.GameScene.Items
                         break;
                     case CarParts.FRT:
                         bubbleUIScale = new Vector3(1f, 1f, 1f);
-                        blinkingUIRect.pivot = new Vector2(0.5f, 0.2f);
                         break;
                     case CarParts.Oil:
                         bubbleUIScale = new Vector3(1f, -1f, 1f);
-                        iconRectInBubble.localScale = new Vector3(1f, -1f, 1f);
                         break;
                     case CarParts.Engine:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
-                        iconRectInBubble.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                     case CarParts.RLT:
                         bubbleUIScale = new Vector3(-1f, -1f, 1f);
                         break;
                     case CarParts.RRT:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
-                        blinkingUIRect.pivot = new Vector2(0.5f, 0.2f);
                         break;
                     case CarParts.Fire:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
-                        bubbleImageRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
@@ -283,7 +283,6 @@ namespace Garage.UI.GameScene.Items
                 {
                     case CarParts.FLT:
                         bubbleUIScale = new Vector3(-1f, 1f, 1f);
-                        blinkingUIRect.pivot = new Vector2(0.5f, 0.2f);
                         break;
                     case CarParts.FRT:
                         bubbleUIScale = new Vector3(-1f, -1f, 1f);
@@ -296,22 +295,38 @@ namespace Garage.UI.GameScene.Items
                         break;
                     case CarParts.RLT:
                         bubbleUIScale = new Vector3(1f, 1f, 1f);
-                        blinkingUIRect.pivot = new Vector2(0.5f, 0.2f);
                         break;
                     case CarParts.RRT:
                         bubbleUIScale = new Vector3(1f, -1f, 1f);
                         break;
                     case CarParts.Fire:
                         bubbleUIScale = new Vector3(1f, 1f, 1f);
-                        bubbleImageRect.localScale = new Vector3(-1f, 1f, 1f);
                         break;
                 }
             }
         }
 
+        private float startScalingRatio = 0.05f;
+        private float endScalingRatio = 0.95f;
+        private float bubbleScalingAmount = 0.2f;
+        // bubbleUI 에서 꼬리쪽 Mask는 좀 빠른 속도로 증가하도록 보이게 하기 위해서 구간별로 값 보정
         public void ApplyFill(float progress)
         {
-            maskToFill.anchorMax = new Vector2(maskToFill.anchorMax.x, progress);
+            float fillAmount = 0f;
+            if(progress < startScalingRatio)
+            {
+                fillAmount = Mathf.Lerp(0f, bubbleScalingAmount, progress / startScalingRatio);
+            }
+            else if (progress > endScalingRatio)
+            {
+                fillAmount = Mathf.Lerp(1f - bubbleScalingAmount, 1f, (progress - endScalingRatio) / startScalingRatio);
+            }
+            else
+            {
+                fillAmount = Mathf.Lerp(bubbleScalingAmount, 1f - bubbleScalingAmount, (progress - startScalingRatio) / endScalingRatio);
+            }
+
+            maskToFill.localScale = new Vector3(maskToFill.localScale.x, fillAmount, maskToFill.localScale.z);
         }
 
         private float uiExpandDuration = 0.2f;
@@ -350,5 +365,89 @@ namespace Garage.UI.GameScene.Items
         {
 
         }
-	}
+
+        private bool IsPlayerBehindBubble()
+        {
+            // 2. 변환된 스크린 좌표를 포인터 이벤트 데이터의 위치로 설정합니다.
+            clickData.position = Camera.main.WorldToScreenPoint(localPlayerHipTf.position);
+
+            // 3. 레이캐스트 결과를 담을 리스트를 초기화합니다.
+            clickResults.Clear();
+
+            // 4. GraphicRaycaster를 사용하여 해당 스크린 위치에 UI 레이캐스트를 실행합니다.
+            uiRaycaster.Raycast(clickData, clickResults);
+
+            // 5. 결과 확인
+            if (clickResults.Count > 0)
+            {
+                foreach(var result in clickResults)
+                {
+                    if (result.gameObject.CompareTag("BubbleUI"))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void CheckAndAdjustBubbleRotation()
+        {
+            if (isRotating) return;
+
+            if (IsPlayerBehindBubble())
+            {
+                ChangeBubbleRotation(bubbleTailRect.rotation.eulerAngles.z + 20f);
+            }
+        }
+
+        private Vector2 maxTailPivotPos = new Vector2(0f, 10f);
+        private bool isRotating = false;
+        // 각도가 바뀌어도 말풍선 꼬리 일정하게 보이도록 tailPivot 위치 이동
+        private void ChangeBubbleRotation(float eulerRotationZ)
+        {
+            if (eulerRotationZ >= 0f)
+                eulerRotationZ = eulerRotationZ % 360f;
+            else
+                eulerRotationZ = eulerRotationZ % 360f + 360f;
+
+            float angularDistance = 0f;
+            Vector2 targetAnchoredPos;
+            
+            bubbleTailRect.DORotate(new Vector3(0f, 0f, eulerRotationZ), 0.4f).
+                OnComplete(()=>
+                isRotating = false);
+
+            if ((eulerRotationZ > 60f && eulerRotationZ < 120f) || (eulerRotationZ > 240f && eulerRotationZ < 300f))
+            {
+                targetAnchoredPos = maxTailPivotPos;
+            }
+            else
+            {
+                if (eulerRotationZ >= 120f && eulerRotationZ <= 240f)
+                {
+                    angularDistance = Mathf.Abs(eulerRotationZ - 180f);
+                }
+                else if (eulerRotationZ <= 60f)
+                {
+                    angularDistance = eulerRotationZ;
+                }
+                else
+                {
+                    angularDistance = Mathf.Abs(eulerRotationZ - 360f);
+                }
+
+                targetAnchoredPos = Vector3.Lerp(Vector2.zero, maxTailPivotPos, angularDistance / 60f);
+            }
+            Sequence seq = DOTween.Sequence();
+
+            isRotating = true;
+            seq.Append(bubbleTailRect.DORotate(new Vector3(0f, 0f, eulerRotationZ), 0.4f).SetEase(Ease.InOutSine)).
+                Join(tailPivotRect.DOAnchorPos(targetAnchoredPos, 0.4f).SetEase(Ease.InOutSine));
+
+            seq.OnComplete(() =>
+            isRotating = false);
+
+            return;
+        }
+    }
 }

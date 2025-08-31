@@ -67,7 +67,7 @@ namespace Garage.Manager
             foreach (var sp in curStageData.SpawningPoints)
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);
-                point.z = (sp.Direction == VehicleDirection.Up ? -curStageData.LaneLength : curStageData.LaneLength);
+                point.z = (sp.Direction == VehicleDirection.Left ? -curStageData.LaneLength : curStageData.LaneLength);
                 
                 VehicleSpawnPoint vsp = Managers.Spawn.SpawnInCurrentScene(spawnPointPrefab, point, Quaternion.identity)
 									.GetComponent<VehicleSpawnPoint>();

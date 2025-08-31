@@ -3921,7 +3921,7 @@ MonoBehaviour:
   idlePropKeyInfoUI: {fileID: 394512871}
   carryPropKeyInfoUI: {fileID: 1444334770}
   interactPropKeyInfoUI: {fileID: 572339452}
-  carStatusUIPrefab: {fileID: 5610953079502897029, guid: 04ab8def65fa474428575f6bce85258d, type: 3}
+  carStatusUIPrefab: {fileID: 6575311125326770678, guid: fd9ce09d59d8c234796f85187abb57c6, type: 3}
   carCountdownUIPrefab: {fileID: 6385409884066586337, guid: 5536f68162c573b418de6e71dea2a660, type: 3}
   shopInfo: {fileID: 5301772727738478027}
   bombAlertUIPrefab: {fileID: 1682618347305131411, guid: d6390d6199066c74ab86637e8e7c3e78, type: 3}
@@ -6605,6 +6605,16 @@ MonoBehaviour:
     estimatedDuration: 2
   - type: 6
     prefab: {fileID: 3503204133499837250, guid: 1c4feaf0795fc14449996569554c3a26, type: 3}
+    poolSize: 5
+    allowPoolExpansion: 1
+    estimatedDuration: 10
+  - type: 7
+    prefab: {fileID: 1292277278813009055, guid: 6f7d78326cf8d3d4f81263fa602a0a43, type: 3}
+    poolSize: 5
+    allowPoolExpansion: 1
+    estimatedDuration: 10
+  - type: 8
+    prefab: {fileID: 7921313235622923772, guid: 8f05364fc36ae1f488fe84c56e909b46, type: 3}
     poolSize: 5
     allowPoolExpansion: 1
     estimatedDuration: 10
@@ -14532,7 +14542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meetingPointPrefab: {fileID: 5136621508253134154, guid: b2f146f793349fc4a89274e357e88aac, type: 3}
-  stageTimer: 17
+  stageTimer: 100
 --- !u!4 &1409908573
 Transform:
   m_ObjectHideFlags: 0
@@ -14563,7 +14573,7 @@ MonoBehaviour:
   gridOrigin:
   - {x: -5, y: -3}
   - {x: 9, y: 10}
-  - {x: 9, y: -10}
+  - {x: 9, y: -13}
   gridSize:
   - {x: 4, y: 15}
   - {x: 5, y: 5}

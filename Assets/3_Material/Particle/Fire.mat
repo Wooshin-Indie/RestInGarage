@@ -14,6 +14,7 @@ Material:
   m_ValidKeywords:
   - _ALPHATEST_ON
   - _CFXR_ADDITIVE
+  - _CFXR_EDGE_FADING
   - _CFXR_UV_DISTORTION
   - _FADING_ON
   m_InvalidKeywords:
@@ -81,7 +82,7 @@ Material:
     - _DissolveSmooth: 0.1
     - _Distort: 0.65
     - _DoubleDissolve: 0
-    - _DstBlend: 10
+    - _DstBlend: 1
     - _EdgeFadePow: 1
     - _FadeAlongU: 1
     - _HdrBoost: 1
@@ -103,7 +104,7 @@ Material:
     - _UseBackLighting: 0
     - _UseDissolve: 0
     - _UseDissolveOffsetUV: 0
-    - _UseEF: 0
+    - _UseEF: 1
     - _UseEmission: 0
     - _UseFB: 0
     - _UseFontColor: 0
@@ -115,7 +116,7 @@ Material:
     - _UseSecondColor: 0
     - _UseUV2Distortion: 0
     - _UseUVDistortion: 1
-    - _ZWrite: 1
+    - _ZWrite: 0
     m_Colors:
     - _DissolveScroll: {r: 0, g: 0, b: 0, a: 0}
     - _DistortScrolling: {r: 0, g: -1, b: 1, a: 1}

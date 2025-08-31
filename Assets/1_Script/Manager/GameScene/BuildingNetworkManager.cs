@@ -1,11 +1,9 @@
 using Garage.Props;
 using Garage.UI.Item;
 using Garage.Utils;
-using IUtil;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Garage.Manager
 {

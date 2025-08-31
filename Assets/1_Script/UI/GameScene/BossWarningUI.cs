@@ -7,11 +7,6 @@ public class BossWarningUI : MonoBehaviour
     [SerializeField] private CanvasGroup UIgroup;
     [SerializeField] private float warningDuration;
 
-    private void Awake()
-    {
-        gameObject.SetActive(false);
-    }
-
     public void StartBossWarningVFX()
     {
         gameObject.SetActive(true);

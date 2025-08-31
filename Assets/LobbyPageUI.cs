@@ -44,11 +44,7 @@ namespace Garage.UI.Item
             // backButton은 MainSceneUI 에서 관리
             startButton.onClick.AddListener(() =>
             {
-                UIManager.Transition.StartTransition(.5f);
-                DOVirtual.DelayedCall(.5f, () =>
-                {
-                    GameNetworkManager.Instance.StartGameInLobby();
-                });
+                OnClickStart();
                 // TODO - MainUI 초기화 코드 필요
             });
             inviteFriendsButton.onClick.AddListener(() =>
@@ -288,6 +284,15 @@ namespace Garage.UI.Item
                 startButton.GetComponent<UnityEngine.UI.Image>().color = UnityEngine.Color.clear;
                 startButton.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.grey;
             }
+        }
+
+        private void OnClickStart()
+        {
+            NetworkTransmission.instance.StartTransitionClientRPC(.5f);
+            DOVirtual.DelayedCall(.5f, () =>
+            {
+                GameNetworkManager.Instance.StartGameInLobby();
+            });
         }
 
         public void OnDisconnected()

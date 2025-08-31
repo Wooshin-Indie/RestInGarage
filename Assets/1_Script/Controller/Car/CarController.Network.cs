@@ -174,35 +174,37 @@ namespace Garage.Controller
 		#region Kick Sync
 
 		Coroutine kickedCoroutine;
-
-		[ServerRpc(RequireOwnership = false)]
-		public void ApplyKickServerRPC(KickDirection kickDir)
+        /// <summary>
+        /// isToUpward는 차량이 위쪽으로 이동해야하면 true, 아래쪽으로 이동해야하면 false
+        /// </summary>
+        [ServerRpc(RequireOwnership = false)]
+		public void ApplyKickServerRPC(bool isToUpward)
 		{
 			float distanceByLane = TrafficManager.Instance.CurStageData.LaneWidth / 3f;
 			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
 																					// 맵 월드좌표는 오른쪽이 +X방향임
 			float distanceX;
 
-			if ((direction == VehicleDirection.Up && kickDir == KickDirection.Right) ||
-				(direction == VehicleDirection.Down && kickDir == KickDirection.Left))
+			if ((direction == VehicleDirection.Left && isToUpward == false) ||
+				(direction == VehicleDirection.Right && isToUpward == true))
 			{
-				// 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
-				//SetAnimParam(0);
-			}
+                // 왼쪽으로 기우는 애니메이션 실행  (차량 기우는 기준은 운전자 시점)
+                //SetAnimParam(0);
+                PlayCarDustVfxClientRPC(LocalFourDirection.Left);
+            }
 			else
 			{
-				//SetAnimParam(1);
-			}
+                //SetAnimParam(1);
+                PlayCarDustVfxClientRPC(LocalFourDirection.Right);
+            }
 
-			if (kickDir == KickDirection.Right)
+			if (isToUpward == false)
 			{
 				distanceX = -distance;
-				PlayCarDustVfxClientRPC(LocalFourDirection.Left);
 			}
 			else
 			{
 				distanceX = distance;
-                PlayCarDustVfxClientRPC(LocalFourDirection.Right);
             }
 
 			ApplyKickClientRPC(distanceX);
@@ -274,7 +276,7 @@ namespace Garage.Controller
         [ClientRpc]
         private void PlayCarDrivingSfxClientRPC()
 		{
-            Managers.Sound.PlayCarDrivingSfx(this, 2f, 1f);
+            Managers.Sound.PlayCarDrivingSfx(this, 1f, 1f);
         }
 		[ClientRpc]
 		private void StopCarDrivingSfxClientRPC()

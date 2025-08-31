@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: dc8a10dbdb328d94aba7463c786c9488
+AssetOrigin:
+  serializedVersion: 1
+  productId: 249203
+  packageName: STYLIZED Fantasy Armory - Low Poly 3D Art
+  packageVersion: 1.06
+  assetPath: Assets/Daniel Mistage/Stylized Fantasy Armory/FBX/Grass.003.fbx
+  uploadId: 746620
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 22200
   internalIDToNameTable: []
   externalObjects:
   - first:
@@ -21,8 +28,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -45,6 +50,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -72,12 +78,13 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
-    normalSmoothAngle: 60
-    normalImportMode: 0
-    tangentImportMode: 3
-    normalCalculationMode: 4
-    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    normalSmoothAngle: 90
+    normalImportMode: 1
+    tangentImportMode: 1
+    normalCalculationMode: 2
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
@@ -104,14 +111,9 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 249203
-  packageName: STYLIZED Fantasy Armory - Low Poly 3D Art
-  packageVersion: 1.06
-  assetPath: Assets/Daniel Mistage/Stylized Fantasy Armory/FBX/Grass.003.fbx
-  uploadId: 746620

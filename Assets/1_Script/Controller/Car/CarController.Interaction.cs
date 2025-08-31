@@ -2,6 +2,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
 using Garage.Utils;
+using Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -18,7 +19,10 @@ namespace Garage.Controller
 		public bool IsExploded => isExploded;
 
 		private float prevFireProgress = -1f;
-		private float maxFireHeight = 1.5f;
+		private float minFireHeight = 1f;
+		private float maxFireHeight = 2.5f;
+		private Vector3 originFireScale;
+		private Vector3 maxFireScale;
 
 		/// <summary>
 		/// 현재 Player가 들고있는 prop과 part를 토대로 상호작용 가능한지 판단
@@ -48,7 +52,7 @@ namespace Garage.Controller
 		/// </summary>
 		public void InteractWithPart(CarParts part, PlayerController player, OwnableProp prop)
 		{
-			float wrenchSpeed = player.WrenchRepairSpeed;
+			float progressSpeed = StatManager.Instance.GetProgressSpeed(part);
 
             switch (part)
 			{
@@ -62,18 +66,18 @@ namespace Garage.Controller
 					}
 					else if (!carStatus.IsTireEmpty(part) && carStatus.IsBroken(part) && prop is WrenchProp)
 					{
-						ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
+						ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					}
 					break;
                 // TODO - 여기 prop.Mult 랑 합연산으로 처리해야됨
 				case CarParts.Oil:
-                    ProgressFixGageServerRPC(part, Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+                    ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
                 case CarParts.Engine:
-					ProgressFixGageServerRPC(part, Time.deltaTime * wrenchSpeed, NetworkManager.Singleton.LocalClientId);
+					ProgressFixGageServerRPC(part, Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
 				case CarParts.Fire:
-					ExtinguishFireServerRPC(Time.deltaTime, NetworkManager.Singleton.LocalClientId);
+					ExtinguishFireServerRPC(Time.deltaTime * progressSpeed, NetworkManager.Singleton.LocalClientId);
 					break;
 
 			}
@@ -90,6 +94,10 @@ namespace Garage.Controller
 		{
 			Renderer rend = partTransforms[(int)part].GetComponent<Renderer>();
 			MeshCollider collid = partTransforms[(int)part].GetComponent<MeshCollider>();
+
+			VFXManager.Instance.PlayVFX(VFXType.TireInsert, partTransforms[(int)part].position);
+			Managers.Sound.PlaySfx(SFXType.Pop);
+
 			rend.enabled = true;
 			collid.isTrigger = false;
 			RestoreOriginRot(1f);
@@ -143,9 +151,8 @@ namespace Garage.Controller
 				if (!firePS.isPlaying)
 					firePS.Play();
 
-				var main = firePS.main;
-				main.startSizeY = maxFireHeight * Mathf.Clamp(carStatus.FireProgress, 0, 1);
-			}
+                firePS.transform.localScale = Vector3.Lerp(originFireScale, maxFireScale, carStatus.FireProgress);
+            }
 			else
 			{
 				if (isFired)

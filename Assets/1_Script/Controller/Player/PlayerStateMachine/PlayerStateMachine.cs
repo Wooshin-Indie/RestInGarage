@@ -1,3 +1,4 @@
+using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Garage.Controller.StateMachine
 
         private StateBase curState;
         public StateBase CurState { get=>curState;}
-        
+
         public void Init(StateBase state)
         {
             curState = state;
