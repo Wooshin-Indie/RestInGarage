@@ -14,6 +14,7 @@ namespace Garage.Structs
         Extinguisher
     }
 
+    // 수치화되는 특징들을 나타냅니다.
 	[System.Serializable]
 	public class ItemFeature
 	{
@@ -23,6 +24,15 @@ namespace Garage.Structs
 		public bool IsPositiveValue = false;
 		public bool IsPositiveFeature = false;
 	}
+
+    // 수치화 되지않는 특징들을 나타냅니다.
+    // ex. IsAbleToRun
+    [System.Serializable]
+    public class StringFeature
+    {
+        public string FeatureName = "";
+        public bool IsPositiveFeatrue = false;
+    }
 
     [System.Serializable]
     public class UpgradeData
@@ -57,6 +67,7 @@ namespace Garage.Structs
 		[SerializeField] private string itemName;
 		[SerializeField] private string descriptionKey;
 		[SerializeField] private List<UpgradeData> upgradeDatas = new();
+        [SerializeField] private List<StringFeature> stringFeatures = new();
 
         [SerializeField] private List<KeyData> idleKeyDataList;
         [SerializeField] private List<KeyData> carryKeyDataList;

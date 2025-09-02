@@ -21,7 +21,7 @@ MonoBehaviour:
   laneWidth: 7
   removeLength: 40
   camRotation: {x: 48, y: 82, z: 0}
-  maxStage: 5
+  maxStage: 4
   laneCounts: 0000000000000000000000000000000000000000
   spawnInterval:
   - {x: 1000, y: 1000}

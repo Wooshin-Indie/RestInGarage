@@ -346,7 +346,7 @@ namespace Garage.Manager
 			{
 				averageWorldPos += tile.transform.position;
 			}
-			averageWorldPos /= previouslyHighlighted.Count;
+			averageWorldPos /= (previouslyHighlighted.Count == 0 ? 1 : previouslyHighlighted.Count);
 			return averageWorldPos;
 		}
 
