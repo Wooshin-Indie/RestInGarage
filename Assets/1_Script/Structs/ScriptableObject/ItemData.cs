@@ -31,7 +31,7 @@ namespace Garage.Structs
     public class StringFeature
     {
         public string FeatureName = "";
-        public bool IsPositiveFeatrue = false;
+        public bool IsPositiveFeature = false;
     }
 
     [System.Serializable]
@@ -143,6 +143,7 @@ namespace Garage.Structs
 		}
 
         public List<UpgradeData> UpgradeDatas => upgradeDatas;
+        public List<StringFeature> StringFeatures => stringFeatures;
 		public bool IsRevealData => isRevealData;
 		public int ItemID => itemID;
         public ItemType ItemType => itemType;

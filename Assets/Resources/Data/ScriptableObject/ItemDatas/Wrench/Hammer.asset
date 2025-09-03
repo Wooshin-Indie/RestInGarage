@@ -28,6 +28,11 @@ MonoBehaviour:
     upgradePrice: 0
     progressMult: 0
     features: []
+  stringFeatures:
+  - FeatureName: cannot run anymore.
+    IsPositiveFeature: 0
+  - FeatureName: faster fix
+    IsPositiveFeature: 1
   idleKeyDataList:
   - Action: {fileID: 7546555153064988476, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
     LocalizedDescription:
