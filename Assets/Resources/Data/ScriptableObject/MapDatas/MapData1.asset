@@ -21,11 +21,24 @@ MonoBehaviour:
   laneWidth: 7
   removeLength: 40
   camRotation: {x: 48, y: 82, z: 0}
-  maxStage: 4
+  maxStage: 5
+  stageTime:
+  - 0
+  - 200
+  - 200
+  - 200
+  - 200
   laneCounts: 0000000000000000000000000000000000000000
+  firingCarLimit: 0000000000000000020000000200000002000000
+  fireChance:
+  - 0
+  - 0
+  - 0.1
+  - 0.1
+  - 0.1
   spawnInterval:
   - {x: 1000, y: 1000}
-  - {x: 8, y: 8}
+  - {x: 17, y: 17}
   - {x: 5, y: 5}
   - {x: 5, y: 5}
   - {x: 4, y: 4}

@@ -155,7 +155,7 @@ namespace Garage.Vehicle
 
         private bool IsOutOfBoundary()
         {
-            return transform.position.z < -TrafficManager.Instance.CurStageData.LaneLength;
+            return transform.position.z < -TrafficManager.Instance.CurMapData.LaneLength;
         }
         private void Despawn()
         {

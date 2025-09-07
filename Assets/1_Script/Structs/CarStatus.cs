@@ -25,13 +25,8 @@ namespace Garage.Structs
                 }
             }
 
-			//fireProgress = (tc++ % 2 == 0) ? .1f : -1f;
-            fireProgress = Utility.Chance(TrafficManager.Instance.CarFireChance) ? .1f : -1f;
-
             progress = new float[values.Length];
         }
-
-        public static int tc = 0;
 
         public int isBroken; // CarParts 상태를 LSB부터 비트마스킹
         private int hasTire;
@@ -88,5 +83,11 @@ namespace Garage.Structs
             fireProgress += gage;
         }
 
+        public void StartFire(float startProgress)
+        {
+            if (IsFiring()) return;
+
+            fireProgress = startProgress;
+        }
 	}
 }

@@ -26,7 +26,10 @@ namespace Garage.Structs
 
         [Header("Wave Info")]
         [SerializeField] private int maxStage;
+        [SerializeField] private float[] stageTime;
         [SerializeField] private int[] laneCounts;
+        [SerializeField] private int[] firingCarLimit;
+        [SerializeField] private float[] fireChance;
         [SerializeField] private Vector2[] spawnInterval;
         [SerializeField] private Vector2Int earnMoney;
         [SerializeField] private Vector2Int eraseMoney;
@@ -61,6 +64,9 @@ namespace Garage.Structs
 
         public Vector2Int EraseMoney => eraseMoney;
         public Vector2Int EarnMoney => earnMoney;
+        public float[] StageTime => stageTime;
+        public int[] FiringCarLimit => firingCarLimit;
+        public float[] FireChance => fireChance;
         public Vector2[] SpawnInterval => spawnInterval;
         public List<Vector3> ItemPositions => itemPositions;
 

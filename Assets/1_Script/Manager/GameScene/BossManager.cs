@@ -9,6 +9,12 @@ using UnityEngine;
 
 namespace Garage.Manager
 {
+    public enum BossType
+    {
+        None = -1,
+        BikerGang,
+
+    }
     public class BossManager : MonoBehaviour
     // Host에서만 접근함
     {
@@ -38,8 +44,8 @@ namespace Garage.Manager
         [SerializeField] private Vector2 bikerGangSpawnInterval;
         [SerializeField] private float bikerGangEventDuration;
         
-        private bool bossStarted = false;
-        public bool BossStarted => bossStarted;
+        private bool isBossAppeared = false;
+        public bool IsBossAppeared => isBossAppeared;
 
         private Vector3[] bossSpawnPoints = null;
 
@@ -53,7 +59,7 @@ namespace Garage.Manager
             // TODO - 보스전이 몇초동안 진행될지 설정, 어디어디 스테이지에서 진행될지 설정(bossStarted값 관리해줘야함)
             // HACK - 무슨 보스랑 싸울지 설정(임시)
             StartBikerGangFight();
-            bossStarted = true;
+            isBossAppeared = true;
         }
 
         private Coroutine curBossFightCoroutine = null;
@@ -69,11 +75,11 @@ namespace Garage.Manager
         // 지금은 BikerGang전용으로 해놓음
         private void SetBossSpawnPoints()
         {
-            bossSpawnPoints = new Vector3[TrafficManager.Instance.CurStageData.SpawningPoints.Count * 2];
-            float laneWidth = TrafficManager.Instance.CurStageData.LaneWidth;
-            float laneLength = TrafficManager.Instance.CurStageData.LaneLength;
+            bossSpawnPoints = new Vector3[TrafficManager.Instance.CurMapData.SpawningPoints.Count * 2];
+            float laneWidth = TrafficManager.Instance.CurMapData.LaneWidth;
+            float laneLength = TrafficManager.Instance.CurMapData.LaneLength;
             int i = 0;
-            foreach (var spData in TrafficManager.Instance.CurStageData.SpawningPoints)
+            foreach (var spData in TrafficManager.Instance.CurMapData.SpawningPoints)
             {
                 bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX + laneWidth/2, 0, laneLength);
                 bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX - laneWidth/2, 0, laneLength);

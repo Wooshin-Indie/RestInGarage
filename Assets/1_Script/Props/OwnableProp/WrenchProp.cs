@@ -40,8 +40,8 @@ namespace Garage.Props
 		{
 			rigid.isKinematic = false;
 
-			controller.GetComponent<PlayerController>().IsAbleToRun = true;
-			transform.GetComponent<Rigidbody>().useGravity = true;
+            //controller.GetComponent<PlayerController>().IsAbleToRun = true; // 임시
+            transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
 

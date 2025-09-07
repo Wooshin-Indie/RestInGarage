@@ -85,6 +85,7 @@ namespace Garage.Manager
 		}
 		private void SetNextSpawnTime(float currentTime)
 		{
+			// HACK : 스테이지 번호로 동기화해야함
 			float interval = Managers.Resource.GetData<MapData>(0).SpawnInterval[CurrentStage.Value].GetRandomValue();
 			nextLogTime = currentTime - interval;
 		}

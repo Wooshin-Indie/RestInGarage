@@ -106,6 +106,7 @@ namespace Garage.Props
 
 				//if (hitObj == gameObject) continue;
 				//if (hitObj == oilgun.gameObject) continue;
+				// TODO : 여기 오류남
 				if (hitObj.CompareTag(Constants.TAG_PLAYER) && OwnClientId == Controller.OwnerClientId) continue;
 				isThereObstacle = true;
                 return;
