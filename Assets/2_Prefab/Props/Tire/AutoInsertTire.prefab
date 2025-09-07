@@ -185,5 +185,8 @@ MonoBehaviour:
   isCarry: 1
   carrySpeed: 10
   height: 0.5
+  materials:
+  - {fileID: 2100000, guid: 0dffa260f92a15048ba88f90cb809dcc, type: 2}
+  - {fileID: 2100000, guid: 18adc75eeeb75394c87c6cbf512cb333, type: 2}
   speedThreshold: 5
   boxHalfExtents: {x: 0.42, y: 0.8, z: 0.8}

@@ -16,6 +16,7 @@ namespace Garage.Controller
 	/// </summary>
 	public partial class CarController : VehicleBase
 	{
+		
 		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
 		[SerializeField] private List<Transform> partTransforms = new();	// 넣을 때 CarParts enum 순서 맞춰서 넣기
@@ -31,6 +32,9 @@ namespace Garage.Controller
 		[SerializeField] private ParticleSystem explosionPS;
 
         [FoldoutGroup("Move Parameters")]
+		[SerializeField, Tooltip("Define vehicle's tire size")]
+		private TireSize tireSize;
+
 		[SerializeField, Tooltip("Basic velocity for vehicle")] 
 		private float moveSpeed = 5f;
 		
@@ -313,13 +317,16 @@ namespace Garage.Controller
 		/// <summary>
 		/// Spawn 직후에 차를 초기화하기 위한 함수
 		/// </summary>
-		public void InitCarController(VehicleSpawnPoint spawnPoint)
+		public void InitCarController(VehicleSpawnPoint spawnPoint, float fireChance)
 		{
 			SetLaneClientRPC(spawnPoint.transform.position.x, Managers.Resource.GetData<MapData>(0).RemoveLength, spawnPoint.Direction);
 
+			if (Utility.Chance(fireChance))
+				carStatus.StartFire(0.1f);
+
 			int vehicleDataIdx = UnityEngine.Random.Range(0, Managers.Resource.GetDataLength<VehicleData>());
 			InitCarStatusLogic(vehicleDataIdx);
-			InitCarStatusClientRPC(carStatus.isBroken, vehicleDataIdx);
+			InitCarStatusClientRPC(vehicleDataIdx, carStatus.isBroken);
 		}
 
 		[ClientRpc]
@@ -344,7 +351,7 @@ namespace Garage.Controller
 		}
 
 		[ClientRpc]
-		private void InitCarStatusClientRPC(int carStatusIsBroken, int vehicleDataIdx)
+		private void InitCarStatusClientRPC(int vehicleDataIdx, int carStatusIsBroken)
 		{
 			if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;

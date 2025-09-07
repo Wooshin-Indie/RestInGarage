@@ -50,8 +50,8 @@ namespace Garage.Manager
         [SerializeField] private GameObject spawnPointPrefab;
         [SerializeField] private GameObject lanePrefab;
 
-        private MapData curStageData;
-        public MapData CurStageData => curStageData;
+        private MapData curMapData;
+        public MapData CurMapData => curMapData;
 
         private List<VehicleSpawnPoint> spawnPoints = new List<VehicleSpawnPoint>();
         private Dictionary<ulong, CarController> curStageCars = new Dictionary<ulong, CarController>();
@@ -61,13 +61,13 @@ namespace Garage.Manager
         /// </summary>
 		public void OnStageStart(int mapIdx)
 		{
-            curStageData = Managers.Resource.GetData<MapData>(mapIdx);
+            curMapData = Managers.Resource.GetData<MapData>(mapIdx);
 
             spawnPoints.Clear();
-            foreach (var sp in curStageData.SpawningPoints)
+            foreach (var sp in curMapData.SpawningPoints)
 			{
 				Vector3 point = new Vector3(sp.SpawnPointX, 0, 0);
-                point.z = (sp.Direction == VehicleDirection.Left ? -curStageData.LaneLength : curStageData.LaneLength);
+                point.z = (sp.Direction == VehicleDirection.Left ? -curMapData.LaneLength : curMapData.LaneLength);
                 
                 VehicleSpawnPoint vsp = Managers.Spawn.SpawnInCurrentScene(spawnPointPrefab, point, Quaternion.identity)
 									.GetComponent<VehicleSpawnPoint>();
@@ -98,7 +98,13 @@ namespace Garage.Manager
 				VehicleSpawnPoint spawnPoint = availableSpawnPoints[UnityEngine.Random.Range(0, availableSpawnPoints.Count)];
                 CarController car = Managers.Spawn.SpawnInCurrentScene(carPrefabList[UnityEngine.Random.Range(0, carPrefabList.Count())], spawnPoint.transform.position, spawnPoint.transform.rotation).
 					GetComponent<CarController>();
-                car.InitCarController(spawnPoint);
+
+                float carFireChance = 0f;
+                if(CurrentFiringCars() < curMapData.FiringCarLimit[GameManagerEx.Instance.CurStageIdx])
+                {
+                    carFireChance = GameManagerEx.Instance.CurMapData.FireChance[GameManagerEx.Instance.CurStageIdx];
+                }
+                car.InitCarController(spawnPoint, carFireChance);
 
                 curStageCars.Add(car.GetComponent<NetworkObject>().NetworkObjectId, car);
 
@@ -115,7 +121,6 @@ namespace Garage.Manager
             Destroy(car.gameObject);
 		}
 
-
         public BikerGang SpawnBikerGang(Vector3 spawnPoint)
         {
             // TrafficManager에서 물량 관리
@@ -124,6 +129,17 @@ namespace Garage.Manager
             bikerGang.GetComponent<NetworkObject>().Spawn();
 
             return bikerGang;
+        }
+
+        public int CurrentFiringCars()
+        {
+            int count = 0;
+            foreach (var car in curStageCars.Values)
+            {
+                if (car.CarStatus.IsFiring())
+                    count++;
+            }
+            return count;
         }
 	}
 }

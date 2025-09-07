@@ -222,7 +222,7 @@ namespace Garage.Controller
 
 		private void SetMapInfo(int mapIdx)
 		{
-			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurStageData.CamRotation);
+			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurMapData.CamRotation);
 			camDir = rot * Vector3.forward;
 			camDir = camDir.normalized;
 		}

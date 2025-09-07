@@ -64,6 +64,7 @@ namespace Garage.UI.GameScene
 		{
 			ItemData data = prop.ItemData;
 			List<ItemFeature> features = prop.ItemData.GetItemFeatures(prop.UpgradeLevel);
+			List<StringFeature> stringFeatures = prop.ItemData.StringFeatures;
 
 			nameText.text = data.ItemName + (prop.UpgradeLevel != 0 ? " +" + prop.UpgradeLevel.ToString() : "");				// 이거도 나중에 Key로 바꿔야됨
 			buyPrice.text = data.GetBuyPrice(prop.UpgradeLevel).ToString();
@@ -79,7 +80,14 @@ namespace Garage.UI.GameScene
 				featureTexts[2 * i + 1].color = (features[i].IsPositiveFeature ? Color.green : Color.red);
 			}
 
+			for (int i = 0; i < stringFeatures.Count; i++) 
+			{
+				stringFeatureTexts[i].text = $"- {stringFeatures[i].FeatureName}";
+				stringFeatureTexts[i].color = (stringFeatures[i].IsPositiveFeature ? Color.green : Color.red);
+			}
+
 			int featureCount = features.Count;
+			int stringFeatureCount = stringFeatures.Count;
 			if (features.Count == 0)
 			{
 				featureTexts[0].text = "None";
@@ -87,7 +95,7 @@ namespace Garage.UI.GameScene
 				featureCount = 1;
 			}
 
-			RebuildLayout(featureCount);
+			RebuildLayout(featureCount, stringFeatureCount);
 		}
 
 		[Header("UI Elements")]
@@ -99,6 +107,7 @@ namespace Garage.UI.GameScene
 		[SerializeField] private TextMeshProUGUI sellPrice;
 		[SerializeField] private TextMeshProUGUI descriptionText;
 		[SerializeField] private List<TextMeshProUGUI> featureTexts = new();
+		[SerializeField] private List<TextMeshProUGUI> stringFeatureTexts = new();
 
 		[Header("Spacing")]
 		[SerializeField] private float spacing = 10f;
@@ -107,7 +116,7 @@ namespace Garage.UI.GameScene
 		[SerializeField] private float topPadding = 20f;
 		[SerializeField] private float bottomPadding = 20f;
 
-		public void RebuildLayout(int featureCount)
+		public void RebuildLayout(int featureCount, int stringFeatureCount)
 		{
 			float y = -topPadding;
 
@@ -130,6 +139,16 @@ namespace Garage.UI.GameScene
 				}
 			}
 
+			SetSpace(ref y, parSpacing);
+			for (int i = 0; i < stringFeatureTexts.Count; i++)
+			{
+				stringFeatureTexts[i].gameObject.SetActive(i < stringFeatureCount);
+				if (i < stringFeatureCount)
+				{
+					SetAndMove(stringFeatureTexts[i].rectTransform, ref y, spacing, true);
+				}
+			}
+
 			float totalHeight = -y + bottomPadding;
 			panelRect.sizeDelta = new Vector2(panelRect.sizeDelta.x, totalHeight);
 		}
@@ -142,7 +161,15 @@ namespace Garage.UI.GameScene
 			rt.sizeDelta = new Vector2(rt.sizeDelta.x, height);
 
 			if (isMoveY)
+			{
 				y -= height + spacing;
+				Debug.Log("Y IS :" + y);
+			}
+		}
+
+		private void SetSpace(ref float y, float spacing)
+		{
+			y -= spacing;
 		}
 	}
 }

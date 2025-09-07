@@ -1,6 +1,6 @@
-using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Utils;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,8 +8,11 @@ namespace Garage.Props
 {
 	public class TireProp : OwnableProp, IActionable
 	{
-
 		[SerializeField] protected float height;
+		[SerializeField] private List<Material> materials = new();
+
+		protected TireSize tireSize;
+		public TireSize TireSize { get => tireSize; set => tireSize = value; }
 
         public override void Awake()
         {
@@ -27,7 +30,7 @@ namespace Garage.Props
 			transform.GetComponent<Rigidbody>().useGravity = false;
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;
-			SyncStateServerRPC(true);
+            SyncStateServerRPC(true);
 		}
 
 		public override void OnEndInteraction(Transform controller)
@@ -42,7 +45,7 @@ namespace Garage.Props
 			SyncStateServerRPC(false);
 
 			base.OnEndInteraction(controller);
-		}
+        }
 
 		public virtual void Update()
 		{
@@ -77,6 +80,18 @@ namespace Garage.Props
 			rigid.useGravity = !isStart;
 			rigid.isKinematic = isStart;
 			transform.GetComponent<Collider>().isTrigger = isStart;
+		}
+
+		public void SetTireSize(TireSize size)
+		{
+			SetTireSizeClientRPC(size);
+		}
+
+		[ClientRpc]
+		private void SetTireSizeClientRPC(TireSize size)
+		{
+			this.tireSize = size;
+			GetComponent<Renderer>().material = materials[(int)size];
 		}
 
 		public void OnStartPropAction(Transform controller)

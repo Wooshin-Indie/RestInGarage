@@ -346,7 +346,7 @@ namespace Garage.Manager
 			{
 				averageWorldPos += tile.transform.position;
 			}
-			averageWorldPos /= previouslyHighlighted.Count;
+			averageWorldPos /= (previouslyHighlighted.Count == 0 ? 1 : previouslyHighlighted.Count);
 			return averageWorldPos;
 		}
 
@@ -391,7 +391,7 @@ namespace Garage.Manager
 			Vector3 forward = playerTransform.forward;
 			Vector3 offset = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
 			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offset
-				  + new Vector3(placeSize.x % 2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
+				+ new Vector3(placeSize.x % 2 == 1 ? .5f : 0f, 0f, placeSize.y % 2 == 1 ? .5f : 0f));
 
 			for (int t = 0; t < gridTiles.Count; t++)
 			{
@@ -423,7 +423,8 @@ namespace Garage.Manager
 			}
 			else
 			{
-				tmpPreview.transform.position = new Vector3(startGridPos.x, 0, startGridPos.y);
+				tmpPreview.transform.position = new Vector3(startGridPos.x, 0, startGridPos.y)
+					+ new Vector3(placeSize.x != 1 ? 0 : -.5f, 0f, placeSize.y != 1 ? 0 : -.5f);
 
 				if (lastAppliedMaterial != previewDisableMaterial)
 				{

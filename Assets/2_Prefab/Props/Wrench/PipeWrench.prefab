@@ -123,11 +123,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   ItemData: {fileID: 11400000, guid: ae7a32b34a3b03043afe2e1bebb234df, type: 2}
+  upgradeLevel:
+    m_InternalValue: 0
   meshRenderer: {fileID: 1817379078669378854}
   targetColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
   isCarry: 0
   carrySpeed: 0
   previewPrefab: {fileID: 8379998864351062203, guid: 8521ff113355b5441957696f63ae537d, type: 3}
+  isAbleToRun: 1
 --- !u!1001 &8225151536918808819
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -180,7 +180,7 @@ namespace Garage.Controller
         [ServerRpc(RequireOwnership = false)]
 		public void ApplyKickServerRPC(bool isToUpward)
 		{
-			float distanceByLane = TrafficManager.Instance.CurStageData.LaneWidth / 3f;
+			float distanceByLane = TrafficManager.Instance.CurMapData.LaneWidth / 3f;
 			float distance = distanceByLane > 0 ? distanceByLane : -distanceByLane; // distance는 절댓값으로 받음
 																					// 맵 월드좌표는 오른쪽이 +X방향임
 			float distanceX;
