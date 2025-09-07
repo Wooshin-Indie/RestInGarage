@@ -27,7 +27,7 @@ namespace Garage.Props
 			transform.GetComponent<Rigidbody>().useGravity = false;
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;
-			SyncStateServerRPC(true);
+            SyncStateServerRPC(true);
 		}
 
 		public override void OnEndInteraction(Transform controller)
@@ -42,7 +42,7 @@ namespace Garage.Props
 			SyncStateServerRPC(false);
 
 			base.OnEndInteraction(controller);
-		}
+        }
 
 		public virtual void Update()
 		{

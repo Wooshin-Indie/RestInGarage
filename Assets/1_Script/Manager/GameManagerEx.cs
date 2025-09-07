@@ -42,7 +42,7 @@ namespace Garage.Manager
 		private bool isHost;
 		private ulong myClientId;
 
-		public MapData CurStageData
+		public MapData CurMapData
 		{
 			get
 			{
@@ -51,6 +51,7 @@ namespace Garage.Manager
 					Managers.Resource.GetData<MapData>(mapIdx);
 			}
 		}
+		public int CurStageIdx => GameSynchronizer.Instance.CurrentStage.Value;
 
 		public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
 		public ulong MyClientId { get => myClientId; set => myClientId = value;}
@@ -84,9 +85,9 @@ namespace Garage.Manager
 			if (!isHost) return;
 
 			SunManager.Instance.SetTimePhase(TimePhase.Morning, startStageDuration);
-			Invoke(nameof(OnStageStart), startStageDuration);
+            OnBeforeStageStartAction?.Invoke();
 
-			OnBeforeStageStartAction?.Invoke();
+            Invoke(nameof(OnStageStart), startStageDuration);
 		}
 
 		/// <summary>
@@ -95,9 +96,10 @@ namespace Garage.Manager
 		/// </summary>
 		private void OnStageStart()
 		{
-			GameSynchronizer.Instance.SetGameTimer(stageTimer);
-			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTimer);
-            TrafficManager.Instance.OnStageStart(0);	// TODO - StageIdx 고쳐야됨
+			float stageTime = CurMapData.StageTime[CurStageIdx];
+			GameSynchronizer.Instance.SetGameTimer(stageTime);
+			SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTime);
+            TrafficManager.Instance.OnStageStart(0);	// TODO - 맵 여러개 생기면 MapIdx 고치기
             BuildingManager.Instance.OnStageStart();
 
 			NetworkTransmission.instance.PlayStageBGMClientRPC();
@@ -155,11 +157,7 @@ namespace Garage.Manager
 
 			GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
-			// HACH - 임시로 여기에서 보스 소환함
-			if (GameSynchronizer.Instance.RemainedTime.Value <= 15f && !BossManager.Instance.BossStarted)
-			{
-				StartBossFight();
-			}
+			// TODO : 조건 맞춰서 보스 소환
 
 			if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
 			{
@@ -190,7 +188,8 @@ namespace Garage.Manager
 		{
 			int mapIdx = GameSynchronizer.Instance.MapIdx.Value;
 			OnStageEnd();
-			OnStartGameAction.Invoke(mapIdx);
+
+            OnStartGameAction.Invoke(mapIdx);
 			BuildingManager.Instance.OnGameStarted();
         }
 
@@ -387,6 +386,8 @@ namespace Garage.Manager
 		#region Bosses
 		public void StartBossFight()
 		{
+			if (BossManager.Instance.IsBossAppeared) return;
+
 			Debug.Log("Start BossFight, GameManagerEX");
 			BossManager.Instance.StartBossFight();
         }

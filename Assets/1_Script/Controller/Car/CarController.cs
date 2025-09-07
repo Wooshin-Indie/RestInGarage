@@ -313,13 +313,16 @@ namespace Garage.Controller
 		/// <summary>
 		/// Spawn 직후에 차를 초기화하기 위한 함수
 		/// </summary>
-		public void InitCarController(VehicleSpawnPoint spawnPoint)
+		public void InitCarController(VehicleSpawnPoint spawnPoint, float fireChance)
 		{
 			SetLaneClientRPC(spawnPoint.transform.position.x, Managers.Resource.GetData<MapData>(0).RemoveLength, spawnPoint.Direction);
 
+			if (Utility.Chance(fireChance))
+				carStatus.StartFire(0.1f);
+
 			int vehicleDataIdx = UnityEngine.Random.Range(0, Managers.Resource.GetDataLength<VehicleData>());
 			InitCarStatusLogic(vehicleDataIdx);
-			InitCarStatusClientRPC(carStatus.isBroken, vehicleDataIdx);
+			InitCarStatusClientRPC(vehicleDataIdx, carStatus.isBroken);
 		}
 
 		[ClientRpc]
@@ -344,7 +347,7 @@ namespace Garage.Controller
 		}
 
 		[ClientRpc]
-		private void InitCarStatusClientRPC(int carStatusIsBroken, int vehicleDataIdx)
+		private void InitCarStatusClientRPC(int vehicleDataIdx, int carStatusIsBroken)
 		{
 			if (IsHost) return;
 			carStatus.isBroken = carStatusIsBroken;
