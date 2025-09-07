@@ -1,3 +1,4 @@
+using Garage.Manager;
 using Garage.Utils;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Garage.Structs
         public VehicleDirection Direction;
     }
 
-    [CreateAssetMenu(fileName = "Stage Data", menuName = "SO/Stage Data")]
+[CreateAssetMenu(fileName = "Stage Data", menuName = "SO/Stage Data")]
     public class MapData : ScriptableObject
     {
         [Header("Map Info")]
@@ -33,6 +34,7 @@ namespace Garage.Structs
         [SerializeField] private Vector2[] spawnInterval;
         [SerializeField] private Vector2Int earnMoney;
         [SerializeField] private Vector2Int eraseMoney;
+        [SerializeField] private BossWaveInfo[] bossWaveInfos;
 
         [Header("Shop Info")]
         [SerializeField] private List<Vector3> itemPositions = new();
@@ -52,7 +54,7 @@ namespace Garage.Structs
                     standardPoint = stdPointWith3Lane;
                     break;
             }
-		}
+        }
 
         public List<LaneData> SpawningPoints => spawningPoints;
         public float LaneLength => laneLength;
@@ -69,6 +71,7 @@ namespace Garage.Structs
         public float[] FireChance => fireChance;
         public Vector2[] SpawnInterval => spawnInterval;
         public List<Vector3> ItemPositions => itemPositions;
+        public BossWaveInfo[] BossWaveInfos => bossWaveInfos;
 
-	}
+    }
 }

@@ -1,10 +1,6 @@
 using Garage.Utils;
 using Garage.Vehicle;
-using Newtonsoft.Json.Bson;
-using NUnit.Framework;
 using System.Collections;
-using System.Xml.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -14,6 +10,13 @@ namespace Garage.Manager
         None = -1,
         BikerGang,
 
+    }
+    [System.Serializable]
+    public class BossWaveInfo
+    {
+        public bool isBossExist;
+        public float appearingTime;
+        public BossType bossType;
     }
     public class BossManager : MonoBehaviour
     // Host에서만 접근함
@@ -43,7 +46,7 @@ namespace Garage.Manager
 
         [SerializeField] private Vector2 bikerGangSpawnInterval;
         [SerializeField] private float bikerGangEventDuration;
-        
+
         private bool isBossAppeared = false;
         public bool IsBossAppeared => isBossAppeared;
 
@@ -54,10 +57,10 @@ namespace Garage.Manager
             GameManagerEx.Instance.OnBeforeStageEndAction += OnStageEnd;
         }
 
-        public void StartBossFight()
+        public void StartBossFight(BossType bossType)
         {
             // TODO - 보스전이 몇초동안 진행될지 설정, 어디어디 스테이지에서 진행될지 설정(bossStarted값 관리해줘야함)
-            // HACK - 무슨 보스랑 싸울지 설정(임시)
+            // TODO - 보스타입 맞춰서 보스전 시작해야함
             StartBikerGangFight();
             isBossAppeared = true;
         }
@@ -81,8 +84,8 @@ namespace Garage.Manager
             int i = 0;
             foreach (var spData in TrafficManager.Instance.CurMapData.SpawningPoints)
             {
-                bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX + laneWidth/2, 0, laneLength);
-                bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX - laneWidth/2, 0, laneLength);
+                bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX + laneWidth / 2, 0, laneLength);
+                bossSpawnPoints[i++] = new Vector3(spData.SpawnPointX - laneWidth / 2, 0, laneLength);
             }
             Debug.Log("bossSpawnPoints Count: " + bossSpawnPoints.Length);
         }
@@ -128,10 +131,10 @@ namespace Garage.Manager
             }
         }
 
-
         private void OnDestroy()
         {
             GameManagerEx.Instance.OnBeforeStageEndAction -= OnStageEnd;
         }
     }
+
 }

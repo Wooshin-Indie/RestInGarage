@@ -44,6 +44,22 @@ MonoBehaviour:
   - {x: 4, y: 4}
   earnMoney: {x: 40, y: 50}
   eraseMoney: {x: 100, y: 200}
+  bossWaveInfos:
+  - isBossExist: 0
+    appearingTime: 0
+    bossType: -1
+  - isBossExist: 0
+    appearingTime: 0
+    bossType: -1
+  - isBossExist: 0
+    appearingTime: 0
+    bossType: -1
+  - isBossExist: 0
+    appearingTime: 0
+    bossType: -1
+  - isBossExist: 0
+    appearingTime: 0
+    bossType: -1
   itemPositions:
   - {x: 10, y: 0, z: 0}
   - {x: 10, y: 0, z: 5}
