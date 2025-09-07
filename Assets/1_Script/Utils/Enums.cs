@@ -76,4 +76,12 @@ namespace Garage.Utils
         Rear,
         Left
     }
+
+    // 타이어 및 차량의 사이즈
+	public enum TireSize
+	{
+		Small = 0,
+		Big,
+	}
+
 }

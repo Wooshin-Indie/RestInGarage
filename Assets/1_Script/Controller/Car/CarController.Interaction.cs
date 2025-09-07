@@ -37,7 +37,7 @@ namespace Garage.Controller
 				case CarParts.FRT:
 				case CarParts.RLT:
 				case CarParts.RRT:
-					return (prop is TireProp && carStatus.IsTireEmpty(part))
+					return (prop is TireProp tire && carStatus.IsTireEmpty(part) && this.tireSize == tire.TireSize)
 						|| (prop is WrenchProp && !carStatus.IsTireEmpty(part));
 				case CarParts.Oil:
 					return prop is OilPump;

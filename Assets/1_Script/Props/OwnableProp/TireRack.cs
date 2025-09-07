@@ -1,5 +1,7 @@
 using Garage.Interfaces;
 using Garage.Manager;
+using Garage.Utils;
+using System.Runtime.InteropServices;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,8 +9,8 @@ namespace Garage.Props
 {
 	public class TireRack : OwnableProp, IPlaceable
 	{
-		[SerializeField] private GameObject tirePrefab;
-
+		[SerializeField] private TireSize tireSize;
+        [SerializeField] private GameObject tirePrefab;
 		[SerializeField] private GameObject previewPrefab;
 
         public override void Awake()
@@ -36,6 +38,7 @@ namespace Garage.Props
 		private void SpawnTireServerRpc(ulong newOwnerClientId)
 		{
 			GameObject go = Managers.Spawn.SpawnInCurrentScene(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
+			go.GetComponent<TireProp>().SetTireSize(tireSize);
 			go.GetComponent<TireProp>().TryInteract(newOwnerClientId);
 		}
 

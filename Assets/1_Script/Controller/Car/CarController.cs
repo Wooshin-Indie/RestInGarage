@@ -16,6 +16,7 @@ namespace Garage.Controller
 	/// </summary>
 	public partial class CarController : VehicleBase
 	{
+		
 		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private List<MeshRenderer> wheelRenderers = new();
 		[SerializeField] private List<Transform> partTransforms = new();	// 넣을 때 CarParts enum 순서 맞춰서 넣기
@@ -31,6 +32,9 @@ namespace Garage.Controller
 		[SerializeField] private ParticleSystem explosionPS;
 
         [FoldoutGroup("Move Parameters")]
+		[SerializeField, Tooltip("Define vehicle's tire size")]
+		private TireSize tireSize;
+
 		[SerializeField, Tooltip("Basic velocity for vehicle")] 
 		private float moveSpeed = 5f;
 		
