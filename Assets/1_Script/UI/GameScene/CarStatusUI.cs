@@ -3,6 +3,7 @@ using Garage.Controller;
 using Garage.Manager;
 using Garage.Utils;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -47,6 +48,9 @@ namespace Garage.UI.GameScene.Items
         private GraphicRaycaster uiRaycaster;
         private PointerEventData clickData;
         private List<RaycastResult> clickResults;
+
+        private Vector3 playerHeadupOffset = new Vector3(0, 2f, 0);
+
         private void Awake()
         {
             blinkingUIRect.localScale = Vector3.one;
@@ -163,11 +167,16 @@ namespace Garage.UI.GameScene.Items
 
         private void OnUpdateScreenPos()
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(partTransform.position);
+            Vector3 screenPos = Vector3.zero;
+            
+            screenPos = Camera.main.WorldToScreenPoint(!isEnlarged ? 
+                partTransform.position : 
+                NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().transform.position + playerHeadupOffset);
             transform.position = screenPos;
 
-            CheckAndAdjustBubbleRotation();
-        }
+            // ChangeBubbleRotation(0f);
+			// CheckAndAdjustBubbleRotation();
+		}
 
         private bool isFirstInBoundary = false;
         private void OnUpdateFireScreenPos()

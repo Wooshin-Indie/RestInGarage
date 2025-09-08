@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Garage.Controller;
-using Garage.Controller.StateMachine;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
@@ -11,9 +10,7 @@ using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
