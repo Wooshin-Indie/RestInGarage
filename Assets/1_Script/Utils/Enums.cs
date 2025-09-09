@@ -84,4 +84,11 @@ namespace Garage.Utils
 		Big,
 	}
 
+	// TODO - 필요한 기록 데이터 추가 필요
+	public enum RuntimeRecordType
+	{
+		FixGage,
+		FixCount,
+		MoveDistance,
+	}
 }

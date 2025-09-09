@@ -46,6 +46,8 @@ namespace Garage.Controller
 				return;
 			}
 
+			Managers.Record.RecordData(networkId, RuntimeRecordType.FixGage, deltaTime / fixingTime);
+			// TODO - 여기 게이지 fixingTime 수정 필요할수도
 			carStatus.AddProgress(part, deltaTime / fixingTime);
 
 			UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
