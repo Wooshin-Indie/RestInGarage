@@ -10,6 +10,7 @@ using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Garage.UI.GameScene
@@ -75,7 +76,7 @@ namespace Garage.UI.GameScene
                 Debug.LogError("car status - Init doesn't work well.");
                 return;
             }
-            if(dict.TryGetValue(CarParts.Fire, out CarStatusUI statusUI))
+            if(dict.TryGetValue(CarParts.Fire, out CarStatusUI statusUI) && statusUI != null)
 			{
 				statusUI.ApplyFill(progress);
             }
@@ -113,14 +114,17 @@ namespace Garage.UI.GameScene
             if (!carStatusInfo.ContainsKey(carID)) return;
             if (carStatusInfo[carID].ContainsKey(carPart) && carStatusInfo[carID][carPart] != null)
             {
-                Transform curUiTf = carStatusInfo[carID][carPart].transform;
+
+				Transform curUiTf = carStatusInfo[carID][carPart].transform;
+                carStatusInfo[carID].Remove(carPart);
+                
                 Sequence uiScaleSeq = DOTween.Sequence();
                 uiScaleSeq.Append(curUiTf.DOScale(curUiTf.localScale * 1.2f, 0.1f).SetEase(Ease.OutCubic));
                 uiScaleSeq.Append(curUiTf.DOScale(Vector3.zero, 0.2f).SetEase(Ease.OutCubic));
                 uiScaleSeq.OnComplete(() =>
                 {
                     Destroy(curUiTf.gameObject);
-                });
+				});
 
                 uiScaleSeq.Play();
             }

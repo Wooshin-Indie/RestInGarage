@@ -2,6 +2,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
 using Garage.Utils;
+using IUtil;
 using Manager;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -157,6 +158,7 @@ namespace Garage.Controller
 			{
 				if (isFired)
 				{
+					Debug.LogWarning("REMOVE FIER ");
 					UIManager.Game.RemoveCarStatusUI(this, CarParts.Fire);
 					isFired = false;
 					firePS.Stop();
@@ -198,10 +200,11 @@ namespace Garage.Controller
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// 주변 차가 터져서 해당 차가 불타는 경우 호출
 		/// </summary>
+		[Button()]
 		public void OnFired()
 		{
 			if (!carStatus.IsFiring())

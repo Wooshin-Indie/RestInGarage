@@ -1325,6 +1325,7 @@ MonoBehaviour:
   firePS: {fileID: 5754276584969108821}
   extinguishPS: {fileID: 594956948399207971}
   explosionPS: {fileID: 3788198279627837247}
+  tireSize: 0
   moveSpeed: 5
   stopDistance: 5
   tmpDistance: 3
@@ -1672,10 +1673,6 @@ PrefabInstance:
     - target: {fileID: 2024504139383921044, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
       propertyPath: m_Name
       value: FireVFX
-      objectReference: {fileID: 0}
-    - target: {fileID: 2960925520943006656, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2960925520943006656, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
       propertyPath: m_LocalPosition.x
