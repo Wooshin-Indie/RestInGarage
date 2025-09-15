@@ -8,6 +8,7 @@ using Steamworks.Data;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -57,15 +58,14 @@ namespace Garage.Manager
         public ulong MyClientId { get => myClientId; set => myClientId = value; }
         public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
 
-        public Action OnDisconnectedAction { get; set; }
-        public Action OnBeforeStageStartAction { get; set; }
-        public Action OnAfterStageStartAction { get; set; }
-        public Action OnTimeoutAction { get; set; }
-        public Action OnBeforeStageEndAction { get; set; }
-        public Action<int> OnAfterStageEndAction { get; set; }
-        public Action<Lobby> OnLobbyEnteredAction { get; set; }
-
-        public Action<int> OnStartGameAction { get; set; }
+		public Action OnDisconnectedAction { get; set; }			// Network Session 끊기면 호출
+		public Action OnBeforeStageStartAction { get; set; }		// StartNextStage 호출 직후 실행
+		public Action OnAfterStageStartAction { get; set; }			// 
+		public Action OnTimeoutAction { get; set; }					// 스테이지 타임아웃시 실행
+		public Action OnBeforeStageEndAction { get; set; }			// EndStage 호출 직후 실행
+		public Action<int> OnAfterStageEndAction { get; set; }		// 
+		public Action<Lobby> OnLobbyEnteredAction { get; set; }		// 
+		public Action<int> OnStartGameAction { get; set; }			// 인게임 진입시 실행
 
         [SerializeField] private GameObject meetingPointPrefab;
         [SerializeField] private float stageTimer;
@@ -84,6 +84,7 @@ namespace Garage.Manager
             if (!isHost) return;
 
             SunManager.Instance.SetTimePhase(TimePhase.Morning, startStageDuration);
+
             OnBeforeStageStartAction?.Invoke();
 
             Invoke(nameof(OnStageStart), startStageDuration);
@@ -125,6 +126,7 @@ namespace Garage.Manager
                 player.Value.PlayerObject.GetComponent<PlayerController>().EndAllInteraction();
             }
         }
+
 
         private void OnStageEnd()
         {
@@ -178,6 +180,7 @@ namespace Garage.Manager
         public void SendMessageToChat(string text, ulong fromwho, bool server)
         {
             string name = Constants.NAME_SERVER;
+
 
             if (!server && playerInfo.ContainsKey(fromwho))
             {
@@ -381,10 +384,14 @@ namespace Garage.Manager
             }
         }
 
-        public void Quit()
-        {
-            Application.Quit();
-        }
+		public void Quit()
+		{
+#if UNITY_EDITOR
+			EditorApplication.isPlaying = false;
+#else
+			Application.Quit();
+#endif
+		}
 
         #region Bosses
         public void StartBossFight(BossType bossType)
@@ -395,7 +402,7 @@ namespace Garage.Manager
             BossManager.Instance.StartBossFight(bossType);
         }
 
-        #endregion
+		#endregion
     }
 
 }
