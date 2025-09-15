@@ -48,7 +48,7 @@ namespace Garage.Manager
 		// TODO - 원하는 데이터를 가공 및 집계해서 결과를 반환해야됨
 		// 해당 결과를 반환할 클래스는 GameplayRecordData
 		[Obsolete("미구현")]
-		public List<GameplayRecordData> GetData()
+		public List<GameplayRecordData> GetData(int count)
 		{
 			return null;
 		}
