@@ -541,5 +541,11 @@ namespace Garage.Controller
             interactPropKeyInfoUITimer = 0f;
             idlePropKeyInfoUITimer = 0f;
         }
+		public void UpdateDetectPropUI()
+		{
+			if (currentOwningProp != null) return;
+
+			UIManager.Game.SetPropDetectUI(recentlyDetectedProp);
+		}
     }
 }

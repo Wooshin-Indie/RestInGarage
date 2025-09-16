@@ -28,6 +28,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
         [SerializeField] private PropKeyInfoUI carryPropKeyInfoUI;
         [SerializeField] private PropKeyInfoUI interactPropKeyInfoUI;
+        [SerializeField] private PropDetectUI propDetectUI;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
@@ -46,6 +47,7 @@ namespace Garage.UI.GameScene
             GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
 
             bossWarningUI.gameObject.SetActive(false);
+            propDetectUI.gameObject.SetActive(false);
         }
 
 
@@ -62,6 +64,7 @@ namespace Garage.UI.GameScene
             // 여기서 carStatusInfo에 있는 CarStatusUI들 전부 Update
 
             curPoppedPropKeyInfoUI?.OnUpdate();
+            propDetectUI.UpdateUIScreenPos();
         }
 
 		private void OnEnable()
@@ -353,6 +356,20 @@ namespace Garage.UI.GameScene
             curPoppedPropKeyInfoUI = null;
         }
         #endregion
+
+        /// <summary>
+        /// Prop을 Detect했을 때 띄우는 UI
+        /// </summary>
+        /// <param name="isOn"> activeSelf </param>
+        public void SetPropDetectUI(OwnableProp prop)
+        {
+            if (prop != null)
+            {
+                propDetectUI.SetTargetProp(prop);
+                propDetectUI.PopUI();
+            }
+            else propDetectUI.CloseUI();
+        }
 
         public void StartBossWarning()
         {
