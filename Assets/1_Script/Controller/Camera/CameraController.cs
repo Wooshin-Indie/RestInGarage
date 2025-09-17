@@ -1,6 +1,11 @@
 using Garage.Manager;
 using Garage.Structs;
+using IUtil;
+using System.Collections.Generic;
+using Unity.Cinemachine;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 namespace Garage.Controller
 {
@@ -10,8 +15,22 @@ namespace Garage.Controller
         [SerializeField] private Transform target;          // 플레이어가 할당될 타겟
         [SerializeField] private float smoothSpeed = 10f;   // 카메라 이동 부드러움 정도
 
+        [Header("Cinemachines")]
+        [SerializeField] private CinemachineCamera vcamTopDown;
+		[SerializeField] private List<CinemachineCamera> vcamPersonView = new();
+        [SerializeField] private float characterBoomLength;
+
+        private CinemachineBrain brain = null;
+
         private Vector3 standardPoint;                      // standard point를 저장해놔야됨
         private float playerRangeX;                         // x+ 방향(윗방향) 플레이어 움직임 범위
+
+		private void Awake()
+		{
+			brain = GetComponent<CinemachineBrain>();
+            vcamTopDown.Priority = 20;
+            for (int i = 0; i < vcamPersonView.Count; i++) vcamPersonView[i].Priority = 0;
+		}
 
 		private void Start()
 		{
@@ -40,9 +59,21 @@ namespace Garage.Controller
 
         [SerializeField] private float ratio = 3;
 
+        [Button]
+        private void ConvertVirtualCamera()
+        {
+            Transform character = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().transform;
+			Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
+
+			vcamPersonView[0].transform.position = cameraPos;
+			vcamPersonView[0].transform.LookAt(character.position);
+            vcamPersonView[0].transform.position = cameraPos + Vector3.up;
+            
+            vcamPersonView[0].Priority = 40;
+		}
+
         private void OnUpdateCamera()
         {
-            float cameraBoomLength = 20;
             Vector3 defaultPos = standardPoint + cameraBoomLength * (-transform.forward);
             // 플레이어 z가 +6 or -6일 때 z축 화면이동 멈춰야됨
             float zOffset = (target.position.z) / ratio;
@@ -77,6 +108,9 @@ namespace Garage.Controller
                     transform.position = desiredPosition;
                 }
             }
+
+			vcamTopDown.transform.position = transform.position;
+            vcamTopDown.transform.rotation = transform.rotation;
         }
 	}
 }
