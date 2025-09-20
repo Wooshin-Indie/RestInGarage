@@ -1,3 +1,4 @@
+using Garage.Controller;
 using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
@@ -35,6 +36,9 @@ namespace Garage.Manager
 		public NetworkVariable<float> RemainedTime = new();
 		public NetworkVariable<int> MapIdx = new();
 
+		private bool isInEvent = false;
+		private int playerInEvent = 0;
+		
 		private void Start()
 		{
 			GameManagerEx.Instance.OnBeforeStageStartAction += (() =>
@@ -88,6 +92,41 @@ namespace Garage.Manager
 			// HACK : 스테이지 번호로 동기화해야함
 			float interval = Managers.Resource.GetData<MapData>(0).SpawnInterval[CurrentStage.Value].GetRandomValue();
 			nextLogTime = currentTime - interval;
+		}
+
+		[ServerRpc]
+		public void StartEventServerRPC()
+		{
+			playerInEvent = NetworkManager.Singleton.ConnectedClients.Count;
+			StartEventClientRPC();
+		}
+
+		[ClientRpc]
+		private void StartEventClientRPC()
+		{
+			isInEvent = true;
+			Camera.main.GetComponent<CameraController>().ConvertVirtualCamera(0);
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		public void EndEventServerRPC()
+		{
+			if (!isInEvent) return;
+
+			isInEvent = false;
+			playerInEvent--;
+
+			EndEventClientRpc();
+			if (playerInEvent == 0)
+			{
+				GameManagerEx.Instance.OnEndEvent();
+			}
+		}
+		[ClientRpc]
+		private void EndEventClientRpc()
+		{
+			NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject()
+				.GetComponent<PlayerController>().IsInputLocked = false;
 		}
 	}
 }

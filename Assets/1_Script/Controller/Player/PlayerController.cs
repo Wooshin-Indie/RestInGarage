@@ -5,13 +5,11 @@ using Garage.Props;
 using Garage.Structs;
 using Garage.Structs.CarPart;
 using Garage.Utils;
-using Garage.Vehicle;
 using IUtil;
 using Manager;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -62,6 +60,7 @@ namespace Garage.Controller
 		private bool isInputLocked = false;
         
 		public bool IsAbleToRun { get => isAbleToRun; set => isAbleToRun = value; }
+		public bool IsInputLocked { get => isInputLocked; set => isInputLocked = value; }	
 		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
 
@@ -415,13 +414,13 @@ namespace Garage.Controller
 					transform.rotation = Quaternion.Euler(-transform.rotation.eulerAngles);
 				}));
 
-            DOVirtual.DelayedCall(awayMoveTime + 3f, () =>
+			if (IsHost)
 			{
-				isInputLocked = false;
-			});
+				GameManagerEx.Instance.StartEvent_HostOnly();
+			}
         }
 
-        private IEnumerator RunToTargetPosCoroutine(float maxTime, Vector3 targetPos, Action onComplete)
+		private IEnumerator RunToTargetPosCoroutine(float maxTime, Vector3 targetPos, Action onComplete)
 		{
 			float elapsedTime = 0f;
 

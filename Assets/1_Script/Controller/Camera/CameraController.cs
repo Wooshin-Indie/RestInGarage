@@ -2,10 +2,10 @@ using Garage.Manager;
 using Garage.Structs;
 using IUtil;
 using System.Collections.Generic;
+using System.Security;
 using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 namespace Garage.Controller
 {
@@ -20,7 +20,8 @@ namespace Garage.Controller
 		[SerializeField] private List<CinemachineCamera> vcamPersonView = new();
         [SerializeField] private float characterBoomLength;
 
-        private CinemachineBrain brain = null;
+        private MapData stageData = null;
+		private CinemachineBrain brain = null;
 
         private Vector3 standardPoint;                      // standard point를 저장해놔야됨
         private float playerRangeX;                         // x+ 방향(윗방향) 플레이어 움직임 범위
@@ -51,7 +52,7 @@ namespace Garage.Controller
 
         public void SetStageInfo(int idx)
         {
-            MapData stageData = Managers.Resource.GetData<MapData>(idx);
+			stageData = Managers.Resource.GetData<MapData>(idx);
 			standardPoint = stageData.StandardPoint;
 			playerRangeX = stageData.PlayerRangeX;
             transform.rotation = Quaternion.Euler(stageData.CamRotation);
@@ -60,16 +61,18 @@ namespace Garage.Controller
         [SerializeField] private float ratio = 3;
 
         [Button]
-        private void ConvertVirtualCamera()
+        private void EndEvent()
         {
-            Transform character = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().transform;
-			Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
+            GameManagerEx.Instance.EndEvent();
 
-			vcamPersonView[0].transform.position = cameraPos;
-			vcamPersonView[0].transform.LookAt(character.position);
-            vcamPersonView[0].transform.position = cameraPos + Vector3.up;
-            
-            vcamPersonView[0].Priority = 40;
+			vcamPersonView[0].Priority = 0;
+		}
+
+        private int currentViewingPersonIdx = -1;
+        public void ConvertVirtualCamera(int idx)
+        {
+            currentViewingPersonIdx = idx;
+			vcamPersonView[0].Priority = 40;
 		}
 
         private void OnUpdateCamera()
@@ -87,13 +90,13 @@ namespace Garage.Controller
                 float xOffset = target.position.x > 15 ? target.position.x - 15 : target.position.x + 15;
                 Vector3 desiredPosition = new Vector3(defaultPos.x + xOffset, defaultPos.y, defaultPos.z + zOffset);
                 Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-                transform.position = smoothedPosition;
+				vcamTopDown.transform.position= smoothedPosition;
             }
             else if (target.position.x > playerRangeX) // 위쪽 상점 공간 진입
             {
                 Vector3 desiredPosition = new Vector3(defaultPos.x + 13, defaultPos.y, defaultPos.z + zOffset);
                 Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-                transform.position = smoothedPosition;
+				vcamTopDown.transform.position = smoothedPosition;
             }
             else
             {
@@ -101,16 +104,27 @@ namespace Garage.Controller
                 if (!Mathf.Approximately(transform.position.x, defaultPos.x))
                 {
                     Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-                    transform.position = smoothedPosition;
+					vcamTopDown.transform.position = smoothedPosition;
                 }
                 else
                 {
-                    transform.position = desiredPosition;
+					vcamTopDown.transform.position = desiredPosition;
                 }
             }
 
-			vcamTopDown.transform.position = transform.position;
-            vcamTopDown.transform.rotation = transform.rotation;
-        }
+            if (stageData != null)
+                vcamTopDown.transform.rotation = Quaternion.Euler(stageData.CamRotation);
+
+            if (currentViewingPersonIdx != -1)
+			{
+				Transform character = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().transform;
+				Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
+
+				vcamPersonView[0].transform.position = cameraPos;
+				vcamPersonView[0].transform.LookAt(character.position);
+				vcamPersonView[0].transform.position = cameraPos + Vector3.up;
+
+			}
+		}
 	}
 }

@@ -143,13 +143,17 @@ namespace Garage.Manager
             if (GameSynchronizer.Instance.IsDay.Value) return;
             if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
 
-            Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
-            {
-                Managers.Sound.PlaySfx(SFXType.ShopPop);
-                BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
-                OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
-            });
         }
+
+        private void OnAfterStageEnd()
+        {
+			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
+			{
+				Managers.Sound.PlaySfx(SFXType.ShopPop);
+				BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
+			});
+		}
 
         private void OnUpdateTimer()
         {
@@ -402,7 +406,26 @@ namespace Garage.Manager
             BossManager.Instance.StartBossFight(bossType);
         }
 
+        #endregion
+
+        #region Event
+
+        public void StartEvent_HostOnly()
+        {
+            GameSynchronizer.Instance.StartEventServerRPC();
+        }
+
+        public void EndEvent()
+        {
+            GameSynchronizer.Instance.EndEventServerRPC();
+        }
+
+        public void OnEndEvent()
+        {
+            OnAfterStageEnd();
+        }
+
 		#endregion
-    }
+	}
 
 }
