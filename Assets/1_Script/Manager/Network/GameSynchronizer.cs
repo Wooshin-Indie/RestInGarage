@@ -95,9 +95,9 @@ namespace Garage.Manager
 		}
 
 		[ClientRpc]
-		public void EndStageClientRPC()
+		public void TimeOutClientRPC()
 		{
-			GameManagerEx.Instance.OnBeforeStageEndAction?.Invoke();
+			GameManagerEx.Instance.OnTimeoutAction?.Invoke();
 		}
 
 		[ServerRpc]

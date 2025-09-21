@@ -111,7 +111,7 @@ namespace Garage.Manager
             SunManager.Instance.SetTimePhase(TimePhase.Night, endStageDuration);
             AllPlayersAwayFromLanesOnStageEnd();
 
-            GameSynchronizer.Instance.EndStageClientRPC();
+			OnBeforeStageEndAction?.Invoke();
 
             DOVirtual.DelayedCall(awayMoveTime, () =>
             {
@@ -170,8 +170,8 @@ namespace Garage.Manager
             }
 
             if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
-            {
-                OnTimeoutAction?.Invoke();
+			{
+				GameSynchronizer.Instance.TimeOutClientRPC();
                 InputLockToAllPlayers();
                 Invoke(nameof(EndStage), timeoutDuration);
             }
