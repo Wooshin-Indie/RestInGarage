@@ -95,7 +95,7 @@ namespace Garage.Manager
         /// </summary>
         private void OnStageStart()
         {
-            float stageTime = CurMapData.StageTime[CurStageIdx];
+            float stageTime = CurMapData.StageDatas[GameSynchronizer.Instance.CurrentStage.Value].StageTime;
             GameSynchronizer.Instance.SetGameTimer(stageTime);
             SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTime);
             TrafficManager.Instance.OnStageStart(0);    // TODO - 맵 여러개 생기면 MapIdx 고치기
@@ -156,10 +156,10 @@ namespace Garage.Manager
 
             GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
-            if (CurMapData.BossWaveInfos[CurStageIdx].isBossExist &&
-                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.BossWaveInfos[CurStageIdx].appearingTime)
+            if (CurMapData.StageDatas[CurStageIdx].BossWaveInfo.isBossExist &&
+                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.StageDatas[CurStageIdx].BossWaveInfo.appearingTime)
             {
-                StartBossFight(CurMapData.BossWaveInfos[CurStageIdx].bossType);
+                StartBossFight(CurMapData.StageDatas[CurStageIdx].BossWaveInfo.bossType);
             }
 
             if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)

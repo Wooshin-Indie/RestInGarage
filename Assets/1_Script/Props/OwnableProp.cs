@@ -14,7 +14,7 @@ namespace Garage.Props
 
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
-		[SerializeField] private float carrySpeed;
+		[SerializeField] private float carrySpeedMultiplier;
 
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
 		protected PlayerController controller;
@@ -24,7 +24,7 @@ namespace Garage.Props
         protected NetworkVariable<Vector3> gridPosition = new();
 
 		public bool IsCarry => isCarry;
-		public float CarrySpeed => carrySpeed;
+		public float CarrySpeedMultiplier => carrySpeedMultiplier;
 
 		private bool isTargetted = false;
 

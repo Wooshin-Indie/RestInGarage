@@ -1105,6 +1105,7 @@ MonoBehaviour:
   firePS: {fileID: 9068799546022308272}
   extinguishPS: {fileID: 6582514690246765099}
   explosionPS: {fileID: 8360822457091413282}
+  tireSize: 0
   moveSpeed: 5
   stopDistance: 10
   tmpDistance: 3
@@ -1878,6 +1879,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2960925520943006656, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2960925520943006656, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -1920,13 +1925,42 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2024504139383921044, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8177295968505729271}
   m_SourcePrefab: {fileID: 100100000, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
 --- !u!4 &5901446474825120708 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2960925520943006656, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
   m_PrefabInstance: {fileID: 8714874709115467780}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7271360211235217808 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2024504139383921044, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}
+  m_PrefabInstance: {fileID: 8714874709115467780}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &8177295968505729271
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7271360211235217808}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.44, y: 0.92, z: 1.49}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!198 &9068799546022308272 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 372582144779669940, guid: 776a96042c92d0847bb71eaa364e3a43, type: 3}

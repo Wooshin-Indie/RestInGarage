@@ -11,7 +11,8 @@ namespace Garage.Structs
         Rack,
         OilPump,
         Wrench,
-        Extinguisher
+        Extinguisher,
+        Barricade
     }
 
     // 수치화되는 특징들을 나타냅니다.

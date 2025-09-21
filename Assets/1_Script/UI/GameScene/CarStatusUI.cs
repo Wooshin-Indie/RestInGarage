@@ -13,7 +13,8 @@ namespace Garage.UI.GameScene.Items
     {
         [Header("Bubble UI")]
         [SerializeField] private RectTransform bubbleUIRect;
-        [SerializeField] private RectTransform maskToFill;
+        [SerializeField] private RectTransform mainFillMask;
+        [SerializeField] private RectTransform subFillMask;
         [SerializeField] private Image iconImageInBubble;
         [SerializeField] private RectTransform bubbleTailRect;
         [SerializeField] private RectTransform tailPivotRect;
@@ -56,9 +57,9 @@ namespace Garage.UI.GameScene.Items
             fireBlinkColor2 = new Color(255f / 255f, 238f / 255f, 124f / 255f, 0.9f);
 
             // Pivot Y 를 0으로 강제설정 (아래에서부터 채우기 위해)
-            if (!Mathf.Approximately(maskToFill.pivot.y, 0f))
+            if (!Mathf.Approximately(mainFillMask.pivot.y, 0f))
             {
-                maskToFill.pivot = new Vector2(maskToFill.pivot.x, 0f);
+                mainFillMask.pivot = new Vector2(mainFillMask.pivot.x, 0f);
             }
 
             ApplyFill(0f); // 처음 mask가 비어있게 설정
@@ -124,9 +125,9 @@ namespace Garage.UI.GameScene.Items
         private float screenEdgeMargin = 80f;
         private void OnUpdateFireBlinking()
         {
-            blinkDuration = Mathf.Lerp(1f, 0.05f, maskToFill.anchorMax.y);
+            blinkDuration = Mathf.Lerp(1f, 0.05f, mainFillMask.anchorMax.y);
 
-            if (maskToFill.anchorMax.y < 0.7f)
+            if (mainFillMask.anchorMax.y < 0.7f)
             {
                 if (elapsedTime < blinkDuration)
                 {
@@ -241,7 +242,8 @@ namespace Garage.UI.GameScene.Items
 				case CarParts.Fire:
 					iconImageInBubble.sprite = oilImage;
                     blinkingIconImage.sprite = fireBlinkImage;
-                    maskToFill.GetComponent<Image>().color = Color.red;
+                    mainFillMask.GetComponent<Image>().color = Color.red;
+                    subFillMask.GetComponent<Image>().color = Color.red;
 					break;
 			}
 
@@ -326,7 +328,7 @@ namespace Garage.UI.GameScene.Items
                 fillAmount = Mathf.Lerp(bubbleScalingAmount, 1f - bubbleScalingAmount, (progress - startScalingRatio) / endScalingRatio);
             }
 
-            maskToFill.localScale = new Vector3(maskToFill.localScale.x, fillAmount, maskToFill.localScale.z);
+            mainFillMask.localScale = new Vector3(mainFillMask.localScale.x, fillAmount, mainFillMask.localScale.z);
         }
 
         private float uiExpandDuration = 0.2f;

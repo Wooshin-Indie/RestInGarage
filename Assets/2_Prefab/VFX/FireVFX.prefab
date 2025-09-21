@@ -4856,6 +4856,7 @@ GameObject:
   - component: {fileID: 2960925520943006656}
   - component: {fileID: 372582144779669940}
   - component: {fileID: 480344485814794645}
+  - component: {fileID: -2268926806147401325}
   m_Layer: 12
   m_Name: FireVFX
   m_TagString: Untagged
@@ -9692,6 +9693,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &-2268926806147401325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2024504139383921044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9379b61e4b9060a46a617f10a3cdbfb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  part: 6
 --- !u!1 &6440642305660121133
 GameObject:
   m_ObjectHideFlags: 0

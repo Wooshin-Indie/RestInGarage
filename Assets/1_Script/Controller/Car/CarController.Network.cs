@@ -93,7 +93,8 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
-			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
+			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).
+				StageDatas[GameSynchronizer.Instance.CurrentStage.Value].EarnMoney.GetRandomValue());
 			StartCoroutine(FxsOnAllPartsRepaired());
 		}
 		private IEnumerator FxsOnAllPartsRepaired()

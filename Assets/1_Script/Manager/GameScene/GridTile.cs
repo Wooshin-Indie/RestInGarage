@@ -11,13 +11,14 @@ namespace Garage
 		public NetworkVariable<NetworkObjectReference> PropNetRef = new();
 
 		public OwnableProp prop => PropNetRef.Value.TryGet(out var obj) ? obj.GetComponent<OwnableProp>() : null;
-		public NetworkVariable<Vector3Int> GridPosition = new();
+        public NetworkVariable<GridType> gridType = new();
+        public NetworkVariable<Vector2Int> GridPosition = new();
 
 		public override void OnNetworkSpawn()
 		{
 			base.OnNetworkSpawn();
 
-			BuildingManager.Instance.RegisterTile(this);
+			BuildingManager.Instance.RegisterTileOnClient(this);
 			gameObject.SetActive(false);
 		}
 
@@ -25,11 +26,11 @@ namespace Garage
 		{
 			rend = GetComponent<Renderer>();
 		}
-
-		public void SetGridPosition(int idx, int row, int col)
+		public void InitGridTile(GridType type, Vector2Int pos)
 		{
-			GridPosition.Value = new Vector3Int(idx, row, col);
-		}
+			GridPosition.Value = pos;
+            gridType.Value = type;
+        }
 		public void SetMaterial(Material mat)
 		{
 			rend.material = mat;

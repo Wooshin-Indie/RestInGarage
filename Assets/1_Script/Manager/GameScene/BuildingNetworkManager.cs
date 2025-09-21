@@ -39,7 +39,7 @@ namespace Garage.Manager
 		#endregion
 
 		[ServerRpc(RequireOwnership = false)]
-		public void TryPlaceServerRpc(ulong propNetId, int gridIdx, int wheelRotate, Vector2Int[] tileIndices, ulong clientId)
+		public void TryPlaceServerRpc(ulong propNetId, GridType gridType, int wheelRotate, Vector2Int[] tilePositions, ulong clientId)
 		{
 			// TODO - 위치에 따라서 살지 팔지
 			if (BuildingManager.Instance.ItemDictionary.TryGetValue(propNetId, out OwnableProp oProp))
@@ -56,41 +56,31 @@ namespace Garage.Manager
 			NetworkObject obj = NetworkManager.SpawnManager.SpawnedObjects[propNetId];
 			OwnableProp prop = obj.GetComponent<OwnableProp>();
 
-			bool success = true;
-
-			foreach (var index in tileIndices)
-			{
-				if (!BuildingManager.Instance.IsInBounds(gridIdx, index)) { success = false; break; }
-				if (!BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].IsPlaceable(prop)) { success = false; break; }
-			}
-
-			if (!success)
+            if (!BuildingManager.Instance.IsAbleToPlace(gridType, tilePositions, prop))
 			{
 				FailToPlaceClientRPC(BuildFailType.WrongPlace, clientId);
-				return;
+                return;
 			}
 
-			for (int t = 0; t < BuildingManager.Instance.GridTiles.Count; t++)
+			// WHAT - 이게 무슨 용도지?
+			foreach (var type in BuildingManager.Instance.GetGridTypes())
 			{
-				for (int i = 0; i < BuildingManager.Instance.GridTiles[t].GetLength(0); i++)
+				foreach (var gridTile in BuildingManager.Instance.GridTileDict[type].Values)
 				{
-					for (int j = 0; j < BuildingManager.Instance.GridTiles[t].GetLength(1); j++)
-					{
-						if (BuildingManager.Instance.GridTiles[t][i, j].PropNetRef.Value.NetworkObjectId == propNetId)
-							BuildingManager.Instance.GridTiles[t][i, j].SetProp(null);
-					}
-				}
-			}
+                    if (gridTile.PropNetRef.Value.NetworkObjectId == propNetId)
+                        gridTile.SetProp(null);
+                }
+            }
 
 			BuildingManager.Instance.OnBuyItem(propNetId);
 			OnShopItemBuyedClientRPC(propNetId);
 
-			foreach (var index in tileIndices)
+			foreach (var tilePos in tilePositions)
 			{
-				BuildingManager.Instance.GridTiles[gridIdx][index.x, index.y].SetProp(prop);
+				BuildingManager.Instance.GridTileDict[gridType][tilePos].SetProp(prop);
 			}
 
-			Vector3 position = BuildingManager.Instance.GetCenterWorldPosition(gridIdx, tileIndices);
+			Vector3 position = BuildingManager.Instance.GetCenterWorldPos(tilePositions);
 			int rotation = wheelRotate;
 
 			prop.SetGridPosition(position);
@@ -107,7 +97,7 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		public void SellPropsServerRPC()
 		{
-			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Sell, sellProps);
+			BuildingManager.Instance.GetPropsInGrid(GridType.Sell, sellProps);
 			
 			foreach(var prop in sellProps)
 			{
@@ -126,7 +116,7 @@ namespace Garage.Manager
 
 		public bool IsAbleToSell()
 		{
-			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Sell, sellProps);
+			BuildingManager.Instance.GetPropsInGrid(GridType.Sell, sellProps);
 
 			return sellProps.Count > 0;
 		}
@@ -134,7 +124,7 @@ namespace Garage.Manager
 		[ServerRpc(RequireOwnership = false)]
 		public void UpgradePropsServerRPC()
 		{
-			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Upgrade, upgradeProps);
+			BuildingManager.Instance.GetPropsInGrid(GridType.Upgrade, upgradeProps);
 
 			foreach (var prop in upgradeProps)
 			{
@@ -144,7 +134,7 @@ namespace Garage.Manager
 
 		public bool IsAbleToUpgrade()
 		{
-			BuildingManager.Instance.GetPropsInGrid(GridIndexType.Upgrade, upgradeProps);
+			BuildingManager.Instance.GetPropsInGrid(GridType.Upgrade, upgradeProps);
 
 			if (upgradeProps.Count == 0) return false;
 

@@ -183,7 +183,7 @@ MonoBehaviour:
   meshRenderer: {fileID: 501110816465581116}
   targetColor: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 0}
   isCarry: 1
-  carrySpeed: 10
+  carrySpeedMultiplier: 1
   height: 0.5
   materials:
   - {fileID: 2100000, guid: 0dffa260f92a15048ba88f90cb809dcc, type: 2}

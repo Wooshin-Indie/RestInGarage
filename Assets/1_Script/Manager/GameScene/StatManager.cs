@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Garage.Manager;
+using Garage.Props;
 using Garage.Utils;
 using UnityEngine;
 
@@ -41,6 +42,7 @@ namespace Manager {
         #endregion
 
         private Dictionary<StatEnum, float> statDict = new();
+        private Dictionary<StatEnum, float> speedBoostDict = new(); // 0 ~ ... , Ex) 30% == 0.3
         private KeyValuePair<StatEnum, float> nonePerk = new(StatEnum.None, 0f);
         private KeyValuePair<StatEnum, float> currentPerk = new(StatEnum.None, 0f);
         public  KeyValuePair<StatEnum, float> CurrentPerk => currentPerk;
@@ -48,11 +50,16 @@ namespace Manager {
 
         private void Start()
         {
+
             statDict.Add(StatEnum.PlayerSpeed, 1f);
             statDict.Add(StatEnum.CarrySpeed, 1f);
             statDict.Add(StatEnum.WrenchRepairSpeed, 1f);
             statDict.Add(StatEnum.OilRepairSpeed, 1f);
             statDict.Add(StatEnum.FireExtinguishSpeed, 1f);
+            foreach (StatEnum statEnum in Enum.GetValues(typeof(StatEnum)))
+            {
+                speedBoostDict.Add(statEnum, 0f);
+            }
             GameManagerEx.Instance.OnStartGameAction += OnGameStart;
         }
 
@@ -118,7 +125,11 @@ namespace Manager {
                     statEnum = StatEnum.FireExtinguishSpeed;
                     break;
             }
-			return statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
+            float speedStat = statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
+            float speedBoost = speedBoostDict.ContainsKey(statEnum) ? speedBoostDict[statEnum] : 1f;
+            speedStat = speedStat + 1f * speedBoost;
+
+            return speedStat;
 		}
 
 
@@ -148,6 +159,37 @@ namespace Manager {
             else
             {
                 return statDict[statEnum];
+            }
+        }
+
+        private float boostUpDuration = 4f;
+        private float boostDownDuration = 6f;
+        private float boostLimit = 0.2f;
+        /// <summary>
+        /// 여기서 프랍별로 속도 추가 어떻게 할 지 결정
+        /// </summary>
+        public void UpdateInteractSpeedBoost(OwnableProp prop, bool isInteractPressed)
+        {
+            float curSpeedBoost = 0f;
+            if (prop is WrenchProp) // 임시로 WrenchProp만 해놓음 
+            {
+                curSpeedBoost = speedBoostDict[StatEnum.WrenchRepairSpeed];
+
+                float boostDelta = isInteractPressed ? ( Time.deltaTime / boostUpDuration ) * boostLimit
+                    : ( -Time.deltaTime / boostDownDuration ) * boostLimit;
+                curSpeedBoost += boostDelta;
+
+                speedBoostDict[StatEnum.WrenchRepairSpeed] = curSpeedBoost;
+                if (curSpeedBoost > boostLimit)
+                {
+                    speedBoostDict[StatEnum.WrenchRepairSpeed] = boostLimit;
+                    return;
+                }
+                if (curSpeedBoost < 0f)
+                {
+                    speedBoostDict[StatEnum.WrenchRepairSpeed] = 0f;
+                    return;
+                }
             }
         }
     }

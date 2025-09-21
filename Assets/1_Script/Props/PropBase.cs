@@ -35,7 +35,7 @@ namespace Garage.Props
 		#region Transform RPC
 
 		[ServerRpc(RequireOwnership = false)]
-		protected void UpdatePlayerVelocityServerRPC(Vector3 velocity, ulong clientId)
+		protected void UpdatePropVelocityServerRPC(Vector3 velocity, ulong clientId)
 		{
 			UpdatePropVelocityClientRPC(velocity, clientId);
 		}
