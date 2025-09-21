@@ -105,12 +105,13 @@ namespace Garage.Manager
             NetworkTransmission.instance.PlayStageBGMClientRPC();
         }
 
+        
         public void EndStage()
         {
             SunManager.Instance.SetTimePhase(TimePhase.Night, endStageDuration);
             AllPlayersAwayFromLanesOnStageEnd();
 
-            OnBeforeStageEndAction?.Invoke();
+            GameSynchronizer.Instance.EndStageClientRPC();
 
             DOVirtual.DelayedCall(awayMoveTime, () =>
             {
@@ -412,7 +413,6 @@ namespace Garage.Manager
 
         public void StartEvent_HostOnly()
         {
-            UIManager.Event.StartResultEvent();
 			GameSynchronizer.Instance.StartEventServerRPC();
         }
 

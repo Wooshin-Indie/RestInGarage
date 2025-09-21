@@ -94,6 +94,12 @@ namespace Garage.Manager
 			nextLogTime = currentTime - interval;
 		}
 
+		[ClientRpc]
+		public void EndStageClientRPC()
+		{
+			GameManagerEx.Instance.OnBeforeStageEndAction?.Invoke();
+		}
+
 		[ServerRpc]
 		public void StartEventServerRPC()
 		{
@@ -105,6 +111,7 @@ namespace Garage.Manager
 		private void StartEventClientRPC()
 		{
 			isInEvent = true;
+			UIManager.Event.StartResultEvent();
 		}
 
 		[ServerRpc(RequireOwnership = false)]

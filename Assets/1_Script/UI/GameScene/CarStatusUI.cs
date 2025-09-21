@@ -214,7 +214,7 @@ namespace Garage.UI.GameScene.Items
             curPart = carPart;
             uiRaycaster = gameScene.GetComponent<GraphicRaycaster>();
             SetUI(carPart);
-            localPlayerHipTf = NetworkTransmission.instance.GetLocalPlayerController().HipTf;
+            localPlayerHipTf = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>().HipTf;
         }
 
         private void SetUI(CarParts carPart)
