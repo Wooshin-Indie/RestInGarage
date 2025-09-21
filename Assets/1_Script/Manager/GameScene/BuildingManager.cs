@@ -50,6 +50,12 @@ namespace Garage.Manager
 			{
 				Destroy(this.gameObject);
 			}
+            gridTileDict = new();
+            GridType[] gridTypes = GetGridTypes();
+            foreach (GridType gridType in gridTypes)
+            {
+                gridTileDict.Add(gridType, new Dictionary<Vector2Int, GridTile>());
+            }
 
             GameManagerEx.Instance.OnDisconnectedAction -= OnDisconnected;
         }
@@ -94,13 +100,6 @@ namespace Garage.Manager
 		}
 		private void SetGridTileDict()
 		{
-            gridTileDict = new();
-            GridType[] gridTypes = GetGridTypes();
-            foreach (GridType gridType in gridTypes)
-            {
-                gridTileDict.Add(gridType, new Dictionary<Vector2Int, GridTile>());
-            }
-
             foreach (GridData gridData in gridDatas)
             {
                 for (int i = 0; i < gridData.gridSize.x; i++)
@@ -128,12 +127,8 @@ namespace Garage.Manager
             foreach (var gridType in GetGridTypes())
             {
                 pos = WorldToGrid(tile.transform.position);
-                if (IsInBounds(gridType, pos))
-                {
-                    gridTileDict[gridType].Add(pos, tile);
-                    isInBound = true;
-                    break;
-                }
+                gridTileDict[gridType].Add(pos, tile);
+                isInBound = true;
             }
 
             if (!isInBound)
@@ -552,6 +547,7 @@ namespace Garage.Manager
             }
 		}
 
+		// 범위로 검사해야될라나
 		public bool IsInBounds(GridType gridType, Vector2Int tilePos)
 		{
             return gridTileDict[gridType].ContainsKey(tilePos);
