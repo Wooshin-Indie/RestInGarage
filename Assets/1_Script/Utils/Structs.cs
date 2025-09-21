@@ -92,4 +92,20 @@ namespace Garage.Utils
 		}
 	}
 
+	// HACK - 임시로 Result UI 테스트용
+	[System.Serializable]
+	public class GameResultData
+	{
+		private ulong netId;
+		private string tmpText;
+
+		public ulong NetId => netId;
+		public string TmpText => tmpText;
+
+		public GameResultData(ulong netId, string tmpText)
+		{
+			this.netId = netId;
+			this.tmpText = tmpText;
+		}
+	}
 }

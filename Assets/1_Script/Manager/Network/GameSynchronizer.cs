@@ -105,7 +105,6 @@ namespace Garage.Manager
 		private void StartEventClientRPC()
 		{
 			isInEvent = true;
-			Camera.main.GetComponent<CameraController>().ConvertVirtualCamera(0);
 		}
 
 		[ServerRpc(RequireOwnership = false)]

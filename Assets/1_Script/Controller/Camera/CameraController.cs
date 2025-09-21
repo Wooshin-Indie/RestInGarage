@@ -1,8 +1,7 @@
 using Garage.Manager;
 using Garage.Structs;
-using IUtil;
 using System.Collections.Generic;
-using System.Security;
+using System.Linq;
 using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
@@ -26,6 +25,10 @@ namespace Garage.Controller
         private Vector3 standardPoint;                      // standard point를 저장해놔야됨
         private float playerRangeX;                         // x+ 방향(윗방향) 플레이어 움직임 범위
 
+        private Dictionary<ulong, CinemachineCamera> vCameras = new();
+		private CinemachineCamera currentVCam = null;
+        private ulong currentPlayerNetId = ulong.MaxValue;
+
 		private void Awake()
 		{
 			brain = GetComponent<CinemachineBrain>();
@@ -33,10 +36,19 @@ namespace Garage.Controller
             for (int i = 0; i < vcamPersonView.Count; i++) vcamPersonView[i].Priority = 0;
 		}
 
-		private void Start()
+		private void OnEnable()
 		{
+			var clientIds = NetworkManager.Singleton.ConnectedClientsIds.ToList();
+			for (int i = 0; i < clientIds.Count; i++)
+            {
+                vCameras[clientIds[i]] = vcamPersonView[i];
+            }
+		}
 
-        }
+		private void OnDisable()
+		{
+            vCameras.Clear();
+		}
 
 		private void Update()
 		{
@@ -60,19 +72,21 @@ namespace Garage.Controller
 
         [SerializeField] private float ratio = 3;
 
-        [Button]
-        private void EndEvent()
+        public void EndEvent()
         {
             GameManagerEx.Instance.EndEvent();
 
 			vcamPersonView[0].Priority = 0;
 		}
 
-        private int currentViewingPersonIdx = -1;
-        public void ConvertVirtualCamera(int idx)
+        public void ConvertVirtualCamera(ulong netId)
         {
-            currentViewingPersonIdx = idx;
-			vcamPersonView[0].Priority = 40;
+            if (currentVCam != null)
+                currentVCam.Priority = 0;
+            currentVCam = vCameras[netId];
+            currentPlayerNetId = netId;
+
+			currentVCam.Priority = 40;
 		}
 
         private void OnUpdateCamera()
@@ -115,15 +129,17 @@ namespace Garage.Controller
             if (stageData != null)
                 vcamTopDown.transform.rotation = Quaternion.Euler(stageData.CamRotation);
 
-            if (currentViewingPersonIdx != -1)
+            if (currentPlayerNetId != ulong.MaxValue)
 			{
-				Transform character = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().transform;
+				Transform character = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerNetId).transform;
 				Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
 
-				vcamPersonView[0].transform.position = cameraPos;
-				vcamPersonView[0].transform.LookAt(character.position);
-				vcamPersonView[0].transform.position = cameraPos + Vector3.up;
-
+				if (currentVCam != null)
+				{
+					currentVCam.transform.position = cameraPos;
+					currentVCam.transform.LookAt(character.position);
+					currentVCam.transform.position = cameraPos + Vector3.up;
+				}
 			}
 		}
 	}

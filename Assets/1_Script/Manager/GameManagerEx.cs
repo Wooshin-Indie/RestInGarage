@@ -412,7 +412,8 @@ namespace Garage.Manager
 
         public void StartEvent_HostOnly()
         {
-            GameSynchronizer.Instance.StartEventServerRPC();
+            UIManager.Event.StartResultEvent();
+			GameSynchronizer.Instance.StartEventServerRPC();
         }
 
         public void EndEvent()
@@ -422,6 +423,8 @@ namespace Garage.Manager
 
         public void OnEndEvent()
         {
+            Camera.main.GetComponent<CameraController>().EndEvent();
+            UIManager.Event.EndResultEvent();
             OnAfterStageEnd();
         }
 
