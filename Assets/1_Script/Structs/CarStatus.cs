@@ -1,7 +1,10 @@
 using Garage.Utils;
 using Garage.Manager;
 using System;
+using System.Linq;
 using UnityEngine;
+using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Garage.Structs
 {
@@ -13,11 +16,21 @@ namespace Garage.Structs
             Array values = Enum.GetValues(typeof(CarParts));
             isBroken = 0; // isBroken에 부품들(CarParts) 상태를 비트마스킹
             hasTire = 0;
-            int count = UnityEngine.Random.Range(1, 4); // 고장날 CarPart 개수
+            int count = UnityEngine.Random.Range(1, 4); // 고장날 CarPart 개수 (타이어 제외)
+            int brokenTireLimit = GameManagerEx.Instance.CurMapData.
+                StageDatas[GameManagerEx.Instance.CurStageIdx].
+                BrokenTireLimit;
+            int tireCount = UnityEngine.Random.Range(0, brokenTireLimit); // 고장날 타이어 개수
 
-            while (count > 0)
+            count = count < tireCount ? 0 : count - tireCount;
+
+            List<int> brokenIdxs = Utility.GetUniqueRandomsByShuffle(0, 3, tireCount); // 고장날 타이어 인덱스 추가
+            brokenIdxs.AddRange(Utility.GetUniqueRandomsByShuffle(4, values.Length - 1, count)); 
+            // 타이어 제외한 고장날 CarPart 인덱스 추가
+            // values.Length - 1 은 CarParts.Fire 제외하려고
+
+            foreach (int idx in brokenIdxs)
             {
-                int idx = UnityEngine.Random.Range(0, values.Length-1);
                 if ((isBroken & (1 << idx)) == 0) // LSB부터 idx번째 isBroken이 0이면 실행
                 {
                     isBroken |= 1 << idx; // (1 << idx) 에 해당하는 비트 켜기
