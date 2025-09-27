@@ -82,6 +82,10 @@ namespace Garage.Controller.StateMachine
 				}
 				return;
 			}
+			else
+			{
+                controller.OnUpdateInteractSpeedBoosts(false);
+            }
 
 			if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
 			{
@@ -92,7 +96,7 @@ namespace Garage.Controller.StateMachine
 			{
 				controller.TryIsPressedAction();
 				return;
-            }
+			}
 			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
 			{
 				controller.TryEndAction();
@@ -100,7 +104,10 @@ namespace Garage.Controller.StateMachine
 			}
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
-				controller.KickCar();
+            {
+                controller.KickCar();
+                return;
+            }
         }
 
         public override void PhysicsUpdate()

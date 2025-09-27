@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Utils;
@@ -42,7 +43,7 @@ namespace Manager {
         #endregion
 
         private Dictionary<StatEnum, float> statDict = new();
-        private Dictionary<StatEnum, float> speedBoostDict = new(); // 0 ~ ... , Ex) 30% == 0.3
+        private Dictionary<StatEnum, float> speedBoostDict = new(); // 기본 stat에 합연산으로 처리 Ex) 0.3 => 30%
         private KeyValuePair<StatEnum, float> nonePerk = new(StatEnum.None, 0f);
         private KeyValuePair<StatEnum, float> currentPerk = new(StatEnum.None, 0f);
         public  KeyValuePair<StatEnum, float> CurrentPerk => currentPerk;
@@ -126,9 +127,10 @@ namespace Manager {
                     break;
             }
             float speedStat = statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
-            float speedBoost = speedBoostDict.ContainsKey(statEnum) ? speedBoostDict[statEnum] : 1f;
-            speedStat = speedStat + 1f * speedBoost;
+            float speedBoost = speedBoostDict.ContainsKey(statEnum) ? speedBoostDict[statEnum] : 0f;
+            speedStat = speedStat + speedBoost;
 
+            Debug.Log(statEnum + ": " + speedStat);
             return speedStat;
 		}
 
@@ -168,28 +170,69 @@ namespace Manager {
         /// <summary>
         /// 여기서 프랍별로 속도 추가 어떻게 할 지 결정
         /// </summary>
-        public void UpdateInteractSpeedBoost(OwnableProp prop, bool isInteractPressed)
+        public void UpdateInteractSpeedBoosts(OwnableProp prop, bool isInteractPressed)
         {
             float curSpeedBoost = 0f;
-            if (prop is WrenchProp) // 임시로 WrenchProp만 해놓음 
+            StatEnum statEnum = StatEnum.None;
+            switch (prop)
             {
-                curSpeedBoost = speedBoostDict[StatEnum.WrenchRepairSpeed];
+                case WrenchProp:
+                    statEnum = StatEnum.WrenchRepairSpeed;
+                    break;
+                case Extinguisher:
+                    isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
+                    statEnum = StatEnum.FireExtinguishSpeed;
+                    break;
+                case OilPump:
+                    statEnum = StatEnum.OilRepairSpeed;
+                    break;
+                default:
+                    statEnum = StatEnum.None;
+                    break;
+            }
 
-                float boostDelta = isInteractPressed ? ( Time.deltaTime / boostUpDuration ) * boostLimit
-                    : ( -Time.deltaTime / boostDownDuration ) * boostLimit;
-                curSpeedBoost += boostDelta;
+            foreach (StatEnum stEnum in speedBoostDict.Keys.ToList())
+            {
+                if (statEnum == stEnum) continue;
+                speedBoostDict[stEnum] = 0f;
+            }
 
-                speedBoostDict[StatEnum.WrenchRepairSpeed] = curSpeedBoost;
-                if (curSpeedBoost > boostLimit)
-                {
-                    speedBoostDict[StatEnum.WrenchRepairSpeed] = boostLimit;
-                    return;
-                }
-                if (curSpeedBoost < 0f)
-                {
-                    speedBoostDict[StatEnum.WrenchRepairSpeed] = 0f;
-                    return;
-                }
+            curSpeedBoost = speedBoostDict[statEnum];
+
+            float boostDelta = isInteractPressed ? (Time.deltaTime / boostUpDuration) * boostLimit
+                : (-Time.deltaTime / boostDownDuration) * boostLimit;
+            curSpeedBoost += boostDelta;
+
+            speedBoostDict[statEnum] = curSpeedBoost;
+            if (curSpeedBoost > boostLimit)
+            {
+                speedBoostDict[statEnum] = boostLimit;
+                return;
+            }
+            else if (curSpeedBoost < 0f)
+            {
+                speedBoostDict[statEnum] = 0f;
+                return;
+            }
+        }
+        private void UpdateSpeedBoost(StatEnum statEnum, bool isInteractPressed)
+        {
+            float curSpeedBoost = speedBoostDict[statEnum];
+
+            float boostDelta = isInteractPressed ? (Time.deltaTime / boostUpDuration) * boostLimit
+                : (-Time.deltaTime / boostDownDuration) * boostLimit;
+            curSpeedBoost += boostDelta;
+
+            speedBoostDict[statEnum] = curSpeedBoost;
+            if (curSpeedBoost > boostLimit)
+            {
+                speedBoostDict[statEnum] = boostLimit;
+                return;
+            }
+            else if (curSpeedBoost < 0f)
+            {
+                speedBoostDict[statEnum] = 0f;
+                return;
             }
         }
     }

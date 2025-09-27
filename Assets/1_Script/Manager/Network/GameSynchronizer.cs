@@ -31,7 +31,7 @@ namespace Garage.Manager
 		#endregion
 
 		public NetworkVariable<bool> IsDay = new();
-		public NetworkVariable<int> CurrentStage = new();
+		public NetworkVariable<int> CurStageIdx = new();
 		public NetworkVariable<float> RemainedTime = new();
 		public NetworkVariable<int> MapIdx = new();
 
@@ -40,8 +40,8 @@ namespace Garage.Manager
 			GameManagerEx.Instance.OnBeforeStageStartAction += (() =>
 			{
 				IsDay.Value = true;
-				CurrentStage.Value++;
-				OnStageStartClientRPC(GameSynchronizer.Instance.CurrentStage.Value);
+				CurStageIdx.Value++;
+				OnStageStartClientRPC(GameSynchronizer.Instance.CurStageIdx.Value);
 			});
 
 			GameManagerEx.Instance.OnBeforeStageEndAction += (() =>
@@ -87,7 +87,7 @@ namespace Garage.Manager
 		{
 			// HACK : 스테이지 번호로 동기화해야함
 			float interval = Managers.Resource.GetData<MapData>(0).
-				StageDatas[CurrentStage.Value].SpawnInterval.GetRandomValue();
+				StageDatas[CurStageIdx.Value].SpawnInterval.GetRandomValue();
 			nextLogTime = currentTime - interval;
 		}
 	}

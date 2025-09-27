@@ -24,8 +24,8 @@ namespace Garage.Structs
 
             count = count < tireCount ? 0 : count - tireCount;
 
-            List<int> brokenIdxs = Utility.GetUniqueRandomsByShuffle(0, 3, tireCount); // 고장날 타이어 인덱스 추가
-            brokenIdxs.AddRange(Utility.GetUniqueRandomsByShuffle(4, values.Length - 1, count)); 
+            List<int> brokenIdxs = Utility.GetUniqueRandomsByShuffle(0, (int)CarParts.RRT + 1, tireCount); // 고장날 타이어 인덱스 추가
+            brokenIdxs.AddRange(Utility.GetUniqueRandomsByShuffle((int)CarParts.RRT + 1, values.Length - 1, count)); 
             // 타이어 제외한 고장날 CarPart 인덱스 추가
             // values.Length - 1 은 CarParts.Fire 제외하려고
 

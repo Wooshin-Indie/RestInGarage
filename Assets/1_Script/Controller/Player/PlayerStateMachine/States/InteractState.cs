@@ -54,7 +54,7 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			controller.OnUpdateInteractSpeedBoost(isInteractPressed);
+			controller.OnUpdateInteractSpeedBoosts(isInteractPressed);
         }
 
 		public override void PhysicsUpdate()

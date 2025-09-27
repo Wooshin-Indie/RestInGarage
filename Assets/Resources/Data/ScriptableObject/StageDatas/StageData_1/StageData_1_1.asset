@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 691da7c3ace7733428316a075ecbefdc, type: 3}
-  m_Name: StageData1_4
+  m_Name: StageData_1_1
   m_EditorClassIdentifier: 
-  stageTime: 200
-  firingCarLimit: 2
-  fireChance: 0.5
-  spawnInterval: {x: 17, y: 17}
-  earnMoney: {x: 40, y: 50}
-  eraseMoney: {x: 100, y: 200}
+  stageTime: 0
+  firingCarLimit: 0
+  fireChance: 0
+  spawnInterval: {x: 1000, y: 1000}
+  earnMoney: {x: 0, y: 0}
+  eraseMoney: {x: 0, y: 0}
   bossWaveInfos:
     isBossExist: 0
     appearingTime: 0

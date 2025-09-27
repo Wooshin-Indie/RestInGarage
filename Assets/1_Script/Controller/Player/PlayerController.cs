@@ -543,9 +543,9 @@ namespace Garage.Controller
             idlePropKeyInfoUITimer = 0f;
         }
 
-		public void OnUpdateInteractSpeedBoost(bool isInteractPressed)
+		public void OnUpdateInteractSpeedBoosts(bool isInteractPressed)
 		{
-            StatManager.Instance.UpdateInteractSpeedBoost(currentOwningProp, isInteractPressed);
+            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, isInteractPressed);
         }
 
 		private bool isRollChargeStarted = false;

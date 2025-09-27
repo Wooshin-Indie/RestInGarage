@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 691da7c3ace7733428316a075ecbefdc, type: 3}
-  m_Name: StageData1_3
+  m_Name: StageData_1_3
   m_EditorClassIdentifier: 
   stageTime: 200
   firingCarLimit: 2

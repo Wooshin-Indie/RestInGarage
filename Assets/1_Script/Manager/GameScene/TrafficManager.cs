@@ -100,9 +100,9 @@ namespace Garage.Manager
 					GetComponent<CarController>();
 
                 float carFireChance = 0f;
-                if (CurrentFiringCars() < curMapData.StageDatas[GameSynchronizer.Instance.CurrentStage.Value].FiringCarLimit)
+                if (CurrentFiringCars() < curMapData.StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].FiringCarLimit)
                 {
-                    carFireChance = GameManagerEx.Instance.CurMapData.StageDatas[GameSynchronizer.Instance.CurrentStage.Value].FireChance;
+                    carFireChance = GameManagerEx.Instance.CurMapData.StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].FireChance;
                 }
                 car.InitCarController(spawnPoint, carFireChance);
 
