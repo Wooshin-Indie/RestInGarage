@@ -76,7 +76,10 @@ namespace Garage.Controller
         {
             GameManagerEx.Instance.EndEvent();
 
-			vcamPersonView[0].Priority = 0;
+            for(int i=0; i < vcamPersonView.Count; i++)
+            {
+                vcamPersonView[i].Priority = 0;
+            }
 		}
 
         public void ConvertVirtualCamera(ulong netId)

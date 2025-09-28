@@ -128,10 +128,9 @@ namespace Garage.Manager
 		{
 			playerInEvent--;
 
-			EndEventClientRpc();
 			if (playerInEvent == 0)
 			{
-				GameManagerEx.Instance.OnEndEvent();
+				EndEventClientRpc();
 			}
 		}
 		[ClientRpc]
@@ -139,6 +138,7 @@ namespace Garage.Manager
 		{
 			NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject()
 				.GetComponent<PlayerController>().IsInputLocked = false;
+			GameManagerEx.Instance.OnEndEvent();
 		}
 	}
 }
