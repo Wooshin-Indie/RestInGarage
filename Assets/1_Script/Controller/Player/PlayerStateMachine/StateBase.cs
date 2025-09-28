@@ -19,7 +19,8 @@ namespace Garage.Controller.StateMachine
             controller.DetectInteractableParts();
             controller.DetectFrontCarAndMakeTransparent();
             controller.UpdatePropKeyInfoUIs();
-        }           
+            controller.UpdateDetectPropUI();
+		}           
         public virtual void PhysicsUpdate()         // Only Physics Update
 		{
 		}     

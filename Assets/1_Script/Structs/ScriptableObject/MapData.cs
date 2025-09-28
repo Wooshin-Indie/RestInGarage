@@ -12,7 +12,7 @@ namespace Garage.Structs
         public VehicleDirection Direction;
     }
 
-[CreateAssetMenu(fileName = "Stage Data", menuName = "SO/Stage Data")]
+[CreateAssetMenu(fileName = "Map Data", menuName = "SO/Map Data")]
     public class MapData : ScriptableObject
     {
         [Header("Map Info")]
@@ -25,16 +25,8 @@ namespace Garage.Structs
         private Vector3 stdPointWith3Lane = new Vector3(-8, 0, 0);
         private Vector3 standardPoint;
 
-        [Header("Wave Info")]
-        [SerializeField] private int maxStage;
-        [SerializeField] private float[] stageTime;
-        [SerializeField] private int[] laneCounts;
-        [SerializeField] private int[] firingCarLimit;
-        [SerializeField] private float[] fireChance;
-        [SerializeField] private Vector2[] spawnInterval;
-        [SerializeField] private Vector2Int earnMoney;
-        [SerializeField] private Vector2Int eraseMoney;
-        [SerializeField] private BossWaveInfo[] bossWaveInfos;
+        [Header("Stage Info")]
+        [SerializeField] private StageData[] stageDatas; // 인덱스는 스테이지 번호
 
         [Header("Shop Info")]
         [SerializeField] private List<Vector3> itemPositions = new();
@@ -64,14 +56,8 @@ namespace Garage.Structs
         public Vector3 StandardPoint => standardPoint;
         public Vector3 CamRotation => camRotation;
 
-        public Vector2Int EraseMoney => eraseMoney;
-        public Vector2Int EarnMoney => earnMoney;
-        public float[] StageTime => stageTime;
-        public int[] FiringCarLimit => firingCarLimit;
-        public float[] FireChance => fireChance;
-        public Vector2[] SpawnInterval => spawnInterval;
+        public StageData[] StageDatas => stageDatas;
         public List<Vector3> ItemPositions => itemPositions;
-        public BossWaveInfo[] BossWaveInfos => bossWaveInfos;
 
     }
 }

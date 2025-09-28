@@ -92,8 +92,10 @@ namespace Garage.Props
 		float hoseCuttingProgress = 0f; // 0~1
 		float hoseCuttingTime = 2f;
 		private void CheckObstacle()
-		{
-			Vector3 start = rope.position;
+        {
+            if (OwnClientId == ulong.MaxValue) return;
+
+            Vector3 start = rope.position;
 			Vector3 end = oilgun.position;
 
 			Ray ray = new Ray(start, (end - start).normalized);

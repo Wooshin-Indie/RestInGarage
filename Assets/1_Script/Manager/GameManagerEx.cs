@@ -8,6 +8,7 @@ using Steamworks.Data;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 
 namespace Garage.Manager
@@ -51,21 +52,20 @@ namespace Garage.Manager
                     Managers.Resource.GetData<MapData>(mapIdx);
             }
         }
-        public int CurStageIdx => GameSynchronizer.Instance.CurrentStage.Value;
+        public int CurStageIdx => GameSynchronizer.Instance.CurStageIdx.Value;
 
         public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
         public ulong MyClientId { get => myClientId; set => myClientId = value; }
         public Dictionary<ulong, PlayerInfo> playerInfo = new Dictionary<ulong, PlayerInfo>();
 
-        public Action OnDisconnectedAction { get; set; }
-        public Action OnBeforeStageStartAction { get; set; }
-        public Action OnAfterStageStartAction { get; set; }
-        public Action OnTimeoutAction { get; set; }
-        public Action OnBeforeStageEndAction { get; set; }
-        public Action<int> OnAfterStageEndAction { get; set; }
-        public Action<Lobby> OnLobbyEnteredAction { get; set; }
-
-        public Action<int> OnStartGameAction { get; set; }
+		public Action OnDisconnectedAction { get; set; }			// Network Session 끊기면 호출
+		public Action OnBeforeStageStartAction { get; set; }		// StartNextStage 호출 직후 실행
+		public Action OnAfterStageStartAction { get; set; }			// 
+		public Action OnTimeoutAction { get; set; }					// 스테이지 타임아웃시 실행
+		public Action OnBeforeStageEndAction { get; set; }			// EndStage 호출 직후 실행
+		public Action<int> OnAfterStageEndAction { get; set; }		// 
+		public Action<Lobby> OnLobbyEnteredAction { get; set; }		// 
+		public Action<int> OnStartGameAction { get; set; }			// 인게임 진입시 실행
 
         [SerializeField] private GameObject meetingPointPrefab;
         [SerializeField] private float stageTimer;
@@ -84,6 +84,7 @@ namespace Garage.Manager
             if (!isHost) return;
 
             SunManager.Instance.SetTimePhase(TimePhase.Morning, startStageDuration);
+
             OnBeforeStageStartAction?.Invoke();
 
             Invoke(nameof(OnStageStart), startStageDuration);
@@ -95,7 +96,7 @@ namespace Garage.Manager
         /// </summary>
         private void OnStageStart()
         {
-            float stageTime = CurMapData.StageTime[CurStageIdx];
+            float stageTime = CurMapData.StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].StageTime;
             GameSynchronizer.Instance.SetGameTimer(stageTime);
             SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTime);
             TrafficManager.Instance.OnStageStart(0);    // TODO - 맵 여러개 생기면 MapIdx 고치기
@@ -104,19 +105,20 @@ namespace Garage.Manager
             NetworkTransmission.instance.PlayStageBGMClientRPC();
         }
 
+        
         public void EndStage()
         {
             SunManager.Instance.SetTimePhase(TimePhase.Night, endStageDuration);
             AllPlayersAwayFromLanesOnStageEnd();
 
-            OnBeforeStageEndAction?.Invoke();
+			OnBeforeStageEndAction?.Invoke();
 
             DOVirtual.DelayedCall(awayMoveTime, () =>
             {
                 TrafficManager.Instance.OnStageEnd();
             });
 
-            if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+            if (GameSynchronizer.Instance.CurStageIdx.Value != 0)
                 Invoke(nameof(OnStageEnd), endStageDuration);
             else OnStageEnd();
 
@@ -125,6 +127,7 @@ namespace Garage.Manager
                 player.Value.PlayerObject.GetComponent<PlayerController>().EndAllInteraction();
             }
         }
+
 
         private void OnStageEnd()
         {
@@ -139,15 +142,19 @@ namespace Garage.Manager
             }
 
             if (GameSynchronizer.Instance.IsDay.Value) return;
-            if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
+            if (GameSynchronizer.Instance.CurStageIdx.Value == 0) return;
 
-            Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
-            {
-                Managers.Sound.PlaySfx(SFXType.ShopPop);
-                BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
-                OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
-            });
         }
+
+        private void OnAfterStageEnd()
+        {
+			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
+			{
+				Managers.Sound.PlaySfx(SFXType.ShopPop);
+				BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurStageIdx.Value);
+				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurStageIdx.Value);
+			});
+		}
 
         private void OnUpdateTimer()
         {
@@ -156,15 +163,15 @@ namespace Garage.Manager
 
             GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
-            if (CurMapData.BossWaveInfos[CurStageIdx].isBossExist &&
-                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.BossWaveInfos[CurStageIdx].appearingTime)
+            if (CurMapData.StageDatas[CurStageIdx].BossWaveInfo.isBossExist &&
+                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.StageDatas[CurStageIdx].BossWaveInfo.appearingTime)
             {
-                StartBossFight(CurMapData.BossWaveInfos[CurStageIdx].bossType);
+                StartBossFight(CurMapData.StageDatas[CurStageIdx].BossWaveInfo.bossType);
             }
 
             if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
-            {
-                OnTimeoutAction?.Invoke();
+			{
+				GameSynchronizer.Instance.TimeOutClientRPC();
                 InputLockToAllPlayers();
                 Invoke(nameof(EndStage), timeoutDuration);
             }
@@ -178,6 +185,7 @@ namespace Garage.Manager
         public void SendMessageToChat(string text, ulong fromwho, bool server)
         {
             string name = Constants.NAME_SERVER;
+
 
             if (!server && playerInfo.ContainsKey(fromwho))
             {
@@ -213,9 +221,9 @@ namespace Garage.Manager
                 pc.PlayerID.Value = playerInfo[clientId].playerId; // 호스트 로컬에 있는 PlayController들에 clientId 할당
             }
 
-            GameSynchronizer.Instance.CurrentStage.Value = 0;
+            GameSynchronizer.Instance.CurStageIdx.Value = 0;
             BuildingManager.Instance.OnGameStart();
-            BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+            BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurStageIdx.Value);
 
             SunManager.Instance.OnChangedToNight();
             OnHostCreated();
@@ -381,10 +389,14 @@ namespace Garage.Manager
             }
         }
 
-        public void Quit()
-        {
-            Application.Quit();
-        }
+		public void Quit()
+		{
+#if UNITY_EDITOR
+			EditorApplication.isPlaying = false;
+#else
+			Application.Quit();
+#endif
+		}
 
         #region Bosses
         public void StartBossFight(BossType bossType)
@@ -396,6 +408,27 @@ namespace Garage.Manager
         }
 
         #endregion
-    }
+
+        #region Event
+
+        public void StartEvent_HostOnly()
+        {
+			GameSynchronizer.Instance.StartEventServerRPC();
+        }
+
+        public void EndEvent()
+        {
+            GameSynchronizer.Instance.EndEvent();
+        }
+
+        public void OnEndEvent()
+        {
+            Camera.main.GetComponent<CameraController>().EndEvent();
+            UIManager.Event.EndResultEvent();
+            OnAfterStageEnd();
+        }
+
+		#endregion
+	}
 
 }

@@ -46,6 +46,8 @@ namespace Garage.Controller
 				return;
 			}
 
+			Managers.Record.RecordData(networkId, RuntimeRecordType.FixGage, deltaTime / fixingTime);
+			// TODO - 여기 게이지 fixingTime 수정 필요할수도
 			carStatus.AddProgress(part, deltaTime / fixingTime);
 
 			UIManager.Game.ApplyProgressToUI(part, carStatus.Progress[(int)part], this);
@@ -93,7 +95,8 @@ namespace Garage.Controller
 			if (!IsHost)
 				isAnyBroken = false;
 
-			EconomyManager.Instance.EarnMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EarnMoney.GetRandomValue());
+			EconomyManager.Instance.EarnMoney_HostOnly(GameManagerEx.Instance.CurMapData.
+				StageDatas[GameManagerEx.Instance.CurStageIdx].EarnMoney.GetRandomValue());
 			StartCoroutine(FxsOnAllPartsRepaired());
 		}
 		private IEnumerator FxsOnAllPartsRepaired()

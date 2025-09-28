@@ -39,11 +39,13 @@ namespace Garage.Manager
 		[SerializeField] private GameObject mainUI;
 		[SerializeField] private GameObject lobbyUI;
         [SerializeField] private GameObject gameUI;
+        [SerializeField] private GameObject eventUI;
         [SerializeField] private GameObject transitionUI;
 
         public static MainSceneUI Main { get { return instance.mainUI.GetComponent<MainSceneUI>(); } }
 		public static UI.LobbyScene.LobbySceneUI Lobby { get {  return instance.lobbyUI.GetComponent<UI.LobbyScene.LobbySceneUI>(); } }
 		public static UI.GameScene.GameSceneUI Game { get { return instance.gameUI.GetComponent<UI.GameScene.GameSceneUI>(); } }
+		public static UI.Event.EventUI Event { get { return instance.eventUI.GetComponent<UI.Event.EventUI>();} }
 		public static TransitionUI Transition { get { return instance.transitionUI.GetComponent<TransitionUI>(); } }
 
 		private void Start()
@@ -60,6 +62,7 @@ namespace Garage.Manager
 			mainUI.SetActive(false);
 			lobbyUI.SetActive(false);
 			gameUI.SetActive(false);
+			eventUI.SetActive(false);
 
 			switch (scene)
 			{
@@ -79,6 +82,7 @@ namespace Garage.Manager
 		{
             lobbyUI.GetComponent<UI.LobbyScene.LobbySceneUI>().OnGameStart();
 			gameUI.SetActive(true);
+			eventUI.SetActive(true);
 		}
 	}
 }

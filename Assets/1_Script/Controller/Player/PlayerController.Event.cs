@@ -22,7 +22,7 @@ namespace Garage.Controller
 			isAbleToMove = false;
 			rigid.linearVelocity = Vector3.zero;
 		}
-		private void OnEndPlace()
+		private void OnEndPlace() // 타이어 굴리기
 		{
 			if (!IsOwner) return;
 
@@ -32,7 +32,9 @@ namespace Garage.Controller
 			if (currentOwningProp.GetComponent<IActionable>() != null)
 			{
 				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
-			}
+				if (currentOwningProp is TireProp) OnTireRoll();
+                // 이 때 굴림
+            }
 			currentOwningProp = null;
 		}
 

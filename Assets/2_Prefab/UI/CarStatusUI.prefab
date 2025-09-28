@@ -363,7 +363,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bubbleUIRect: {fileID: 4273882662687969130}
-  maskToFill: {fileID: 2526132546526149167}
+  mainFillMask: {fileID: 2526132546526149167}
+  subFillMask: {fileID: 4817975208489102715}
   iconImageInBubble: {fileID: 5426874910220699262}
   bubbleTailRect: {fileID: 5846520684183007466}
   tailPivotRect: {fileID: 244094364460027839}

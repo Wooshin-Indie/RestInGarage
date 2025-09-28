@@ -257,7 +257,7 @@ namespace Garage.Manager
 			if (!IsHost) return;
 
 			GameObject playerOb = Instantiate(playerPrefab, position, Quaternion.identity);
-			Debug.LogWarning("Plyaer Dict Aded : " + clientId);
+			Debug.LogWarning("Plyaer Dict Added : " + clientId);
 			playerDict.Add(clientId, playerOb.GetComponent<PlayerController>());
 			NetworkObject networkOb = playerOb.GetComponent<NetworkObject>();
 
@@ -320,7 +320,8 @@ namespace Garage.Manager
 
 		public PlayerController GetLocalPlayerController()
 		{
-			return playerDict[GameManagerEx.Instance.MyClientId];
+			return NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
+			//return playerDict[GameManagerEx.Instance.MyClientId];
 		}
     }
 }

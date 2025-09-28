@@ -10,23 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9edeb005215e7b64684e664643df96a2, type: 3}
-  m_Name: MapData2
+  m_Name: MapData_1
   m_EditorClassIdentifier: 
-  spawningPoints: []
+  spawningPoints:
+  - SpawnPointX: -10
+    Direction: 2
+  - SpawnPointX: 2
+    Direction: 1
   laneLength: 40
-  laneWidth: 8
+  laneWidth: 7
   removeLength: 40
   camRotation: {x: 48, y: 82, z: 0}
-  maxStage: 5
-  laneCounts: 000000000000000000000000
-  spawnInterval:
-  - {x: 6, y: 6}
-  - {x: 5, y: 5}
-  - {x: 5, y: 5}
-  - {x: 5, y: 5}
-  - {x: 4, y: 4}
-  earnMoney: {x: 40, y: 50}
-  eraseMoney: {x: 100, y: 200}
+  stageDatas:
+  - {fileID: 11400000, guid: 7c0fa145d8096bf469ccf9f0e2e1f4f8, type: 2}
+  - {fileID: 11400000, guid: 7a6824a9369be554ebb07b130fc52c46, type: 2}
+  - {fileID: 11400000, guid: de63d488f1ce85445a758ea592b3e866, type: 2}
+  - {fileID: 11400000, guid: d3b0d8ef0a08a50449df47e9d0d675c8, type: 2}
   itemPositions:
   - {x: 10, y: 0, z: 0}
   - {x: 10, y: 0, z: 5}

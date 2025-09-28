@@ -1,6 +1,5 @@
 using DG.Tweening;
 using Garage.Controller;
-using Garage.Controller.StateMachine;
 using Garage.Manager;
 using Garage.Props;
 using Garage.Structs;
@@ -11,9 +10,8 @@ using Garage.Utils;
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Garage.UI.GameScene
 {
@@ -30,6 +28,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private PropKeyInfoUI idlePropKeyInfoUI;
         [SerializeField] private PropKeyInfoUI carryPropKeyInfoUI;
         [SerializeField] private PropKeyInfoUI interactPropKeyInfoUI;
+        [SerializeField] private PropDetectUI propDetectUI;
 
         [Header("UI Prefabs")]
         [SerializeField] private GameObject carStatusUIPrefab;
@@ -37,6 +36,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private ShopInfo shopInfo;
         [SerializeField] private GameObject bombAlertUIPrefab;
         [SerializeField] private GameObject emoteGoodUIPrefab;
+        [SerializeField] private GameObject tireRollingUIPrefab;
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -48,6 +48,9 @@ namespace Garage.UI.GameScene
             GameManagerEx.Instance.OnTimeoutAction += OnTimeout;
 
             bossWarningUI.gameObject.SetActive(false);
+            propDetectUI.gameObject.SetActive(false);
+            tireRollingUI = Instantiate(tireRollingUIPrefab, transform).GetComponent<TireRollingUI>();
+            tireRollingUI.gameObject.SetActive(false);
         }
 
 
@@ -64,6 +67,7 @@ namespace Garage.UI.GameScene
             // 여기서 carStatusInfo에 있는 CarStatusUI들 전부 Update
 
             curPoppedPropKeyInfoUI?.OnUpdate();
+            propDetectUI.UpdateUIScreenPos();
         }
 
 		private void OnEnable()
@@ -78,7 +82,7 @@ namespace Garage.UI.GameScene
                 Debug.LogError("car status - Init doesn't work well.");
                 return;
             }
-            if(dict.TryGetValue(CarParts.Fire, out CarStatusUI statusUI))
+            if(dict.TryGetValue(CarParts.Fire, out CarStatusUI statusUI) && statusUI != null)
 			{
 				statusUI.ApplyFill(progress);
             }
@@ -116,14 +120,17 @@ namespace Garage.UI.GameScene
             if (!carStatusInfo.ContainsKey(carID)) return;
             if (carStatusInfo[carID].ContainsKey(carPart) && carStatusInfo[carID][carPart] != null)
             {
-                Transform curUiTf = carStatusInfo[carID][carPart].transform;
+
+				Transform curUiTf = carStatusInfo[carID][carPart].transform;
+                carStatusInfo[carID].Remove(carPart);
+                
                 Sequence uiScaleSeq = DOTween.Sequence();
                 uiScaleSeq.Append(curUiTf.DOScale(curUiTf.localScale * 1.2f, 0.1f).SetEase(Ease.OutCubic));
                 uiScaleSeq.Append(curUiTf.DOScale(Vector3.zero, 0.2f).SetEase(Ease.OutCubic));
                 uiScaleSeq.OnComplete(() =>
                 {
                     Destroy(curUiTf.gameObject);
-                });
+				});
 
                 uiScaleSeq.Play();
             }
@@ -353,6 +360,20 @@ namespace Garage.UI.GameScene
         }
         #endregion
 
+        /// <summary>
+        /// Prop을 Detect했을 때 띄우는 UI
+        /// </summary>
+        /// <param name="isOn"> activeSelf </param>
+        public void SetPropDetectUI(OwnableProp prop)
+        {
+            if (prop != null)
+            {
+                propDetectUI.SetTargetProp(prop);
+                propDetectUI.PopUI();
+            }
+            else propDetectUI.CloseUI();
+        }
+
         public void StartBossWarning()
         {
             bossWarningUI.StartBossWarningVFX();
@@ -362,6 +383,20 @@ namespace Garage.UI.GameScene
         {
             EmotePopupUI emoteGoodUI = Instantiate(emoteGoodUIPrefab, transform).GetComponent<EmotePopupUI>();
             emoteGoodUI.PopEmoteUI(car.transform);
+        }
+
+        private TireRollingUI tireRollingUI;
+        public void PopTireRollingUI(Transform tf)
+        {
+            tireRollingUI.PopUI(tf);
+        }
+        public void CloseTireRollingUI()
+        {
+            tireRollingUI.CloseUI();
+        }
+        public void ChargeTireRollingUI(float rollGage)
+        {
+            tireRollingUI.ApplyRollGage(rollGage);
         }
     }
 }

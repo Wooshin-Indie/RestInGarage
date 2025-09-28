@@ -30,6 +30,7 @@ namespace Garage.Controller.StateMachine
 			base.HandleInput();
 		}
 
+		private bool isInteractPressed = false;
 		public override void LogicUpdate()
 		{
 			base.LogicUpdate();
@@ -42,7 +43,8 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			if (Managers.Input.Control.Player.Interact.IsPressed())
+			isInteractPressed = Managers.Input.Control.Player.Interact.IsPressed();
+            if (isInteractPressed)
 			{
 				controller.CurrentFixablePart.Interact(controller, controller.CurrentOwningProp);
 			}
@@ -51,7 +53,9 @@ namespace Garage.Controller.StateMachine
 				stateMachine.ChangeState(controller.carryState);
 				return;
 			}
-		}
+
+			controller.OnUpdateInteractSpeedBoosts(isInteractPressed);
+        }
 
 		public override void PhysicsUpdate()
 		{

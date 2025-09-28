@@ -30,12 +30,14 @@ namespace Garage.Manager
 			_sound.Init();
 			_input.Init();
 			_data.Init();
+			_record.Init();
 			_spawn.Init();
         }
 
 		private void Start()
 		{
 			_spawn.Start();
+			_record.Start();
 		}
 
 		private static ResourceManager _resource = new ResourceManager();
@@ -44,14 +46,16 @@ namespace Garage.Manager
 		private static DataManager _data = new DataManager();
 		private static SoundManager _sound = new SoundManager();
 		private static SpawnManager _spawn = new SpawnManager();
+		private static RuntimeRecordManager _record = new RuntimeRecordManager();
 
 
 
-		public static ResourceManager Resource { get => _resource; }
-		public static SceneManagerEx Scene { get => _scene; }
-		public static InputManager Input { get => _input; }
-		public static DataManager Data{ get => _data; }
-		public static SoundManager Sound { get => _sound; }
-		public static SpawnManager Spawn { get => _spawn; }	
+		public static ResourceManager Resource => _resource;
+		public static SceneManagerEx Scene => _scene;
+		public static InputManager Input => _input;
+		public static DataManager Data => _data;
+		public static SoundManager Sound => _sound;
+		public static SpawnManager Spawn => _spawn;	
+		public static RuntimeRecordManager Record => _record;
 	}
 }

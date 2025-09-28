@@ -40,7 +40,7 @@ namespace Garage.Props
 		{
 			rigid.isKinematic = false;
 
-            //controller.GetComponent<PlayerController>().IsAbleToRun = true; // 임시
+            controller.GetComponent<PlayerController>().IsAbleToRun = true;
             transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
@@ -67,7 +67,7 @@ namespace Garage.Props
 				{
 					UpdatePropPositionServerRPC(transform.position, NetworkManager.Singleton.LocalClientId);
 					UpdatePropRotateServerRPC(transform.rotation, NetworkManager.Singleton.LocalClientId);
-					UpdatePlayerVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
+					UpdatePropVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
 				}
 			}
 			else

@@ -24,7 +24,7 @@ MonoBehaviour:
   maxStage: 5
   stageTime:
   - 0
-  - 200
+  - 10
   - 200
   - 200
   - 200
