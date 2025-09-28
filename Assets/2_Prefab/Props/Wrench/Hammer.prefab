@@ -101,7 +101,7 @@ MonoBehaviour:
   meshRenderer: {fileID: 7742761695196155598}
   targetColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
   isCarry: 0
-  carrySpeed: 0
+  carrySpeedMultiplier: 1
   previewPrefab: {fileID: 8379998864351062203, guid: c98311aed126bba4f976483b5a21c927, type: 3}
   isAbleToRun: 0
 --- !u!54 &7795791608402369351

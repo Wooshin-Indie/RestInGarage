@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Garage.Manager;
+using Garage.Props;
 using Garage.Utils;
 using UnityEngine;
 
@@ -41,6 +43,7 @@ namespace Manager {
         #endregion
 
         private Dictionary<StatEnum, float> statDict = new();
+        private Dictionary<StatEnum, float> speedBoostDict = new(); // 기본 stat에 합연산으로 처리 Ex) 0.3 => 30%
         private KeyValuePair<StatEnum, float> nonePerk = new(StatEnum.None, 0f);
         private KeyValuePair<StatEnum, float> currentPerk = new(StatEnum.None, 0f);
         public  KeyValuePair<StatEnum, float> CurrentPerk => currentPerk;
@@ -48,11 +51,16 @@ namespace Manager {
 
         private void Start()
         {
+
             statDict.Add(StatEnum.PlayerSpeed, 1f);
             statDict.Add(StatEnum.CarrySpeed, 1f);
             statDict.Add(StatEnum.WrenchRepairSpeed, 1f);
             statDict.Add(StatEnum.OilRepairSpeed, 1f);
             statDict.Add(StatEnum.FireExtinguishSpeed, 1f);
+            foreach (StatEnum statEnum in Enum.GetValues(typeof(StatEnum)))
+            {
+                speedBoostDict.Add(statEnum, 0f);
+            }
             GameManagerEx.Instance.OnStartGameAction += OnGameStart;
         }
 
@@ -118,7 +126,12 @@ namespace Manager {
                     statEnum = StatEnum.FireExtinguishSpeed;
                     break;
             }
-			return statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
+            float speedStat = statDict.ContainsKey(statEnum) ? statDict[statEnum] : 1f;
+            float speedBoost = speedBoostDict.ContainsKey(statEnum) ? speedBoostDict[statEnum] : 0f;
+            speedStat = speedStat + speedBoost;
+
+            Debug.Log(statEnum + ": " + speedStat);
+            return speedStat;
 		}
 
 
@@ -148,6 +161,78 @@ namespace Manager {
             else
             {
                 return statDict[statEnum];
+            }
+        }
+
+        private float boostUpDuration = 4f;
+        private float boostDownDuration = 6f;
+        private float boostLimit = 0.2f;
+        /// <summary>
+        /// 여기서 프랍별로 속도 추가 어떻게 할 지 결정
+        /// </summary>
+        public void UpdateInteractSpeedBoosts(OwnableProp prop, bool isInteractPressed)
+        {
+            float curSpeedBoost = 0f;
+            StatEnum statEnum = StatEnum.None;
+            switch (prop)
+            {
+                case WrenchProp:
+                    statEnum = StatEnum.WrenchRepairSpeed;
+                    break;
+                case Extinguisher:
+                    isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
+                    statEnum = StatEnum.FireExtinguishSpeed;
+                    break;
+                case OilPump:
+                    statEnum = StatEnum.OilRepairSpeed;
+                    break;
+                default:
+                    statEnum = StatEnum.None;
+                    break;
+            }
+
+            foreach (StatEnum stEnum in speedBoostDict.Keys.ToList())
+            {
+                if (statEnum == stEnum) continue;
+                speedBoostDict[stEnum] = 0f;
+            }
+
+            curSpeedBoost = speedBoostDict[statEnum];
+
+            float boostDelta = isInteractPressed ? (Time.deltaTime / boostUpDuration) * boostLimit
+                : (-Time.deltaTime / boostDownDuration) * boostLimit;
+            curSpeedBoost += boostDelta;
+
+            speedBoostDict[statEnum] = curSpeedBoost;
+            if (curSpeedBoost > boostLimit)
+            {
+                speedBoostDict[statEnum] = boostLimit;
+                return;
+            }
+            else if (curSpeedBoost < 0f)
+            {
+                speedBoostDict[statEnum] = 0f;
+                return;
+            }
+        }
+        private void UpdateSpeedBoost(StatEnum statEnum, bool isInteractPressed)
+        {
+            float curSpeedBoost = speedBoostDict[statEnum];
+
+            float boostDelta = isInteractPressed ? (Time.deltaTime / boostUpDuration) * boostLimit
+                : (-Time.deltaTime / boostDownDuration) * boostLimit;
+            curSpeedBoost += boostDelta;
+
+            speedBoostDict[statEnum] = curSpeedBoost;
+            if (curSpeedBoost > boostLimit)
+            {
+                speedBoostDict[statEnum] = boostLimit;
+                return;
+            }
+            else if (curSpeedBoost < 0f)
+            {
+                speedBoostDict[statEnum] = 0f;
+                return;
             }
         }
     }

@@ -14583,6 +14583,7 @@ GameObject:
   - component: {fileID: 8689849257578951821}
   - component: {fileID: 3062801556232807222}
   - component: {fileID: 342169833626580640}
+  - component: {fileID: -686724500526270719}
   m_Layer: 0
   m_Name: FireVFX2
   m_TagString: Untagged
@@ -19536,3 +19537,16 @@ MonoBehaviour:
     perlinColor: 0
     perlinColorSpeed: 1
   fadeOutReference: {fileID: 0}
+--- !u!114 &-686724500526270719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9015265573910258207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9379b61e4b9060a46a617f10a3cdbfb0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  part: 6

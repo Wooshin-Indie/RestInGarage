@@ -36,6 +36,7 @@ namespace Garage.UI.GameScene
         [SerializeField] private ShopInfo shopInfo;
         [SerializeField] private GameObject bombAlertUIPrefab;
         [SerializeField] private GameObject emoteGoodUIPrefab;
+        [SerializeField] private GameObject tireRollingUIPrefab;
 
 
         private Dictionary<ulong, Dictionary<CarParts, CarStatusUI>> carStatusInfo = new Dictionary<ulong, Dictionary<CarParts, CarStatusUI>>();
@@ -48,6 +49,8 @@ namespace Garage.UI.GameScene
 
             bossWarningUI.gameObject.SetActive(false);
             propDetectUI.gameObject.SetActive(false);
+            tireRollingUI = Instantiate(tireRollingUIPrefab, transform).GetComponent<TireRollingUI>();
+            tireRollingUI.gameObject.SetActive(false);
         }
 
 
@@ -380,6 +383,20 @@ namespace Garage.UI.GameScene
         {
             EmotePopupUI emoteGoodUI = Instantiate(emoteGoodUIPrefab, transform).GetComponent<EmotePopupUI>();
             emoteGoodUI.PopEmoteUI(car.transform);
+        }
+
+        private TireRollingUI tireRollingUI;
+        public void PopTireRollingUI(Transform tf)
+        {
+            tireRollingUI.PopUI(tf);
+        }
+        public void CloseTireRollingUI()
+        {
+            tireRollingUI.CloseUI();
+        }
+        public void ChargeTireRollingUI(float rollGage)
+        {
+            tireRollingUI.ApplyRollGage(rollGage);
         }
     }
 }

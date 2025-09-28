@@ -23,7 +23,8 @@ namespace Garage.Controller.StateMachine
 
 			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
-				controller.SetAnimParam((int)AnimationType.CarryMult, controller.CurrentOwningProp.CarrySpeed / 3f);
+				controller.SetAnimParam((int)AnimationType.CarryMult, 
+					controller.CarrySpeed * controller.CurrentOwningProp.CarrySpeedMultiplier);
 				controller.SetAnimParam((int)AnimationType.Carry, true);
 			}
 
@@ -53,9 +54,11 @@ namespace Garage.Controller.StateMachine
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
 			bool isRun = controller.IsRun;
-			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CurrentOwningProp.CarrySpeed :
+			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? 
+				controller.CarrySpeed * controller.CurrentOwningProp.CarrySpeedMultiplier :
 				((isRun ? controller.RunSpeed : controller.WalkSpeed));
-			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? controller.CarrySpeed : 
+			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? 
+				controller.CarrySpeed : 
 				controller.RunSpeed;
 
 			controller.MovePosition(move, speed, maxSpeed);
@@ -79,10 +82,19 @@ namespace Garage.Controller.StateMachine
 				}
 				return;
 			}
+			else
+			{
+                controller.OnUpdateInteractSpeedBoosts(false);
+            }
 
 			if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
 			{
-				controller.TryAction();
+				controller.TryWasPressedThisFrameAction();
+				return;
+			}
+			else if (Managers.Input.Control.Player.Action.IsPressed())
+			{
+				controller.TryIsPressedAction();
 				return;
 			}
 			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
@@ -92,7 +104,10 @@ namespace Garage.Controller.StateMachine
 			}
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
-				controller.KickCar();
+            {
+                controller.KickCar();
+                return;
+            }
         }
 
         public override void PhysicsUpdate()

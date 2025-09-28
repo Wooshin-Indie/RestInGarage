@@ -184,7 +184,8 @@ namespace Garage.Controller
 			if (isExploded) return;
 			isExploded = true;
 
-			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurrentStage.Value).EraseMoney.GetRandomValue());
+			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurStageIdx.Value).
+				StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].EraseMoney.GetRandomValue());
 			OnCarExplosionClientRPC();
 			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
 			HashSet<CarController> processed = new HashSet<CarController>();

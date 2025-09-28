@@ -3927,6 +3927,7 @@ MonoBehaviour:
   shopInfo: {fileID: 5301772727738478027}
   bombAlertUIPrefab: {fileID: 1682618347305131411, guid: d6390d6199066c74ab86637e8e7c3e78, type: 3}
   emoteGoodUIPrefab: {fileID: 5245735188687116467, guid: e6d34ab9fb90edb43b51c5df37247e72, type: 3}
+  tireRollingUIPrefab: {fileID: 4299166090207000369, guid: 69652544597aeea4396133ffa67aaa7d, type: 3}
 --- !u!114 &404230441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7817,7 +7818,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -15144,15 +15145,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6aca306a7516116458ba592ef4b850b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridOrigin:
-  - {x: -5, y: -3}
-  - {x: 9, y: 10}
-  - {x: 9, y: -13}
-  gridSize:
-  - {x: 4, y: 15}
-  - {x: 5, y: 5}
-  - {x: 5, y: 5}
   gridPrefab: {fileID: 8596295414241702324, guid: c4baf75bb6c368c4e93a621804d63adb, type: 3}
+  gridDatas:
+  - gridType: 0
+    gridOrigin: {x: -6, y: -3}
+    gridSize: {x: 5, y: 15}
+  - gridType: 1
+    gridOrigin: {x: 9, y: 10}
+    gridSize: {x: 5, y: 5}
+  - gridType: 2
+    gridOrigin: {x: 9, y: -13}
+    gridSize: {x: 5, y: 5}
+  - gridType: 0
+    gridOrigin: {x: 6, y: -8}
+    gridSize: {x: 1, y: 22}
+  - gridType: 0
+    gridOrigin: {x: -14, y: -8}
+    gridSize: {x: 1, y: 22}
   previewEnableMaterial: {fileID: 2100000, guid: bde7e07434186f34a8c6cba32432c9e8, type: 2}
   previewDisableMaterial: {fileID: 2100000, guid: cdd17b342ddf2ad4abac8ee1472ac271, type: 2}
   sellBoundPrefab: {fileID: 6401124710559395942, guid: 65341fb52d583d644a1e97f729da26fc, type: 3}
@@ -15163,6 +15172,7 @@ MonoBehaviour:
   - {fileID: 8084718555022500170, guid: 2c4b35fd5b6225f46b990546da4b9553, type: 3}
   - {fileID: 4307560395867504668, guid: bf0ea4a7b2c279047a7d801bff445913, type: 3}
   - {fileID: 8084718555022500170, guid: 8135167c71bc61448ad239af5c2f07a5, type: 3}
+  - {fileID: 4535396835587189748, guid: b620249236350d64cb0f0e0000e7941c, type: 3}
   nightDecoPrefabList:
   - {fileID: 5002811844654477903, guid: 2a70cbf25ad7aeb44b7c405f4f832bee, type: 3}
   lightPrefab: {fileID: 1088789332951765597, guid: 19201ba5f45fb5540ba9e68173741c5f, type: 3}
@@ -20022,7 +20032,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -22797,7 +22807,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 81
+  m_fontSize: 57
   m_fontSizeBase: 65
   m_fontWeight: 400
   m_enableAutoSizing: 1

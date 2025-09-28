@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 691da7c3ace7733428316a075ecbefdc, type: 3}
+  m_Name: StageData_1_3
+  m_EditorClassIdentifier: 
+  stageTime: 200
+  firingCarLimit: 2
+  fireChance: 0.5
+  spawnInterval: {x: 17, y: 17}
+  earnMoney: {x: 40, y: 50}
+  eraseMoney: {x: 100, y: 200}
+  bossWaveInfos:
+    isBossExist: 0
+    appearingTime: 0
+    bossType: 0

@@ -1,3 +1,4 @@
+using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Utils;
 using System.Collections.Generic;
@@ -64,7 +65,7 @@ namespace Garage.Props
 			{
 				UpdatePropPositionServerRPC(transform.position, NetworkManager.Singleton.LocalClientId);
 				UpdatePropRotateServerRPC(transform.rotation, NetworkManager.Singleton.LocalClientId);
-				UpdatePlayerVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
+				UpdatePropVelocityServerRPC(Vector3.zero, NetworkManager.Singleton.LocalClientId);
 			}
 		}
 
@@ -100,16 +101,25 @@ namespace Garage.Props
 
 		public void OnStopPropAction(Transform controller)
 		{
-			rigid.isKinematic = false;
-			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
-			transform.rotation = Quaternion.LookRotation(controller.forward);
-			GetComponent<Rigidbody>().linearVelocity = (controller.forward * 10f);
+			TireRolling(controller);
 
-			transform.GetComponent<Rigidbody>().useGravity = true;
-			transform.GetComponent<Collider>().isTrigger = false;
-			SyncStateServerRPC(false);
-
-			base.OnEndInteraction(controller);
+            base.OnEndInteraction(controller);
 		}
+
+		private void TireRolling(Transform controller)
+		{
+            rigid.isKinematic = false;
+
+            PlayerController pc = controller.GetComponent<PlayerController>();
+            float rollingForce = pc.GetTireRollingForce();
+
+            transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
+            transform.rotation = Quaternion.LookRotation(controller.forward);
+            GetComponent<Rigidbody>().linearVelocity = (controller.forward * rollingForce);
+
+            transform.GetComponent<Rigidbody>().useGravity = true;
+            transform.GetComponent<Collider>().isTrigger = false;
+            SyncStateServerRPC(false);
+        }
 	}
 }

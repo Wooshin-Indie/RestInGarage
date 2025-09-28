@@ -52,7 +52,7 @@ namespace Garage.Manager
                     Managers.Resource.GetData<MapData>(mapIdx);
             }
         }
-        public int CurStageIdx => GameSynchronizer.Instance.CurrentStage.Value;
+        public int CurStageIdx => GameSynchronizer.Instance.CurStageIdx.Value;
 
         public bool IsDay { get => GameSynchronizer.Instance.IsDay.Value; }
         public ulong MyClientId { get => myClientId; set => myClientId = value; }
@@ -96,7 +96,7 @@ namespace Garage.Manager
         /// </summary>
         private void OnStageStart()
         {
-            float stageTime = CurMapData.StageTime[CurStageIdx];
+            float stageTime = CurMapData.StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].StageTime;
             GameSynchronizer.Instance.SetGameTimer(stageTime);
             SunManager.Instance.SetTimePhase(TimePhase.Afternoon, stageTime);
             TrafficManager.Instance.OnStageStart(0);    // TODO - 맵 여러개 생기면 MapIdx 고치기
@@ -118,7 +118,7 @@ namespace Garage.Manager
                 TrafficManager.Instance.OnStageEnd();
             });
 
-            if (GameSynchronizer.Instance.CurrentStage.Value != 0)
+            if (GameSynchronizer.Instance.CurStageIdx.Value != 0)
                 Invoke(nameof(OnStageEnd), endStageDuration);
             else OnStageEnd();
 
@@ -142,7 +142,7 @@ namespace Garage.Manager
             }
 
             if (GameSynchronizer.Instance.IsDay.Value) return;
-            if (GameSynchronizer.Instance.CurrentStage.Value == 0) return;
+            if (GameSynchronizer.Instance.CurStageIdx.Value == 0) return;
 
         }
 
@@ -151,8 +151,8 @@ namespace Garage.Manager
 			Managers.Sound.PlaySfx(SFXType.ShopCar, () =>
 			{
 				Managers.Sound.PlaySfx(SFXType.ShopPop);
-				BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
-				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurrentStage.Value);
+				BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurStageIdx.Value);
+				OnAfterStageEndAction?.Invoke(GameSynchronizer.Instance.CurStageIdx.Value);
 			});
 		}
 
@@ -163,10 +163,10 @@ namespace Garage.Manager
 
             GameSynchronizer.Instance.RemainedTime.Value -= Time.deltaTime;
 
-            if (CurMapData.BossWaveInfos[CurStageIdx].isBossExist &&
-                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.BossWaveInfos[CurStageIdx].appearingTime)
+            if (CurMapData.StageDatas[CurStageIdx].BossWaveInfo.isBossExist &&
+                GameSynchronizer.Instance.RemainedTime.Value < CurMapData.StageDatas[CurStageIdx].BossWaveInfo.appearingTime)
             {
-                StartBossFight(CurMapData.BossWaveInfos[CurStageIdx].bossType);
+                StartBossFight(CurMapData.StageDatas[CurStageIdx].BossWaveInfo.bossType);
             }
 
             if (IsDay && GameSynchronizer.Instance.RemainedTime.Value <= 0f)
@@ -221,9 +221,9 @@ namespace Garage.Manager
                 pc.PlayerID.Value = playerInfo[clientId].playerId; // 호스트 로컬에 있는 PlayController들에 clientId 할당
             }
 
-            GameSynchronizer.Instance.CurrentStage.Value = 0;
+            GameSynchronizer.Instance.CurStageIdx.Value = 0;
             BuildingManager.Instance.OnGameStart();
-            BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurrentStage.Value);
+            BuildingManager.Instance.OnStageEnd(GameSynchronizer.Instance.CurStageIdx.Value);
 
             SunManager.Instance.OnChangedToNight();
             OnHostCreated();

@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 namespace Garage.Controller
 {
@@ -546,5 +547,66 @@ namespace Garage.Controller
 
 			UIManager.Game.SetPropDetectUI(recentlyDetectedProp);
 		}
+
+		public void OnUpdateInteractSpeedBoosts(bool isInteractPressed)
+		{
+            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, isInteractPressed);
+        }
+
+		private bool isRollChargeStarted = false;
+		private float rollForce = 20f;
+		private float rollGage = 0f; // 0f ~ 1f
+		private float rollDuration = 2f; // rollDuration 만큼 지난 후에 gage가 max 찍음
+        private bool isRollGageUpward = true;
+        private void ChargeTireRoll()
+		{
+			if (!isRollChargeStarted)
+			{
+				isRollChargeStarted = true;
+				isAbleToMove = false;
+                rollGage = 0f;
+                UIManager.Game.PopTireRollingUI(transform);
+                UIManager.Game.ChargeTireRollingUI(rollGage);
+
+                return;
+			}
+
+			// 게이지가 위아래로 왔다갔다 하도록
+			float rollGageDelta = Time.deltaTime / rollDuration;
+            if (isRollGageUpward) // 게이지 방향 위쪽
+            {
+                if (rollGage > 1f)
+					isRollGageUpward = false;
+            }
+			else // 게이지 방향 아래쪽
+			{
+				rollGageDelta = -rollGageDelta;
+                if (rollGage < 0f)
+				{
+					rollGage = 0f;
+                    isRollGageUpward = true;
+                }
+            }
+			rollGage += rollGageDelta;
+
+            UIManager.Game.ChargeTireRollingUI(rollGage);
+            
+			// 꾹 누르고 있을 때 차지됨, 뗄 때 나가야됨(그러면서 게이지는 초기화)
+        }
+		private void OnTireRoll()
+		{
+            UIManager.Game.CloseTireRollingUI();
+            isRollChargeStarted = false;
+            isAbleToMove = true;
+        }
+		public float GetTireRollingForce()
+		{
+			float overallRollingForce = rollForce * rollGage;
+
+			if (overallRollingForce < 0f)
+				overallRollingForce = 0f;
+
+            return overallRollingForce;
+        }
     }
 }
