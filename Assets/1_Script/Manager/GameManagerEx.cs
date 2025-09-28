@@ -418,7 +418,7 @@ namespace Garage.Manager
 
         public void EndEvent()
         {
-            GameSynchronizer.Instance.EndEventServerRPC();
+            GameSynchronizer.Instance.EndEvent();
         }
 
         public void OnEndEvent()

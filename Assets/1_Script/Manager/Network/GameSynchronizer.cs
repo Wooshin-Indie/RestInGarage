@@ -3,6 +3,7 @@ using Garage.Structs;
 using Garage.Utils;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 namespace Garage.Manager
 {
@@ -114,12 +115,17 @@ namespace Garage.Manager
 			UIManager.Event.StartResultEvent();
 		}
 
+		public void EndEvent()
+		{
+			if (!isInEvent) return;
+			isInEvent = false;
+			EndEventServerRPC();
+		}
+
+
 		[ServerRpc(RequireOwnership = false)]
 		public void EndEventServerRPC()
 		{
-			if (!isInEvent) return;
-
-			isInEvent = false;
 			playerInEvent--;
 
 			EndEventClientRpc();

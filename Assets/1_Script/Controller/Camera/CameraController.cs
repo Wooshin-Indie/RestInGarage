@@ -137,7 +137,7 @@ namespace Garage.Controller
 					var playerObj = client.PlayerObject;
 					if (playerObj != null && playerObj.OwnerClientId == currentPlayerNetId)
 					{
-						character = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerNetId).transform;
+						character = playerObj.transform;
 					}
 				}
 				Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
