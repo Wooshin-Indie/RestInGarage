@@ -131,7 +131,15 @@ namespace Garage.Controller
 
             if (currentPlayerNetId != ulong.MaxValue)
 			{
-				Transform character = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerNetId).transform;
+                Transform character = null;
+				foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+				{
+					var playerObj = client.PlayerObject;
+					if (playerObj != null && playerObj.OwnerClientId == currentPlayerNetId)
+					{
+						character = NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(currentPlayerNetId).transform;
+					}
+				}
 				Vector3 cameraPos = character.position + (character.forward * characterBoomLength) + Vector3.up * 2.5f;
 
 				if (currentVCam != null)
