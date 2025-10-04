@@ -593,7 +593,7 @@ MonoBehaviour:
   firePS: {fileID: 3856476310582448567}
   extinguishPS: {fileID: 6732442680582060479}
   explosionPS: {fileID: 2389237774265451991}
-  tireSize: 1
+  tireSize: 0
   moveSpeed: 5
   stopDistance: 5
   tmpDistance: 3

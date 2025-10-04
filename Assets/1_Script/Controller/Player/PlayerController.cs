@@ -43,11 +43,16 @@ namespace Garage.Controller
 		[SerializeField] private float boxWidth;
 		[SerializeField] private float boxHeight;
 
-		[SerializeField] private float fireExLength = 5f;
+        [FoldoutGroup("Fire Extinguish")]
+        [SerializeField] private float fireExLength = 5f;
 		[SerializeField] private float fireExRadius = 1f;
 		[SerializeField] private LayerMask fireExLayer;
 
-		[TabGroup("Main", "Rendering")]
+        [FoldoutGroup("Tire Rolling")]
+        [SerializeField] private float rollForce;
+        [SerializeField] private float rollDuration; // rollDuration 만큼 지난 후에 gage가 max 찍음
+
+        [TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
 
@@ -554,9 +559,7 @@ namespace Garage.Controller
         }
 
 		private bool isRollChargeStarted = false;
-		private float rollForce = 20f;
 		private float rollGage = 0f; // 0f ~ 1f
-		private float rollDuration = 2f; // rollDuration 만큼 지난 후에 gage가 max 찍음
         private bool isRollGageUpward = true;
         private void ChargeTireRoll()
 		{

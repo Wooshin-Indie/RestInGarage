@@ -1186,6 +1186,8 @@ MonoBehaviour:
   fireExLayer:
     serializedVersion: 2
     m_Bits: 4096
+  rollForce: 16
+  rollDuration: 1.3
   meshRenderer: {fileID: 5760093498017814160}
   playerMaterial:
   - {fileID: 2100000, guid: 43080622186391047aff385f2a362d86, type: 2}

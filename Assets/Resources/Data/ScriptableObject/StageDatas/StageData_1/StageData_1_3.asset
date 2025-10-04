@@ -15,10 +15,11 @@ MonoBehaviour:
   stageTime: 200
   firingCarLimit: 2
   fireChance: 0.5
+  brokenTireLimit: 3
   spawnInterval: {x: 17, y: 17}
   earnMoney: {x: 40, y: 50}
   eraseMoney: {x: 100, y: 200}
-  bossWaveInfos:
+  bossWaveInfo:
     isBossExist: 0
     appearingTime: 0
     bossType: 0
