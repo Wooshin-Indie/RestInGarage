@@ -1,7 +1,10 @@
 using Garage.Controller;
 using Garage.Interfaces;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.TextCore.Text;
 
 namespace Garage.Props
 {
@@ -90,6 +93,21 @@ namespace Garage.Props
 		protected virtual void StartInteraction(ulong newOwnerClientId)
 		{
 			NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerController>().OnInteractionGranted(this);
+
+			foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+			{
+				var playerObj = client.PlayerObject;
+				if (playerObj != null && playerObj.OwnerClientId == newOwnerClientId)
+				{
+					controller = playerObj.GetComponent<PlayerController>();
+				}
+			}
+
+			if(controller == null)
+			{
+				Debug.LogError("[OwnableProp] - controller is null");
+				return;
+			}
 		}
 
 		public virtual void OnEndInteraction(Transform transform)

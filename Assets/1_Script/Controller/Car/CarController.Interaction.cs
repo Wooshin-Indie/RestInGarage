@@ -184,7 +184,7 @@ namespace Garage.Controller
 			if (isExploded) return;
 			isExploded = true;
 
-			EconomyManager.Instance.EraseMoney_HostOnly(Managers.Resource.GetData<MapData>(GameSynchronizer.Instance.CurStageIdx.Value).
+			EconomyManager.Instance.EraseMoney_HostOnly(GameManagerEx.Instance.CurMapData.
 				StageDatas[GameSynchronizer.Instance.CurStageIdx.Value].EraseMoney.GetRandomValue());
 			OnCarExplosionClientRPC();
 			Collider[] hits = Physics.OverlapSphere(transform.position, boomRadius, Constants.LAYER_VEHICLE);
