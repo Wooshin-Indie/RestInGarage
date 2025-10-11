@@ -571,7 +571,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   IsDay:
     m_InternalValue: 0
-  CurrentStage:
+  CurStageIdx:
     m_InternalValue: 0
   RemainedTime:
     m_InternalValue: 0
@@ -6162,7 +6162,8 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6e1379128fcef8f4285598f2ce3dd6ed, type: 3}
   - {fileID: 21300000, guid: 704821d2bc4f70e46a091f29111d3e7a, type: 3}
   - {fileID: 21300000, guid: e438e473fe9f8fc4b964ab8608b78761, type: 3}
-  - {fileID: 21300000, guid: d359ab28ccb5fd744a613dc391c7f947, type: 3}
+  - {fileID: 21300000, guid: b9c429628fc15e844acdb8ce50d3c7e9, type: 3}
+  - {fileID: 21300000, guid: 3fd24a41d70da1748b470b1d6c81cbf8, type: 3}
 --- !u!1 &579677748
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,6 +8,10 @@ using UnityEngine;
 public class Barricade : OwnableProp, IPlaceable
 {
     [SerializeField] private GameObject previewPrefab;
+    [SerializeField] private Transform holdingTf;
+
+    private Vector3 holdingPosOffset;
+    private Quaternion rotationOffset;
 
     public override void Awake()
     {
@@ -17,6 +21,8 @@ public class Barricade : OwnableProp, IPlaceable
     public override void Init()
     {
         base.Init();
+        rotationOffset = Quaternion.Euler(0f, 90f, 0f);
+        holdingPosOffset = transform.position - holdingTf.position;
     }
     private void Update()
     {
@@ -24,8 +30,8 @@ public class Barricade : OwnableProp, IPlaceable
         {
             if (controller != null)
             {
-                rigid.MovePosition(controller.GetSocket(PropType.Tire).position);
-                rigid.MoveRotation(controller.GetSocket(PropType.Tire).rotation);
+                rigid.MovePosition(controller.GetSocket(PropType.Tire).position + holdingPosOffset);
+                rigid.MoveRotation(controller.transform.rotation * rotationOffset);
 
                 return;
             }

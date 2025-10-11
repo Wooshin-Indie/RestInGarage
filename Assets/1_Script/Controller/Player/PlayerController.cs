@@ -546,12 +546,17 @@ namespace Garage.Controller
             interactPropKeyInfoUITimer = 0f;
             idlePropKeyInfoUITimer = 0f;
         }
+
 		public void UpdateDetectPropUI()
 		{
-			if (currentOwningProp != null) return;
+			if (currentOwningProp != null || recentlyDetectedProp == null) // 감지된거 있고 현재 프랍 안들고있을 때만 실행
+            {
+                UIManager.Game.ClosePropDetectUI();
+                return;
+            }
 
-			UIManager.Game.SetPropDetectUI(recentlyDetectedProp);
-		}
+			UIManager.Game.PopPropDetectUI(recentlyDetectedProp);
+        }
 
 		public void OnUpdateInteractSpeedBoosts(bool isInteractPressed)
 		{
