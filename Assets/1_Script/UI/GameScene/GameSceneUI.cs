@@ -272,6 +272,11 @@ namespace Garage.UI.GameScene
             shopInfo.SetInfo(prop);
             shopInfo.gameObject.SetActive(true);
         }
+        public void SetTimerMax(float maxTime)
+        {
+            timerText.gameObject.SetActive(true);
+            timerText.SetMaxTime(maxTime);
+        }
         public void OnTimerChanged(float prevTime, float curTime)
         {
             timerText.SetTime(prevTime, curTime);
@@ -364,14 +369,17 @@ namespace Garage.UI.GameScene
         /// Prop을 Detect했을 때 띄우는 UI
         /// </summary>
         /// <param name="isOn"> activeSelf </param>
-        public void SetPropDetectUI(OwnableProp prop)
+        public void PopPropDetectUI(OwnableProp targetProp)
         {
-            if (prop != null)
+            if (targetProp != null)
             {
-                propDetectUI.SetTargetProp(prop);
+                propDetectUI.SetTargetProp(targetProp);
                 propDetectUI.PopUI();
             }
-            else propDetectUI.CloseUI();
+        }
+        public void ClosePropDetectUI()
+        {
+            propDetectUI.CloseUI();
         }
 
         public void StartBossWarning()

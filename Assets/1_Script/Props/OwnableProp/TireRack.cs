@@ -1,7 +1,6 @@
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
-using System.Runtime.InteropServices;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -37,7 +36,7 @@ namespace Garage.Props
 		[ServerRpc(RequireOwnership = false)]
 		private void SpawnTireServerRpc(ulong newOwnerClientId)
 		{
-			GameObject go = Managers.Spawn.SpawnInCurrentScene(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
+			GameObject go = Managers.Spawn.SpawnInCurrentStage(tirePrefab, NetworkManager.Singleton.ConnectedClients[newOwnerClientId].PlayerObject.transform.position, Quaternion.identity, null);
 			go.GetComponent<TireProp>().SetTireSize(tireSize);
 			go.GetComponent<TireProp>().TryInteract(newOwnerClientId);
 		}

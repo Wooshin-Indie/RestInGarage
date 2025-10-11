@@ -461,6 +461,7 @@ namespace Garage.Manager
 			Vector3 forward = playerTransform.forward;
 			Vector3 offsetForward = new Vector3(forward.x * placeSize.x / 2, 0, forward.z * placeSize.y / 2);
 			Vector2Int startGridPos = WorldToGrid(playerTransform.position + offsetForward);
+			Vector2Int previewPos = startGridPos;
 
 			foreach (GridType gridType in GetGridTypes())
 			{
@@ -497,7 +498,7 @@ namespace Garage.Manager
                 if (isTileSizeCorrect)
                     tmpPreview.transform.position = GetAveragePosition();
                 else
-                    tmpPreview.transform.position = playerTransform.position + offsetForward;
+                    tmpPreview.transform.position = new Vector3(previewPos.x, .01f, previewPos.y) + offsetForward/2;
 
 				if (lastAppliedMaterial != previewDisableMaterial)
 				{

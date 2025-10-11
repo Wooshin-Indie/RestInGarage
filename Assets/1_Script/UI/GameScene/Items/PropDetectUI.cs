@@ -56,6 +56,9 @@ namespace Garage.UI.GameScene
 				case Extinguisher _:
 					index = 3;
 					break;
+				case Barricade _:
+					index = 4;
+					break;
 				default:
 					return;
 			}

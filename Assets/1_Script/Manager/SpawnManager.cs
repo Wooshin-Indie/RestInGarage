@@ -7,6 +7,8 @@ namespace Garage.Manager
 {
 	public class SpawnManager
 	{
+		private List<GameObject> stageGameobjects = new();
+
 		public void Init()
 		{
 
@@ -14,9 +16,25 @@ namespace Garage.Manager
 
 		public void Start()
 		{
-
+			GameManagerEx.Instance.OnBeforeStageEndAction += DespawnStageGameobjects;
 		}
 
+		private void DespawnStageGameobjects()
+		{
+			for (int i = 0; i < stageGameobjects.Count; i++)
+			{
+				DespawnObject(stageGameobjects[i].GetComponent<NetworkObject>().NetworkObjectId);
+			}
+			stageGameobjects.Clear();
+		}
+
+		public GameObject SpawnInCurrentStage(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
+		{
+			GameObject go = SpawnInCurrentScene(prefab, position, rotation, parent);
+			stageGameobjects.Add(go);
+			return go;
+		}
+		
 		public GameObject SpawnInCurrentScene(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent = null)
 		{
 			GameObject go = Object.Instantiate(prefab, position, rotation, parent);
