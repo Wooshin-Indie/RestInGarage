@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 691da7c3ace7733428316a075ecbefdc, type: 3}
   m_Name: StageData_1_2
   m_EditorClassIdentifier: 
-  stageTime: 200
+  stageTime: 10
   firingCarLimit: 2
   fireChance: 0.5
   brokenTireLimit: 2
