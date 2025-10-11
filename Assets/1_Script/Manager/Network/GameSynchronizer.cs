@@ -57,7 +57,8 @@ namespace Garage.Manager
 
 		public void SetGameTimer(float time)
 		{
-			RemainedTime.Value += time;
+			RemainedTime.Value = time;
+			UIManager.Game.SetTimerMax(time);
 		}
 
 		public override void OnNetworkSpawn()

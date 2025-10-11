@@ -272,6 +272,11 @@ namespace Garage.UI.GameScene
             shopInfo.SetInfo(prop);
             shopInfo.gameObject.SetActive(true);
         }
+        public void SetTimerMax(float maxTime)
+        {
+            timerText.gameObject.SetActive(true);
+            timerText.SetMaxTime(maxTime);
+        }
         public void OnTimerChanged(float prevTime, float curTime)
         {
             timerText.SetTime(prevTime, curTime);
