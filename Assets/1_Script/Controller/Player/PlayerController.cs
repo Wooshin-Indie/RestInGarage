@@ -119,20 +119,16 @@ namespace Garage.Controller
 
             rigid.maxLinearVelocity = 500f;
 
-			Debug.Log("game" + gameObject.layer);
-
-
 			animIDs[0] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY);
 			animIDs[1] = Animator.StringToHash(Constants.ANIM_PARAM_SPEED);
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
 			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
-			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_CROUCH);
-			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
-			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
-			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT);
-      
+			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
+			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
+			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
+			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;

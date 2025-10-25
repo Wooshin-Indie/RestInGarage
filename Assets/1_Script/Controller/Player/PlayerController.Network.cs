@@ -1,4 +1,5 @@
 using Garage.Manager;
+using Garage.Utils;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -177,6 +178,32 @@ namespace Garage.Controller
 		{
 			if (IsOwner) return;
 			animator.SetFloat(animIDs[id], param);
+		}
+
+
+		public void SetAnimLayerWeight(int layerIndex, float weight)
+		{
+			animator.SetLayerWeight(layerIndex, weight);
+			if (IsHost)
+			{
+				SetAnimLayerWeightClientRPC(layerIndex, weight);
+			}
+			else
+			{
+				SetAnimLayerWeightServerRPC(layerIndex, weight);
+			}
+		}
+
+		[ServerRpc(RequireOwnership = false)]
+		private void SetAnimLayerWeightServerRPC(int layerIndex, float weight)
+		{
+			SetAnimLayerWeightClientRPC(layerIndex, weight);
+		}
+		[ClientRpc]
+		private void SetAnimLayerWeightClientRPC(int layerIndex, float weight)
+		{
+			if (IsOwner) return;
+			animator.SetLayerWeight(layerIndex, weight);
 		}
 		#endregion
 	}

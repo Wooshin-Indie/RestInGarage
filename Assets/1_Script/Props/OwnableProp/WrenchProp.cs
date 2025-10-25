@@ -11,6 +11,9 @@ namespace Garage.Props
 	{
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
+		[SerializeField] private AnimationType animType;
+
+		public AnimationType AnimType => animType;
 
         public override void Awake()
         {

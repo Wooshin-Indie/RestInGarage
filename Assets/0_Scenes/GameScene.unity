@@ -93177,6 +93177,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WindTrailParticle
       objectReference: {fileID: 0}
+    - target: {fileID: 2959441240536801129, guid: 347f89a24211850419d520e302834248, type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 0.1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

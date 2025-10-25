@@ -2,8 +2,8 @@
 namespace Garage.Utils
 {
 	[System.Serializable]
-	public enum AnimationType { Carry, Speed, Oil, Place, Tire, Hammer, Crouch, Kick, KnockBack, 
-                                CarryMult, }
+	public enum AnimationType { Carry, Speed, Oil, Place, Tire, Hammer, Kick, KnockBack, 
+                                CarryMult, Fix}
 	public enum SceneEnum
     {
         None = -1,

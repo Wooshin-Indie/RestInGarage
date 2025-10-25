@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Garage.Utils
 {
-    public static class Constants
+	public static class Constants
     {
         /** PATHS **/
         public static readonly string PATH_SFX = "Sounds/SFX/";
@@ -22,6 +22,7 @@ namespace Garage.Utils
         public static readonly int LAYER_INTERACTABLE = 1 << 10;
         public static readonly int LAYER_PLAYER = 1 << 11;
 
+
         /** ANIM PARAMS **/
         public static readonly string ANIM_PARAM_SPEED = "Speed";
         public static readonly string ANIM_PARAM_CARRY = "IsCarry";
@@ -29,12 +30,14 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_PLACE = "IsPlace";
         public static readonly string ANIM_PARAM_TIREPUT = "IsTirePut";
         public static readonly string ANIM_PARAM_HAMMER = "IsHammering";
-        public static readonly string ANIM_PARAM_CROUCH = "IsCrouch";
         public static readonly string ANIM_PARAM_KICK = "IsKick";
         public static readonly string ANIM_PARAM_KNOCKBACK = "IsKnockBack";
         public static readonly string ANIM_PARAM_CARRY_MULT = "CarryMult";
+        public static readonly string ANIM_PARAM_FIX = "IsFix";
 
-	  /** Localization Tables **/
+        public static readonly int ANIM_LAYER_INDEX_LOWERBODY = 1;
+
+	    /** Localization Tables **/
 		public static readonly string TABLE_MAINUI = "MainUI";
 
         /** NETWORK SETTINGS **/

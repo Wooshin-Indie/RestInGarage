@@ -3,7 +3,6 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
-using Steamworks;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -135,7 +134,8 @@ namespace Garage.Controller
 						case CarParts.RLT:
 						case CarParts.FRT:
 						case CarParts.RRT:
-							SetAnimParam((int)AnimationType.Crouch, true);
+							SetAnimLayerWeight(Constants.ANIM_LAYER_INDEX_LOWERBODY, 1f);
+							SetAnimParam((int)((WrenchProp)currentOwningProp).AnimType, true);
 							break;
 						case CarParts.Oil:
 							SetAnimParam((int)AnimationType.Oil, true);

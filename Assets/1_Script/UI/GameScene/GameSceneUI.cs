@@ -99,6 +99,7 @@ namespace Garage.UI.GameScene
             ulong carID = car.GetComponent<NetworkObject>().NetworkObjectId;
 
             Dictionary<CarParts, CarStatusUI> carStatusUIs = new Dictionary<CarParts, CarStatusUI>();
+            if (carStatusInfo.ContainsKey(carID)) carStatusInfo.Remove(carID);
             carStatusInfo.Add(carID, carStatusUIs);
 
 

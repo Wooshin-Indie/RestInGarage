@@ -1,6 +1,5 @@
 using Garage.Manager;
 using Garage.Utils;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Controller.StateMachine
@@ -20,8 +19,9 @@ namespace Garage.Controller.StateMachine
 		{
 			base.Exit();
 
-			controller.SetAnimParam((int)AnimationType.Crouch, false);
+			controller.SetAnimLayerWeight(Constants.ANIM_LAYER_INDEX_LOWERBODY, 0f);
 			controller.SetAnimParam((int)AnimationType.Oil, false);
+			controller.SetAnimParam((int)AnimationType.Fix, false);
 			controller.SetAnimParam((int)AnimationType.Hammer, false);
 		}
 
