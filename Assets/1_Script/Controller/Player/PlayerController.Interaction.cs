@@ -61,6 +61,7 @@ namespace Garage.Controller
 			{
 				currentOwningProp.OnEndInteraction(transform);
 				currentOwningProp = null;
+				currentPropAction = null;
 				SetAnimParam((int)AnimationType.Carry, false);
 			}
 			else
@@ -68,7 +69,8 @@ namespace Garage.Controller
 				BuildingManager.Instance.TryPlaceBuilding(currentOwningProp);
 				currentOwningProp.OnEndInteraction(transform);
 				currentOwningProp = null;
-			}
+                currentPropAction = null;
+            }
 		}
         #endregion
 
@@ -205,7 +207,6 @@ namespace Garage.Controller
 			stateMachine.ChangeState(idleState);
 			OnEndAction();
 			TryEndInteractWithProp();
-			currentOwningProp = null;
 			currentFixablePart = null;
 		}
 
