@@ -65,7 +65,8 @@ namespace Garage.Controller
 		private bool isAbleToRun = true;
 		private bool isInputLocked = false;
         
-		public bool IsAbleToRun { get => isAbleToRun; set => isAbleToRun = value; }
+		public bool IsAbleToRun { get =>
+            Managers.Input.Control.Player.Run.enabled; set => isAbleToRun = value; }
 		public bool IsInputLocked { get => isInputLocked; set => isInputLocked = value; }	
 		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
@@ -239,7 +240,7 @@ namespace Garage.Controller
 			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
             // 차는 애니메이션 실행
-            Managers.Input.DisablePlayerActions();
+            Managers.Input.DisablePlayerInputs();
             SetAnimParam((int)AnimationType.Kick);
         }
 
@@ -278,7 +279,7 @@ namespace Garage.Controller
             rigid.rotation = targetRot;
 
 			// 플레이어 움직임 Lock걸기
-            Managers.Input.DisablePlayerActions();
+            Managers.Input.DisablePlayerInputs();
             rigid.constraints = RigidbodyConstraints.FreezeRotation | originalConstraints;
             EndAllInteraction();
 
@@ -554,15 +555,15 @@ namespace Garage.Controller
 			UIManager.Game.PopPropDetectUI(recentlyDetectedProp);
         }
 
-		public void OnUpdateInteractSpeedBoosts(bool isInteractPressed)
+		public void OnUpdateInteractSpeedBoosts()
 		{
-            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, isInteractPressed);
+            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, Managers.Input.Control.Player.Interact.IsPressed());
         }
 
 		private bool isRollChargeStarted = false;
 		private float rollGage = 0f; // 0f ~ 1f
         private bool isRollGageUpward = true;
-        private void ChargeTireRoll()
+        public void ChargeTireRoll()
 		{
 			if (!isRollChargeStarted)
 			{
@@ -597,12 +598,6 @@ namespace Garage.Controller
             
 			// 꾹 누르고 있을 때 차지됨, 뗄 때 나가야됨(그러면서 게이지는 초기화)
         }
-		private void OnTireRoll()
-		{
-            UIManager.Game.CloseTireRollingUI();
-            isRollChargeStarted = false;
-            isAbleToMove = true;
-        }
 		public float GetTireRollingForce()
 		{
 			float overallRollingForce = rollForce * rollGage;
@@ -611,6 +606,11 @@ namespace Garage.Controller
 				overallRollingForce = 0f;
 
             return overallRollingForce;
+        }
+		public void OnTireRollStart()
+		{
+            SetAnimParam((int)AnimationType.Carry, false);
+            SetAnimParam((int)AnimationType.Place);
         }
     }
 }

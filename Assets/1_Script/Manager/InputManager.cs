@@ -13,13 +13,31 @@ namespace Garage.Manager
 			control.Enable();
 		}
 
-		public void EnablePlayerActions()
+		public void EnablePlayerInputs()
 		{
 			control.Player.Enable();
         }
-		public void DisablePlayerActions()
+		public void DisablePlayerInputs()
 		{
 			control.Player.Disable();
         }
-	}
+
+		public void EnablePlayerMove()
+        {
+            control.Player.Move.Enable();
+        }
+        public void DisablePlayerMove()
+        {
+            control.Player.Move.Disable();
+        }
+
+		public void EnablePlayerRun()
+        {
+            control.Player.Run.Enable();
+        }
+        public void DisablePlayerRun()
+        {
+			control.Player.Run.Disable();
+        }
+    }
 }

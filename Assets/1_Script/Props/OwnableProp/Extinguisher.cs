@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class Extinguisher : OwnableProp, IActionable, IPlaceable
+	public class Extinguisher : OwnableProp, IActionableProp, IPlaceable
 	{
 
 		[SerializeField] private GameObject previewPrefab;
@@ -121,7 +121,7 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
-		public void OnStartPropAction(Transform controller)
+        public void OnStartPropAction(Transform controller)
 		{
 			if (!IsOwner)
 			{
@@ -129,17 +129,25 @@ namespace Garage.Props
 				return;
 			}
 
-			IsAction.Value = true;
+            this.controller.SetAnimParam((int)AnimationType.Oil, true);
+            Managers.Input.DisablePlayerMove();
+            IsAction.Value = true;
 		}
+        public void OnHoldingPropAction(Transform controller)
+        {
 
-		public void OnStopPropAction(Transform controller)
+        }
+        public void OnReleasedPropAction(Transform controller)
 		{
 			if (!IsOwner)
 			{
 				Debug.LogWarning("You are not prop's owner");
 				return;
-			}
-			IsAction.Value = false;
+            }
+
+			this.controller.SetAnimParam((int)AnimationType.Oil, false);
+            Managers.Input.EnablePlayerMove();
+            IsAction.Value = false;
 		}
 
 		private void OnActionChanged(bool prev, bool isAction)

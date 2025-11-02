@@ -20,7 +20,8 @@ namespace Garage.Controller.StateMachine
             controller.DetectFrontCarAndMakeTransparent();
             controller.UpdatePropKeyInfoUIs();
             controller.UpdateDetectPropUI();
-		}           
+            controller.OnUpdateInteractSpeedBoosts();
+        }           
         public virtual void PhysicsUpdate()         // Only Physics Update
 		{
 		}     

@@ -19,26 +19,34 @@ namespace Garage.Controller
 		{
 			if (!IsOwner) return;
 
-			isAbleToMove = false;
-			rigid.linearVelocity = Vector3.zero;
+			Managers.Input.DisablePlayerMove();
+            rigid.linearVelocity = Vector3.zero;
 		}
 		private void OnEndPlace() // 타이어 굴리기
 		{
 			if (!IsOwner) return;
 
-			isAbleToMove = true;
+			Managers.Input.EnablePlayerMove();
 			if (currentOwningProp == null) return;
 
-			if (currentOwningProp.GetComponent<IActionable>() != null)
+			if (currentOwningProp.GetComponent<IActionableProp>() != null)
 			{
-				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
-				if (currentOwningProp is TireProp) OnTireRoll();
+				currentOwningProp.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
+				if (currentOwningProp is TireProp) OnTireRollEnd();
                 // 이 때 굴림
             }
 			currentOwningProp = null;
 		}
 
-		private void OnPutTire()
+		// 타이어 놓을 때 애니메이션 키로 실행
+        private void OnTireRollEnd()
+        {
+            UIManager.Game.CloseTireRollingUI();
+            isRollChargeStarted = false;
+            Managers.Input.EnablePlayerMove(); // 0.1초 뒤에 enable 하면 좋을 듯
+        }
+
+        private void OnPutTire()
 		{
 			if (!IsOwner) return;
 			if (currentOwningProp == null) return;
@@ -102,14 +110,14 @@ namespace Garage.Controller
 		private void OnKickEnd()
         {
             Debug.Log("OnKickEnd");
-            Managers.Input.EnablePlayerActions();
+            Managers.Input.EnablePlayerInputs();
 		}
 
 		private void OnGettingUp()
 		{
 			Debug.Log("OnGettingUp");
             rigid.constraints = originalConstraints;
-            Managers.Input.EnablePlayerActions();
+            Managers.Input.EnablePlayerInputs();
             isKnockedBack = false;
         }
 

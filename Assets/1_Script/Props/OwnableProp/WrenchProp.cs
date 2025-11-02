@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class WrenchProp : OwnableProp, IPlaceable
+	public class WrenchProp : OwnableProp, IPlaceable, IActionableProp
 	{
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
@@ -51,7 +51,16 @@ namespace Garage.Props
 			base.OnEndInteraction(controller);
 		}
 
-		private void Update()
+        public virtual void OnStartPropAction(Transform controller)
+        {
+            Managers.Input.DisablePlayerInputs();
+            //SetAnimParam((int)AnimationType.Swing, true);
+            //애니메이션 끝날 때 Managers.Input.EnablePlayerInputs();
+        }
+        public virtual void OnHoldingPropAction(Transform controller) { }
+        public virtual void OnReleasedPropAction(Transform controller) { }
+
+        private void Update()
 		{
 			if (GameManagerEx.Instance.IsDay)
 			{

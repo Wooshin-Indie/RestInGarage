@@ -43,8 +43,7 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			isInteractPressed = Managers.Input.Control.Player.Interact.IsPressed();
-            if (isInteractPressed)
+            if (Managers.Input.Control.Player.Interact.IsPressed())
 			{
 				controller.CurrentFixablePart.Interact(controller, controller.CurrentOwningProp);
 			}
@@ -53,8 +52,6 @@ namespace Garage.Controller.StateMachine
 				stateMachine.ChangeState(controller.carryState);
 				return;
 			}
-
-			controller.OnUpdateInteractSpeedBoosts(isInteractPressed);
         }
 
 		public override void PhysicsUpdate()

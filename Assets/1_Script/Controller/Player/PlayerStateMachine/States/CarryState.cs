@@ -15,7 +15,7 @@ namespace Garage.Controller.StateMachine
 		{
 			base.Enter();
 
-			if(controller.CurrentOwningProp == null)
+			if (controller.CurrentOwningProp == null)
 			{
 				stateMachine.ChangeState(controller.idleState);
 				return;
@@ -23,13 +23,13 @@ namespace Garage.Controller.StateMachine
 
 			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
-				controller.SetAnimParam((int)AnimationType.CarryMult, 
+				controller.SetAnimParam((int)AnimationType.CarryMult,
 					controller.CarrySpeed * controller.CurrentOwningProp.CarrySpeedMultiplier);
 				controller.SetAnimParam((int)AnimationType.Carry, true);
 			}
 
-            Managers.Sound.PlaySfx(SFXType.PropHold);
-        }
+			Managers.Sound.PlaySfx(SFXType.PropHold);
+		}
 
 		public override void Exit()
 		{
@@ -48,17 +48,17 @@ namespace Garage.Controller.StateMachine
 			if (controller.CurrentOwningProp == null)
 			{
 				stateMachine.ChangeState(controller.idleState);
-                return;
+				return;
 			}
 
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
 			bool isRun = controller.IsRun;
-			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? 
+			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ?
 				controller.CarrySpeed * controller.CurrentOwningProp.CarrySpeedMultiplier :
 				((isRun ? controller.RunSpeed : controller.WalkSpeed));
-			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ? 
-				controller.CarrySpeed : 
+			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ?
+				controller.CarrySpeed :
 				controller.RunSpeed;
 
 			controller.MovePosition(move, speed, maxSpeed);
@@ -72,34 +72,35 @@ namespace Garage.Controller.StateMachine
 			// End Interact
 			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
-				if (controller.CurrentFixablePart != null)
-				{
-					controller.TryStartFix();
-				}
-				else
-				{
-					controller.TryEndInteract();
-				}
+				controller.TryEndInteractWithProp();
 				return;
 			}
-			else
-			{
-                controller.OnUpdateInteractSpeedBoosts(false);
-            }
 
-			if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
+            if (controller.CurrentFixablePart != null)
 			{
-				controller.TryWasPressedThisFrameAction();
+				return;
+			}
+
+
+            if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
+			{
+				controller.OnActionKeyStart();
 				return;
 			}
 			else if (Managers.Input.Control.Player.Action.IsPressed())
 			{
-				controller.TryIsPressedAction();
-				return;
-			}
+                controller.OnActionKeyHolding();
+                return;
+            }
+			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
+            {
+                controller.OnActionKeyHolding();
+                return;
+            }
+
 			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
 			{
-				controller.TryEndAction();
+				controller.OnEndAction();
 				return;
 			}
 

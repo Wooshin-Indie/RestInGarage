@@ -1,5 +1,6 @@
 using Garage.Controller;
 using Garage.Interfaces;
+using Garage.Manager;
 using Garage.Utils;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class TireProp : OwnableProp, IActionable
+	public class TireProp : OwnableProp, IActionableProp
 	{
 		[SerializeField] protected float height;
 		[SerializeField] private List<Material> materials = new();
@@ -95,27 +96,33 @@ namespace Garage.Props
 			GetComponent<Renderer>().material = materials[(int)size];
 		}
 
-		public void OnStartPropAction(Transform controller)
+        public void OnStartPropAction(Transform controller)
 		{
-		}
-
-		public void OnStopPropAction(Transform controller)
-		{
-			TireRolling(controller);
+			Managers.Input.DisablePlayerMove();
+            this.controller.ChargeTireRoll();
+        }
+        public void OnHoldingPropAction(Transform controller)
+        {
+            this.controller.ChargeTireRoll();
+        }
+        public void OnReleasedPropAction(Transform controller)
+        {
+            this.controller.SetAnimParam((int)AnimationType.Carry, false);
+            this.controller.SetAnimParam((int)AnimationType.Place);
 
             base.OnEndInteraction(controller);
 		}
 
-		private void TireRolling(Transform controller)
+		public void TireRolling(float rollForce)
 		{
             rigid.isKinematic = false;
 
-            PlayerController pc = controller.GetComponent<PlayerController>();
-            float rollingForce = pc.GetTireRollingForce();
+			Transform playerTf = controller.transform;
+            float rollingForce = rollForce;
 
-            transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
-            transform.rotation = Quaternion.LookRotation(controller.forward);
-            GetComponent<Rigidbody>().linearVelocity = (controller.forward * rollingForce);
+            transform.position = playerTf.position + new Vector3(0, height * 1.2f, 0) + playerTf.forward * 1.5f;
+            transform.rotation = Quaternion.LookRotation(playerTf.forward);
+            GetComponent<Rigidbody>().linearVelocity = (playerTf.forward * rollingForce);
 
             transform.GetComponent<Rigidbody>().useGravity = true;
             transform.GetComponent<Collider>().isTrigger = false;

@@ -37,7 +37,7 @@ namespace Garage.Controller.StateMachine
 			{
 				if(controller.RecentlyDetectedProp != null)
 				{
-					controller.TryStartInteract();
+					controller.TryStartInteractWithProp();
 					return;
 				}
 				if (controller.CurrentFixablePart != null)

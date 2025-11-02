@@ -332,6 +332,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d63c6d55ad87234b88e4a955f14eaad, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8552493421116108945}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8d63c6d55ad87234b88e4a955f14eaad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1168700739171428607}
   m_SourcePrefab: {fileID: 100100000, guid: 8d63c6d55ad87234b88e4a955f14eaad, type: 3}
 --- !u!1 &493214191371278644 stripped
 GameObject:
@@ -365,6 +368,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1168700739171428607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493214191371278644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e7bce7c88e49f6458b289097a6e2eb8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oilParticle: {fileID: 0}
 --- !u!4 &978388452849320846 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8d63c6d55ad87234b88e4a955f14eaad, type: 3}
@@ -576,7 +592,7 @@ MonoBehaviour:
   initPos: {x: -0.948, y: 1.045, z: 0.223}
   initRot: {x: -37.267, y: -94.248, z: 2.575}
   rope: {fileID: 3681204652177645260}
-  oilgun: {fileID: 978388452849320846}
+  oilGun: {fileID: 1168700739171428607}
   hitLayers:
     serializedVersion: 2
     m_Bits: 2560
