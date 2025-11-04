@@ -66,6 +66,7 @@ namespace Garage.Controller
 			switch (currentOwningProp)
 			{
 				case TireProp _:
+				case WrenchProp _:
 					ChargeTireRoll();
                     break;
 				case Extinguisher ex:
@@ -87,6 +88,7 @@ namespace Garage.Controller
             switch (currentOwningProp)
             {
                 case TireProp _:
+				case WrenchProp _:
                     ChargeTireRoll();
                     break;
             }
@@ -107,6 +109,9 @@ namespace Garage.Controller
 					isAbleToMove = true;
 					ex.GetComponent<IActionable>().OnStopPropAction(transform);
 					SetAnimParam((int)AnimationType.Oil, false);
+					break;
+				case WrenchProp _:
+					SetAnimParam((int)AnimationType.Throw);
 					break;
 			}
 		}

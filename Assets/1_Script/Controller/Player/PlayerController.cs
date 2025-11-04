@@ -1,4 +1,3 @@
-using DG.Tweening;
 using Garage.Controller.StateMachine;
 using Garage.Manager;
 using Garage.Props;
@@ -12,7 +11,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 
 namespace Garage.Controller
 {
@@ -58,7 +56,7 @@ namespace Garage.Controller
 
 		public Transform HipTf => hipTf;
 
-		private int[] animIDs = new int[10];
+		private int[] animIDs = new int[20];
 
 		
 		private bool isAbleToMove = true;
@@ -129,6 +127,7 @@ namespace Garage.Controller
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
+			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_THROW); 
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
