@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Garage.Actions
 {
+    [CreateAssetMenu(fileName = "TireRollAction", menuName = "SO/Prop Action/Tire Roll Action")]
     public class TireRollAction : PropAction
     {
         public override void OnStart(Transform controller)

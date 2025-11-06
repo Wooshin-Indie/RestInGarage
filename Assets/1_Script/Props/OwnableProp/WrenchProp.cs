@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -12,8 +13,9 @@ namespace Garage.Props
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
 		[SerializeField] private AnimationType animType;
+        [SerializeField] private PropAction propAction;
 
-		public AnimationType AnimType => animType;
+        public AnimationType AnimType => animType;
 
         public override void Awake()
         {
@@ -60,6 +62,10 @@ namespace Garage.Props
         }
         public virtual void OnHoldingPropAction(Transform controller) { }
         public virtual void OnReleasedPropAction(Transform controller) { }
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
+        }
 
         private void Update()
 		{

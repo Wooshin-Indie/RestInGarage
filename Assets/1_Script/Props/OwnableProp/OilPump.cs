@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
@@ -20,6 +21,7 @@ namespace Garage.Props
 		private Color originColor;
 
 		[SerializeField] private GameObject previewPrefab;
+        [SerializeField] private PropAction propAction;
 
         private Transform oilGunTf;
         private Rigidbody oilGunRigid;
@@ -72,6 +74,10 @@ namespace Garage.Props
         {
             Managers.Input.EnablePlayerRun();
             oilGun.StopOilSpray();
+        }
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
         }
 
         private void Update()

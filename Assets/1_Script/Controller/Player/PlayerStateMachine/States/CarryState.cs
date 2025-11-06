@@ -94,7 +94,7 @@ namespace Garage.Controller.StateMachine
             }
 			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
             {
-                controller.OnActionKeyHolding();
+                controller.OnActionKeyReleased();
                 return;
             }
 

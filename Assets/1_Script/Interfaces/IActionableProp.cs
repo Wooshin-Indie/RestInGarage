@@ -24,7 +24,7 @@ namespace Garage.Interfaces
         void OnReleasedPropAction(Transform controller);
 
         /// <summary>
-        /// 플레이어 컨트롤러가 저장할 액션 객체 전달
+        /// 프랍에 지정되어있는 액션을 플레이어 컨트롤러에 넘겨줌
         /// </summary>
         PropAction GetPropAction();
 	}

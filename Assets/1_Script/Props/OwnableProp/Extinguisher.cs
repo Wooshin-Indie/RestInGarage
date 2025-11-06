@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
@@ -16,9 +17,9 @@ namespace Garage.Props
 		[SerializeField] private ParticleSystem fireExPS;
 		[SerializeField] private float extinguishDistance;
 		[SerializeField] private float extinguishRadius;
+		[SerializeField] private PropAction propAction;
 
-
-		public float ExDistance => extinguishDistance;
+        public float ExDistance => extinguishDistance;
 		public float ExRadius => extinguishRadius;
 
 		private NetworkVariable<bool> IsAction = new(
@@ -149,8 +150,13 @@ namespace Garage.Props
             Managers.Input.EnablePlayerMove();
             IsAction.Value = false;
 		}
+        PropAction IActionableProp.GetPropAction()
+        {
+			return propAction;
+        }
 
-		private void OnActionChanged(bool prev, bool isAction)
+
+        private void OnActionChanged(bool prev, bool isAction)
 		{
 			if (prev == isAction) return;
 
@@ -173,5 +179,5 @@ namespace Garage.Props
 		{
 			return previewPrefab;
 		}
-	}
+    }
 }

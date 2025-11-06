@@ -598,6 +598,7 @@ MonoBehaviour:
     m_Bits: 2560
   cuttingColor: {r: 0.4716981, g: 0, b: 0, a: 0}
   previewPrefab: {fileID: 8084718555022500170, guid: 36a3bae8b49379f4fb90fac7a5b491c1, type: 3}
+  propAction: {fileID: 0}
 --- !u!4 &8084718555022998890 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}

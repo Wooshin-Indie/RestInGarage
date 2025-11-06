@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -12,8 +13,9 @@ namespace Garage.Props
 	{
 		[SerializeField] protected float height;
 		[SerializeField] private List<Material> materials = new();
+        [SerializeField] private PropAction propAction;
 
-		protected TireSize tireSize;
+        protected TireSize tireSize;
 		public TireSize TireSize { get => tireSize; set => tireSize = value; }
 
         public override void Awake()
@@ -111,9 +113,13 @@ namespace Garage.Props
             this.controller.SetAnimParam((int)AnimationType.Place);
 
             base.OnEndInteraction(controller);
-		}
+        }
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
+        }
 
-		public void TireRolling(float rollForce)
+        public void TireRolling(float rollForce)
 		{
             rigid.isKinematic = false;
 

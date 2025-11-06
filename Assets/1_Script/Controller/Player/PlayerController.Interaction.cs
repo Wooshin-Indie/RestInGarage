@@ -75,7 +75,9 @@ namespace Garage.Controller
         #endregion
 
         private PropAction currentPropAction = null;
-		private bool isActionStarted = false;
+
+        // carryState 들어가기 이전에 action키 꾹 누르고있을 때의 예외 처리
+        private bool isActionStarted = false;
         #region ActionKeyEtc
         public void OnActionKeyStart()
         {
