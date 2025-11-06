@@ -60,16 +60,7 @@ namespace Garage.Controller
 
 		private int[] animIDs = new int[10];
 
-		
-		private bool isAbleToMove = true;
-		private bool isAbleToRun = true;
-		private bool isInputLocked = false;
-        
-		public bool IsAbleToRun { get =>
-            Managers.Input.Control.Player.Run.enabled; set => isAbleToRun = value; }
-		public bool IsInputLocked { get => isInputLocked; set => isInputLocked = value; }	
-		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
-
+		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
         private float originWalkSpeed;
         private float originRunSpeed;
@@ -174,7 +165,7 @@ namespace Garage.Controller
 			if (!IsOwner) return;
 
 			UpdateSizeOfFireUIs();
-			if (!isInputLocked)
+			if (!Managers.Input.IsInputLocked)
 			{
 				stateMachine.CurState.HandleInput();
 				stateMachine.CurState.LogicUpdate();
@@ -197,7 +188,7 @@ namespace Garage.Controller
         /// </summary>
         public void MovePosition(Vector2 move, float speed, float maxSpeed)
 		{
-			if (!isAbleToMove)
+			if (!Managers.Input.IsAbleToMove)
 			{
 				rigid.linearVelocity = Vector3.zero;
 				SetAnimParam((int)AnimationType.Speed, 0);
@@ -456,7 +447,7 @@ namespace Garage.Controller
         {
             if (!IsOwner) return;
 
-            isInputLocked = true;
+			Managers.Input.DisablePlayerInputs();
             rigid.linearVelocity = Vector3.zero;
             SetAnimParam((int)AnimationType.Speed, 0);
         }
@@ -568,7 +559,7 @@ namespace Garage.Controller
 			if (!isRollChargeStarted)
 			{
 				isRollChargeStarted = true;
-				isAbleToMove = false;
+				Managers.Input.DisablePlayerMove();
                 rollGage = 0f;
                 UIManager.Game.PopTireRollingUI(transform);
                 UIManager.Game.ChargeTireRollingUI(rollGage);

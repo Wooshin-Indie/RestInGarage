@@ -31,7 +31,8 @@ namespace Garage.Props
 
 			if (GameManagerEx.Instance.IsDay)
 			{
-				controller.IsAbleToRun = this.isAbleToRun;
+				if (!isAbleToRun) 
+					Managers.Input.DisablePlayerRun();
 				transform.GetComponent<Rigidbody>().useGravity = false;
 				rigid.isKinematic = true;
 				transform.GetComponent<Collider>().isTrigger = true;
@@ -43,7 +44,7 @@ namespace Garage.Props
 		{
 			rigid.isKinematic = false;
 
-            controller.GetComponent<PlayerController>().IsAbleToRun = true;
+            Managers.Input.EnablePlayerRun();
             transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);

@@ -6,8 +6,11 @@ namespace Garage.Manager
 	{
 		private PlayerControl control;
 		public PlayerControl Control => control;
+        public bool IsInputLocked => control.Player.enabled;
+        public bool IsAbleToMove => control.Player.Move.enabled;
+		public bool IsAbleToRun => control.Player.Run.enabled;
 
-		public void Init()
+        public void Init()
 		{
 			control = new();
 			control.Enable();

@@ -56,8 +56,8 @@ namespace Garage.Controller
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
 			currentOwningProp = null;
-			isAbleToMove = true;
-		}
+			Managers.Input.EnablePlayerMove();
+        }
 
 
 		private void OnFootstep()
