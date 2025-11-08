@@ -13,9 +13,23 @@ namespace Garage.Controller
 	public partial class PlayerController
 	{
 
-		#region Animation Events
+        #region Animation Events
 
-		private void OnStartPlace()
+
+        // 애니메이션 클립에서 Key로 호출될 함수
+        private void OnActionKeyEvent()
+        {
+            if (currentPropAction == null) return;
+            if (currentOwningProp == null) return;
+            Debug.Log("Called animation event: OnActionEnd");
+
+            currentPropAction.OnAnimationKey(transform);
+            currentOwningProp.GetComponent<IActionableProp>()?.OnAnimationKeyPropAction(transform);
+            isActionStarted = false;
+            // OnActionEndEvent가 호출되는 유형의 액션에서 애니메이션 실행 중 액션 키 입력 시 오류 발생 가능 (액션 안에서 통제해야할라나)
+        }
+
+        private void OnStartPlace()
 		{
 			if (!IsOwner) return;
 
@@ -32,19 +46,9 @@ namespace Garage.Controller
 			if (currentOwningProp.GetComponent<IActionableProp>() != null)
 			{
 				currentOwningProp.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
-				if (currentOwningProp is TireProp) OnTireRollEnd();
-                // 이 때 굴림
             }
 			currentOwningProp = null;
 		}
-
-		// 타이어 놓을 때 애니메이션 키로 실행
-        private void OnTireRollEnd()
-        {
-            UIManager.Game.CloseTireRollingUI();
-            isRollChargeStarted = false;
-            Managers.Input.EnablePlayerMove(); // 0.1초 뒤에 enable 하면 좋을 듯
-        }
 
         private void OnPutTire()
 		{

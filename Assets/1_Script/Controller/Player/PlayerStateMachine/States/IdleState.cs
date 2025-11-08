@@ -26,10 +26,9 @@ namespace Garage.Controller.StateMachine
 		public override void LogicUpdate()
 		{
 			base.LogicUpdate();
-
 			// Move
 			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
-			bool isRun = controller.IsRun;
+            bool isRun = controller.IsRun;
 			controller.MovePosition(move, isRun ? controller.RunSpeed : controller.WalkSpeed, controller.RunSpeed);
 
 			// Interact

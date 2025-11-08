@@ -149,7 +149,8 @@ namespace Garage.Props
 			this.controller.SetAnimParam((int)AnimationType.Oil, false);
             Managers.Input.EnablePlayerMove();
             IsAction.Value = false;
-		}
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller) { }
         PropAction IActionableProp.GetPropAction()
         {
 			return propAction;

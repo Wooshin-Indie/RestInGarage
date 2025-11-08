@@ -34,6 +34,7 @@ namespace Garage.Props
 			transform.GetComponent<Rigidbody>().useGravity = false;
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;
+			isTireRolling = false;
             SyncStateServerRPC(true);
 		}
 
@@ -42,7 +43,6 @@ namespace Garage.Props
 			rigid.isKinematic = false;
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
 			transform.rotation = Quaternion.LookRotation(controller.forward);
-			GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
 
 			transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
@@ -53,7 +53,7 @@ namespace Garage.Props
 
 		public virtual void Update()
 		{
-			if (controller != null)
+			if (controller != null && !isTireRolling)
 			{
 				rigid.MovePosition(controller.GetSocket(PropType.Tire).position);
 				rigid.MoveRotation(controller.GetSocket(PropType.Tire).rotation);
@@ -109,8 +109,12 @@ namespace Garage.Props
         }
         public void OnReleasedPropAction(Transform controller)
         {
-            this.controller.SetAnimParam((int)AnimationType.Carry, false);
-            this.controller.SetAnimParam((int)AnimationType.Place);
+
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+        {
+            TireRolling(controller.GetComponent<PlayerController>().GetTireRollingForce());
+            controller.GetComponent<PlayerController>().TryEndInteractWithProp();
 
             base.OnEndInteraction(controller);
         }
@@ -119,20 +123,24 @@ namespace Garage.Props
             return propAction;
         }
 
+		private bool isTireRolling = false;
         public void TireRolling(float rollForce)
-		{
+        {
             rigid.isKinematic = false;
+			isTireRolling = true;
 
-			Transform playerTf = controller.transform;
+            Transform playerTf = controller.transform;
             float rollingForce = rollForce;
 
             transform.position = playerTf.position + new Vector3(0, height * 1.2f, 0) + playerTf.forward * 1.5f;
             transform.rotation = Quaternion.LookRotation(playerTf.forward);
             GetComponent<Rigidbody>().linearVelocity = (playerTf.forward * rollingForce);
+			Debug.Log("TireRoll: "+GetComponent<Rigidbody>().linearVelocity);
 
             transform.GetComponent<Rigidbody>().useGravity = true;
             transform.GetComponent<Collider>().isTrigger = false;
             SyncStateServerRPC(false);
+            Debug.Log("Tire is rolled");
         }
 	}
 }

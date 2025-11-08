@@ -1,4 +1,4 @@
-
+using UnityEngine;
 
 namespace Garage.Manager
 {
@@ -6,7 +6,7 @@ namespace Garage.Manager
 	{
 		private PlayerControl control;
 		public PlayerControl Control => control;
-        public bool IsInputLocked => control.Player.enabled;
+        public bool IsInputEnabled => control.Player.enabled;
         public bool IsAbleToMove => control.Player.Move.enabled;
 		public bool IsAbleToRun => control.Player.Run.enabled;
 
@@ -18,29 +18,35 @@ namespace Garage.Manager
 
 		public void EnablePlayerInputs()
 		{
+            Debug.Log("PlayerInputs Enabled");
 			control.Player.Enable();
         }
 		public void DisablePlayerInputs()
-		{
-			control.Player.Disable();
+        {
+            Debug.Log("PlayerInputs Enabled");
+            control.Player.Disable();
         }
 
 		public void EnablePlayerMove()
         {
+            Debug.Log("PlayerMove Enabled");
             control.Player.Move.Enable();
         }
         public void DisablePlayerMove()
         {
+            Debug.Log("PlayerMove Disabled");
             control.Player.Move.Disable();
         }
 
 		public void EnablePlayerRun()
         {
+            Debug.Log("PlayerRun Enabled");
             control.Player.Run.Enable();
         }
         public void DisablePlayerRun()
         {
-			control.Player.Run.Disable();
+            Debug.Log("PlayerRun Disabled");
+            control.Player.Run.Disable();
         }
     }
 }

@@ -190,6 +190,7 @@ MonoBehaviour:
   fireExPS: {fileID: 2662016363357497847}
   extinguishDistance: 10
   extinguishRadius: 5
+  propAction: {fileID: 11400000, guid: d5b4d212a6ff1f444a3eed9585029f6a, type: 2}
 --- !u!1001 &861096550656977930
 PrefabInstance:
   m_ObjectHideFlags: 0

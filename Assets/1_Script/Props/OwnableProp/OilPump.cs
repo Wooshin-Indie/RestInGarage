@@ -32,6 +32,7 @@ namespace Garage.Props
 		{
 			base.Awake();
 			Init();
+            oilGunTf = oilGun.GetComponent<Transform>();
             oilGunRigid = oilGun.GetComponent<Rigidbody>();
 			hits = new RaycastHit[5];
 
@@ -63,8 +64,7 @@ namespace Garage.Props
 
         public void OnStartPropAction(Transform controller)
         {
-            Managers.Input.DisablePlayerRun();
-			oilGun.StartOilSpray();
+			//oilGun.StartOilSpray();
         }
         public void OnHoldingPropAction(Transform controller)
         {
@@ -72,8 +72,11 @@ namespace Garage.Props
         }
         public void OnReleasedPropAction(Transform controller)
         {
-            Managers.Input.EnablePlayerRun();
-            oilGun.StopOilSpray();
+            //oilGun.StopOilSpray();
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+        {
+
         }
         PropAction IActionableProp.GetPropAction()
         {
@@ -105,7 +108,7 @@ namespace Garage.Props
             }
 			else
 			{
-				oilGunTf.localPosition = (initPos);
+				oilGunTf.localPosition = initPos;
 				oilGunTf.localRotation = (Quaternion.Euler(initRot));
 			}
 		}

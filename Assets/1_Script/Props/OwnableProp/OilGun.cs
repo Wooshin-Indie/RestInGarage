@@ -6,6 +6,11 @@ namespace Garage.Props
     {
         [SerializeField] private ParticleSystem oilParticle;
 
+        private void Awake()
+        {
+            oilParticle.Stop();
+        }
+
         public void StartOilSpray()
         {
             oilParticle.Play();

@@ -24,6 +24,12 @@ namespace Garage.Interfaces
         void OnReleasedPropAction(Transform controller);
 
         /// <summary>
+        /// 애니메이션 클립에서 정한 키에서 액션 처리 
+        /// 지금은 애니메이션 끝날 때의 액션 처리하려고 넣음
+        /// </summary>
+        void OnAnimationKeyPropAction(Transform controller);
+
+        /// <summary>
         /// 프랍에 지정되어있는 액션을 플레이어 컨트롤러에 넘겨줌
         /// </summary>
         PropAction GetPropAction();

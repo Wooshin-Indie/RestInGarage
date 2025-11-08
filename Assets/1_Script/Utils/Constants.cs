@@ -34,6 +34,7 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_KNOCKBACK = "IsKnockBack";
         public static readonly string ANIM_PARAM_CARRY_MULT = "CarryMult";
         public static readonly string ANIM_PARAM_FIX = "IsFix";
+        public static readonly string ANIM_PARAM_TIREROLL = "IsTireRoll";
 
         public static readonly int ANIM_LAYER_INDEX_LOWERBODY = 1;
 

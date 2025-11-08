@@ -58,7 +58,7 @@ namespace Garage.Controller
 
 		public Transform HipTf => hipTf;
 
-		private int[] animIDs = new int[10];
+		private int[] animIDs = new int[11];
 
 		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
@@ -121,6 +121,7 @@ namespace Garage.Controller
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
+			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL); 
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
@@ -161,17 +162,17 @@ namespace Garage.Controller
 		}
 
 		private void Update()
-		{
-			if (!IsOwner) return;
+        {
+            if (!IsOwner) return;
 
-			UpdateSizeOfFireUIs();
-			if (!Managers.Input.IsInputLocked)
-			{
-				stateMachine.CurState.HandleInput();
+            UpdateSizeOfFireUIs();
+			if (Managers.Input.IsInputEnabled)
+            {
+                stateMachine.CurState.HandleInput();
 				stateMachine.CurState.LogicUpdate();
-			}
+            }
 
-			OnUpdateSynchronization();
+            OnUpdateSynchronization();
 
 			// HACK
 			if (Input.GetKeyDown(KeyCode.T))
@@ -551,14 +552,14 @@ namespace Garage.Controller
             StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, Managers.Input.Control.Player.Interact.IsPressed());
         }
 
-		private bool isRollChargeStarted = false;
+		public bool IsRollChargeStarted = false;
 		private float rollGage = 0f; // 0f ~ 1f
         private bool isRollGageUpward = true;
         public void ChargeTireRoll()
 		{
-			if (!isRollChargeStarted)
+			if (!IsRollChargeStarted)
 			{
-				isRollChargeStarted = true;
+				IsRollChargeStarted = true;
 				Managers.Input.DisablePlayerMove();
                 rollGage = 0f;
                 UIManager.Game.PopTireRollingUI(transform);
@@ -597,11 +598,6 @@ namespace Garage.Controller
 				overallRollingForce = 0f;
 
             return overallRollingForce;
-        }
-		public void OnTireRollStart()
-		{
-            SetAnimParam((int)AnimationType.Carry, false);
-            SetAnimParam((int)AnimationType.Place);
         }
     }
 }

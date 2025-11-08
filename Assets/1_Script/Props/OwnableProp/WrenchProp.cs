@@ -56,12 +56,14 @@ namespace Garage.Props
 
         public virtual void OnStartPropAction(Transform controller)
         {
-            Managers.Input.DisablePlayerInputs();
-            //SetAnimParam((int)AnimationType.Swing, true);
-            //애니메이션 끝날 때 Managers.Input.EnablePlayerInputs();
+
         }
         public virtual void OnHoldingPropAction(Transform controller) { }
         public virtual void OnReleasedPropAction(Transform controller) { }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+		{
+
+		}
         PropAction IActionableProp.GetPropAction()
         {
             return propAction;

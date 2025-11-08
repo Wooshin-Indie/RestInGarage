@@ -98,12 +98,6 @@ namespace Garage.Controller.StateMachine
                 return;
             }
 
-			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
-			{
-				controller.OnEndAction();
-				return;
-			}
-
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
             {
                 controller.KickCar();

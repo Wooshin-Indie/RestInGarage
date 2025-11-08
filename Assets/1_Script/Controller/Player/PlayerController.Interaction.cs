@@ -82,6 +82,7 @@ namespace Garage.Controller
         public void OnActionKeyStart()
         {
             if (currentOwningProp == null) return;
+            if (isActionStarted) return;
 
             // 고칠거 있으면 fix하면서 interact state로 점프
             if (currentFixablePart != null)
@@ -115,15 +116,16 @@ namespace Garage.Controller
         // 액션 버튼에서 손을 뗐을 때
         public void OnActionKeyReleased()
         {
-			if (currentPropAction == null) return;
-			if (currentOwningProp == null) return;
+            if (currentPropAction == null) return;
+            if (currentOwningProp == null) return;
+            if (!isActionStarted) return;
 
             // 1. Action에게 Player가 할 일을 시킴
             currentPropAction.OnReleased(transform);
 
             // 2. Prop에게 "액션 끝났어" 라고 알려줌
             currentOwningProp.GetComponent<IActionableProp>()?.OnReleasedPropAction(transform);
-			isActionStarted = false;
+            isActionStarted = false;
         }
 
         public void OnEndAction()
@@ -207,8 +209,8 @@ namespace Garage.Controller
 		public void EndAllInteraction()
 		{
 			stateMachine.ChangeState(idleState);
-			OnEndAction();
-			TryEndInteractWithProp();
+			OnActionKeyReleased();
+            TryEndInteractWithProp();
 			currentFixablePart = null;
 		}
 
