@@ -8,6 +8,7 @@ TagManager:
   - Chat
   - ChatMessage
   - BubbleUI
+  - Floor
   layers:
   - Default
   - TransparentFX

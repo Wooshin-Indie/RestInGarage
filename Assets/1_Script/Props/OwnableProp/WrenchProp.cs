@@ -15,6 +15,8 @@ namespace Garage.Props
 
 		public AnimationType AnimType => animType;
 
+		private bool isInAir = false;
+
         public override void Awake()
         {
 			base.Awake();
@@ -119,9 +121,13 @@ namespace Garage.Props
 		private void OnCollisionEnter(Collision collision)
 		{
 			if (!IsHost) return;
+			if (isInAir && collision.gameObject.layer == Constants.INT_GROUND)
+			{
+				isInAir = false; return;
+			}
             if (!collision.gameObject.CompareTag(Constants.TAG_PLAYER)) return;
 			// HACK - temp param
-			if (rigid.linearVelocity.sqrMagnitude < 10f) return;
+			if (rigid.linearVelocity.sqrMagnitude < 10f || !isInAir) return;
 			if (controller != null) return;
 
 			// TODO - 필요시 플레이어가 맞는 부분에 VFX 생성
@@ -141,6 +147,7 @@ namespace Garage.Props
 			/// Rotation, Position을 플레이어와 겹치지 않도록 조정하고 각속도도 원하는대로 회전시킴
 			/// ----------
 
+			isInAir = true;
 			rigid.MoveRotation(Quaternion.identity);
 			rigid.MovePosition(transform.position + (controller.up + controller.forward) * 1f);
 			rigid.linearVelocity = ((controller.up + controller.forward) * rollingForce * 0.3f);
