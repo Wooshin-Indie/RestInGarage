@@ -149,7 +149,7 @@ namespace Garage.Props
 
 			isInAir = true;
 			rigid.MoveRotation(Quaternion.identity);
-			rigid.MovePosition(transform.position + (controller.up + controller.forward) * 1f);
+			rigid.MovePosition(transform.position + (controller.up + controller.forward) * .5f);
 			rigid.linearVelocity = ((controller.up + controller.forward) * rollingForce * 0.3f);
 			rigid.angularVelocity = transform.up * 10f;
 		}
