@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
@@ -7,21 +8,23 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class OilPump : OwnableProp, IPlaceable
+	public class OilPump : OwnableProp, IPlaceable, IActionableProp
     {
 		[SerializeField] private Vector3 initPos;
 		[SerializeField] private Vector3 initRot;
 
 		[SerializeField] private Transform rope;
-		[SerializeField] private Transform oilgun;
+		[SerializeField] private OilGun oilGun;
 
 		[SerializeField] private LayerMask hitLayers;
 		[SerializeField] private Color cuttingColor;
 		private Color originColor;
 
 		[SerializeField] private GameObject previewPrefab;
+        [SerializeField] private PropAction propAction;
 
-		private Rigidbody gunRigid;
+        private Transform oilGunTf;
+        private Rigidbody oilGunRigid;
 		private RaycastHit[] hits;
 		private Material ropeMaterial;
 
@@ -29,7 +32,8 @@ namespace Garage.Props
 		{
 			base.Awake();
 			Init();
-            gunRigid = oilgun.GetComponent<Rigidbody>();
+            oilGunTf = oilGun.GetComponent<Transform>();
+            oilGunRigid = oilGun.GetComponent<Rigidbody>();
 			hits = new RaycastHit[5];
 
 			if (rope != null)
@@ -58,19 +62,40 @@ namespace Garage.Props
 			}
 		}
 
-		private void Update()
+        public void OnStartPropAction(Transform controller)
+        {
+			//oilGun.StartOilSpray();
+        }
+        public void OnHoldingPropAction(Transform controller)
+        {
+
+        }
+        public void OnReleasedPropAction(Transform controller)
+        {
+            //oilGun.StopOilSpray();
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+        {
+
+        }
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
+        }
+
+        private void Update()
 		{
 			if (GameManagerEx.Instance.IsDay)
 			{
 				if (controller != null)
 				{
-					gunRigid.MovePosition(controller.GetSocket(PropType.Oilgun).position);
-					gunRigid.MoveRotation(controller.GetSocket(PropType.Oilgun).rotation);
+					oilGunRigid.MovePosition(controller.GetSocket(PropType.Oilgun).position);
+					oilGunRigid.MoveRotation(controller.GetSocket(PropType.Oilgun).rotation);
 				}
 				else
 				{
-					oilgun.localPosition = (initPos);
-					oilgun.localRotation = (Quaternion.Euler(initRot));
+					oilGunTf.localPosition = (initPos);
+					oilGunTf.localRotation = (Quaternion.Euler(initRot));
 				}
 
 				if (!IsHost) return;
@@ -83,8 +108,8 @@ namespace Garage.Props
             }
 			else
 			{
-				oilgun.localPosition = (initPos);
-				oilgun.localRotation = (Quaternion.Euler(initRot));
+				oilGunTf.localPosition = initPos;
+				oilGunTf.localRotation = (Quaternion.Euler(initRot));
 			}
 		}
 
@@ -96,7 +121,7 @@ namespace Garage.Props
             if (OwnClientId == ulong.MaxValue) return;
 
             Vector3 start = rope.position;
-			Vector3 end = oilgun.position;
+			Vector3 end = oilGunTf.position;
 
 			Ray ray = new Ray(start, (end - start).normalized);
 			int count = Physics.RaycastNonAlloc(ray, hits, Vector3.Distance(start, end), hitLayers);

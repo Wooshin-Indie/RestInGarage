@@ -139,7 +139,7 @@ namespace Garage.Props
 			material.SetColor("_Emissive_Color", Color.black);
 		}
 
-		public void SetGridPosition(Vector3 pos)
+        public void SetGridPosition(Vector3 pos)
 		{
 			transform.position = pos;
 			gridPosition.Value = pos;

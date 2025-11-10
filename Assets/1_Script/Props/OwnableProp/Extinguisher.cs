@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class Extinguisher : OwnableProp, IActionable, IPlaceable
+	public class Extinguisher : OwnableProp, IActionableProp, IPlaceable
 	{
 
 		[SerializeField] private GameObject previewPrefab;
@@ -16,9 +17,9 @@ namespace Garage.Props
 		[SerializeField] private ParticleSystem fireExPS;
 		[SerializeField] private float extinguishDistance;
 		[SerializeField] private float extinguishRadius;
+		[SerializeField] private PropAction propAction;
 
-
-		public float ExDistance => extinguishDistance;
+        public float ExDistance => extinguishDistance;
 		public float ExRadius => extinguishRadius;
 
 		private NetworkVariable<bool> IsAction = new(
@@ -121,7 +122,7 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
-		public void OnStartPropAction(Transform controller)
+        public void OnStartPropAction(Transform controller)
 		{
 			if (!IsOwner)
 			{
@@ -129,20 +130,34 @@ namespace Garage.Props
 				return;
 			}
 
-			IsAction.Value = true;
+            this.controller.SetAnimParam((int)AnimationType.Oil, true);
+            Managers.Input.DisablePlayerMove();
+            IsAction.Value = true;
 		}
+        public void OnHoldingPropAction(Transform controller)
+        {
 
-		public void OnStopPropAction(Transform controller)
+        }
+        public void OnReleasedPropAction(Transform controller)
 		{
 			if (!IsOwner)
 			{
 				Debug.LogWarning("You are not prop's owner");
 				return;
-			}
-			IsAction.Value = false;
-		}
+            }
 
-		private void OnActionChanged(bool prev, bool isAction)
+			this.controller.SetAnimParam((int)AnimationType.Oil, false);
+            Managers.Input.EnablePlayerMove();
+            IsAction.Value = false;
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller) { }
+        PropAction IActionableProp.GetPropAction()
+        {
+			return propAction;
+        }
+
+
+        private void OnActionChanged(bool prev, bool isAction)
 		{
 			if (prev == isAction) return;
 
@@ -165,5 +180,5 @@ namespace Garage.Props
 		{
 			return previewPrefab;
 		}
-	}
+    }
 }

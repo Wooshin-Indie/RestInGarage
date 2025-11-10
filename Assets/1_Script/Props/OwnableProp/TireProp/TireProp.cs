@@ -1,5 +1,7 @@
+using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
+using Garage.Manager;
 using Garage.Utils;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -7,12 +9,13 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class TireProp : OwnableProp, IActionable
+	public class TireProp : OwnableProp, IActionableProp
 	{
 		[SerializeField] protected float height;
 		[SerializeField] private List<Material> materials = new();
+        [SerializeField] private PropAction propAction;
 
-		protected TireSize tireSize;
+        protected TireSize tireSize;
 		public TireSize TireSize { get => tireSize; set => tireSize = value; }
 
         public override void Awake()
@@ -31,6 +34,7 @@ namespace Garage.Props
 			transform.GetComponent<Rigidbody>().useGravity = false;
             rigid.isKinematic = true;
             transform.GetComponent<Collider>().isTrigger = true;
+			isTireRolling = false;
             SyncStateServerRPC(true);
 		}
 
@@ -39,7 +43,6 @@ namespace Garage.Props
 			rigid.isKinematic = false;
 			transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
 			transform.rotation = Quaternion.LookRotation(controller.forward);
-			GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
 
 			transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
@@ -50,7 +53,7 @@ namespace Garage.Props
 
 		public virtual void Update()
 		{
-			if (controller != null)
+			if (controller != null && !isTireRolling)
 			{
 				rigid.MovePosition(controller.GetSocket(PropType.Tire).position);
 				rigid.MoveRotation(controller.GetSocket(PropType.Tire).rotation);
@@ -95,31 +98,49 @@ namespace Garage.Props
 			GetComponent<Renderer>().material = materials[(int)size];
 		}
 
-		public void OnStartPropAction(Transform controller)
+        public void OnStartPropAction(Transform controller)
 		{
-		}
+			Managers.Input.DisablePlayerMove();
+            this.controller.ChargeTireRoll();
+        }
+        public void OnHoldingPropAction(Transform controller)
+        {
+            this.controller.ChargeTireRoll();
+        }
+        public void OnReleasedPropAction(Transform controller)
+        {
 
-		public void OnStopPropAction(Transform controller)
-		{
-			TireRolling(controller);
+        }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+        {
+            TireRolling(controller.GetComponent<PlayerController>().GetTireRollingForce());
+            controller.GetComponent<PlayerController>().TryEndInteractWithProp();
 
             base.OnEndInteraction(controller);
-		}
+        }
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
+        }
 
-		private void TireRolling(Transform controller)
-		{
+		private bool isTireRolling = false;
+        public void TireRolling(float rollForce)
+        {
             rigid.isKinematic = false;
+			isTireRolling = true;
 
-            PlayerController pc = controller.GetComponent<PlayerController>();
-            float rollingForce = pc.GetTireRollingForce();
+            Transform playerTf = controller.transform;
+            float rollingForce = rollForce;
 
-            transform.position = controller.position + new Vector3(0, height * 1.2f, 0) + controller.forward * 1.5f;
-            transform.rotation = Quaternion.LookRotation(controller.forward);
-            GetComponent<Rigidbody>().linearVelocity = (controller.forward * rollingForce);
+            transform.position = playerTf.position + new Vector3(0, height * 1.2f, 0) + playerTf.forward * 1.5f;
+            transform.rotation = Quaternion.LookRotation(playerTf.forward);
+            GetComponent<Rigidbody>().linearVelocity = (playerTf.forward * rollingForce);
+			Debug.Log("TireRoll: "+GetComponent<Rigidbody>().linearVelocity);
 
             transform.GetComponent<Rigidbody>().useGravity = true;
             transform.GetComponent<Collider>().isTrigger = false;
             SyncStateServerRPC(false);
+            Debug.Log("Tire is rolled");
         }
 	}
 }

@@ -166,6 +166,7 @@ MonoBehaviour:
   materials:
   - {fileID: 2100000, guid: 0dffa260f92a15048ba88f90cb809dcc, type: 2}
   - {fileID: 2100000, guid: 18adc75eeeb75394c87c6cbf512cb333, type: 2}
+  propAction: {fileID: 11400000, guid: 59032ec62eb358b439920bbc92332a1a, type: 2}
 --- !u!64 &7020740912526171379
 MeshCollider:
   m_ObjectHideFlags: 0

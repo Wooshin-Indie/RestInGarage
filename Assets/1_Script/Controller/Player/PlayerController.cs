@@ -58,15 +58,7 @@ namespace Garage.Controller
 
 		private int[] animIDs = new int[20];
 
-		
-		private bool isAbleToMove = true;
-		private bool isAbleToRun = true;
-		private bool isInputLocked = false;
-        
-		public bool IsAbleToRun { get => isAbleToRun; set => isAbleToRun = value; }
-		public bool IsInputLocked { get => isInputLocked; set => isInputLocked = value; }	
-		public bool IsRun { get => IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
-
+		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
         private float originWalkSpeed;
         private float originRunSpeed;
@@ -127,7 +119,8 @@ namespace Garage.Controller
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
-			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_THROW); 
+			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL); 
+      animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_THROW);
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
@@ -168,17 +161,17 @@ namespace Garage.Controller
 		}
 
 		private void Update()
-		{
-			if (!IsOwner) return;
+        {
+            if (!IsOwner) return;
 
-			UpdateSizeOfFireUIs();
-			if (!isInputLocked)
-			{
-				stateMachine.CurState.HandleInput();
+            UpdateSizeOfFireUIs();
+			if (Managers.Input.IsInputEnabled)
+            {
+                stateMachine.CurState.HandleInput();
 				stateMachine.CurState.LogicUpdate();
-			}
+            }
 
-			OnUpdateSynchronization();
+            OnUpdateSynchronization();
 
 			// HACK
 			if (Input.GetKeyDown(KeyCode.T))
@@ -195,7 +188,7 @@ namespace Garage.Controller
         /// </summary>
         public void MovePosition(Vector2 move, float speed, float maxSpeed)
 		{
-			if (!isAbleToMove)
+			if (!Managers.Input.IsAbleToMove)
 			{
 				rigid.linearVelocity = Vector3.zero;
 				SetAnimParam((int)AnimationType.Speed, 0);
@@ -238,7 +231,7 @@ namespace Garage.Controller
 			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
 
             // 차는 애니메이션 실행
-            Managers.Input.DisablePlayerActions();
+            Managers.Input.DisablePlayerInputs();
             SetAnimParam((int)AnimationType.Kick);
         }
 
@@ -277,7 +270,7 @@ namespace Garage.Controller
             rigid.rotation = targetRot;
 
 			// 플레이어 움직임 Lock걸기
-            Managers.Input.DisablePlayerActions();
+            Managers.Input.DisablePlayerInputs();
             rigid.constraints = RigidbodyConstraints.FreezeRotation | originalConstraints;
             EndAllInteraction();
 
@@ -454,7 +447,7 @@ namespace Garage.Controller
         {
             if (!IsOwner) return;
 
-            isInputLocked = true;
+			Managers.Input.DisablePlayerInputs();
             rigid.linearVelocity = Vector3.zero;
             SetAnimParam((int)AnimationType.Speed, 0);
         }
@@ -553,20 +546,20 @@ namespace Garage.Controller
 			UIManager.Game.PopPropDetectUI(recentlyDetectedProp);
         }
 
-		public void OnUpdateInteractSpeedBoosts(bool isInteractPressed)
+		public void OnUpdateInteractSpeedBoosts()
 		{
-            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, isInteractPressed);
+            StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, Managers.Input.Control.Player.Interact.IsPressed());
         }
 
-		private bool isRollChargeStarted = false;
+		public bool IsRollChargeStarted = false;
 		private float rollGage = 0f; // 0f ~ 1f
         private bool isRollGageUpward = true;
-        private void ChargeTireRoll()
+        public void ChargeTireRoll()
 		{
-			if (!isRollChargeStarted)
+			if (!IsRollChargeStarted)
 			{
-				isRollChargeStarted = true;
-				isAbleToMove = false;
+				IsRollChargeStarted = true;
+				Managers.Input.DisablePlayerMove();
                 rollGage = 0f;
                 UIManager.Game.PopTireRollingUI(transform);
                 UIManager.Game.ChargeTireRollingUI(rollGage);
@@ -595,12 +588,6 @@ namespace Garage.Controller
             UIManager.Game.ChargeTireRollingUI(rollGage);
             
 			// 꾹 누르고 있을 때 차지됨, 뗄 때 나가야됨(그러면서 게이지는 초기화)
-        }
-		private void OnTireRoll()
-		{
-            UIManager.Game.CloseTireRollingUI();
-            isRollChargeStarted = false;
-            isAbleToMove = true;
         }
 		public float GetTireRollingForce()
 		{

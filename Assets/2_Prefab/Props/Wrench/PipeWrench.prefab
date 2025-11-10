@@ -132,6 +132,7 @@ MonoBehaviour:
   previewPrefab: {fileID: 8379998864351062203, guid: 8521ff113355b5441957696f63ae537d, type: 3}
   isAbleToRun: 1
   animType: 2
+  propAction: {fileID: 11400000, guid: 5f9d30cb0cc33b340a83ed4a3c2081d0, type: 2}
 --- !u!1001 &8225151536918808819
 PrefabInstance:
   m_ObjectHideFlags: 0

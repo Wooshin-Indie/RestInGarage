@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -7,13 +8,14 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class WrenchProp : OwnableProp, IPlaceable, IActionable
+	public class WrenchProp : OwnableProp, IPlaceable, IActionableProp
 	{
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
 		[SerializeField] private AnimationType animType;
+        [SerializeField] private PropAction propAction;
 
-		public AnimationType AnimType => animType;
+        public AnimationType AnimType => animType;
 
 		private bool isInAir = false;
 
@@ -33,7 +35,8 @@ namespace Garage.Props
 
 			if (GameManagerEx.Instance.IsDay)
 			{
-				controller.IsAbleToRun = this.isAbleToRun;
+				if (!isAbleToRun) 
+					Managers.Input.DisablePlayerRun();
 				transform.GetComponent<Rigidbody>().useGravity = false;
 				rigid.isKinematic = true;
 				transform.GetComponent<Collider>().isTrigger = true;
@@ -45,7 +48,7 @@ namespace Garage.Props
 		{
 			rigid.isKinematic = false;
 
-            controller.GetComponent<PlayerController>().IsAbleToRun = true;
+            Managers.Input.EnablePlayerRun();
             transform.GetComponent<Rigidbody>().useGravity = true;
 			transform.GetComponent<Collider>().isTrigger = false;
 			SyncStateServerRPC(false);
@@ -53,7 +56,22 @@ namespace Garage.Props
 			base.OnEndInteraction(controller);
 		}
 
-		private void Update()
+        public virtual void OnStartPropAction(Transform controller)
+        {
+
+        }
+        public virtual void OnHoldingPropAction(Transform controller) { }
+        public virtual void OnReleasedPropAction(Transform controller) { }
+        public virtual void OnAnimationKeyPropAction(Transform controller)
+		{
+
+		}
+        PropAction IActionableProp.GetPropAction()
+        {
+            return propAction;
+        }
+
+        private void Update()
 		{
 			if (GameManagerEx.Instance.IsDay)
 			{
