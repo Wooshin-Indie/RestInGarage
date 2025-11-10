@@ -49,8 +49,23 @@ namespace Garage.Controller
             }
 			currentOwningProp = null;
 		}
+    
+		private void OnEndThrow()
+		{
+			if (!IsOwner) return;
 
-        private void OnPutTire()
+			isAbleToMove = true;
+			if (currentOwningProp == null) return;
+
+			if (currentOwningProp.GetComponent<IActionable>() != null)
+			{
+				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
+				OnTireRoll();
+			}
+			currentOwningProp = null;
+		}
+
+		private void OnPutTire()
 		{
 			if (!IsOwner) return;
 			if (currentOwningProp == null) return;
