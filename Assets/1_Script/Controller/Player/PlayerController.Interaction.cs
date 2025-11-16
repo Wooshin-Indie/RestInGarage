@@ -4,9 +4,7 @@ using Garage.Manager;
 using Garage.Props;
 using Garage.Structs.CarPart;
 using Garage.Utils;
-using Manager;
 using Unity.Netcode;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -74,76 +72,71 @@ namespace Garage.Controller
 		}
         #endregion
 
-        private PropAction currentPropAction = null;
-
-        // carryState 들어가기 이전에 action키 꾹 누르고있을 때의 예외 처리
-        private bool isActionStarted = false;
         #region ActionKeyEtc
-        public void OnActionKeyStart()
-        {
-            if (currentOwningProp == null) return;
-            if (isActionStarted) return;
 
-            // 고칠거 있으면 fix하면서 interact state로 점프
-            if (currentFixablePart != null)
-			{ 
-				TryStartFix();
+        private ActionBase currentPropAction = null;
+
+		public void GetActionInput()
+		{
+			if (currentOwningProp == null) return;
+
+			for (int i = 0; i < currentOwningProp.PropActions.Count; i++)
+			{
+				if (currentOwningProp.PropActions[i].GetInputAction().WasPressedThisFrame())
+				{
+					currentPropAction = currentOwningProp.PropActions[i];
+					stateMachine.ChangeState(actionState);
+				}
+			}
+		}
+		public void OnActionKeyStart()
+		{
+			if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
 				return;
 			}
 
-            if (currentPropAction == null) return;
-
-            // 1. Action에게 Player가 할 일을 시킴
-            currentPropAction.OnStart(transform);
-
-            // 2. Prop에게 "이제 액션 시작했으니 너도 반응해" 라고 알려줌 (콜백 호출)
-            currentOwningProp.GetComponent<IActionableProp>()?.OnStartPropAction(transform);
-
-            isActionStarted = true;
-        }
+			currentPropAction.OnStart(currentOwningProp);
+		}
         public void OnActionKeyHolding()
-        {
-            if (currentPropAction == null) return;
-            if (currentOwningProp == null) return;
-			if (!isActionStarted) return;
+		{
+			if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
+				return;
+			}
 
-            // 1. Action에게 Player가 할 일을 시킴
-            currentPropAction.OnHolding(transform);
-
-			// 2. Prop에게 "액션 계속되고 있어" 라고 알려줌
-			currentOwningProp.GetComponent<IActionableProp>()?.OnHoldingPropAction(transform);
+			currentPropAction.OnHolding(currentOwningProp);
         }
-        // 액션 버튼에서 손을 뗐을 때
         public void OnActionKeyReleased()
         {
-            if (currentPropAction == null) return;
-            if (currentOwningProp == null) return;
-            if (!isActionStarted) return;
-
-            // 1. Action에게 Player가 할 일을 시킴
-            currentPropAction.OnReleased(transform);
-
-            // 2. Prop에게 "액션 끝났어" 라고 알려줌
-            currentOwningProp.GetComponent<IActionableProp>()?.OnReleasedPropAction(transform);
-            isActionStarted = false;
+            if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
+				return;
+			}
+            
+            currentPropAction.OnReleased(currentOwningProp);
+			currentPropAction = null;
         }
 
-        public void OnEndAction()
-		{
-			if (currentOwningProp == null) return;
-			if (currentOwningProp.GetComponent<IActionableProp>() == null) return;
+  //      public void OnEndAction()
+		//{
+		//	if (currentOwningProp == null) return;
+		//	if (currentOwningProp.GetComponent<IActionableProp>() == null) return;
 
-			switch (currentOwningProp)
-            {
-                case WrenchProp wr:
-                    wr.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
-                    break;
-                case TireProp _:
-					SetAnimParam((int)AnimationType.Carry, false);
-					SetAnimParam((int)AnimationType.Place);
-					break;
-            }
-        }
+		//	switch (currentOwningProp)
+  //          {
+  //              case WrenchProp wr:
+  //                  wr.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
+  //                  break;
+  //              case TireProp _:
+		//			SetAnimParam((int)AnimationType.Carry, false);
+		//			SetAnimParam((int)AnimationType.Place);
+		//			break;
+  //          }
+  //      }
 
         /// <summary>
         /// 수리를 시작할 때 호출
@@ -190,7 +183,6 @@ namespace Garage.Controller
         public void OnInteractionGranted(OwnableProp prop)
 		{
 			currentOwningProp = prop;
-			currentPropAction = currentOwningProp.GetComponent<IActionableProp>()?.GetPropAction();
 
 			if (currentOwningProp.GetComponent<IPlaceable>() == null)
 			{

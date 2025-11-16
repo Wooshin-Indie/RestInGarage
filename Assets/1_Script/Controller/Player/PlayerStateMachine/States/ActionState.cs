@@ -1,10 +1,9 @@
 using Garage.Manager;
-using UnityEngine;
 
 namespace Garage.Controller.StateMachine
 {
-    // 플레이어가 맘대로 움직일 수 없는 행동 취할 때
-    public class ActionState : StateBase
+	// 플레이어가 맘대로 움직일 수 없는 행동 취할 때
+	public class ActionState : StateBase
     {
         public ActionState(PlayerController controller, PlayerStateMachine stateMachine)
             : base(controller, stateMachine) { }
@@ -12,13 +11,15 @@ namespace Garage.Controller.StateMachine
         public override void Enter()
         {
             base.Enter();
-            Managers.Input.DisablePlayerInputs();
-        }
+            Managers.Input.DisablePlayerMove();
+            controller.OnActionKeyStart();
+		}
 
         public override void Exit()
         {
             base.Exit();
-            Managers.Input.EnablePlayerInputs();
+            controller.OnActionKeyReleased();
+            Managers.Input.EnablePlayerMove();
         }
 
         public override void HandleInput()
@@ -29,7 +30,7 @@ namespace Garage.Controller.StateMachine
         public override void LogicUpdate()
         {
             base.LogicUpdate();
-
+            controller.OnActionKeyHolding();
         }
 
         public override void PhysicsUpdate()

@@ -1,38 +1,43 @@
+using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
+using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.TextCore.Text;
 
 namespace Garage.Props
 {
 	public class OwnableProp : PropBase, IKeyCodeDescription
     {
-		private Material material;
+		[Header("Actions")]
+		[SerializeField] private List<ActionBase> propActions = new();
 
+		[Header("Graphics")]
 		[SerializeField] private MeshRenderer meshRenderer;
 		[SerializeField] private Color targetColor;
 
+		[Header("Carry")]
 		[SerializeField, Tooltip("Determine carry this prop with two hand or not")]
 		private bool isCarry;
 		[SerializeField] private float carrySpeedMultiplier;
 
 		private NetworkVariable<ulong> ownerClientId = new NetworkVariable<ulong>(ulong.MaxValue);
+
+		private Material material;
 		protected PlayerController controller;
-		public ulong OwnClientId => ownerClientId.Value;
-		public PlayerController Controller => controller;
-
         protected NetworkVariable<Vector3> gridPosition = new();
-
-		public bool IsCarry => isCarry;
-		public float CarrySpeedMultiplier => carrySpeedMultiplier;
 
 		private bool isTargetted = false;
 
+		#region Properties
+		public PlayerController Controller => controller;
+		public List<ActionBase> PropActions => propActions;
+		public ulong OwnClientId => ownerClientId.Value;
+		public float CarrySpeedMultiplier => carrySpeedMultiplier;
+		public bool IsCarry => isCarry;
+		#endregion
 
-        public virtual void Init()
+		public virtual void Init()
         {
 			InitKeyDescriptions();
         }

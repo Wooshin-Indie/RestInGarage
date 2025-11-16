@@ -1,6 +1,5 @@
 using Garage.Interfaces;
 using Garage.Manager;
-using Garage.Props;
 using Garage.Utils;
 using UnityEngine;
 
@@ -81,22 +80,7 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-
-            if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
-			{
-				controller.OnActionKeyStart();
-				return;
-			}
-			else if (Managers.Input.Control.Player.Action.IsPressed())
-			{
-                controller.OnActionKeyHolding();
-                return;
-            }
-			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
-            {
-                controller.OnActionKeyReleased();
-                return;
-            }
+			controller.GetActionInput();
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
             {

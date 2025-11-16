@@ -1,4 +1,3 @@
-using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -8,12 +7,11 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class WrenchProp : OwnableProp, IPlaceable, IActionableProp
+	public class WrenchProp : OwnableProp, IPlaceable
 	{
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
 		[SerializeField] private AnimationType animType;
-        [SerializeField] private PropAction propAction;
 
         public AnimationType AnimType => animType;
 
@@ -55,21 +53,6 @@ namespace Garage.Props
 
 			base.OnEndInteraction(controller);
 		}
-
-        public virtual void OnStartPropAction(Transform controller)
-        {
-
-        }
-        public virtual void OnHoldingPropAction(Transform controller) { }
-        public virtual void OnReleasedPropAction(Transform controller) { }
-        public virtual void OnAnimationKeyPropAction(Transform controller)
-		{
-
-		}
-        PropAction IActionableProp.GetPropAction()
-        {
-            return propAction;
-        }
 
         private void Update()
 		{
@@ -125,17 +108,6 @@ namespace Garage.Props
 			return previewPrefab;
 		}
 
-		public void OnStartPropAction(Transform controller)
-		{
-
-		}
-
-		public void OnStopPropAction(Transform controller)
-		{
-			OnEndInteraction(controller);
-			ThrowWrench(controller);
-		}
-
 		private void OnCollisionEnter(Collision collision)
 		{
 			if (!IsHost) return;
@@ -154,10 +126,9 @@ namespace Garage.Props
 			collision.gameObject.GetComponent<PlayerController>().KnockBackClientRPC(knockbackDirection, rigid.mass);
 		}
 
-		private void ThrowWrench(Transform controller)
+		public void ThrowWrench(float throwForce)
 		{
-			PlayerController pc = controller.GetComponent<PlayerController>();
-			float rollingForce = pc.GetTireRollingForce();
+			PlayerController pc = controller.transform.GetComponent<PlayerController>();
 
 			///	-- NOTE --
 			/// 해머의 특성 (무게중심이나 질량) 때문에
@@ -167,8 +138,8 @@ namespace Garage.Props
 
 			isInAir = true;
 			rigid.MoveRotation(Quaternion.identity);
-			rigid.MovePosition(transform.position + (controller.up + controller.forward) * .5f);
-			rigid.linearVelocity = ((controller.up + controller.forward) * rollingForce * 0.3f);
+			rigid.MovePosition(transform.position + (controller.transform.up + controller.transform.forward) * .5f);
+			rigid.linearVelocity = ((controller.transform.up + controller.transform.forward) * throwForce * 0.3f);
 			rigid.angularVelocity = transform.up * 10f;
 		}
 	}

@@ -89,6 +89,7 @@ namespace Garage.Controller
 
 		public IdleState idleState;
 		public CarryState carryState;
+		public ActionState actionState;
 		public InteractState interactState;
 
 		private Vector3 camDir;
@@ -104,6 +105,7 @@ namespace Garage.Controller
 			stateMachine = new PlayerStateMachine();
 			idleState = new IdleState(this, stateMachine);
 			carryState = new CarryState(this, stateMachine);
+			actionState = new ActionState(this, stateMachine);
 			interactState = new InteractState(this, stateMachine);
 			stateMachine.Init(idleState);
 
@@ -120,7 +122,7 @@ namespace Garage.Controller
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
 			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL); 
-      animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_THROW);
+			animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_THROW);
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
@@ -554,6 +556,7 @@ namespace Garage.Controller
 		public bool IsRollChargeStarted = false;
 		private float rollGage = 0f; // 0f ~ 1f
         private bool isRollGageUpward = true;
+		// TODO - 공통적인 게이지로 사용가능하도록 수정 필요
         public void ChargeTireRoll()
 		{
 			if (!IsRollChargeStarted)

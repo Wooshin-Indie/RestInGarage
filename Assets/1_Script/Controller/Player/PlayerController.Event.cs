@@ -1,8 +1,5 @@
-
-using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Props;
-using Garage.Utils;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -15,55 +12,17 @@ namespace Garage.Controller
 
         #region Animation Events
 
-
         // 애니메이션 클립에서 Key로 호출될 함수
         private void OnActionKeyEvent()
         {
-            if (currentPropAction == null) return;
-            if (currentOwningProp == null) return;
-            Debug.Log("Called animation event: OnActionEnd");
-
-            currentPropAction.OnAnimationKey(transform);
-            currentOwningProp.GetComponent<IActionableProp>()?.OnAnimationKeyPropAction(transform);
-            isActionStarted = false;
-            // OnActionEndEvent가 호출되는 유형의 액션에서 애니메이션 실행 중 액션 키 입력 시 오류 발생 가능 (액션 안에서 통제해야할라나)
-        }
-
-        private void OnStartPlace()
-		{
-			if (!IsOwner) return;
-
-			Managers.Input.DisablePlayerMove();
-            rigid.linearVelocity = Vector3.zero;
-		}
-		private void OnEndPlace() // 타이어 굴리기
-		{
-			if (!IsOwner) return;
-
-			Managers.Input.EnablePlayerMove();
-			if (currentOwningProp == null) return;
-
-			if (currentOwningProp.GetComponent<IActionableProp>() != null)
+			if (currentPropAction == null || currentOwningProp == null)
 			{
-				currentOwningProp.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
-            }
-			currentOwningProp = null;
-		}
-    
-		private void OnEndThrow()
-		{
-			if (!IsOwner) return;
-
-			isAbleToMove = true;
-			if (currentOwningProp == null) return;
-
-			if (currentOwningProp.GetComponent<IActionable>() != null)
-			{
-				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
-				OnTireRoll();
+				Debug.LogError("PlayerController.Event - Prop/PropAction is null");
+				return;
 			}
-			currentOwningProp = null;
-		}
+
+			currentPropAction.OnAnimationKey(currentOwningProp);
+        }
 
 		private void OnPutTire()
 		{

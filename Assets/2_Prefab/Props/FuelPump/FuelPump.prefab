@@ -655,6 +655,7 @@ MonoBehaviour:
   ItemData: {fileID: 11400000, guid: 921609f520b9f194a93d936f8de025f3, type: 2}
   upgradeLevel:
     m_InternalValue: 0
+  propActions: []
   meshRenderer: {fileID: 8084718555020574602}
   targetColor: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
   isCarry: 0
@@ -668,7 +669,6 @@ MonoBehaviour:
     m_Bits: 2560
   cuttingColor: {r: 0.4716981, g: 0, b: 0, a: 0}
   previewPrefab: {fileID: 8084718555022500170, guid: 36a3bae8b49379f4fb90fac7a5b491c1, type: 3}
-  propAction: {fileID: 11400000, guid: d5b4d212a6ff1f444a3eed9585029f6a, type: 2}
 --- !u!4 &8084718555022998890 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 89d8c5b96bd715c4e8569910516adbf7, type: 3}
