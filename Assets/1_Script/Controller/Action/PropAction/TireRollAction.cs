@@ -20,6 +20,12 @@ namespace Garage.Actions
 			prop.Controller.OnUpdatePlayerGage();
 		}
 
+		public override void OnCanceled(TireProp prop)
+		{
+			prop.Controller.CloseGageUI();
+			Managers.Input.EnablePlayerMove();
+		}
+
 		public override void OnReleased(TireProp prop)
 		{
 			prop.Controller.GetComponent<PlayerController>().

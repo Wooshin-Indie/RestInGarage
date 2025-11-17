@@ -19,6 +19,11 @@ namespace Garage.Actions
 
 		}
 
+		public override void OnCanceled(WrenchProp prop)
+		{
+
+		}
+
 		public override void OnReleased(WrenchProp prop)
 		{
 			//SetAnimParam((int)AnimationType.Swing, true);

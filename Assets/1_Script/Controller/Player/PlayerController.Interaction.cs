@@ -152,7 +152,7 @@ namespace Garage.Controller
 
 			for (int i = 0; i < currentOwningProp.PropActions.Count; i++)
 			{
-				if (currentOwningProp.PropActions[i].GetInputAction().WasPressedThisFrame())
+				if (currentOwningProp.PropActions[i].GetActionIA().WasPressedThisFrame())
 				{
 					currentPropAction = currentOwningProp.PropActions[i];
 					stateMachine.ChangeState(actionState);
@@ -179,12 +179,18 @@ namespace Garage.Controller
 			}
 			if (isActionKeyReleased) return;
 
-			if (currentPropAction.GetInputAction().IsPressed())
+			if (currentPropAction.GetActionIA().IsPressed())
 			{
 				currentPropAction.OnHolding(currentOwningProp);
 			}
 
-			if (currentPropAction.GetInputAction().WasReleasedThisFrame())
+			if (currentPropAction.GetCancelIA().WasPressedThisFrame())
+			{
+				currentPropAction.OnCanceled(currentOwningProp);
+				stateMachine.ChangeState(carryState);
+			}
+
+			if (currentPropAction.GetActionIA().WasReleasedThisFrame())
 				OnActionKeyReleased();
 		}
         public void OnActionKeyReleased()

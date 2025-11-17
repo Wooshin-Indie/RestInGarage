@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cddf824e00cdc15429ef70d6ea95ee0a, type: 3}
   m_Name: ThrowAction
   m_EditorClassIdentifier: 
+  isAbleToCancel: 1
+  actionIAName: Player/Action2
+  cancelIAName: Player/Action1
   endCondition: 1
-  actionName: Player/Action2

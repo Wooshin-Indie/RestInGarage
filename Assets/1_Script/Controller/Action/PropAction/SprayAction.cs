@@ -21,6 +21,11 @@ namespace Garage.Actions
 
 		}
 
+		public override void OnCanceled(OilPump prop)
+		{
+
+		}
+
 		public override void OnReleased(OilPump prop)
 		{
 			prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.Oil, false);

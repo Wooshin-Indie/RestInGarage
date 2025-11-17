@@ -9,6 +9,7 @@ namespace Garage.Actions
 		public abstract void OnStart(T prop);
 		public abstract void OnHolding(T prop);
 		public abstract void OnReleased(T prop);
+		public abstract void OnCanceled(T prop);
 		public abstract void OnAnimationKey(T prop);
 
 		public sealed override void OnStart(Object obj)
@@ -21,6 +22,11 @@ namespace Garage.Actions
 			if (!IsValid(obj)) return;
 			OnHolding((T)obj);
 		}
+		public sealed override void OnCanceled(Object obj)
+		{
+			if(!IsValid(obj)) return;
+			OnCanceled((T)obj);
+		}
 		public sealed override void OnReleased(Object obj)
 		{
 			if (!IsValid(obj)) return;
@@ -31,6 +37,7 @@ namespace Garage.Actions
 			if (!IsValid(obj)) return;
 			OnAnimationKey((T)obj);
 		}
+		
 
 		private bool IsValid(Object obj)
 		{

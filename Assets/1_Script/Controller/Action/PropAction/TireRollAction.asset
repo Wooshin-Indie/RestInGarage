@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b77d0da50fb2624b8af3569b9225cba, type: 3}
   m_Name: TireRollAction
   m_EditorClassIdentifier: 
+  isAbleToCancel: 1
+  actionIAName: Player/Action2
+  cancelIAName: Player/Action1
   endCondition: 1
-  actionName: Player/Action2
