@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-public class TireRollingUI : MonoBehaviour
+public class PlayerGageUI : MonoBehaviour
 {
     [SerializeField] private RectTransform greenFillMask;
 

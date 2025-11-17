@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46bcf7f410e037543a5c9351bd7fb0de, type: 3}
   m_Name: SwingAction
   m_EditorClassIdentifier: 
-  releaseTrigger: 0
+  endCondition: 0
+  actionName: Player/Action1

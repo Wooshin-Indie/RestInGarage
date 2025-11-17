@@ -11,7 +11,7 @@ namespace Garage.Actions
 		public override void OnStart(WrenchProp prop)
 		{
 			Managers.Input.DisablePlayerMove();
-			prop.Controller.ChargeTireRoll();
+			prop.Controller.OnUpdatePlayerGage();
 		}
 
 		public override void OnHolding(WrenchProp prop)
@@ -27,7 +27,6 @@ namespace Garage.Actions
 
 		public override void OnAnimationKey(WrenchProp prop)
 		{
-			prop.ThrowWrench(prop.Controller.GetComponent<PlayerController>().GetTireRollingForce());
 			prop.Controller.GetComponent<PlayerController>().TryEndInteractWithProp();
 			prop.OnEndInteraction(prop.Controller.transform);
 

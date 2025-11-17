@@ -128,8 +128,11 @@ namespace Garage.Props
 
 		public void ThrowWrench(float throwForce)
 		{
-			PlayerController pc = controller.transform.GetComponent<PlayerController>();
+			rigid.isKinematic = false;
 
+			transform.GetComponent<Rigidbody>().useGravity = true;
+			transform.GetComponent<Collider>().isTrigger = false;
+			SyncStateServerRPC(false);
 			///	-- NOTE --
 			/// 해머의 특성 (무게중심이나 질량) 때문에
 			/// 던질 때 플레이어를 밀치거나 회전이 이상하게 되는 경우가 발생

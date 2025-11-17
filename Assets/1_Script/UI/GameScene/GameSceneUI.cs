@@ -49,8 +49,8 @@ namespace Garage.UI.GameScene
 
             bossWarningUI.gameObject.SetActive(false);
             propDetectUI.gameObject.SetActive(false);
-            tireRollingUI = Instantiate(tireRollingUIPrefab, transform).GetComponent<TireRollingUI>();
-            tireRollingUI.gameObject.SetActive(false);
+            playerGageUI = Instantiate(tireRollingUIPrefab, transform).GetComponent<PlayerGageUI>();
+            playerGageUI.gameObject.SetActive(false);
         }
 
 
@@ -394,18 +394,18 @@ namespace Garage.UI.GameScene
             emoteGoodUI.PopEmoteUI(car.transform);
         }
 
-        private TireRollingUI tireRollingUI;
-        public void PopTireRollingUI(Transform tf)
+        private PlayerGageUI playerGageUI;
+        public void PopPlayerGageUI(Transform tf)
         {
-            tireRollingUI.PopUI(tf);
+            playerGageUI.PopUI(tf);
         }
-        public void CloseTireRollingUI()
+        public void ClosePlayerGageUI()
         {
-            tireRollingUI.CloseUI();
+            playerGageUI.CloseUI();
         }
-        public void ChargeTireRollingUI(float rollGage)
+        public void SetPlayerGageUI(float rollGage)
         {
-            tireRollingUI.ApplyRollGage(rollGage);
+            playerGageUI.ApplyRollGage(rollGage);
         }
     }
 }

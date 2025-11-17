@@ -10,11 +10,11 @@ using UnityEngine;
 namespace Garage.Controller
 {
 	/// <summary>
-	/// Interaction 관련 함수들
+	/// Interaction, Action, Detect 등 다른 물체와의 상호작용에 관한 스크립트
 	/// </summary>
 	public partial class PlayerController
 	{
-        #region InteractKey
+        #region Interacts
         public void OnInteractPressed()
         {
             if (recentlyDetectedProp == null) return;
@@ -70,79 +70,12 @@ namespace Garage.Controller
                 currentPropAction = null;
             }
 		}
-        #endregion
 
-        #region ActionKeyEtc
-
-        private ActionBase currentPropAction = null;
-
-		public void GetActionInput()
-		{
-			if (currentOwningProp == null) return;
-
-			for (int i = 0; i < currentOwningProp.PropActions.Count; i++)
-			{
-				if (currentOwningProp.PropActions[i].GetInputAction().WasPressedThisFrame())
-				{
-					currentPropAction = currentOwningProp.PropActions[i];
-					stateMachine.ChangeState(actionState);
-				}
-			}
-		}
-		public void OnActionKeyStart()
-		{
-			if (currentPropAction == null || currentOwningProp == null)
-			{
-				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
-				return;
-			}
-
-			currentPropAction.OnStart(currentOwningProp);
-		}
-        public void OnActionKeyHolding()
-		{
-			if (currentPropAction == null || currentOwningProp == null)
-			{
-				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
-				return;
-			}
-
-			currentPropAction.OnHolding(currentOwningProp);
-        }
-        public void OnActionKeyReleased()
-        {
-            if (currentPropAction == null || currentOwningProp == null)
-			{
-				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
-				return;
-			}
-            
-            currentPropAction.OnReleased(currentOwningProp);
-			currentPropAction = null;
-        }
-
-  //      public void OnEndAction()
-		//{
-		//	if (currentOwningProp == null) return;
-		//	if (currentOwningProp.GetComponent<IActionableProp>() == null) return;
-
-		//	switch (currentOwningProp)
-  //          {
-  //              case WrenchProp wr:
-  //                  wr.GetComponent<IActionableProp>().OnReleasedPropAction(transform);
-  //                  break;
-  //              case TireProp _:
-		//			SetAnimParam((int)AnimationType.Carry, false);
-		//			SetAnimParam((int)AnimationType.Place);
-		//			break;
-  //          }
-  //      }
-
-        /// <summary>
-        /// 수리를 시작할 때 호출
-        /// 
-        /// </summary>
-        public void TryStartFix()
+		/// <summary>
+		/// 수리를 시작할 때 호출
+		/// 
+		/// </summary>
+		public void TryStartFix()
 		{
 			if (currentFixablePart == null) return;
 
@@ -175,12 +108,11 @@ namespace Garage.Controller
 				}
 			}
 		}
-        #endregion
 
-        /// <summary>
-        /// TryInteract 후에 상호작용 가능한 경우에만 Prop쪽에서 호출됩니다.
-        /// </summary>
-        public void OnInteractionGranted(OwnableProp prop)
+		/// <summary>
+		/// TryInteract 후에 상호작용 가능한 경우에만 Prop쪽에서 호출됩니다.
+		/// </summary>
+		public void OnInteractionGranted(OwnableProp prop)
 		{
 			currentOwningProp = prop;
 
@@ -202,10 +134,104 @@ namespace Garage.Controller
 		{
 			stateMachine.ChangeState(idleState);
 			OnActionKeyReleased();
-            TryEndInteractWithProp();
+			TryEndInteractWithProp();
 			currentFixablePart = null;
 		}
+		#endregion
 
+		#region Actions
+
+		private ActionBase currentPropAction = null;
+		public ActionBase CurrentPropAction => currentPropAction;
+
+		private bool isActionKeyReleased = false;
+
+		public void GetActionInput()
+		{
+			if (currentOwningProp == null) return;
+
+			for (int i = 0; i < currentOwningProp.PropActions.Count; i++)
+			{
+				if (currentOwningProp.PropActions[i].GetInputAction().WasPressedThisFrame())
+				{
+					currentPropAction = currentOwningProp.PropActions[i];
+					stateMachine.ChangeState(actionState);
+				}
+			}
+		}
+		public void OnActionKeyStart()
+		{
+			if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
+				return;
+			}
+
+			isActionKeyReleased = false;
+			currentPropAction.OnStart(currentOwningProp);
+		}
+        public void OnActionKeyHolding()
+		{
+			if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
+				return;
+			}
+			if (isActionKeyReleased) return;
+
+			if (currentPropAction.GetInputAction().IsPressed())
+			{
+				currentPropAction.OnHolding(currentOwningProp);
+			}
+
+			if (currentPropAction.GetInputAction().WasReleasedThisFrame())
+				OnActionKeyReleased();
+		}
+        public void OnActionKeyReleased()
+        {
+            if (currentPropAction == null || currentOwningProp == null)
+			{
+				Debug.LogError("PlayerContorller.Interaction - Prop/PropAction is null");
+				return;
+			}
+			isActionKeyReleased = true;
+
+			ActionEndCondition cond = currentPropAction.EndCondition;
+			currentPropAction.OnReleased(currentOwningProp);
+
+			if (cond == ActionEndCondition.OnKeyUp)
+			{
+				stateMachine.ChangeState(carryState);
+			}
+        }
+
+		public void ExtinguishFire(Vector3 position)
+		{
+			if (currentOwningProp == null || currentOwningProp.GetComponent<Extinguisher>() == null) return;
+
+			Vector3 sprayEndPosition = position + transform.forward * currentOwningProp.GetComponent<Extinguisher>().ExDistance;
+
+			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, currentOwningProp.GetComponent<Extinguisher>().ExRadius, interactableHits, fireExLayer);
+
+			for (int i = 0; i < counts; i++)
+			{
+				CarPartBase part = interactableHits[i].GetComponent<CarPartBase>();
+				if (part == null) continue;
+
+				part.Interact(this, currentOwningProp);
+			}
+		}
+		public void KickCar()
+		{
+			if (currentKickableCar == null) return;
+			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
+
+			Managers.Input.DisablePlayerInputs();
+			SetAnimParam((int)AnimationType.Kick);
+		}
+		#endregion
+
+		#region Detects
 		private float fixablePartDistance = 1000f;
 		private float interactableDistance = 1000f;
 		private OwnableProp prevDetectedProp = null;
@@ -277,40 +303,49 @@ namespace Garage.Controller
 			Debugger.DebugDrawBox(boxCenter, boxSize, transform.rotation, Color.green);
 		}
 
-		private bool shopInfoActivated = false;
-		public void ActivateShopInfoUI()
+		private CarController curTransparentCar = null;
+		private CarController tmpRaycastedCar = null;
+		public void DetectFrontCarAndMakeTransparent()
 		{
-			shopInfoActivated = true;
-        }
-        public void UpdateShopInfoUIStatus()
-        {
-			if (!shopInfoActivated) return;
-			if (recentlyDetectedProp == null)
+			int count = Physics.RaycastNonAlloc(transform.position, -camDir, hits, 3f, transparentLayer);
+			Debug.DrawRay(transform.position, -camDir * 3f, Color.red);
+
+			tmpRaycastedCar = null; // raycast 된거 없을 때 처리
+			for (int i = 0; i < count; i++)
 			{
-                UIManager.Game.PopupItemInfo(null);
-				shopInfoActivated = false;
-                return;
+				tmpRaycastedCar = hits[i].transform.GetComponent<CarController>();
+
+				if (tmpRaycastedCar != null)
+				{
+					break;
+				}
 			}
 
-            UIManager.Game.PopupItemInfo(recentlyDetectedProp);
-        }
-
-        public void ExtinguishFire(Vector3 position)
-        {
-			if (currentOwningProp == null || currentOwningProp.GetComponent<Extinguisher>() == null) return;
-
-			Vector3 sprayEndPosition = position + transform.forward * currentOwningProp.GetComponent<Extinguisher>().ExDistance;
-
-			int counts = Physics.OverlapCapsuleNonAlloc(position, sprayEndPosition, currentOwningProp.GetComponent<Extinguisher>().ExRadius, interactableHits, fireExLayer);
-
-			for (int i = 0; i < counts; i++)
+			if (curTransparentCar == tmpRaycastedCar)
 			{
-				CarPartBase part = interactableHits[i].GetComponent<CarPartBase>();
-				if (part == null) continue;
+				return;
+			}
 
-				part.Interact(this, currentOwningProp);
+			if (curTransparentCar == null && tmpRaycastedCar != null) // 원래 투명화된 차량 없었을 때
+			{
+				curTransparentCar = tmpRaycastedCar;
+				curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
+				Debug.Log("새로 투명화");
+			}
+			else if (curTransparentCar != null && tmpRaycastedCar == null) // 투명화된 차량 있는데 밖으로 벗어났을 때
+			{
+				curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
+				curTransparentCar = null;
+				Debug.Log("차량 복원");
+			}
+			else // 투명화된 차량이 있는데 새로운 차량이 raycast 됐을 때
+			{
+				curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
+				curTransparentCar = tmpRaycastedCar;
+				curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
+				Debug.Log("기존 차량 복원 및 새로 투명화");
 			}
 		}
-
+		#endregion
 	}
 }

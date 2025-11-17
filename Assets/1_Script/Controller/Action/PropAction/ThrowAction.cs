@@ -12,24 +12,25 @@ namespace Garage.Actions
 		public override void OnStart(WrenchProp prop)
 		{
 			Managers.Input.DisablePlayerMove();
-			prop.Controller.GetComponent<PlayerController>().ChargeTireRoll();
 		}
 
 		public override void OnHolding(WrenchProp prop)
 		{
-			prop.Controller.GetComponent<PlayerController>().ChargeTireRoll();
+			prop.Controller.RotateToMousePos();
+			prop.Controller.OnUpdatePlayerGage();
 		}
 
 		public override void OnReleased(WrenchProp prop)
 		{
-			prop.Controller.GetComponent<PlayerController>().
-				SetAnimParam((int)AnimationType.Throw);
+			prop.Controller.SetAnimParam((int)AnimationType.Throw);
 		}
 
 		public override void OnAnimationKey(WrenchProp prop)
 		{
-			UIManager.Game.CloseTireRollingUI();
-			prop.Controller.GetComponent<PlayerController>().IsRollChargeStarted = false;
+			prop.ThrowWrench(prop.Controller.GetTireRollingForce());
+			prop.Controller.CloseGageUI();
+			prop.Controller.TryEndInteractWithProp();
+
 			Managers.Input.EnablePlayerMove();
 		}
 	}

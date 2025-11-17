@@ -1,4 +1,5 @@
 using Garage.Manager;
+using UnityEngine;
 
 namespace Garage.Controller.StateMachine
 {
@@ -11,16 +12,14 @@ namespace Garage.Controller.StateMachine
         public override void Enter()
         {
             base.Enter();
-            Managers.Input.DisablePlayerMove();
-            controller.OnActionKeyStart();
+            Debug.Log("ENTER ACTION");
+			controller.OnActionKeyStart();
 		}
 
         public override void Exit()
         {
             base.Exit();
-            controller.OnActionKeyReleased();
-            Managers.Input.EnablePlayerMove();
-        }
+		}
 
         public override void HandleInput()
         {
@@ -31,7 +30,19 @@ namespace Garage.Controller.StateMachine
         {
             base.LogicUpdate();
             controller.OnActionKeyHolding();
-        }
+
+			// Move
+			Vector2 move = Managers.Input.Control.Player.Move.ReadValue<Vector2>();
+			bool isRun = controller.IsRun;
+			float speed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ?
+				controller.CarrySpeed * controller.CurrentOwningProp.CarrySpeedMultiplier :
+				((isRun ? controller.RunSpeed : controller.WalkSpeed));
+			float maxSpeed = (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry) ?
+				controller.CarrySpeed :
+				controller.RunSpeed;
+
+			controller.MovePosition(move, speed, maxSpeed);
+		}
 
         public override void PhysicsUpdate()
         {

@@ -19,7 +19,7 @@ namespace Garage.Controller.StateMachine
 				stateMachine.ChangeState(controller.idleState);
 				return;
 			}
-
+			
 			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
 				controller.SetAnimParam((int)AnimationType.CarryMult,
@@ -75,12 +75,13 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-            if (controller.CurrentFixablePart != null)
+			controller.GetActionInput();
+
+			if (controller.CurrentFixablePart != null)
 			{
 				return;
 			}
 
-			controller.GetActionInput();
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
             {

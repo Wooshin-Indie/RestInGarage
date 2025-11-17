@@ -181,7 +181,8 @@ namespace Manager {
                     statEnum = StatEnum.WrenchRepairSpeed;
                     break;
                 case Extinguisher:
-                    isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
+                    // HACK - ?
+                    // isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
                     statEnum = StatEnum.FireExtinguishSpeed;
                     break;
                 case OilPump:

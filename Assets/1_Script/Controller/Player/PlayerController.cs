@@ -53,19 +53,21 @@ namespace Garage.Controller
         [TabGroup("Main", "Rendering")]
 		[SerializeField] private SkinnedMeshRenderer meshRenderer;
 		[SerializeField] private List<Material> playerMaterial = new();
+		[SerializeField] private LayerMask transparentLayer;
 
-		public Transform HipTf => hipTf;
 
 		private int[] animIDs = new int[20];
+		private RaycastHit[] hits = new RaycastHit[10];
 
-		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
-
-        private float originWalkSpeed;
+		private float originWalkSpeed;
         private float originRunSpeed;
         private float originCarrySpeed;
 		private float wrenchRepairSpeed = 1f;
     
         
+		public Transform HipTf => hipTf;
+		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
+
 		public float WalkSpeed => walkSpeed;
 		public float RunSpeed => runSpeed;
 		public float CarrySpeed => carrySpeed;
@@ -94,6 +96,7 @@ namespace Garage.Controller
 
 		private Vector3 camDir;
 
+		#region Unity Methods
 		private void Awake()
 		{
 			interactableHits = new Collider[10];
@@ -129,44 +132,14 @@ namespace Garage.Controller
 			originRunSpeed = runSpeed;
 			originalConstraints = rigid.constraints;
         }
-
-		public override void OnNetworkSpawn()
-		{
-			base.OnNetworkSpawn();
-
-			//cameraTransform.gameObject.SetActive(IsOwner);
-			if (IsOwner)
-			{
-				Debug.Log("NetworkSpawned");
-				// OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
-				CameraManager.Instance.SetTargetPlayer(this.transform);
-			}
-
-            PlayerID.OnValueChanged += OnPlayerIDChanged;
-		}
-
-		public override void OnNetworkDespawn()
-		{
-			base.OnNetworkDespawn();
-			
-			Debug.Log("Character On NetworkDeSpawn , " + System.Environment.StackTrace);
-        }
-
-
-        private void OnDestroy()
-        {
-			Debug.Log("Character On Destroy , " + System.Environment.StackTrace);
-        }
         private void Start()
 		{
-			GameManagerEx.Instance.OnStartGameAction += SetMapInfo;
+			GameManagerEx.Instance.OnStartGameAction += InitPlayerCamera;
 		}
-
 		private void Update()
         {
             if (!IsOwner) return;
 
-            UpdateSizeOfFireUIs();
 			if (Managers.Input.IsInputEnabled)
             {
                 stateMachine.CurState.HandleInput();
@@ -182,6 +155,55 @@ namespace Garage.Controller
 			}
 		}
 
+		public override void OnNetworkSpawn()
+		{
+			base.OnNetworkSpawn();
+
+			//cameraTransform.gameObject.SetActive(IsOwner);
+			if (IsOwner)
+			{
+				Debug.Log("NetworkSpawned");
+				// OnNetworkSpawn 이 SceneManager.sceneLoaded 이벤트보다 먼저 실행됨
+				CameraManager.Instance.SetTargetPlayer(this.transform);
+			}
+
+			PlayerID.OnValueChanged += OnPlayerIDChanged;
+		}
+		public override void OnNetworkDespawn()
+		{
+			base.OnNetworkDespawn();
+
+			Debug.Log("Character On NetworkDeSpawn , " + System.Environment.StackTrace);
+		}
+
+		void OnDrawGizmos()
+		{
+			Gizmos.color = Color.cyan;
+
+			Vector3 start = transform.position;
+			Vector3 end = transform.position + transform.forward * fireExLength;
+
+			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
+		}
+		#endregion
+
+		#region Setters
+		private void InitPlayerCamera(int mapIdx)
+		{
+			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurMapData.CamRotation);
+			camDir = rot * Vector3.forward;
+			camDir = camDir.normalized;
+		}
+		#endregion
+
+		#region Getters
+		public Transform GetSocket(PropType type)
+		{
+			return sockets[(int)type];
+		}
+		#endregion
+
+		#region Basic Moves
 		private Vector3 moveDir = Vector3.zero;
         /// <summary>
         /// move 방향으로 speed의 속도로 움직입니다.
@@ -215,47 +237,29 @@ namespace Garage.Controller
 			SetAnimParam((int)AnimationType.Speed, speed / maxSpeed);
 		}
 
-		private void SetMapInfo(int mapIdx)
+		/// <summary>
+		/// 마우스 방향으로 몸을 회전시킵니다.
+		/// 기본적으로 Player.Move 입력이 막힌다는 가정하에 작성되었습니다.
+		/// </summary>
+		public void RotateToMousePos()
 		{
-			Quaternion rot = Quaternion.Euler(TrafficManager.Instance.CurMapData.CamRotation);
-			camDir = rot * Vector3.forward;
-			camDir = camDir.normalized;
-		}
-		public Transform GetSocket(PropType type) 
-		{
-			return sockets[(int)type];
-		}
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			Vector3 rayOrigin = ray.origin;
+			Vector3 rayDir = ray.direction;
 
-		// 키 바인딩 필요
-        public void KickCar()
-		{
-            if (currentKickableCar == null) return;
-			// HACK - if (currentKickableCar.CarStatus.IsThereAnyBroken()) return;
+			float t = -rayOrigin.y / rayDir.y;
+			Vector3 lookDir = rayOrigin + rayDir * t - transform.position;
+			lookDir.y = 0f;
 
-            // 차는 애니메이션 실행
-            Managers.Input.DisablePlayerInputs();
-            SetAnimParam((int)AnimationType.Kick);
-        }
-
-
-		private bool isFireUIsEnlarged = false;
-		private void UpdateSizeOfFireUIs()
-		{
-			if (currentOwningProp is not Extinguisher)
+			if (lookDir.sqrMagnitude > 0.001f)
 			{
-				if (isFireUIsEnlarged)
-				{
-					isFireUIsEnlarged = false;
-					UIManager.Game.ReduceAllFireUIs();
-				}
-				return;
+				Quaternion targetRot = Quaternion.LookRotation(lookDir);
+				rigid.MoveRotation(targetRot);
 			}
-
-			isFireUIsEnlarged = true;
-			UIManager.Game.EnlargeAllFireUIs();
 		}
-        
-        private RigidbodyConstraints originalConstraints;
+		#endregion
+
+		private RigidbodyConstraints originalConstraints;
 		private bool isKnockedBack = false;
 		[ClientRpc]
         public void KnockBackClientRPC(Vector3 knockbackDirection, float force)
@@ -310,61 +314,6 @@ namespace Garage.Controller
                 yield return null;
             }
         }
-		void OnDrawGizmos()
-		{
-			Gizmos.color = Color.cyan;
-
-			Vector3 start = transform.position;
-			Vector3 end = transform.position + transform.forward * fireExLength;
-
-			Debugger.DrawCapsuleGizmo(transform, start, end, fireExRadius);
-		}
-
-		private CarController curTransparentCar = null;
-		private CarController tmpRaycastedCar = null;
-		private RaycastHit[] hits = new RaycastHit[10];
-		[SerializeField] private LayerMask transparentLayer;
-		public void DetectFrontCarAndMakeTransparent()
-		{
-			int count = Physics.RaycastNonAlloc(transform.position, -camDir, hits, 3f, transparentLayer);
-			Debug.DrawRay(transform.position, -camDir * 3f, Color.red);
-
-            tmpRaycastedCar = null; // raycast 된거 없을 때 처리
-            for (int i = 0; i < count; i++)
-			{
-                tmpRaycastedCar = hits[i].transform.GetComponent<CarController>();
-
-                if (tmpRaycastedCar != null)
-				{
-					break;
-				}
-            }
-
-			if (curTransparentCar == tmpRaycastedCar)
-			{
-                return;
-            }
-
-			if (curTransparentCar == null && tmpRaycastedCar != null) // 원래 투명화된 차량 없었을 때
-			{
-				curTransparentCar = tmpRaycastedCar;
-				curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
-				Debug.Log("새로 투명화");
-            }
-            else if (curTransparentCar != null && tmpRaycastedCar == null) // 투명화된 차량 있는데 밖으로 벗어났을 때
-			{
-				curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
-                curTransparentCar = null;
-                Debug.Log("차량 복원");
-            }
-			else // 투명화된 차량이 있는데 새로운 차량이 raycast 됐을 때
-			{
-                curTransparentCar.RestoreCarBodyTransparency(); // 차량 복원 함수 실행
-                curTransparentCar = tmpRaycastedCar;
-                curTransparentCar.MakeCarBodyTransparent(); // 차량 투명화 함수 실행
-                Debug.Log("기존 차량 복원 및 새로 투명화");
-            }
-        }
 
 		public void AwayFromLanesOnStageEnd_HostOnly(float awayMoveTime)
 		{
@@ -384,7 +333,6 @@ namespace Garage.Controller
 
             AwayFromLanesOnStageEndClientRPC(awayMoveTime, laneXwidths);
         }
-
 		[ClientRpc]
 		private void AwayFromLanesOnStageEndClientRPC(float awayMoveTime, Vector2[] laneXwidths)
 		{
@@ -415,7 +363,6 @@ namespace Garage.Controller
 				GameManagerEx.Instance.StartEvent_HostOnly();
 			}
         }
-
 		private IEnumerator RunToTargetPosCoroutine(float maxTime, Vector3 targetPos, Action onComplete)
 		{
 			float elapsedTime = 0f;
@@ -439,167 +386,63 @@ namespace Garage.Controller
 			onComplete?.Invoke();
         }
 
-        public void InputLockToPlayer_HostOnly()
-        {
-			InputLockToPlayerClientRPC();
-        }
-
-        [ClientRpc]
-        private void InputLockToPlayerClientRPC()
-        {
-            if (!IsOwner) return;
-
-			Managers.Input.DisablePlayerInputs();
-            rigid.linearVelocity = Vector3.zero;
-            SetAnimParam((int)AnimationType.Speed, 0);
-        }
-
-        [ClientRpc]
-        public void ApplyStatsClientRPC(StatEnum[] statEnums, float[] values)
-        {
-            for (int i = 0; i < statEnums.Length; i++)
-			{
-				ApplyStat(statEnums[i], values[i]);
-			}
-			Debug.Log("Apply Stats: " + statEnums + values );
-        }
-
-		private void ApplyStat(StatEnum statEnum, float value)
-		{
-			switch (statEnum)
-			{
-				case StatEnum.PlayerSpeed:
-					// TODO - 스탯 적용
-					walkSpeed = originWalkSpeed * value;
-					runSpeed = originRunSpeed * value;
-					break;
-				case StatEnum.CarrySpeed:
-					carrySpeed = originCarrySpeed * value;
-					break;
-				case StatEnum.WrenchRepairSpeed:
-					wrenchRepairSpeed = value;
-                    break;
-			}
-		}
-
-		private float interactPropKeyInfoUITimer = 0f;
-		private float idlePropKeyInfoUITimer = 0f;
-		private float propKeyInfoUIDelay = 1.5f;
-        public void UpdatePropKeyInfoUIs()
-        {
-			if (stateMachine.CurState == interactState)
-			{
-                UIManager.Game.ClosePropKeyInfoUI();
-                interactPropKeyInfoUITimer = 0f;
-                idlePropKeyInfoUITimer = 0f;
-
-				return;
-            }
-
-            // interactPropKeyInfoUI condition
-            if (currentFixablePart != null && currentFixablePart.IsAbleToInteract(currentOwningProp))
-            {
-                idlePropKeyInfoUITimer = 0f;
-
-                interactPropKeyInfoUITimer += Time.deltaTime;
-                if (interactPropKeyInfoUITimer > propKeyInfoUIDelay)
-                {
-					interactPropKeyInfoUITimer = 0f;
-                    UIManager.Game.PopPropKeyInfoUI(currentOwningProp, currentFixablePart.transform, PlayerState.Interact);
-                }
-                return;
-            }
-            // carryPropKeyInfoUI condition
-            else if (currentOwningProp != null)
-            {
-                interactPropKeyInfoUITimer = 0f;
-                idlePropKeyInfoUITimer = 0f;
-
-                UIManager.Game.PopPropKeyInfoUI(currentOwningProp, PlayerState.Carry);
-				return;
-            }
-            // idlePropKeyInfoUI condition
-            else if (recentlyDetectedProp != null && recentlyDetectedProp == prevDetectedProp)
-            {
-                interactPropKeyInfoUITimer = 0f;
-
-                idlePropKeyInfoUITimer += Time.deltaTime;
-                if (idlePropKeyInfoUITimer > propKeyInfoUIDelay)
-                {
-                    idlePropKeyInfoUITimer = 0f;
-                    UIManager.Game.PopPropKeyInfoUI(recentlyDetectedProp, PlayerState.Idle);
-                }
-				return;
-            }
-
-            UIManager.Game.ClosePropKeyInfoUI();
-            interactPropKeyInfoUITimer = 0f;
-            idlePropKeyInfoUITimer = 0f;
-        }
-
-		public void UpdateDetectPropUI()
-		{
-			if (currentOwningProp != null || recentlyDetectedProp == null) // 감지된거 있고 현재 프랍 안들고있을 때만 실행
-            {
-                UIManager.Game.ClosePropDetectUI();
-                return;
-            }
-
-			UIManager.Game.PopPropDetectUI(recentlyDetectedProp);
-        }
-
 		public void OnUpdateInteractSpeedBoosts()
 		{
             StatManager.Instance.UpdateInteractSpeedBoosts(currentOwningProp, Managers.Input.Control.Player.Interact.IsPressed());
         }
 
-		public bool IsRollChargeStarted = false;
-		private float rollGage = 0f; // 0f ~ 1f
-        private bool isRollGageUpward = true;
-		// TODO - 공통적인 게이지로 사용가능하도록 수정 필요
-        public void ChargeTireRoll()
+
+		private float gageValue = 0f;	// [0f, 1f]
+        private bool isGageUpward = true;
+		private bool isChargeStarted = false;
+		public bool IsChargeStarted { get => isChargeStarted; set => isChargeStarted = value; }
+
+        public void OnUpdatePlayerGage()
 		{
-			if (!IsRollChargeStarted)
+			if (!isChargeStarted)
 			{
-				IsRollChargeStarted = true;
+				isChargeStarted = true;
 				Managers.Input.DisablePlayerMove();
-                rollGage = 0f;
-                UIManager.Game.PopTireRollingUI(transform);
-                UIManager.Game.ChargeTireRollingUI(rollGage);
+                gageValue = 0f;
+                UIManager.Game.PopPlayerGageUI(transform);
+                UIManager.Game.SetPlayerGageUI(gageValue);
 
                 return;
 			}
 
 			// 게이지가 위아래로 왔다갔다 하도록
 			float rollGageDelta = Time.deltaTime / rollDuration;
-            if (isRollGageUpward) // 게이지 방향 위쪽
+            if (isGageUpward) // 게이지 방향 위쪽
             {
-                if (rollGage > 1f)
-					isRollGageUpward = false;
+                if (gageValue > 1f)
+					isGageUpward = false;
             }
 			else // 게이지 방향 아래쪽
 			{
 				rollGageDelta = -rollGageDelta;
-                if (rollGage < 0f)
+                if (gageValue < 0f)
 				{
-					rollGage = 0f;
-                    isRollGageUpward = true;
+					gageValue = 0f;
+                    isGageUpward = true;
                 }
             }
-			rollGage += rollGageDelta;
+			gageValue += rollGageDelta;
 
-            UIManager.Game.ChargeTireRollingUI(rollGage);
-            
-			// 꾹 누르고 있을 때 차지됨, 뗄 때 나가야됨(그러면서 게이지는 초기화)
+            UIManager.Game.SetPlayerGageUI(gageValue);
         }
 		public float GetTireRollingForce()
 		{
-			float overallRollingForce = rollForce * rollGage;
+			float overallRollingForce = rollForce * gageValue;
 
 			if (overallRollingForce < 0f)
 				overallRollingForce = 0f;
 
             return overallRollingForce;
         }
+		public void CloseGageUI()
+		{
+			isChargeStarted = false;
+			UIManager.Game.ClosePlayerGageUI();
+		}
     }
 }

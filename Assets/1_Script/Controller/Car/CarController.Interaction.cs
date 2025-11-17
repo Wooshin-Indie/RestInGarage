@@ -1,6 +1,5 @@
 using Garage.Manager;
 using Garage.Props;
-using Garage.Structs;
 using Garage.Utils;
 using IUtil;
 using Manager;

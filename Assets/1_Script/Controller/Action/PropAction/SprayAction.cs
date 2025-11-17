@@ -9,6 +9,7 @@ namespace Garage.Actions
     [CreateAssetMenu(fileName = "SprayAction", menuName = "SO/Prop Action/Spray Action")]
     public class SprayAction : PropAction<OilPump>
     {
+		// TODO - Spray 코드 추가 필요
 		public override void OnStart(OilPump prop)
 		{
 			prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.Oil, true);

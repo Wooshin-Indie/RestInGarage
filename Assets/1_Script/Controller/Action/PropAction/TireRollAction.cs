@@ -12,12 +12,12 @@ namespace Garage.Actions
 		public override void OnStart(TireProp prop)
 		{
 			Managers.Input.DisablePlayerMove();
-			prop.Controller.ChargeTireRoll();
 		}
 
 		public override void OnHolding(TireProp prop)
 		{
-			prop.Controller.GetComponent<PlayerController>().ChargeTireRoll();
+			prop.Controller.RotateToMousePos();
+			prop.Controller.OnUpdatePlayerGage();
 		}
 
 		public override void OnReleased(TireProp prop)
@@ -30,9 +30,11 @@ namespace Garage.Actions
 
 		public override void OnAnimationKey(TireProp prop)
 		{
-			UIManager.Game.CloseTireRollingUI();
-			prop.Controller.GetComponent<PlayerController>().IsRollChargeStarted = false;
-			Managers.Input.EnablePlayerMove(); // 0.1초 뒤에 enable 하면 좋을 듯
+			prop.TireRolling(prop.Controller.GetTireRollingForce());
+			prop.Controller.CloseGageUI();
+			prop.Controller.TryEndInteractWithProp();
+
+			Managers.Input.EnablePlayerMove();
 		}
 	}
 }

@@ -1,29 +1,33 @@
 using Garage.Manager;
-using IUtil;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Garage.Actions
 {
-	public enum ActionEndTrigger
+	public enum ActionEndCondition
     {
-        OnKeyUp,            // 액션 끝나는 시점 = 키에서 손을 떼는 시점
-        OnAnimationEnd      // 액션 끝나는 시점 = 애니메이션 이벤트가 호출할 때
+        OnKeyUp,            // Key Released -> Action End
+        OnAnimationEnd      // Animation End -> Action End
     }
     public abstract class ActionBase : ScriptableObject
     {
         [Header("Action Timing Settings")]
-        public ActionEndTrigger releaseTrigger = ActionEndTrigger.OnKeyUp; // 기본값은 떼는 즉시 실행
+        [Tooltip("해당 Action이 끝나는 시점 결정")]
+        [SerializeField] private ActionEndCondition endCondition = ActionEndCondition.OnKeyUp;
 
-        [HelpBox("ex) Player/Action 이런 식으로 키 값을 넣어야 합니다.")]
-        public string actionName;
+        [Tooltip("사용할 Input Action 이름 ex) Player/Action")]
+        [SerializeField] private string actionName;
+
+        /** Properties **/
+        public ActionEndCondition EndCondition => endCondition;
+        public string ActionName => actionName;
 
         private InputAction cachedAction = null;
-
         public InputAction GetInputAction()
         {
-            if(cachedAction == null)
+            if (cachedAction == null || cachedAction.actionMap == null)
                 cachedAction = Managers.Input.Control.FindAction(actionName, true);
+
             return cachedAction;
         }
 

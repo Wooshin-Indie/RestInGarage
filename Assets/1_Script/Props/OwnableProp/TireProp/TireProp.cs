@@ -98,11 +98,11 @@ namespace Garage.Props
         public void OnStartPropAction(Transform controller)
 		{
 			Managers.Input.DisablePlayerMove();
-            this.controller.ChargeTireRoll();
+            this.controller.OnUpdatePlayerGage();
         }
         public void OnHoldingPropAction(Transform controller)
         {
-            this.controller.ChargeTireRoll();
+            this.controller.OnUpdatePlayerGage();
         }
         public void OnReleasedPropAction(Transform controller)
         {

@@ -1,3 +1,4 @@
+using Garage.Actions;
 using Garage.Manager;
 using Garage.Props;
 using UnityEngine;
@@ -21,8 +22,14 @@ namespace Garage.Controller
 				return;
 			}
 
+			ActionEndCondition cond = currentPropAction.EndCondition;
 			currentPropAction.OnAnimationKey(currentOwningProp);
-        }
+
+			if (cond == ActionEndCondition.OnAnimationEnd)
+			{
+				stateMachine.ChangeState(carryState);
+			}
+		}
 
 		private void OnPutTire()
 		{
