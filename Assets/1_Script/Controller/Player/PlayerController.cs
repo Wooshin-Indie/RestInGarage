@@ -58,7 +58,7 @@ namespace Garage.Controller
 
 		public Transform HipTf => hipTf;
 
-		private int[] animIDs = new int[11];
+		private int[] animIDs = new int[15];
 
 		public bool IsRun { get => Managers.Input.IsAbleToRun ? Managers.Input.Control.Player.Run.IsPressed() : false; }
 
@@ -116,12 +116,16 @@ namespace Garage.Controller
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
-			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMER);
+			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHREPAIR);
 			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
 			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL); 
+			animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMERREPAIR); 
+			animIDs[12] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHATTACK); 
+			animIDs[13] = Animator.StringToHash(Constants.ANIM_PARAM_FALLBACK); 
+			animIDs[14] = Animator.StringToHash(Constants.ANIM_PARAM_OILSPRAY); 
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;
@@ -599,5 +603,10 @@ namespace Garage.Controller
 
             return overallRollingForce;
         }
+
+		public void ApplySlippingEffect()
+		{
+
+		}
     }
 }

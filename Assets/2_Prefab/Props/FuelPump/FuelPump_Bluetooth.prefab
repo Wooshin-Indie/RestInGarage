@@ -189,7 +189,8 @@ PrefabInstance:
       value: OilSpray
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8459015014956081329, guid: c278a96d85112c649bb6e3364c8e720d, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c278a96d85112c649bb6e3364c8e720d, type: 3}

@@ -64,7 +64,7 @@ namespace Garage.Props
 
         public void OnStartPropAction(Transform controller)
         {
-			//oilGun.StartOilSpray();
+			oilGun.DelayedStartOilSpray(); // 바로 쏘면 포즈 잡기전에 파티클 나옴
         }
         public void OnHoldingPropAction(Transform controller)
         {
@@ -72,7 +72,7 @@ namespace Garage.Props
         }
         public void OnReleasedPropAction(Transform controller)
         {
-            //oilGun.StopOilSpray();
+            oilGun.StopOilSpray();
         }
         public virtual void OnAnimationKeyPropAction(Transform controller)
         {

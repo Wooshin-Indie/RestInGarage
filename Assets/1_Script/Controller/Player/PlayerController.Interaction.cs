@@ -175,7 +175,7 @@ namespace Garage.Controller
 							SetAnimParam((int)AnimationType.Oil, true);
 							break;
 						case CarParts.Engine:
-							SetAnimParam((int)AnimationType.Hammer, true);
+							SetAnimParam((int)AnimationType.WrenchRepair, true);
 							break;
 					}
 					stateMachine.ChangeState(interactState);

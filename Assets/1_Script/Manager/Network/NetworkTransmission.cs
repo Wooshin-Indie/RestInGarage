@@ -6,6 +6,7 @@ using UnityEngine;
 using Steamworks.Data;
 using Garage.Controller;
 using Manager;
+using Garage.Environment;
 
 namespace Garage.Manager
 {
@@ -323,5 +324,19 @@ namespace Garage.Manager
 			return NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject().GetComponent<PlayerController>();
 			//return playerDict[GameManagerEx.Instance.MyClientId];
 		}
+
+        [ServerRpc(RequireOwnership = false)]
+        public void InitObjectPoolsServerRPC()
+		{
+			if (!IsHost) return;
+
+            InitObjectPoolsClientRPC();
+        }
+
+        [ClientRpc]
+        public void InitObjectPoolsClientRPC()
+		{
+			PuddlePool.Instance.InitializePool();
+        }
     }
 }

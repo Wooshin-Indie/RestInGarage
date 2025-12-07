@@ -22,7 +22,7 @@ namespace Garage.Controller.StateMachine
 			controller.SetAnimLayerWeight(Constants.ANIM_LAYER_INDEX_LOWERBODY, 0f);
 			controller.SetAnimParam((int)AnimationType.Oil, false);
 			controller.SetAnimParam((int)AnimationType.Fix, false);
-			controller.SetAnimParam((int)AnimationType.Hammer, false);
+			controller.SetAnimParam((int)AnimationType.WrenchRepair, false);
 		}
 
 		public override void HandleInput()

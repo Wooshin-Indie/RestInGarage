@@ -233,6 +233,8 @@ namespace Garage.Manager
         {
             GameSynchronizer.Instance.IsDay.Value = false;
             SunManager.Instance.SetTimePhase(TimePhase.Night, 2f);
+
+            NetworkTransmission.instance.InitObjectPoolsServerRPC();
         }
 
         public void ConnectedAsClient()

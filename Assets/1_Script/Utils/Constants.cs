@@ -29,12 +29,16 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_OIL = "IsOil";
         public static readonly string ANIM_PARAM_PLACE = "IsPlace";
         public static readonly string ANIM_PARAM_TIREPUT = "IsTirePut";
-        public static readonly string ANIM_PARAM_HAMMER = "IsHammering";
+        public static readonly string ANIM_PARAM_WRENCHREPAIR = "IsWrenchRepair";
         public static readonly string ANIM_PARAM_KICK = "IsKick";
         public static readonly string ANIM_PARAM_KNOCKBACK = "IsKnockBack";
         public static readonly string ANIM_PARAM_CARRY_MULT = "CarryMult";
         public static readonly string ANIM_PARAM_FIX = "IsFix";
         public static readonly string ANIM_PARAM_TIREROLL = "IsTireRoll";
+        public static readonly string ANIM_PARAM_HAMMERREPAIR = "IsHammerRepair";
+        public static readonly string ANIM_PARAM_WRENCHATTACK = "IsWrenchAttack";
+        public static readonly string ANIM_PARAM_FALLBACK = "IsFallBack";
+        public static readonly string ANIM_PARAM_OILSPRAY = "IsOilSpray";
 
         public static readonly int ANIM_LAYER_INDEX_LOWERBODY = 1;
 

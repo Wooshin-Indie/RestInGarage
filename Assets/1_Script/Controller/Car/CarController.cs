@@ -535,6 +535,14 @@ namespace Garage.Controller
             leftMiddleTf.localRotation = Quaternion.identity;
         }
 
+		public void ApplyOilSpray(float particleCycle)
+		{
+			if (carStatus.IsFiring())
+			{
+                ExtinguishFireServerRPC(particleCycle, NetworkManager.Singleton.LocalClientId);
+            }
+		}
+
 
 		private void OnDrawGizmosSelected()
 		{

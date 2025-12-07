@@ -15,7 +15,7 @@ namespace Garage.Manager
 			control = new();
 			control.Enable();
 		}
-
+        // 액션 수행하고 있을 때 interact키 안눌리도록 따로 함수 팔까
 		public void EnablePlayerInputs()
 		{
             Debug.Log("PlayerInputs Enabled");

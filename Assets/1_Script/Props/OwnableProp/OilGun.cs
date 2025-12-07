@@ -10,6 +10,10 @@ namespace Garage.Props
         {
             oilParticle.Stop();
         }
+        public void DelayedStartOilSpray()
+        {
+            Invoke("StartOilSpray", 0.2f);
+        }
 
         public void StartOilSpray()
         {
@@ -18,7 +22,13 @@ namespace Garage.Props
 
         public void StopOilSpray()
         {
+            CancelInvoke();
             oilParticle.Stop();
+        }
+
+        private void OnDestroy()
+        {
+            Debug.Log("------------Oilgun Destroyed");
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Garage.Actions
     {
         public override void OnStart(Transform controller)
         {
-            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.Oil, true);
+            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, true);
             Managers.Input.DisablePlayerMove();
         }
         public override void OnHolding(Transform controller)
@@ -20,7 +20,7 @@ namespace Garage.Actions
         }
         public override void OnReleased(Transform controller)
         {
-            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.Oil, false);
+            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, false);
             Managers.Input.EnablePlayerMove();
         }
         public override void OnAnimationKey(Transform controller)
