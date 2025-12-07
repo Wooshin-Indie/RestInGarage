@@ -158,6 +158,8 @@ MonoBehaviour:
   ItemData: {fileID: 11400000, guid: 3f55df8fe5169d84c90338cf4791c0ee, type: 2}
   upgradeLevel:
     m_InternalValue: 0
+  propActions:
+  - {fileID: 11400000, guid: 59032ec62eb358b439920bbc92332a1a, type: 2}
   meshRenderer: {fileID: 501110816465581116}
   targetColor: {r: 0.18867922, g: 0.18867922, b: 0.18867922, a: 1}
   isCarry: 1
@@ -166,7 +168,6 @@ MonoBehaviour:
   materials:
   - {fileID: 2100000, guid: 0dffa260f92a15048ba88f90cb809dcc, type: 2}
   - {fileID: 2100000, guid: 18adc75eeeb75394c87c6cbf512cb333, type: 2}
-  propAction: {fileID: 11400000, guid: 59032ec62eb358b439920bbc92332a1a, type: 2}
 --- !u!64 &7020740912526171379
 MeshCollider:
   m_ObjectHideFlags: 0

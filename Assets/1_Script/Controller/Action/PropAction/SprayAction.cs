@@ -1,31 +1,38 @@
 using Garage.Controller;
 using Garage.Manager;
+using Garage.Props;
 using Garage.Utils;
-using System.Globalization;
 using UnityEngine;
 
 namespace Garage.Actions
 {
     [CreateAssetMenu(fileName = "SprayAction", menuName = "SO/Prop Action/Spray Action")]
-    public class SprayAction : PropAction
+    public class SprayAction : PropAction<OilPump>
     {
-        public override void OnStart(Transform controller)
+        public override void OnStart(OilPump prop)
         {
-            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, true);
+            prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, true);
+            prop.OilGun.DelayedStartOilSpray();
             Managers.Input.DisablePlayerMove();
         }
-        public override void OnHolding(Transform controller)
+        public override void OnHolding(OilPump prop)
         {
 
         }
-        public override void OnReleased(Transform controller)
+        public override void OnReleased(OilPump prop)
         {
-            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, false);
+            prop.OilGun.StopOilSpray();
+            prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.OilSpray, false);
             Managers.Input.EnablePlayerMove();
         }
-        public override void OnAnimationKey(Transform controller)
+        public override void OnAnimationKey(OilPump prop)
         {
 
-        }
-    }
+		}
+
+		public override void OnCanceled(OilPump prop)
+		{
+
+		}
+	}
 }

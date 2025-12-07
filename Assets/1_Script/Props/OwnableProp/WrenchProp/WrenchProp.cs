@@ -1,4 +1,3 @@
-using Garage.Actions;
 using Garage.Controller;
 using Garage.Interfaces;
 using Garage.Manager;
@@ -8,14 +7,15 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class WrenchProp : OwnableProp, IPlaceable, IActionableProp
+	public class WrenchProp : OwnableProp, IPlaceable
 	{
 		[SerializeField] private GameObject previewPrefab;
 		[SerializeField] private bool isAbleToRun;
 		[SerializeField] private AnimationType animType;
-        [SerializeField] private PropAction propAction;
 
         public AnimationType AnimType => animType;
+
+		private bool isInAir = false;
 
         public override void Awake()
         {
@@ -53,21 +53,6 @@ namespace Garage.Props
 
 			base.OnEndInteraction(controller);
 		}
-
-        public virtual void OnStartPropAction(Transform controller)
-        {
-
-        }
-        public virtual void OnHoldingPropAction(Transform controller) { }
-        public virtual void OnReleasedPropAction(Transform controller) { }
-        public virtual void OnAnimationKeyPropAction(Transform controller)
-		{
-
-		}
-        PropAction IActionableProp.GetPropAction()
-        {
-            return propAction;
-        }
 
         private void Update()
 		{
@@ -121,6 +106,44 @@ namespace Garage.Props
 		public GameObject GetPreviewPrefab()
 		{
 			return previewPrefab;
+		}
+
+		private void OnCollisionEnter(Collision collision)
+		{
+			if (!IsHost) return;
+			if (isInAir && collision.gameObject.layer == Constants.INT_GROUND)
+			{
+				isInAir = false; return;
+			}
+            if (!collision.gameObject.CompareTag(Constants.TAG_PLAYER)) return;
+			// HACK - temp param
+			if (rigid.linearVelocity.sqrMagnitude < 10f || !isInAir) return;
+			if (controller != null) return;
+
+			// TODO - 필요시 플레이어가 맞는 부분에 VFX 생성
+			// VFXManager.Instance.PlayVFX(~, collision.GetContact(0).point, ~);
+			Vector3 knockbackDirection = Vector3.ProjectOnPlane(collision.transform.position - transform.position, Vector3.up);
+			collision.gameObject.GetComponent<PlayerController>().KnockBackClientRPC(knockbackDirection, rigid.mass);
+		}
+
+		public void ThrowWrench(float throwForce)
+		{
+			rigid.isKinematic = false;
+
+			transform.GetComponent<Rigidbody>().useGravity = true;
+			transform.GetComponent<Collider>().isTrigger = false;
+			SyncStateServerRPC(false);
+			///	-- NOTE --
+			/// 해머의 특성 (무게중심이나 질량) 때문에
+			/// 던질 때 플레이어를 밀치거나 회전이 이상하게 되는 경우가 발생
+			/// Rotation, Position을 플레이어와 겹치지 않도록 조정하고 각속도도 원하는대로 회전시킴
+			/// ----------
+
+			isInAir = true;
+			rigid.MoveRotation(Quaternion.identity);
+			rigid.MovePosition(transform.position + (controller.transform.up + controller.transform.forward) * .5f);
+			rigid.linearVelocity = ((controller.transform.up + controller.transform.forward) * throwForce * 0.3f);
+			rigid.angularVelocity = transform.up * 10f;
 		}
 	}
 }

@@ -1,14 +1,12 @@
-using Garage.Actions;
 using Garage.Interfaces;
 using Garage.Manager;
 using Garage.Utils;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Garage.Props
 {
-	public class OilPump : OwnableProp, IPlaceable, IActionableProp
+	public class OilPump : OwnableProp, IPlaceable
     {
 		[SerializeField] private Vector3 initPos;
 		[SerializeField] private Vector3 initRot;
@@ -21,14 +19,16 @@ namespace Garage.Props
 		private Color originColor;
 
 		[SerializeField] private GameObject previewPrefab;
-        [SerializeField] private PropAction propAction;
 
         private Transform oilGunTf;
         private Rigidbody oilGunRigid;
 		private RaycastHit[] hits;
 		private Material ropeMaterial;
 
-		public override void Awake()
+		public OilGun OilGun => oilGun;
+
+
+        public override void Awake()
 		{
 			base.Awake();
 			Init();
@@ -61,27 +61,6 @@ namespace Garage.Props
 				Managers.Sound.PlaySfx(SFXType.Tape, .8f, .8f);
 			}
 		}
-
-        public void OnStartPropAction(Transform controller)
-        {
-			oilGun.DelayedStartOilSpray(); // 바로 쏘면 포즈 잡기전에 파티클 나옴
-        }
-        public void OnHoldingPropAction(Transform controller)
-        {
-
-        }
-        public void OnReleasedPropAction(Transform controller)
-        {
-            oilGun.StopOilSpray();
-        }
-        public virtual void OnAnimationKeyPropAction(Transform controller)
-        {
-
-        }
-        PropAction IActionableProp.GetPropAction()
-        {
-            return propAction;
-        }
 
         private void Update()
 		{

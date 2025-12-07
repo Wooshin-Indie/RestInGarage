@@ -1,6 +1,5 @@
 using Garage.Interfaces;
 using Garage.Manager;
-using Garage.Props;
 using Garage.Utils;
 using UnityEngine;
 
@@ -20,7 +19,7 @@ namespace Garage.Controller.StateMachine
 				stateMachine.ChangeState(controller.idleState);
 				return;
 			}
-
+			
 			if (GameManagerEx.Instance.IsDay && controller.CurrentOwningProp.IsCarry)
 			{
 				controller.SetAnimParam((int)AnimationType.CarryMult,
@@ -76,27 +75,13 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-            if (controller.CurrentFixablePart != null)
+			controller.GetActionInput();
+
+			if (controller.CurrentFixablePart != null)
 			{
 				return;
 			}
 
-
-            if (Managers.Input.Control.Player.Action.WasPressedThisFrame())
-			{
-				controller.OnActionKeyStart();
-				return;
-			}
-			else if (Managers.Input.Control.Player.Action.IsPressed())
-			{
-                controller.OnActionKeyHolding();
-                return;
-            }
-			else if (Managers.Input.Control.Player.Action.WasReleasedThisFrame())
-            {
-                controller.OnActionKeyReleased();
-                return;
-            }
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
             {

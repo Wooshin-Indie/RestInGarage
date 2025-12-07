@@ -53,5 +53,11 @@ namespace Garage.Environment
                 }
             }
         }
+
+        
+        private void OnCollisionEnter(Collision collision)
+        {
+            // 플레이어 감지해서 미끄러지기
+        }
     }
 }

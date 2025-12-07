@@ -1,10 +1,8 @@
-
-using Garage.Actions;
 using UnityEngine;
 
 namespace Garage.Interfaces
 {
-	public interface IActionableProp
+	public interface IActionable
     {
         /// <summary>
         /// 처음 한 번 눌릴 때의 액션 처리
@@ -28,10 +26,5 @@ namespace Garage.Interfaces
         /// 지금은 애니메이션 끝날 때의 액션 처리하려고 넣음
         /// </summary>
         void OnAnimationKeyPropAction(Transform controller);
-
-        /// <summary>
-        /// 프랍에 지정되어있는 액션을 플레이어 컨트롤러에 넘겨줌
-        /// </summary>
-        PropAction GetPropAction();
 	}
 }

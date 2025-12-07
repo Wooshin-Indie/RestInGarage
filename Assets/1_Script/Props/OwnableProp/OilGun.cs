@@ -10,7 +10,7 @@ namespace Garage.Props
         {
             oilParticle.Stop();
         }
-        public void DelayedStartOilSpray()
+        public void DelayedStartOilSpray()// 바로 쏘면 포즈 잡기전에 파티클 나옴
         {
             Invoke("StartOilSpray", 0.2f);
         }

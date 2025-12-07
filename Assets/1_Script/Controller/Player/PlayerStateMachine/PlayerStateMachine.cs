@@ -1,33 +1,31 @@
-using Garage.Utils;
 using Unity.Netcode;
-using UnityEngine;
 
 namespace Garage.Controller.StateMachine
 {
-    public class PlayerStateMachine
-    {
+	public class PlayerStateMachine
+	{
 
-        private StateBase curState;
-        public StateBase CurState { get=>curState;}
+		private StateBase curState;
+		public StateBase CurState { get => curState; }
 
-        public void Init(StateBase state)
-        {
-            curState = state;
-            curState.Enter();
-        }
+		public void Init(StateBase state)
+		{
+			curState = state;
+			curState.Enter();
+		}
 
-        public void ChangeState(StateBase newState)
-        {
-            curState.Exit();
+		public void ChangeState(StateBase newState)
+		{
+			curState.Exit();
 
-            curState = newState;
-            curState.Enter();
-        }
+			curState = newState;
+			curState.Enter();
+		}
 
-        [ServerRpc(RequireOwnership = false)]
-        public void UpdateCurStateServerRPC(StateBase clientState)
-        {
-            curState = clientState;
-        }
-    }
+		[ServerRpc(RequireOwnership = false)]
+		public void UpdateCurStateServerRPC(StateBase clientState)
+		{
+			curState = clientState;
+		}
+	}
 }

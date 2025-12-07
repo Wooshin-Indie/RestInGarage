@@ -42,9 +42,18 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Action",
+                    "name": "Action1",
                     "type": "Button",
                     "id": "98b9f97f-e2f8-4ec1-9ecc-2b89f77668ba",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Action2",
+                    "type": "Button",
+                    "id": "174d4ed1-970e-4083-8cca-8c6a92a2bb82",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -216,11 +225,11 @@
                 {
                     "name": "",
                     "id": "0e5bef5e-acf9-4443-811e-5120d77c1610",
-                    "path": "<Keyboard>/space",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Action",
+                    "action": "Action1",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -254,6 +263,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Info",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "43699e6b-f48c-4ca4-a66f-0a860cb01d81",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Action2",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -1,32 +1,36 @@
 using Garage.Controller;
 using Garage.Manager;
+using Garage.Props;
 using Garage.Utils;
-using System.Globalization;
 using UnityEngine;
 
 namespace Garage.Actions
 {
-    [CreateAssetMenu(fileName = "SwingAction", menuName = "SO/Prop Action/Swing Action")]
-    public class SwingAction : PropAction
+	[CreateAssetMenu(fileName = "SwingAction", menuName = "SO/Prop Action/Swing Action")]
+    public class SwingAction : PropAction<WrenchProp>
     {
-        public override void OnStart(Transform controller)
+        public override void OnStart(WrenchProp prop)
         {
             Managers.Input.DisablePlayerInputs();
-            controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.WrenchAttack, true);
-            //애니메이션 끝날 때 Managers.Input.EnablePlayerInputs();
+            prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.WrenchAttack, true);
         }
-        public override void OnHolding(Transform controller)
+        public override void OnHolding(WrenchProp propr)
         {
 
         }
-        public override void OnReleased(Transform controller)
+        public override void OnReleased(WrenchProp prop)
         {
 
         }
-        public override void OnAnimationKey(Transform controller)
+        public override void OnAnimationKey(WrenchProp prop)
         {
             Managers.Input.EnablePlayerInputs();
             // + 맞는 시점 잡아서 Hit 검사
         }
-    }
+
+		public override void OnCanceled(WrenchProp prop)
+		{
+
+		}
+	}
 }

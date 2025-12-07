@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Garage.Props
 {
-	public class Extinguisher : OwnableProp, IActionableProp, IPlaceable
+	public class Extinguisher : OwnableProp, IPlaceable
 	{
 
 		[SerializeField] private GameObject previewPrefab;
@@ -17,8 +17,7 @@ namespace Garage.Props
 		[SerializeField] private ParticleSystem fireExPS;
 		[SerializeField] private float extinguishDistance;
 		[SerializeField] private float extinguishRadius;
-		[SerializeField] private PropAction propAction;
-
+		
         public float ExDistance => extinguishDistance;
 		public float ExRadius => extinguishRadius;
 
@@ -151,11 +150,6 @@ namespace Garage.Props
             IsAction.Value = false;
         }
         public virtual void OnAnimationKeyPropAction(Transform controller) { }
-        PropAction IActionableProp.GetPropAction()
-        {
-			return propAction;
-        }
-
 
         private void OnActionChanged(bool prev, bool isAction)
 		{

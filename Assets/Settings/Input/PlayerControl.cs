@@ -64,9 +64,18 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Action"",
+                    ""name"": ""Action1"",
                     ""type"": ""Button"",
                     ""id"": ""98b9f97f-e2f8-4ec1-9ecc-2b89f77668ba"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Action2"",
+                    ""type"": ""Button"",
+                    ""id"": ""174d4ed1-970e-4083-8cca-8c6a92a2bb82"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -238,11 +247,11 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""0e5bef5e-acf9-4443-811e-5120d77c1610"",
-                    ""path"": ""<Keyboard>/space"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Action"",
+                    ""action"": ""Action1"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -276,6 +285,17 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Info"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""43699e6b-f48c-4ca4-a66f-0a860cb01d81"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Action2"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -418,7 +438,8 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
         m_Player_Run = m_Player.FindAction("Run", throwIfNotFound: true);
-        m_Player_Action = m_Player.FindAction("Action", throwIfNotFound: true);
+        m_Player_Action1 = m_Player.FindAction("Action1", throwIfNotFound: true);
+        m_Player_Action2 = m_Player.FindAction("Action2", throwIfNotFound: true);
         m_Player_Kick = m_Player.FindAction("Kick", throwIfNotFound: true);
         m_Player_Info = m_Player.FindAction("Info", throwIfNotFound: true);
         // UI
@@ -500,7 +521,8 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_Rotate;
     private readonly InputAction m_Player_Run;
-    private readonly InputAction m_Player_Action;
+    private readonly InputAction m_Player_Action1;
+    private readonly InputAction m_Player_Action2;
     private readonly InputAction m_Player_Kick;
     private readonly InputAction m_Player_Info;
     public struct PlayerActions
@@ -511,7 +533,8 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
         public InputAction @Run => m_Wrapper.m_Player_Run;
-        public InputAction @Action => m_Wrapper.m_Player_Action;
+        public InputAction @Action1 => m_Wrapper.m_Player_Action1;
+        public InputAction @Action2 => m_Wrapper.m_Player_Action2;
         public InputAction @Kick => m_Wrapper.m_Player_Kick;
         public InputAction @Info => m_Wrapper.m_Player_Info;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -535,9 +558,12 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
             @Run.started += instance.OnRun;
             @Run.performed += instance.OnRun;
             @Run.canceled += instance.OnRun;
-            @Action.started += instance.OnAction;
-            @Action.performed += instance.OnAction;
-            @Action.canceled += instance.OnAction;
+            @Action1.started += instance.OnAction1;
+            @Action1.performed += instance.OnAction1;
+            @Action1.canceled += instance.OnAction1;
+            @Action2.started += instance.OnAction2;
+            @Action2.performed += instance.OnAction2;
+            @Action2.canceled += instance.OnAction2;
             @Kick.started += instance.OnKick;
             @Kick.performed += instance.OnKick;
             @Kick.canceled += instance.OnKick;
@@ -560,9 +586,12 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
             @Run.started -= instance.OnRun;
             @Run.performed -= instance.OnRun;
             @Run.canceled -= instance.OnRun;
-            @Action.started -= instance.OnAction;
-            @Action.performed -= instance.OnAction;
-            @Action.canceled -= instance.OnAction;
+            @Action1.started -= instance.OnAction1;
+            @Action1.performed -= instance.OnAction1;
+            @Action1.canceled -= instance.OnAction1;
+            @Action2.started -= instance.OnAction2;
+            @Action2.performed -= instance.OnAction2;
+            @Action2.canceled -= instance.OnAction2;
             @Kick.started -= instance.OnKick;
             @Kick.performed -= instance.OnKick;
             @Kick.canceled -= instance.OnKick;
@@ -678,7 +707,8 @@ public partial class @PlayerControl: IInputActionCollection2, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
-        void OnAction(InputAction.CallbackContext context);
+        void OnAction1(InputAction.CallbackContext context);
+        void OnAction2(InputAction.CallbackContext context);
         void OnKick(InputAction.CallbackContext context);
         void OnInfo(InputAction.CallbackContext context);
     }

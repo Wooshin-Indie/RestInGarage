@@ -99,6 +99,8 @@ MonoBehaviour:
   ItemData: {fileID: 11400000, guid: d859194229814f741bdd9dfb6a44dc02, type: 2}
   upgradeLevel:
     m_InternalValue: 0
+  propActions:
+  - {fileID: 11400000, guid: 9a2f1a15853e826408f66739d19fd55f, type: 2}
   meshRenderer: {fileID: 7742761695196155598}
   targetColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
   isCarry: 0
@@ -106,7 +108,6 @@ MonoBehaviour:
   previewPrefab: {fileID: 8379998864351062203, guid: c98311aed126bba4f976483b5a21c927, type: 3}
   isAbleToRun: 0
   animType: 9
-  propAction: {fileID: 11400000, guid: 5f9d30cb0cc33b340a83ed4a3c2081d0, type: 2}
 --- !u!54 &7795791608402369351
 Rigidbody:
   m_ObjectHideFlags: 0
