@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: WrenchAttackAction
   m_EditorClassIdentifier: 
   isAbleToCancel: 0
-  actionIAName: Player/Action1
-  cancelIAName: 
+  actionIARef: {fileID: 7574594106575956060, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+  cancelIARef: {fileID: 0}
   endCondition: 1

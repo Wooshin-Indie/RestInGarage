@@ -7,15 +7,15 @@ namespace Garage.Editors
     public class ActionBaseEditor : Editor
     {
 		private SerializedProperty isAbleToCancelProp;
-		private SerializedProperty actionIANameProp;
-		private SerializedProperty cancelIANameProp;
+		private SerializedProperty actionIARefProp;
+		private SerializedProperty cancelIARefProp;
 		private SerializedProperty endConditionProp;
 
 		private void OnEnable()
 		{
 			isAbleToCancelProp = serializedObject.FindProperty("isAbleToCancel");
-			actionIANameProp = serializedObject.FindProperty("actionIAName");
-			cancelIANameProp = serializedObject.FindProperty("cancelIAName");
+			actionIARefProp = serializedObject.FindProperty("actionIARef");
+			cancelIARefProp = serializedObject.FindProperty("cancelIARef");
 			endConditionProp = serializedObject.FindProperty("endCondition");
 		}
 
@@ -24,11 +24,11 @@ namespace Garage.Editors
 			serializedObject.Update();
 
 			EditorGUILayout.PropertyField(isAbleToCancelProp);
-			EditorGUILayout.PropertyField(actionIANameProp);
+			EditorGUILayout.PropertyField(actionIARefProp);
 
 			if (isAbleToCancelProp.boolValue)
 			{
-				EditorGUILayout.PropertyField(cancelIANameProp);
+				EditorGUILayout.PropertyField(cancelIARefProp);
 			}
 
 			EditorGUILayout.PropertyField(endConditionProp);

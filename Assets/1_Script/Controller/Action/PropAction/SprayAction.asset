@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SprayAction
   m_EditorClassIdentifier: 
   isAbleToCancel: 0
-  actionIAName: Player/Action1
-  cancelIAName: 
+  actionIARef: {fileID: -5730457496986960640, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+  cancelIARef: {fileID: 0}
   endCondition: 0
