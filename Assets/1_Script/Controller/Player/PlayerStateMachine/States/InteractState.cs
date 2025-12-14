@@ -22,7 +22,7 @@ namespace Garage.Controller.StateMachine
 			controller.SetAnimLayerWeight(Constants.ANIM_LAYER_INDEX_LOWERBODY, 0f);
 			controller.SetAnimParam((int)AnimationType.Oil, false);
 			controller.SetAnimParam((int)AnimationType.Fix, false);
-			controller.SetAnimParam((int)AnimationType.Hammer, false);
+			controller.SetAnimParam((int)AnimationType.WrenchRepair, false);
 		}
 
 		public override void HandleInput()
@@ -43,8 +43,7 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			isInteractPressed = Managers.Input.Control.Player.Interact.IsPressed();
-            if (isInteractPressed)
+            if (Managers.Input.Control.Player.Interact.IsPressed())
 			{
 				controller.CurrentFixablePart.Interact(controller, controller.CurrentOwningProp);
 			}
@@ -53,8 +52,6 @@ namespace Garage.Controller.StateMachine
 				stateMachine.ChangeState(controller.carryState);
 				return;
 			}
-
-			controller.OnUpdateInteractSpeedBoosts(isInteractPressed);
         }
 
 		public override void PhysicsUpdate()

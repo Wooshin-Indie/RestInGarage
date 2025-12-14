@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51deb681e4df3ea408ba1c5a2e8cd2ee, type: 3}
+  m_Name: SprayAction
+  m_EditorClassIdentifier: 
+  isAbleToCancel: 0
+  actionIARef: {fileID: -5730457496986960640, guid: 19cfade485ef60945940b79f2cb5fce4, type: 3}
+  cancelIARef: {fileID: 0}
+  endCondition: 0

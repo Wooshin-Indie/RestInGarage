@@ -138,8 +138,7 @@ namespace Garage.Manager
 		[ClientRpc]
 		private void EndEventClientRpc()
 		{
-			NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject()
-				.GetComponent<PlayerController>().IsInputLocked = false;
+			Managers.Input.EnablePlayerInputs();
 			GameManagerEx.Instance.OnEndEvent();
 		}
 	}

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5652797518758881143}
   - component: {fileID: 7678455931091393838}
   - component: {fileID: 7795791608402369351}
+  - component: {fileID: 62872332769152055}
   m_Layer: 10
   m_Name: Hammer
   m_TagString: Untagged
@@ -98,13 +99,15 @@ MonoBehaviour:
   ItemData: {fileID: 11400000, guid: d859194229814f741bdd9dfb6a44dc02, type: 2}
   upgradeLevel:
     m_InternalValue: 0
+  propActions:
+  - {fileID: 11400000, guid: 9a2f1a15853e826408f66739d19fd55f, type: 2}
   meshRenderer: {fileID: 7742761695196155598}
   targetColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
   isCarry: 0
   carrySpeedMultiplier: 1
   previewPrefab: {fileID: 8379998864351062203, guid: c98311aed126bba4f976483b5a21c927, type: 3}
   isAbleToRun: 0
-  animType: 9
+  animType: 11
 --- !u!54 &7795791608402369351
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -132,6 +135,32 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &62872332769152055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6935937593766982331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bde32539b2ab6d346a664657f438c561, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  ItemData: {fileID: 11400000, guid: d859194229814f741bdd9dfb6a44dc02, type: 2}
+  upgradeLevel:
+    m_InternalValue: 0
+  propActions:
+  - {fileID: 11400000, guid: 4364e281c98070049af03a5d2bbcd387, type: 2}
+  - {fileID: 11400000, guid: 9a2f1a15853e826408f66739d19fd55f, type: 2}
+  meshRenderer: {fileID: 7742761695196155598}
+  targetColor: {r: 0.18039216, g: 0.18039216, b: 0.18039216, a: 1}
+  isCarry: 0
+  carrySpeedMultiplier: 1
+  previewPrefab: {fileID: 8379998864351062203, guid: c98311aed126bba4f976483b5a21c927, type: 3}
+  isAbleToRun: 0
+  animType: 11
 --- !u!1 &7603103358892871371
 GameObject:
   m_ObjectHideFlags: 0

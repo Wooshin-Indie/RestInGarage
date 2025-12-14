@@ -1,5 +1,6 @@
 using Garage.Manager;
 using Garage.Utils;
+using Manager;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -204,6 +205,49 @@ namespace Garage.Controller
 		{
 			if (IsOwner) return;
 			animator.SetLayerWeight(layerIndex, weight);
+		}
+		#endregion
+
+		#region etc
+		public void InputLockToPlayer_HostOnly()
+		{
+			InputLockToPlayerClientRPC();
+		}
+		[ClientRpc]
+		private void InputLockToPlayerClientRPC()
+		{
+			if (!IsOwner) return;
+
+			Managers.Input.DisablePlayerInputs();
+			rigid.linearVelocity = Vector3.zero;
+			SetAnimParam((int)AnimationType.Speed, 0);
+		}
+
+		[ClientRpc]
+		public void ApplyStatsClientRPC(StatEnum[] statEnums, float[] values)
+		{
+			for (int i = 0; i < statEnums.Length; i++)
+			{
+				ApplyStat(statEnums[i], values[i]);
+			}
+			Debug.Log("Apply Stats: " + statEnums + values);
+		}
+		private void ApplyStat(StatEnum statEnum, float value)
+		{
+			switch (statEnum)
+			{
+				case StatEnum.PlayerSpeed:
+					// TODO - 스탯 적용
+					walkSpeed = originWalkSpeed * value;
+					runSpeed = originRunSpeed * value;
+					break;
+				case StatEnum.CarrySpeed:
+					carrySpeed = originCarrySpeed * value;
+					break;
+				case StatEnum.WrenchRepairSpeed:
+					wrenchRepairSpeed = value;
+					break;
+			}
 		}
 		#endregion
 	}

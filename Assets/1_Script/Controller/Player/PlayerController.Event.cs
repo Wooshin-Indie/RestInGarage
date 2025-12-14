@@ -1,8 +1,6 @@
-
-using Garage.Interfaces;
+using Garage.Actions;
 using Garage.Manager;
 using Garage.Props;
-using Garage.Utils;
 using UnityEngine;
 
 namespace Garage.Controller
@@ -13,29 +11,24 @@ namespace Garage.Controller
 	public partial class PlayerController
 	{
 
-		#region Animation Events
+        #region Animation Events
 
-		private void OnStartPlace()
-		{
-			if (!IsOwner) return;
-
-			isAbleToMove = false;
-			rigid.linearVelocity = Vector3.zero;
-		}
-		private void OnEndPlace() // 타이어 굴리기
-		{
-			if (!IsOwner) return;
-
-			isAbleToMove = true;
-			if (currentOwningProp == null) return;
-
-			if (currentOwningProp.GetComponent<IActionable>() != null)
+        // 애니메이션 클립에서 Key로 호출될 함수
+        private void OnActionKeyEvent()
+        {
+			if (currentPropAction == null || currentOwningProp == null)
 			{
-				currentOwningProp.GetComponent<IActionable>().OnStopPropAction(transform);
-				if (currentOwningProp is TireProp) OnTireRoll();
-                // 이 때 굴림
-            }
-			currentOwningProp = null;
+				Debug.LogError("PlayerController.Event - Prop/PropAction is null");
+				return;
+			}
+
+			ActionEndCondition cond = currentPropAction.EndCondition;
+			currentPropAction.OnAnimationKey(currentOwningProp);
+
+			if (cond == ActionEndCondition.OnAnimationEnd)
+			{
+				stateMachine.ChangeState(carryState);
+			}
 		}
 
 		private void OnPutTire()
@@ -48,8 +41,8 @@ namespace Garage.Controller
 			currentFixablePart?.Interact(this, currentOwningProp);
 			DespawnPropServerRPC(currentOwningProp.NetworkObjectId);
 			currentOwningProp = null;
-			isAbleToMove = true;
-		}
+			Managers.Input.EnablePlayerMove();
+        }
 
 
 		private void OnFootstep()
@@ -102,14 +95,14 @@ namespace Garage.Controller
 		private void OnKickEnd()
         {
             Debug.Log("OnKickEnd");
-            Managers.Input.EnablePlayerActions();
+            Managers.Input.EnablePlayerInputs();
 		}
 
 		private void OnGettingUp()
 		{
 			Debug.Log("OnGettingUp");
             rigid.constraints = originalConstraints;
-            Managers.Input.EnablePlayerActions();
+            Managers.Input.EnablePlayerInputs();
             isKnockedBack = false;
         }
 

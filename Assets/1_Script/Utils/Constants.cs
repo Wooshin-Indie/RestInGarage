@@ -13,11 +13,14 @@ namespace Garage.Utils
 		public static readonly string TAG_CHAT = "Chat";
         public static readonly string TAG_PCARD = "PlayerCard";
         public static readonly string TAG_PLAYER = "Player";
+        public static readonly string TAG_FLOOR = "Floor";
 
         /** LAYERS **/
+        public static readonly int INT_GROUND = 7;
         public static readonly int INT_VEHICLE = 9;
         public static readonly int INT_PLAYER = 11;
           
+        public static readonly int LAYER_GROUND = 1 << 7;
         public static readonly int LAYER_VEHICLE = 1 << 9;
         public static readonly int LAYER_INTERACTABLE = 1 << 10;
         public static readonly int LAYER_PLAYER = 1 << 11;
@@ -29,11 +32,18 @@ namespace Garage.Utils
         public static readonly string ANIM_PARAM_OIL = "IsOil";
         public static readonly string ANIM_PARAM_PLACE = "IsPlace";
         public static readonly string ANIM_PARAM_TIREPUT = "IsTirePut";
-        public static readonly string ANIM_PARAM_HAMMER = "IsHammering";
+        public static readonly string ANIM_PARAM_TIREROLL = "IsTireRoll";
         public static readonly string ANIM_PARAM_KICK = "IsKick";
         public static readonly string ANIM_PARAM_KNOCKBACK = "IsKnockBack";
         public static readonly string ANIM_PARAM_CARRY_MULT = "CarryMult";
         public static readonly string ANIM_PARAM_FIX = "IsFix";
+        public static readonly string ANIM_PARAM_WRENCHREPAIR = "IsWrenchRepair";
+        public static readonly string ANIM_PARAM_HAMMERREPAIR = "IsHammerRepair";
+        public static readonly string ANIM_PARAM_WRENCHATTACK = "IsWrenchAttack";
+        public static readonly string ANIM_PARAM_HAMMERATTACK = "IsHammerAttack";
+        public static readonly string ANIM_PARAM_FALLBACK = "IsFallBack";
+        public static readonly string ANIM_PARAM_OILSPRAY = "IsOilSpray";
+        public static readonly string ANIM_PARAM_THROW = "IsThrow";
 
         public static readonly int ANIM_LAYER_INDEX_LOWERBODY = 1;
 

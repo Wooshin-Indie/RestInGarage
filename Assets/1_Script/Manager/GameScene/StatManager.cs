@@ -168,7 +168,8 @@ namespace Manager {
         private float boostDownDuration = 6f;
         private float boostLimit = 0.2f;
         /// <summary>
-        /// 여기서 프랍별로 속도 추가 어떻게 할 지 결정
+        /// 고치고있으면 서서히 속도 증가, 안고치면 서서히 속도 감소
+        /// 프랍별 속도 추가 어떻게 할 지 결정
         /// </summary>
         public void UpdateInteractSpeedBoosts(OwnableProp prop, bool isInteractPressed)
         {
@@ -180,7 +181,8 @@ namespace Manager {
                     statEnum = StatEnum.WrenchRepairSpeed;
                     break;
                 case Extinguisher:
-                    isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
+                    // HACK - ?
+                    // isInteractPressed = Managers.Input.Control.Player.Action.IsPressed();
                     statEnum = StatEnum.FireExtinguishSpeed;
                     break;
                 case OilPump:
