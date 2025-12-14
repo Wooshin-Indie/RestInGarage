@@ -71,10 +71,17 @@ namespace Garage.Controller.StateMachine
 			// End Interact
 			if (Managers.Input.Control.Player.Interact.WasPressedThisFrame())
 			{
-				controller.TryEndInteractWithProp();
-				return;
-			}
-
+				if (controller.CurrentOwningProp != null)
+                {
+                    controller.TryEndInteractWithProp();
+                    return;
+                }
+                if (controller.CurrentFixablePart != null)
+                {
+                    controller.TryStartFix();
+                    return;
+                }
+            }
 
             controller.GetActionInput();
 
