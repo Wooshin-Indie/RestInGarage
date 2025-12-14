@@ -119,17 +119,18 @@ namespace Garage.Controller
 			animIDs[2] = Animator.StringToHash(Constants.ANIM_PARAM_OIL);
 			animIDs[3] = Animator.StringToHash(Constants.ANIM_PARAM_PLACE);
 			animIDs[4] = Animator.StringToHash(Constants.ANIM_PARAM_TIREPUT);
-			animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHREPAIR);
-			animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
+            animIDs[5] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL);
+            animIDs[6] = Animator.StringToHash(Constants.ANIM_PARAM_KICK);
 			animIDs[7] = Animator.StringToHash(Constants.ANIM_PARAM_KNOCKBACK);
 			animIDs[8] = Animator.StringToHash(Constants.ANIM_PARAM_CARRY_MULT); 
 			animIDs[9] = Animator.StringToHash(Constants.ANIM_PARAM_FIX); 
-			animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_TIREROLL); 
-			animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMERREPAIR); 
-			animIDs[12] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHATTACK); 
-			animIDs[13] = Animator.StringToHash(Constants.ANIM_PARAM_FALLBACK); 
-			animIDs[14] = Animator.StringToHash(Constants.ANIM_PARAM_OILSPRAY); 
-			animIDs[15] = Animator.StringToHash(Constants.ANIM_PARAM_THROW);
+            animIDs[10] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHREPAIR);
+            animIDs[11] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMERREPAIR);
+            animIDs[12] = Animator.StringToHash(Constants.ANIM_PARAM_WRENCHATTACK);
+            animIDs[13] = Animator.StringToHash(Constants.ANIM_PARAM_HAMMERATTACK);
+            animIDs[14] = Animator.StringToHash(Constants.ANIM_PARAM_FALLBACK); 
+			animIDs[15] = Animator.StringToHash(Constants.ANIM_PARAM_OILSPRAY); 
+			animIDs[16] = Animator.StringToHash(Constants.ANIM_PARAM_THROW);
 
 			originWalkSpeed = walkSpeed;
 			originCarrySpeed = carrySpeed;

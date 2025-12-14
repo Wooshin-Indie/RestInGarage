@@ -39,11 +39,11 @@ namespace Garage.Controller.StateMachine
 					controller.TryStartInteractWithProp();
 					return;
 				}
-				if (controller.CurrentFixablePart != null)
-				{
-					controller.TryStartFix();
-					return;
-				}
+				//if (controller.CurrentFixablePart != null)
+				//{
+				//	controller.TryStartFix();
+				//	return;
+				//}
 			}
 
 			if (Managers.Input.Control.Player.Info.WasPressedThisFrame())

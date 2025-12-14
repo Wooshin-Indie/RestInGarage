@@ -27836,7 +27836,7 @@ AnimationClip:
     m_LoopBlendOrientation: 1
     m_LoopBlendPositionY: 1
     m_LoopBlendPositionXZ: 1
-    m_KeepOriginalOrientation: 1
+    m_KeepOriginalOrientation: 0
     m_KeepOriginalPositionY: 0
     m_KeepOriginalPositionXZ: 1
     m_HeightFromFeet: 1
@@ -54472,7 +54472,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 1.1666666
-    functionName: OnHammer
+    functionName: OnActionKeyEvent
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

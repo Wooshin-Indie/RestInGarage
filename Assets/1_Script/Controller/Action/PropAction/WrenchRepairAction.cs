@@ -1,3 +1,6 @@
+using UnityEngine;
+using UnityEngine;
+
 using Garage.Controller;
 using Garage.Manager;
 using Garage.Props;
@@ -6,13 +9,16 @@ using UnityEngine;
 
 namespace Garage.Actions
 {
-	[CreateAssetMenu(fileName = "SwingAction", menuName = "SO/Prop Action/Swing Action")]
-    public class SwingAction : PropAction<WrenchProp>
+    [CreateAssetMenu(fileName = "WrenchRepairAction", menuName = "SO/Prop Action/Wrench Repair Action")]
+    public class WrenchRepairAction : PropAction<WrenchProp>
     {
         public override void OnStart(WrenchProp prop)
         {
+            //if (prop.Controller.CurrentFixablePart == null) return;
+
             Managers.Input.DisablePlayerInputs();
-            prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.WrenchAttack, true);
+
+            prop.Controller.GetComponent<PlayerController>().SetAnimParam((int)AnimationType.HammerAttack, true);
         }
         public override void OnHolding(WrenchProp propr)
         {
@@ -22,15 +28,15 @@ namespace Garage.Actions
         {
 
         }
+
         public override void OnAnimationKey(WrenchProp prop)
         {
             Managers.Input.EnablePlayerInputs();
-            // + 맞는 시점 잡아서 Hit 검사
         }
 
-		public override void OnCanceled(WrenchProp prop)
-		{
+        public override void OnCanceled(WrenchProp prop)
+        {
 
-		}
-	}
+        }
+    }
 }

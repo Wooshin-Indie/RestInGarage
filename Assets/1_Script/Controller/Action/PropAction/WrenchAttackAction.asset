@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46bcf7f410e037543a5c9351bd7fb0de, type: 3}
-  m_Name: SwingAction
+  m_Script: {fileID: 11500000, guid: 8cfb89d344e08414aa5c2f44da997f92, type: 3}
+  m_Name: WrenchAttackAction
   m_EditorClassIdentifier: 
   isAbleToCancel: 0
-  actionIAName: Player/Action
+  actionIAName: Player/Action1
   cancelIAName: 
-  endCondition: 0
+  endCondition: 1

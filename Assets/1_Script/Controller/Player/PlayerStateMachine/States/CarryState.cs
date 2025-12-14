@@ -75,13 +75,8 @@ namespace Garage.Controller.StateMachine
 				return;
 			}
 
-			controller.GetActionInput();
 
-			if (controller.CurrentFixablePart != null)
-			{
-				return;
-			}
-
+            controller.GetActionInput();
 
 			if (Managers.Input.Control.Player.Kick.WasPressedThisFrame())
             {
