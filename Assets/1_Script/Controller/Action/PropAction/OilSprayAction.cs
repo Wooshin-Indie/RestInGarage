@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Garage.Actions
 {
-    [CreateAssetMenu(fileName = "SprayAction", menuName = "SO/Prop Action/Spray Action")]
-    public class SprayAction : PropAction<OilPump>
+    [CreateAssetMenu(fileName = "OilSprayAction", menuName = "SO/Prop Action/Oil Spray Action")]
+    public class OilSprayAction : PropAction<OilPump>
     {
         public override void OnStart(OilPump prop)
         {

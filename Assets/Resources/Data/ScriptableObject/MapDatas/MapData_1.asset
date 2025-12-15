@@ -23,7 +23,7 @@ MonoBehaviour:
   camRotation: {x: 48, y: 82, z: 0}
   stageDatas:
   - {fileID: 11400000, guid: 7c0fa145d8096bf469ccf9f0e2e1f4f8, type: 2}
-  - {fileID: 11400000, guid: 7a6824a9369be554ebb07b130fc52c46, type: 2}
+  - {fileID: 11400000, guid: e3ff27583abedc14993e4d71f4c82db1, type: 2}
   - {fileID: 11400000, guid: de63d488f1ce85445a758ea592b3e866, type: 2}
   - {fileID: 11400000, guid: d3b0d8ef0a08a50449df47e9d0d675c8, type: 2}
   itemPositions:

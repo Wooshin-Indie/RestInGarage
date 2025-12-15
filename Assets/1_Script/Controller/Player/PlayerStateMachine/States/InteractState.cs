@@ -23,7 +23,8 @@ namespace Garage.Controller.StateMachine
 			controller.SetAnimParam((int)AnimationType.Oil, false);
 			controller.SetAnimParam((int)AnimationType.Fix, false);
 			controller.SetAnimParam((int)AnimationType.WrenchRepair, false);
-		}
+            controller.SetAnimParam((int)AnimationType.HammerRepair, false);
+        }
 
 		public override void HandleInput()
 		{

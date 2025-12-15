@@ -661,7 +661,7 @@ MonoBehaviour:
   upgradeLevel:
     m_InternalValue: 0
   propActions:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: d5b4d212a6ff1f444a3eed9585029f6a, type: 2}
   meshRenderer: {fileID: 8084718555020574602}
   targetColor: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
   isCarry: 0

@@ -31,6 +31,13 @@ namespace Garage.Controller
 			}
 		}
 
+		private void OnStartTirePut()
+		{
+            if (!IsOwner) return;
+
+            rigid.linearVelocity = Vector3.zero;
+            Managers.Input.DisablePlayerMove();
+        }
 		private void OnPutTire()
 		{
 			if (!IsOwner) return;

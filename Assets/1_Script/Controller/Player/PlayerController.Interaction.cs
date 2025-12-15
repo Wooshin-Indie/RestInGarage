@@ -101,7 +101,10 @@ namespace Garage.Controller
 							SetAnimParam((int)AnimationType.Oil, true);
 							break;
 						case CarParts.Engine:
-							SetAnimParam((int)AnimationType.WrenchRepair, true);
+							if (currentOwningProp is HammerProp)
+                                SetAnimParam((int)AnimationType.HammerRepair, true);
+							else
+								SetAnimParam((int)AnimationType.WrenchRepair, true);
 							break;
 					}
 					stateMachine.ChangeState(interactState);
