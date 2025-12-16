@@ -181,6 +181,8 @@ MonoBehaviour:
   ItemData: {fileID: 11400000, guid: 518d1b938140cc7418e72e8749e1317f, type: 2}
   upgradeLevel:
     m_InternalValue: 0
+  propActions:
+  - {fileID: 11400000, guid: a59d6dbbfaed3a440b3020b2c060381b, type: 2}
   meshRenderer: {fileID: 4307560395867504670}
   targetColor: {r: 0.3584906, g: 0.3584906, b: 0.3584906, a: 1}
   isCarry: 0
@@ -190,7 +192,6 @@ MonoBehaviour:
   fireExPS: {fileID: 2662016363357497847}
   extinguishDistance: 10
   extinguishRadius: 5
-  propAction: {fileID: 11400000, guid: d5b4d212a6ff1f444a3eed9585029f6a, type: 2}
 --- !u!1001 &861096550656977930
 PrefabInstance:
   m_ObjectHideFlags: 0

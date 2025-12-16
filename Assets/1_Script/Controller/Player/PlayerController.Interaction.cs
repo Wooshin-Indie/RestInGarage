@@ -187,10 +187,13 @@ namespace Garage.Controller
 				currentPropAction.OnHolding(currentOwningProp);
 			}
 
-			if (currentPropAction.GetCancelIA().WasPressedThisFrame())
+			if (currentPropAction.IsAbleToCancel)
 			{
-				currentPropAction.OnCanceled(currentOwningProp);
-				stateMachine.ChangeState(carryState);
+				if (currentPropAction.GetCancelIA().WasPressedThisFrame())
+				{
+					currentPropAction.OnCanceled(currentOwningProp);
+					stateMachine.ChangeState(carryState);
+				}
 			}
 
 			if (currentPropAction.GetActionIA().WasReleasedThisFrame())

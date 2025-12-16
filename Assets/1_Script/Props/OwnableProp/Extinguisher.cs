@@ -26,6 +26,7 @@ namespace Garage.Props
 			NetworkVariableReadPermission.Everyone,
 			NetworkVariableWritePermission.Owner
 		);
+		private bool IsExtinguishing = false;
 
 		public override void Awake()
 		{
@@ -121,36 +122,6 @@ namespace Garage.Props
 			transform.GetComponent<Collider>().isTrigger = isStart;
 		}
 
-        public void OnStartPropAction(Transform controller)
-		{
-			if (!IsOwner)
-			{
-				Debug.LogWarning("You are not prop's owner"); 
-				return;
-			}
-
-            this.controller.SetAnimParam((int)AnimationType.Oil, true);
-            Managers.Input.DisablePlayerMove();
-            IsAction.Value = true;
-		}
-        public void OnHoldingPropAction(Transform controller)
-        {
-
-        }
-        public void OnReleasedPropAction(Transform controller)
-		{
-			if (!IsOwner)
-			{
-				Debug.LogWarning("You are not prop's owner");
-				return;
-            }
-
-			this.controller.SetAnimParam((int)AnimationType.Oil, false);
-            Managers.Input.EnablePlayerMove();
-            IsAction.Value = false;
-        }
-        public virtual void OnAnimationKeyPropAction(Transform controller) { }
-
         private void OnActionChanged(bool prev, bool isAction)
 		{
 			if (prev == isAction) return;
@@ -164,8 +135,16 @@ namespace Garage.Props
 				fireExPS.Stop();
 			}
         }
+        public void StartSpray()
+        {
+            IsAction.Value = true;
+        }
+        public void StopSpray()
+        {
+            IsAction.Value = false;
+        }
 
-		public Vector2Int GetSize()
+        public Vector2Int GetSize()
 		{
 			return Vector2Int.one;
 		}
